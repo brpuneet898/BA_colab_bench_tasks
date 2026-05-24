@@ -1,0 +1,20 @@
+user_id,timestamp,channel,interaction_type,campaign_name,revenue,is_conversion
+USR_9928A,2026-04-02 06:30:00,Display Ad,impression,Retargeting_Q2_Variant_A,0.0,False
+USR_9928A,2026-04-05 10:30:00,Display Ad,impression,Retargeting_Q2_Variant_B,0.0,False
+USR_9928A,2026-04-06 11:30:00,Email,open,Spring_Promo,0.0,False
+USR_9928A,2026-04-11 09:30:00,Email,click,Spring_Promo,0.0,False
+USR_9928A,2026-04-12 09:30:00,Display Ad,impression,Retargeting_Q2_Variant_A,0.0,False
+USR_9928A,2026-04-14 06:30:00,Display Ad,impression,Retargeting_Q2_Variant_A,0.0,False
+USR_9928A,2026-04-14 14:30:00,Display Ad,impression,Retargeting_Q2_Variant_A,0.0,False
+USR_9928A,2026-04-15 04:30:00,Display Ad,impression,Retargeting_Q2_Variant_B,0.0,False
+USR_9928A,2026-04-15 11:30:00,Display Ad,impression,Retargeting_Q2_Variant_B,0.0,False
+USR_9928A,2026-04-16 14:30:00,Display Ad,impression,Retargeting_Q2_Variant_B,0.0,False
+USR_9928A,2026-04-19 10:30:00,Display Ad,impression,Retargeting_Q2_Variant_C,0.0,False
+USR_9928A,2026-04-24 04:30:00,Display Ad,impression,Retargeting_Q2_Variant_A,0.0,False
+USR_9928A,2026-04-24 04:30:00,Display Ad,impression,Retargeting_Q2_Variant_B,0.0,False
+USR_9928A,2026-04-26 10:30:00,Email,open,Last_Chance_Promo,0.0,False
+USR_9928A,2026-04-28 04:30:00,Display Ad,impression,Retargeting_Q2_Variant_B,0.0,False
+USR_9928A,2026-04-29 11:30:00,Display Ad,impression,Retargeting_Q2_Variant_C,0.0,False
+USR_9928A,2026-04-30 03:30:00,Display Ad,impression,Retargeting_Q2_Variant_A,0.0,False
+USR_9928A,2026-04-30 13:30:00,Display Ad,impression,Retargeting_Q2_Variant_A,0.0,False
+USR_9928A,2026-05-01 15:30:00,Direct Traffic,visit,Organic,150.0,True
