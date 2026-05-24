@@ -1,0 +1,55 @@
+vendor_id,vendor_name,address,city,state,zip_code,tax_id_last4,business_unit,registration_date,status,contact_email
+V-L006,Eastern Data Systems,700 Elm St,Manchester,NH,03101,7781,BU_EAST,2020-11-06,Active,billing@easterndatasys.com
+V-L036,Peach State Materials,3344 Peachtree Rd,Atlanta,GA,30326,7705,BU_SOUTH,2022-03-13,Active,materials@peachstatemat.com
+V-L035,Magnolia Consulting,210 Baronne St,New Orleans,LA,70112,6694,BU_SOUTH,2021-10-13,Active,consult@magnoliaconsulting.com
+V-6001,Meridi4n Financia1 Advisors,1600 Broadway Ste 800,Denver,CO,80202,5540,BU_EAST,2021-01-05,Active,billing@meridianfa.com
+V-L031,Dixie Services Group,191 Peachtree St NE,Atlanta,GA,30303,2250,BU_SOUTH,2019-04-12,Active,service@dixiegroup.com
+V-3001,0rion Technology Svcs,2500 Technology Dr,San Jose,CA,95110,9182,BU_SOUTH,2021-05-08,Active,billing@oriontechsvcs.com
+V-L004,Northeast Maintenance Group,255 Main St,Hartford,CT,06103,5512,BU_EAST,2019-07-12,Active,service@nemaintenance.com
+V-L039,Bayou Tech Partners,365 Canal St,New Orleans,LA,70130,1038,BU_SOUTH,2020-06-29,Active,tech@bayoutechpartners.com
+V-2001,8ridgeport Logistics Corp,800 Travis St Floor 12,Houston,TX,77002,4491,BU_WEST,2020-03-14,Active,invoices@bridgeportlog.com
+V-L019,Global Supply West,1100 Wilshire Blvd Ste 300,Los Angeles,CA,90017,9902,BU_WEST,2019-05-19,Active,orders@globalsupplywest.com
+V-6002,Meridian Financ1al Advis0rs,1600 Broadway Suite 800,Denver,CO,80202,5504,BU_WEST,2021-01-31,Active,ap@meridian-financial.com
+V-4001,81ackstone lndustrial Supply,4700 Woodward Ave,Detroit,MI,48201,3356,BU_NORTH,2019-07-21,Active,orders@blackstone-ind.com
+V-L013,Bridge Associates LLC,200 Pine St,Seattle,WA,98101,4459,BU_WEST,2020-08-26,Active,consulting@bridgeassoc.com
+V-3002,Ori0n Tech. Services,2500 Technology Drive,San Jose,CA,95110,9128,BU_SOUTH,2019-03-27,Active,ap@orion-tech-services.com
+V-L021,Great Lakes Services,333 W Wacker Dr,Chicago,IL,60606,2240,BU_NORTH,2022-08-24,Active,billing@greatlakessvc.com
+V-2002,Bridgep0rt Logistics Corp.,"800 Travis Street, 12th Fl",Houston,TX,77002,4419,BU_WEST,2020-03-09,Active,ap@bridgeport-logistics.com
+V-L024,Northern Supplies Inc,45 S 7th St,Minneapolis,MN,55402,5573,BU_NORTH,2022-05-26,Active,supply@northernsupplies.com
+V-L011,Pacific Coast Supplies,600 Montgomery St,San Francisco,CA,94111,2230,BU_WEST,2022-03-18,Active,orders@pacificcoast.com
+V-L032,Sunbelt Equipment Co,1000 Main St,Dallas,TX,75202,3361,BU_SOUTH,2022-12-27,Active,equip@sunbeltequipment.com
+V-L020,Orion Partners LLC,450 B St,San Diego,CA,92101,1012,BU_WEST,2021-04-11,Active,info@orionpartners.com
+V-L037,Coastal Cleaning Solutions,401 E Jackson St,Tampa,FL,33602,8816,BU_SOUTH,2022-02-13,Active,clean@coastalcleaning.com
+V-L002,Atlantic Supply Co,42 Broad St,Boston,MA,02109,3301,BU_EAST,2022-03-25,Active,billing@atlanticsupply.com
+V-4002,Blackst0ne lndustrial Supp1y,4700 Woodward Avenue,Detroit,MI,48201,3365,BU_NORTH,2019-04-05,Active,billing@blackstoneindustrial.net
+V-L003,Metro Office Solutions,100 Church St,New York,NY,10007,4420,BU_EAST,2021-02-08,Active,invoices@metrooffice.com
+V-L017,Valley Tech Partners,2025 Gateway Pl,San Jose,CA,95110,8890,BU_WEST,2020-11-06,Active,admin@valleytechpartners.com
+V-L023,Prairie Technology Group,100 N Riverside Plz,Chicago,IL,60606,4462,BU_NORTH,2022-07-11,Active,it@prairietech.com
+V-L012,Sierra Logistics LLC,1500 SW 1st Ave,Portland,OR,97201,3341,BU_WEST,2021-08-23,Active,shipping@sierralog.com
+V-5002,Westfield C0nsulting Gr0up,191 Peachtree Street NE Suite 3000,Atlanta,GA,30303,6610,BU_SOUTH,2021-09-02,Active,ap@westfield-consulting.com
+V-1001,Pinnacle S0lutions Intl,1200 N Michigan Ave Ste 400,Chicago,IL,60611,7823,BU_EAST,2019-03-31,Active,ap@pinnacle-solutions.com
+V-L034,Palmetto IT Services,55 Beaufain St,Charleston,SC,29401,5583,BU_SOUTH,2022-09-01,Active,it@palmettoit.com
+V-L014,Cascade IT Services,900 4th Ave,Seattle,WA,98164,5567,BU_WEST,2022-05-19,Active,support@cascadeit.com
+V-L018,Global Industries West,1100 Wilshire Blvd,Los Angeles,CA,90017,9901,BU_WEST,2019-12-07,Active,ap@globalindwest.com
+V-L027,Western Consulting Inc,750 N Michigan Ave,Chicago,IL,60611,8806,BU_NORTH,2019-09-05,Active,consult@westernconsulting.com
+V-L016,Redwood Materials Co,300 Lakeside Dr,Oakland,CA,94612,7789,BU_WEST,2020-10-27,Active,sales@redwoodmat.com
+V-L033,Gulf Coast Logistics,700 Louisiana St,Houston,TX,77002,4472,BU_SOUTH,2020-10-30,Active,logistics@gulfcoastlog.com
+V-1002,Pinnac1e Solutions Int'l,1200 N. Michigan Avenue Suite 400,Chicago,IL,60611,7832,BU_EAST,2021-02-12,Active,billing@pinnaclesolutions.net
+V-L008,Colonial Cleaning Services,32 Exchange Pl,Providence,RI,02903,9903,BU_EAST,2020-07-10,Active,service@colonialcleaning.com
+V-1003,PINNACLE S0LUTI0NS INTL,1200 North Michigan Ave #400,Chicago,IL,60611,7823,BU_NORTH,2020-10-16,Active,accounts@pinnacle-sol.com
+V-L028,Iron Range Equipment,500 Nicollet Mall,Minneapolis,MN,55402,9917,BU_NORTH,2022-02-11,Active,equip@ironrangeequip.com
+V-L026,Heartland Data Solutions,400 E Court Ave,Des Moines,IA,50309,7795,BU_NORTH,2021-08-05,Active,data@heartlandsolutions.com
+V-L022,Midwest Manufacturing Co,200 E Randolph St,Chicago,IL,60601,3351,BU_NORTH,2019-04-06,Active,orders@midwestmfg.com
+V-L010,Acme Solutions LLC,500 Park Ave Ste 201,New York,NY,10022,1120,BU_EAST,2022-10-22,Active,ap@acmesolutions.com
+V-L030,Badger Office Products,10 E Doty St,Madison,WI,53703,1139,BU_NORTH,2020-06-15,Active,sales@badgeroffice.com
+V-5001,Westfie1d Consu1ting Group,191 Peachtree St NE Ste 3000,Atlanta,GA,30303,6601,BU_SOUTH,2020-06-10,Active,invoicing@westfieldcg.com
+V-L009,Acme Corp,500 Park Ave,New York,NY,10022,1119,BU_EAST,2019-10-01,Active,billing@acmecorp.com
+V-L005,Harbor Technology Corp,1 Federal St,Boston,MA,02110,6673,BU_EAST,2022-06-13,Active,ap@harbortech.com
+V-L040,Carolina Facilities Mgmt,128 S Tryon St,Charlotte,NC,28202,1149,BU_SOUTH,2020-12-01,Active,facilities@carolinamgmt.com
+V-L007,Prime Materials Inc,88 Lexington Ave,New York,NY,10016,8891,BU_EAST,2021-01-20,Active,orders@primematerials.com
+V-3003,0RI0N TECHN0L0GY SERVICES,"2500 Tech Dr, San Jose",San Jose,CA,95110,9182,BU_EAST,2020-11-28,Active,finance@oriontech.co
+V-L029,Central Plains Shipping,800 Main St,Kansas City,MO,64105,1028,BU_NORTH,2021-11-16,Active,logistics@centralplains.com
+V-L001,Pinnacle Enterprises Inc,350 Fifth Ave,New York,NY,10118,2210,BU_EAST,2021-12-12,Active,ap@pinnacle-ent.com
+V-L015,Golden Gate Consulting,101 California St,San Francisco,CA,94111,6678,BU_WEST,2021-03-29,Active,billing@goldgateconsulting.com
+V-L038,Lone Star Supply Chain,2200 Ross Ave,Dallas,TX,75201,9927,BU_SOUTH,2019-10-19,Active,supply@lonestarsupply.com
+V-L025,Lakeshore Maintenance,1 Woodward Ave,Detroit,MI,48226,6684,BU_NORTH,2020-02-20,Active,maint@lakeshoremaint.com
