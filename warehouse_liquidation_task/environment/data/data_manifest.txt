@@ -1,0 +1,2 @@
+Q3_Inventory_Sales_Data.csv
+merchandising_strategy.txt

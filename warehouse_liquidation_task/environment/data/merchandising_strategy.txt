@@ -1,0 +1,20 @@
+To: Inventory Planning Team
+From: VP of Merchandising
+Date: September 26, 2024
+Subject: Q4 Warehouse Capacity & Liquidation Strategy
+
+Team,
+
+We need to free up physical storage space ahead of the holiday inbound wave.
+
+Please review Q3 inventory and sales, then propose liquidation recommendations. Keep the following guardrails in mind:
+
+- Protect the Home Automation category. Do not liquidate any Home Automation SKU.
+- Do not liquidate any SKU launched within the last 8 weeks. They have not had enough time to mature.
+- Some weekly sales were distorted by one-off B2B bulk transfers. Normalize those anomalies before comparing item performance.
+- If you liquidate a base SKU, you must also liquidate any dependent accessories or add-ons that require it. We cannot leave orphaned components behind.
+- Damaged SKUs should be prioritized first because they are liabilities.
+- Any SKU that would take more than two years to deplete at its normalized sales rate should be treated as dead stock.
+
+Thanks,
+VP of Merchandising
