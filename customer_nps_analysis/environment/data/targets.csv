@@ -1,0 +1,11 @@
+segment,variable,level,target_proportion
+smb,age_band,18-29,0.55
+smb,age_band,30-49,0.30
+smb,age_band,50+,0.15
+smb,region,Urban,0.70
+smb,region,Rural,0.30
+corp,age_band,18-29,0.10
+corp,age_band,30-49,0.40
+corp,age_band,50+,0.50
+corp,region,Urban,0.35
+corp,region,Rural,0.65
