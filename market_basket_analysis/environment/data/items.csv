@@ -1,0 +1,320 @@
+item_id,item_name,category,canonical_item_id
+1001,Apple,Produce,1001
+1002,Banana,Produce,1002
+1003,Orange,Produce,1003
+1004,Grapes,Produce,1004
+1005,Strawberry,Produce,1005
+1006,Blueberry,Produce,1006
+1007,Spinach,Produce,1007
+1008,Kale,Produce,1008
+1009,Lettuce,Produce,1009
+1010,Broccoli,Produce,1010
+1011,Carrot,Produce,1011
+1012,Celery,Produce,1012
+1013,Tomato,Produce,1013
+1014,Cucumber,Produce,1014
+1015,Bell Pepper,Produce,1015
+1016,Onion,Produce,1016
+1017,Garlic,Produce,1017
+1018,Potato,Produce,1018
+1019,Sweet Potato,Produce,1019
+1020,Mushroom,Produce,1020
+1021,Zucchini,Produce,1021
+1022,Avocado,Produce,1022
+1023,Lemon,Produce,1023
+1024,Lime,Produce,1024
+1025,Mango,Produce,1025
+1026,Pineapple,Produce,1026
+1027,Watermelon,Produce,1027
+1028,Peach,Produce,1028
+1029,Pear,Produce,1029
+1030,Ginger Root,Produce,1030
+1031,Eggs,Produce,1031
+1032,Fresh Basil,Produce,1032
+1033,Fresh Cilantro,Produce,1033
+1034,Jalapeño,Produce,1034
+1035,Corn,Produce,1035
+1036,Asparagus,Produce,1036
+1037,Cauliflower,Produce,1037
+1038,Eggplant,Produce,1038
+1039,Radish,Produce,1039
+1040,Beet,Produce,1040
+1051,Whole Milk,Dairy,1051
+4051,Whole Milk [v2],Dairy,1051
+1052,Skim Milk,Dairy,1052
+4052,Skim Milk [v2],Dairy,1052
+1053,2% Milk,Dairy,1053
+4053,2% Milk [v2],Dairy,1053
+1054,Butter,Dairy,1054
+4054,Butter [v2],Dairy,1054
+1055,Cream Cheese,Dairy,1055
+4055,Cream Cheese [v2],Dairy,1055
+1056,Cheddar Cheese,Dairy,1056
+4056,Cheddar Cheese [v2],Dairy,1056
+1057,Mozzarella Cheese,Dairy,1057
+4057,Mozzarella Cheese [v2],Dairy,1057
+1058,Parmesan Cheese,Dairy,1058
+4058,Parmesan Cheese [v2],Dairy,1058
+1059,Greek Yogurt,Dairy,1059
+4059,Greek Yogurt [v2],Dairy,1059
+1060,Plain Yogurt,Dairy,1060
+4060,Plain Yogurt [v2],Dairy,1060
+1061,Sour Cream,Dairy,1061
+4061,Sour Cream [v2],Dairy,1061
+1062,Heavy Cream,Dairy,1062
+4062,Heavy Cream [v2],Dairy,1062
+1063,Swiss Cheese,Dairy,1063
+4063,Swiss Cheese [v2],Dairy,1063
+1064,Cottage Cheese,Dairy,1064
+4064,Cottage Cheese [v2],Dairy,1064
+1065,Brie Cheese,Dairy,1065
+4065,Brie Cheese [v2],Dairy,1065
+1066,Feta Cheese,Dairy,1066
+4066,Feta Cheese [v2],Dairy,1066
+1067,Provolone Cheese,Dairy,1067
+4067,Provolone Cheese [v2],Dairy,1067
+1068,Half and Half,Dairy,1068
+4068,Half and Half [v2],Dairy,1068
+1069,String Cheese,Dairy,1069
+4069,String Cheese [v2],Dairy,1069
+1070,Gouda Cheese,Dairy,1070
+4070,Gouda Cheese [v2],Dairy,1070
+1081,White Bread,Bakery,1081
+1082,Whole Wheat Bread,Bakery,1082
+1083,Sourdough Bread,Bakery,1083
+1084,Bagels,Bakery,1084
+1085,English Muffins,Bakery,1085
+1086,Croissants,Bakery,1086
+1087,Dinner Rolls,Bakery,1087
+1088,Pita Bread,Bakery,1088
+1089,Tortillas,Bakery,1089
+1090,Baguette,Bakery,1090
+1091,Muffins,Bakery,1091
+1092,Donuts,Bakery,1092
+1093,Cinnamon Rolls,Bakery,1093
+1094,Rye Bread,Bakery,1094
+1095,Pumpernickel Bread,Bakery,1095
+1101,Coca Cola,Beverages,1101
+4101,Coca Cola [v2],Beverages,1101
+1102,Pepsi,Beverages,1102
+4102,Pepsi [v2],Beverages,1102
+1103,Orange Juice,Beverages,1103
+4103,Orange Juice [v2],Beverages,1103
+1104,Apple Juice,Beverages,1104
+4104,Apple Juice [v2],Beverages,1104
+1105,Sparkling Water,Beverages,1105
+4105,Sparkling Water [v2],Beverages,1105
+1106,Still Water,Beverages,1106
+4106,Still Water [v2],Beverages,1106
+1107,Green Tea,Beverages,1107
+4107,Green Tea [v2],Beverages,1107
+1108,Black Tea,Beverages,1108
+4108,Black Tea [v2],Beverages,1108
+1109,Coffee Beans,Beverages,1109
+4109,Coffee Beans [v2],Beverages,1109
+1110,Ground Coffee,Beverages,1110
+4110,Ground Coffee [v2],Beverages,1110
+1111,Instant Coffee,Beverages,1111
+4111,Instant Coffee [v2],Beverages,1111
+1112,Lemonade,Beverages,1112
+4112,Lemonade [v2],Beverages,1112
+1113,Sports Drink,Beverages,1113
+4113,Sports Drink [v2],Beverages,1113
+1114,Energy Drink,Beverages,1114
+4114,Energy Drink [v2],Beverages,1114
+1115,Beer,Beverages,1115
+4115,Beer [v2],Beverages,1115
+1116,Red Wine,Beverages,1116
+4116,Red Wine [v2],Beverages,1116
+1117,White Wine,Beverages,1117
+4117,White Wine [v2],Beverages,1117
+1118,Almond Milk,Beverages,1118
+4118,Almond Milk [v2],Beverages,1118
+1119,Oat Milk,Beverages,1119
+4119,Oat Milk [v2],Beverages,1119
+1120,Soy Milk,Beverages,1120
+4120,Soy Milk [v2],Beverages,1120
+1121,Coconut Water,Beverages,1121
+4121,Coconut Water [v2],Beverages,1121
+1122,Cranberry Juice,Beverages,1122
+4122,Cranberry Juice [v2],Beverages,1122
+1123,Kombucha,Beverages,1123
+4123,Kombucha [v2],Beverages,1123
+1124,Grape Juice,Beverages,1124
+4124,Grape Juice [v2],Beverages,1124
+1125,Tomato Juice,Beverages,1125
+4125,Tomato Juice [v2],Beverages,1125
+1126,Ginger Beer,Beverages,1126
+4126,Ginger Beer [v2],Beverages,1126
+1127,Hard Cider,Beverages,1127
+4127,Hard Cider [v2],Beverages,1127
+1136,Potato Chips,Snacks,1136
+4136,Potato Chips [v2],Snacks,1136
+1137,Corn Chips,Snacks,1137
+4137,Corn Chips [v2],Snacks,1137
+1138,Pretzels,Snacks,1138
+4138,Pretzels [v2],Snacks,1138
+1139,Popcorn,Snacks,1139
+4139,Popcorn [v2],Snacks,1139
+1140,Trail Mix,Snacks,1140
+4140,Trail Mix [v2],Snacks,1140
+1141,Granola Bar,Snacks,1141
+4141,Granola Bar [v2],Snacks,1141
+1142,Crackers,Snacks,1142
+4142,Crackers [v2],Snacks,1142
+1143,Rice Cakes,Snacks,1143
+4143,Rice Cakes [v2],Snacks,1143
+1144,Almonds,Snacks,1144
+4144,Almonds [v2],Snacks,1144
+1145,Cashews,Snacks,1145
+4145,Cashews [v2],Snacks,1145
+1146,Peanuts,Snacks,1146
+4146,Peanuts [v2],Snacks,1146
+1147,Mixed Nuts,Snacks,1147
+4147,Mixed Nuts [v2],Snacks,1147
+1148,Dark Chocolate,Snacks,1148
+4148,Dark Chocolate [v2],Snacks,1148
+1149,Milk Chocolate,Snacks,1149
+4149,Milk Chocolate [v2],Snacks,1149
+1150,Gummy Bears,Snacks,1150
+4150,Gummy Bears [v2],Snacks,1150
+1151,Cookies,Snacks,1151
+4151,Cookies [v2],Snacks,1151
+1152,Oreos,Snacks,1152
+4152,Oreos [v2],Snacks,1152
+1153,Cheese Crackers,Snacks,1153
+4153,Cheese Crackers [v2],Snacks,1153
+1154,Peanut Butter Cups,Snacks,1154
+4154,Peanut Butter Cups [v2],Snacks,1154
+1155,Protein Bar,Snacks,1155
+4155,Protein Bar [v2],Snacks,1155
+1166,Chicken Breast,Meat & Seafood,1166
+1167,Ground Beef,Meat & Seafood,1167
+1168,Bacon,Meat & Seafood,1168
+1169,Ham,Meat & Seafood,1169
+1170,Turkey Slices,Meat & Seafood,1170
+1171,Pork Chops,Meat & Seafood,1171
+1172,Salmon Fillet,Meat & Seafood,1172
+1173,Tuna Canned,Meat & Seafood,1173
+1174,Shrimp,Meat & Seafood,1174
+1175,Steak,Meat & Seafood,1175
+1176,Chicken Thighs,Meat & Seafood,1176
+1177,Sausage,Meat & Seafood,1177
+1178,Hot Dogs,Meat & Seafood,1178
+1179,Ground Turkey,Meat & Seafood,1179
+1180,Tilapia Fillet,Meat & Seafood,1180
+1186,Frozen Pizza,Frozen,1186
+1187,Ice Cream,Frozen,1187
+1188,Frozen Vegetables,Frozen,1188
+1189,Frozen Fries,Frozen,1189
+1190,Frozen Waffles,Frozen,1190
+1191,Frozen Burritos,Frozen,1191
+1192,Frozen Meals,Frozen,1192
+1193,Popsicles,Frozen,1193
+1194,Frozen Berries,Frozen,1194
+1195,Edamame,Frozen,1195
+1196,Frozen Peas,Frozen,1196
+1197,Frozen Corn,Frozen,1197
+1206,Pasta,Pantry,1206
+4206,Pasta [v2],Pantry,1206
+1207,Spaghetti,Pantry,1207
+4207,Spaghetti [v2],Pantry,1207
+1208,Penne,Pantry,1208
+4208,Penne [v2],Pantry,1208
+1209,Rice,Pantry,1209
+4209,Rice [v2],Pantry,1209
+1210,Quinoa,Pantry,1210
+4210,Quinoa [v2],Pantry,1210
+1211,Oatmeal,Pantry,1211
+4211,Oatmeal [v2],Pantry,1211
+1212,Cereal,Pantry,1212
+4212,Cereal [v2],Pantry,1212
+1213,Granola,Pantry,1213
+4213,Granola [v2],Pantry,1213
+1214,Flour,Pantry,1214
+4214,Flour [v2],Pantry,1214
+1215,Sugar,Pantry,1215
+4215,Sugar [v2],Pantry,1215
+1216,Olive Oil,Pantry,1216
+4216,Olive Oil [v2],Pantry,1216
+1217,Vegetable Oil,Pantry,1217
+4217,Vegetable Oil [v2],Pantry,1217
+1218,Pasta Sauce,Pantry,1218
+4218,Pasta Sauce [v2],Pantry,1218
+1219,Tomato Paste,Pantry,1219
+4219,Tomato Paste [v2],Pantry,1219
+1220,Canned Tomatoes,Pantry,1220
+4220,Canned Tomatoes [v2],Pantry,1220
+1221,Chicken Broth,Pantry,1221
+4221,Chicken Broth [v2],Pantry,1221
+1222,Vegetable Broth,Pantry,1222
+4222,Vegetable Broth [v2],Pantry,1222
+1223,Soy Sauce,Pantry,1223
+4223,Soy Sauce [v2],Pantry,1223
+1224,Hot Sauce,Pantry,1224
+4224,Hot Sauce [v2],Pantry,1224
+1225,Ketchup,Pantry,1225
+4225,Ketchup [v2],Pantry,1225
+1226,Mustard,Pantry,1226
+4226,Mustard [v2],Pantry,1226
+1227,Mayonnaise,Pantry,1227
+4227,Mayonnaise [v2],Pantry,1227
+1228,Peanut Butter,Pantry,1228
+4228,Peanut Butter [v2],Pantry,1228
+1229,Jelly,Pantry,1229
+4229,Jelly [v2],Pantry,1229
+1230,Honey,Pantry,1230
+4230,Honey [v2],Pantry,1230
+1231,Maple Syrup,Pantry,1231
+4231,Maple Syrup [v2],Pantry,1231
+1232,Salsa,Pantry,1232
+4232,Salsa [v2],Pantry,1232
+1233,Hummus,Pantry,1233
+4233,Hummus [v2],Pantry,1233
+1234,Ranch Dressing,Pantry,1234
+4234,Ranch Dressing [v2],Pantry,1234
+1235,Italian Dressing,Pantry,1235
+4235,Italian Dressing [v2],Pantry,1235
+1236,Balsamic Vinegar,Pantry,1236
+4236,Balsamic Vinegar [v2],Pantry,1236
+1237,Apple Cider Vinegar,Pantry,1237
+4237,Apple Cider Vinegar [v2],Pantry,1237
+1238,Sesame Oil,Pantry,1238
+4238,Sesame Oil [v2],Pantry,1238
+1239,Coconut Oil,Pantry,1239
+1240,Vanilla Extract,Pantry,1240
+1241,Baking Soda,Pantry,1241
+1242,Baking Powder,Pantry,1242
+1243,Black Pepper,Pantry,1243
+1244,Salt,Pantry,1244
+1245,Red Pepper Flakes,Pantry,1245
+1246,Cumin,Pantry,1246
+1247,Paprika,Pantry,1247
+1248,Oregano,Pantry,1248
+1249,Basil Dried,Pantry,1249
+1250,Cinnamon,Pantry,1250
+1261,Paper Towels,Household,1261
+1262,Toilet Paper,Household,1262
+1263,Dish Soap,Household,1263
+1264,Laundry Detergent,Household,1264
+1265,Trash Bags,Household,1265
+1266,Zip Lock Bags,Household,1266
+1267,Aluminum Foil,Household,1267
+1268,Plastic Wrap,Household,1268
+1269,Sponges,Household,1269
+1270,Hand Soap,Household,1270
+1271,All-Purpose Cleaner,Household,1271
+1272,Window Cleaner,Household,1272
+1273,Fabric Softener,Household,1273
+1274,Dish Sponge Set,Household,1274
+1275,Garbage Can Liner,Household,1275
+1281,Shampoo,Personal Care,1281
+1282,Conditioner,Personal Care,1282
+1283,Body Wash,Personal Care,1283
+1284,Toothpaste,Personal Care,1284
+1285,Toothbrush,Personal Care,1285
+1286,Deodorant,Personal Care,1286
+1287,Razors,Personal Care,1287
+1288,Moisturizer,Personal Care,1288
+1289,Sunscreen,Personal Care,1289
+1290,Lip Balm,Personal Care,1290

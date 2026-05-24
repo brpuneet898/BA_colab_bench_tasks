@@ -1,0 +1,21 @@
+store_id,store_name,city,region
+1,Downtown Fresh Market,New York,Northeast
+2,Midtown Grocery,New York,Northeast
+3,Brooklyn Corner Store,New York,Northeast
+4,Boston Commons Market,Boston,Northeast
+5,Cambridge Provisions,Boston,Northeast
+6,Windy City Grocer,Chicago,Midwest
+7,North Shore Market,Chicago,Midwest
+8,Detroit Fresh Mart,Detroit,Midwest
+9,Peach State Provisions,Atlanta,Southeast
+10,Miami Fresh Market,Miami,Southeast
+11,Orlando Grocery Hub,Orlando,Southeast
+12,Lone Star Market,Dallas,South
+13,Houston Basket Co,Houston,South
+14,Austin Fresh Grocer,Austin,South
+15,Pacific Coast Market,Los Angeles,West
+16,Bay Area Provisions,San Francisco,West
+17,Seattle Fresh Market,Seattle,West
+18,Portland Organic Grocer,Portland,West
+19,Desert Fresh Market,Phoenix,Southwest
+20,Mile High Provisions,Denver,Mountain
