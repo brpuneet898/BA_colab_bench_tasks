@@ -1,0 +1,17 @@
+To: Retail Analytics Team
+From: VP of Global Sales
+Date: December 31, 2025
+Subject: Cyber Week Promo Post-Mortem
+
+Team,
+
+As we close out the year, I need a precise financial post-mortem on our "Cyber Week Promo" which ran exclusively from November 24, 2025, through November 30, 2025. 
+
+I need you to calculate the true Net Profit and the Return Rate specifically for orders that originated during this promotional window. 
+
+Please ensure you are looking at our entire global market. North America (NA) is our biggest driver, and I want to make sure their numbers are fully factored into the global net profit. 
+
+Also, remember that Net Profit = (Revenue - COGS) - Refunds. Do not forget to account for items bought during Cyber Week that were returned later in December. 
+
+Thanks,
+VP of Global Sales
