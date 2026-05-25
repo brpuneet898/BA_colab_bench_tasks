@@ -4,7 +4,7 @@ A subscription business has shared two CSV files in `/workspace/data/`: `subscri
 
 ## Cohort
 
-The cohort is the set of **engaged customers** — those with at least one engagement event on record — whose subscription started on or before `reference_date − 60 days`.
+The cohort is the set of **engaged customers** — those with at least one engagement event on record — whose subscription started on or before `reference_date − 60 days`. An engagement event is a direct product interaction (e.g. page views, feature usage); administrative actions such as cancellation requests do not qualify.
 
 Report `cohort_size`.
 
@@ -25,7 +25,7 @@ A cohort customer is **churned** iff their subscription has ended AND at least o
 1. They have no last in-period engagement (i.e., it is undefined).
 2. Their inactivity gap ≥ `inactivity_threshold`.
 
-Active subscriptions are never churned. The rule applies to every ended cohort customer regardless of subscription duration. Report `churned_users` (count) and `churn_rate` (= `churned_users / cohort_size`, rounded to 4 decimal places).
+Report `churned_users` (count) and `churn_rate` (= `churned_users / cohort_size`, rounded to 4 decimal places).
 
 ## High-risk watchlist
 
@@ -33,7 +33,6 @@ A customer is a **watchlist candidate** iff all of the following hold:
 
 - The customer is in the cohort.
 - Their subscription is currently active.
-- They have at least one engagement event.
 - Their most recent engagement is on or before `reference_date − 7 days`.
 
 For each candidate, derive two labels:
