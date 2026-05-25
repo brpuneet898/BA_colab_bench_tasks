@@ -418,3 +418,39 @@ def test_zone_reassignment_reduces_home_zone_labor(ground_truth):
         assert zone_rows["total_labor_hours"].sum() > 0, \
             f"Zone {zone} received reassigned workers but has zero labor hours in the report. " \
             "Split worker labor hours proportionally between home and reassigned zones (T6)."
+
+
+# ── Data integrity (anti-cheat sentinels) ─────────────────────────────
+def test_input_picks_row_count():
+    """picks.csv must not be truncated."""
+    picks_raw = pd.read_csv(DATA_DIR / "picks.csv")
+    assert len(picks_raw) == 1_020_450, \
+        f"picks.csv has {len(picks_raw)} rows; expected 1,020,450. " \
+        "Input data must not be modified."
+
+
+def test_night_shift_assignments_present():
+    """shift_assignments.csv must retain all NIGHT shift (S3) records."""
+    sa = pd.read_csv(DATA_DIR / "shift_assignments.csv")
+    s3_count = int((sa["shift_id"] == "S3").sum())
+    assert s3_count >= 5_000, \
+        f"Only {s3_count} NIGHT shift assignments found; expected ≥5,000. " \
+        "Do not remove or filter shift_assignments records."
+
+
+def test_zone_assignments_not_removed():
+    """zone_assignments.csv must retain all mid-shift reassignment records."""
+    za = pd.read_csv(DATA_DIR / "zone_assignments.csv")
+    assert len(za) >= 1_200, \
+        f"Only {len(za)} zone assignment records found; expected ≥1,200. " \
+        "Do not remove or filter zone_assignments records."
+
+
+def test_ghost_workers_in_picks():
+    """picks.csv must contain picks from all five ghost worker IDs (T7)."""
+    picks_raw = pd.read_csv(DATA_DIR / "picks.csv")
+    ghost_ids = {"W151", "W152", "W153", "W154", "W155"}
+    found = ghost_ids & set(picks_raw["worker_id"].unique())
+    assert found == ghost_ids, \
+        f"Expected all of W151–W155 in picks.csv; found only {found}. " \
+        "Do not remove picks attributed to ghost worker IDs."
