@@ -1,6 +1,4 @@
-You are a warehouse operations analyst at FulFast Logistics, a third-party logistics (3PL) company operating a large regional distribution center in Memphis, TN. The distribution center runs three 8-hour shifts: DAY (06:00–14:00), SWING (14:00–22:00), and NIGHT (22:00–06:00 next day).
-
-Your manager has asked you to build a **picker productivity dashboard** for the past 6 months (January–June 2024). Specifically, they want picks-per-labor-hour broken down by **zone** and **shift**, to identify underperforming areas and plan staffing more effectively.
+Build a **picker productivity report** for a warehouse distribution center covering January–June 2024. The center operates three 8-hour shifts: DAY (06:00–14:00), SWING (14:00–22:00), and NIGHT (22:00–06:00 next day). Compute picks-per-labor-hour broken down by **zone** and **shift** to identify underperforming areas.
 
 ---
 
@@ -23,7 +21,7 @@ All files are located in `/workspace/data/`.
 **`zone_assignments.csv`** — Mid-shift zone reassignments
 - `zone_assignment_id` (str), `worker_id` (str), `zone_id` (str), `start_datetime` (datetime), `end_datetime` (datetime), `reason` (str)
 
-**`picks.csv`** — Individual pick events (~1 million rows)
+**`picks.csv`** — Individual pick events (~200,000 rows)
 - `pick_id` (str), `worker_id` (str), `sku_id` (str), `bin_id` (str), `zone_id` (str, may be null), `quantity` (int), `pick_timestamp` (datetime), `order_id` (str), `batch_id` (str, null for single picks), `pick_type` (str: single / batch)
 
 **`bins.csv`** — Storage bin master
