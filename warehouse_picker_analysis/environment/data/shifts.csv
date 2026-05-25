@@ -1,0 +1,4 @@
+shift_id,shift_name,start_time,end_time
+S1,DAY,06:00,14:00
+S2,SWING,14:00,22:00
+S3,NIGHT,22:00,06:00

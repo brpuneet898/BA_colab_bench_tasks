@@ -1,0 +1,501 @@
+sku_id,sku_name,category,weight_kg,uom
+SKU0001,Product 0001,Electronics,32.63,case
+SKU0002,Product 0002,Automotive,43.39,each
+SKU0003,Product 0003,Grocery,22.75,each
+SKU0004,Product 0004,Sporting Goods,12.47,each
+SKU0005,Product 0005,Sporting Goods,11.91,case
+SKU0006,Product 0006,Automotive,37.33,each
+SKU0007,Product 0007,Electronics,40.85,pallet
+SKU0008,Product 0008,Grocery,5.35,each
+SKU0009,Product 0009,Apparel,3.42,pallet
+SKU0010,Product 0010,Electronics,29.76,case
+SKU0011,Product 0011,Toys,7.39,each
+SKU0012,Product 0012,Health & Beauty,41.25,each
+SKU0013,Product 0013,Grocery,15.59,case
+SKU0014,Product 0014,Automotive,7.28,each
+SKU0015,Product 0015,Grocery,46.06,each
+SKU0016,Product 0016,Automotive,8.36,pallet
+SKU0017,Product 0017,Toys,14.31,each
+SKU0018,Product 0018,Apparel,7.77,each
+SKU0019,Product 0019,Automotive,5.86,each
+SKU0020,Product 0020,Sporting Goods,1.16,each
+SKU0021,Product 0021,Toys,2.86,pallet
+SKU0022,Product 0022,Home & Garden,8.81,case
+SKU0023,Product 0023,Apparel,2.76,each
+SKU0024,Product 0024,Health & Beauty,29.6,each
+SKU0025,Product 0025,Automotive,34.07,case
+SKU0026,Product 0026,Grocery,19.74,each
+SKU0027,Product 0027,Sporting Goods,15.97,each
+SKU0028,Product 0028,Automotive,25.28,each
+SKU0029,Product 0029,Toys,43.76,each
+SKU0030,Product 0030,Sporting Goods,42.57,pallet
+SKU0031,Product 0031,Sporting Goods,2.27,each
+SKU0032,Product 0032,Apparel,9.16,each
+SKU0033,Product 0033,Electronics,11.91,pallet
+SKU0034,Product 0034,Toys,12.54,each
+SKU0035,Product 0035,Health & Beauty,28.6,case
+SKU0036,Product 0036,Electronics,20.87,each
+SKU0037,Product 0037,Automotive,2.56,each
+SKU0038,Product 0038,Automotive,18.74,each
+SKU0039,Product 0039,Home & Garden,26.24,case
+SKU0040,Product 0040,Grocery,5.17,case
+SKU0041,Product 0041,Apparel,41.69,each
+SKU0042,Product 0042,Automotive,2.69,each
+SKU0043,Product 0043,Grocery,46.25,each
+SKU0044,Product 0044,Home & Garden,5.05,case
+SKU0045,Product 0045,Electronics,42.19,each
+SKU0046,Product 0046,Health & Beauty,45.14,case
+SKU0047,Product 0047,Sporting Goods,48.98,case
+SKU0048,Product 0048,Health & Beauty,40.12,pallet
+SKU0049,Product 0049,Grocery,39.0,each
+SKU0050,Product 0050,Automotive,32.16,each
+SKU0051,Product 0051,Automotive,38.97,each
+SKU0052,Product 0052,Apparel,6.81,pallet
+SKU0053,Product 0053,Home & Garden,26.85,case
+SKU0054,Product 0054,Sporting Goods,25.76,case
+SKU0055,Product 0055,Sporting Goods,42.89,each
+SKU0056,Product 0056,Electronics,23.19,each
+SKU0057,Product 0057,Toys,19.32,pallet
+SKU0058,Product 0058,Apparel,32.01,case
+SKU0059,Product 0059,Grocery,13.4,pallet
+SKU0060,Product 0060,Grocery,7.07,pallet
+SKU0061,Product 0061,Health & Beauty,23.95,each
+SKU0062,Product 0062,Grocery,20.9,each
+SKU0063,Product 0063,Home & Garden,11.71,each
+SKU0064,Product 0064,Health & Beauty,18.44,pallet
+SKU0065,Product 0065,Sporting Goods,18.38,case
+SKU0066,Product 0066,Home & Garden,16.44,each
+SKU0067,Product 0067,Health & Beauty,19.04,pallet
+SKU0068,Product 0068,Home & Garden,34.32,case
+SKU0069,Product 0069,Electronics,14.91,pallet
+SKU0070,Product 0070,Sporting Goods,47.45,pallet
+SKU0071,Product 0071,Automotive,45.83,each
+SKU0072,Product 0072,Apparel,24.1,each
+SKU0073,Product 0073,Sporting Goods,16.49,case
+SKU0074,Product 0074,Apparel,26.82,case
+SKU0075,Product 0075,Grocery,42.44,each
+SKU0076,Product 0076,Sporting Goods,32.66,each
+SKU0077,Product 0077,Home & Garden,40.24,case
+SKU0078,Product 0078,Apparel,26.68,case
+SKU0079,Product 0079,Toys,31.68,each
+SKU0080,Product 0080,Grocery,14.48,case
+SKU0081,Product 0081,Health & Beauty,36.77,each
+SKU0082,Product 0082,Sporting Goods,10.2,each
+SKU0083,Product 0083,Apparel,34.77,case
+SKU0084,Product 0084,Automotive,43.05,each
+SKU0085,Product 0085,Grocery,6.69,case
+SKU0086,Product 0086,Grocery,30.76,each
+SKU0087,Product 0087,Electronics,4.85,case
+SKU0088,Product 0088,Home & Garden,36.31,each
+SKU0089,Product 0089,Automotive,4.32,pallet
+SKU0090,Product 0090,Automotive,46.8,each
+SKU0091,Product 0091,Sporting Goods,6.96,case
+SKU0092,Product 0092,Automotive,47.95,each
+SKU0093,Product 0093,Automotive,40.06,each
+SKU0094,Product 0094,Sporting Goods,29.72,each
+SKU0095,Product 0095,Health & Beauty,39.15,case
+SKU0096,Product 0096,Home & Garden,39.78,each
+SKU0097,Product 0097,Apparel,47.31,case
+SKU0098,Product 0098,Grocery,12.74,case
+SKU0099,Product 0099,Grocery,29.54,pallet
+SKU0100,Product 0100,Apparel,4.84,case
+SKU0101,Product 0101,Automotive,30.85,each
+SKU0102,Product 0102,Apparel,8.65,case
+SKU0103,Product 0103,Automotive,28.29,case
+SKU0104,Product 0104,Electronics,28.66,each
+SKU0105,Product 0105,Automotive,23.35,each
+SKU0106,Product 0106,Automotive,26.18,pallet
+SKU0107,Product 0107,Automotive,38.22,each
+SKU0108,Product 0108,Grocery,39.98,case
+SKU0109,Product 0109,Sporting Goods,24.66,each
+SKU0110,Product 0110,Grocery,30.02,each
+SKU0111,Product 0111,Home & Garden,46.57,case
+SKU0112,Product 0112,Automotive,6.07,each
+SKU0113,Product 0113,Toys,5.94,case
+SKU0114,Product 0114,Sporting Goods,4.48,case
+SKU0115,Product 0115,Toys,32.93,each
+SKU0116,Product 0116,Toys,20.99,each
+SKU0117,Product 0117,Electronics,38.74,case
+SKU0118,Product 0118,Apparel,33.59,case
+SKU0119,Product 0119,Apparel,16.75,each
+SKU0120,Product 0120,Electronics,44.93,pallet
+SKU0121,Product 0121,Sporting Goods,38.15,each
+SKU0122,Product 0122,Grocery,13.6,each
+SKU0123,Product 0123,Grocery,18.27,pallet
+SKU0124,Product 0124,Sporting Goods,15.79,each
+SKU0125,Product 0125,Automotive,7.96,case
+SKU0126,Product 0126,Toys,7.47,pallet
+SKU0127,Product 0127,Electronics,46.81,case
+SKU0128,Product 0128,Automotive,21.95,case
+SKU0129,Product 0129,Toys,19.23,each
+SKU0130,Product 0130,Grocery,36.51,each
+SKU0131,Product 0131,Toys,27.69,case
+SKU0132,Product 0132,Toys,46.81,pallet
+SKU0133,Product 0133,Electronics,39.04,each
+SKU0134,Product 0134,Toys,24.02,pallet
+SKU0135,Product 0135,Automotive,18.88,each
+SKU0136,Product 0136,Home & Garden,49.33,case
+SKU0137,Product 0137,Toys,35.92,each
+SKU0138,Product 0138,Electronics,47.56,case
+SKU0139,Product 0139,Home & Garden,6.01,each
+SKU0140,Product 0140,Sporting Goods,42.54,each
+SKU0141,Product 0141,Health & Beauty,31.89,case
+SKU0142,Product 0142,Apparel,6.18,each
+SKU0143,Product 0143,Home & Garden,29.45,each
+SKU0144,Product 0144,Sporting Goods,34.34,case
+SKU0145,Product 0145,Health & Beauty,0.71,each
+SKU0146,Product 0146,Automotive,22.77,each
+SKU0147,Product 0147,Electronics,41.29,each
+SKU0148,Product 0148,Apparel,14.84,case
+SKU0149,Product 0149,Automotive,22.98,pallet
+SKU0150,Product 0150,Electronics,22.17,pallet
+SKU0151,Product 0151,Automotive,15.17,each
+SKU0152,Product 0152,Home & Garden,45.93,each
+SKU0153,Product 0153,Health & Beauty,39.09,each
+SKU0154,Product 0154,Home & Garden,5.62,case
+SKU0155,Product 0155,Sporting Goods,49.85,each
+SKU0156,Product 0156,Grocery,43.97,each
+SKU0157,Product 0157,Apparel,14.27,pallet
+SKU0158,Product 0158,Toys,41.86,pallet
+SKU0159,Product 0159,Toys,5.41,pallet
+SKU0160,Product 0160,Automotive,49.96,each
+SKU0161,Product 0161,Health & Beauty,33.32,case
+SKU0162,Product 0162,Grocery,32.54,case
+SKU0163,Product 0163,Sporting Goods,4.61,each
+SKU0164,Product 0164,Sporting Goods,44.86,case
+SKU0165,Product 0165,Sporting Goods,1.55,case
+SKU0166,Product 0166,Automotive,12.12,each
+SKU0167,Product 0167,Home & Garden,7.24,case
+SKU0168,Product 0168,Apparel,38.86,case
+SKU0169,Product 0169,Home & Garden,9.99,case
+SKU0170,Product 0170,Electronics,45.54,case
+SKU0171,Product 0171,Electronics,32.85,case
+SKU0172,Product 0172,Electronics,1.9,case
+SKU0173,Product 0173,Automotive,0.37,each
+SKU0174,Product 0174,Grocery,2.68,case
+SKU0175,Product 0175,Grocery,30.34,case
+SKU0176,Product 0176,Sporting Goods,40.09,pallet
+SKU0177,Product 0177,Grocery,12.0,each
+SKU0178,Product 0178,Apparel,42.49,each
+SKU0179,Product 0179,Health & Beauty,2.96,pallet
+SKU0180,Product 0180,Toys,40.07,case
+SKU0181,Product 0181,Health & Beauty,46.4,pallet
+SKU0182,Product 0182,Apparel,38.63,each
+SKU0183,Product 0183,Sporting Goods,34.94,each
+SKU0184,Product 0184,Grocery,41.92,case
+SKU0185,Product 0185,Sporting Goods,2.1,each
+SKU0186,Product 0186,Sporting Goods,10.17,case
+SKU0187,Product 0187,Apparel,6.33,each
+SKU0188,Product 0188,Sporting Goods,25.28,each
+SKU0189,Product 0189,Apparel,37.28,pallet
+SKU0190,Product 0190,Home & Garden,31.54,each
+SKU0191,Product 0191,Grocery,42.57,case
+SKU0192,Product 0192,Grocery,7.85,pallet
+SKU0193,Product 0193,Toys,36.76,case
+SKU0194,Product 0194,Home & Garden,9.73,each
+SKU0195,Product 0195,Health & Beauty,13.61,each
+SKU0196,Product 0196,Electronics,35.52,case
+SKU0197,Product 0197,Home & Garden,49.01,each
+SKU0198,Product 0198,Electronics,30.62,each
+SKU0199,Product 0199,Home & Garden,2.82,each
+SKU0200,Product 0200,Health & Beauty,30.85,pallet
+SKU0201,Product 0201,Home & Garden,2.21,each
+SKU0202,Product 0202,Health & Beauty,44.22,each
+SKU0203,Product 0203,Sporting Goods,35.51,case
+SKU0204,Product 0204,Grocery,8.74,each
+SKU0205,Product 0205,Sporting Goods,4.68,pallet
+SKU0206,Product 0206,Home & Garden,9.26,pallet
+SKU0207,Product 0207,Automotive,49.0,pallet
+SKU0208,Product 0208,Health & Beauty,22.98,pallet
+SKU0209,Product 0209,Home & Garden,39.23,each
+SKU0210,Product 0210,Automotive,31.86,each
+SKU0211,Product 0211,Home & Garden,28.66,each
+SKU0212,Product 0212,Grocery,7.34,each
+SKU0213,Product 0213,Automotive,47.31,pallet
+SKU0214,Product 0214,Sporting Goods,15.14,case
+SKU0215,Product 0215,Grocery,28.94,case
+SKU0216,Product 0216,Home & Garden,35.02,pallet
+SKU0217,Product 0217,Electronics,32.5,case
+SKU0218,Product 0218,Electronics,47.04,each
+SKU0219,Product 0219,Sporting Goods,7.51,each
+SKU0220,Product 0220,Health & Beauty,25.47,case
+SKU0221,Product 0221,Apparel,20.26,each
+SKU0222,Product 0222,Sporting Goods,23.76,case
+SKU0223,Product 0223,Grocery,6.05,case
+SKU0224,Product 0224,Apparel,6.79,case
+SKU0225,Product 0225,Grocery,13.98,case
+SKU0226,Product 0226,Home & Garden,15.3,case
+SKU0227,Product 0227,Automotive,21.45,pallet
+SKU0228,Product 0228,Toys,30.59,case
+SKU0229,Product 0229,Toys,31.77,each
+SKU0230,Product 0230,Apparel,20.65,each
+SKU0231,Product 0231,Sporting Goods,20.5,case
+SKU0232,Product 0232,Automotive,10.96,pallet
+SKU0233,Product 0233,Electronics,29.46,case
+SKU0234,Product 0234,Automotive,15.92,pallet
+SKU0235,Product 0235,Sporting Goods,1.9,pallet
+SKU0236,Product 0236,Grocery,20.98,case
+SKU0237,Product 0237,Grocery,23.76,case
+SKU0238,Product 0238,Sporting Goods,11.36,each
+SKU0239,Product 0239,Home & Garden,28.67,each
+SKU0240,Product 0240,Grocery,28.33,each
+SKU0241,Product 0241,Apparel,35.13,each
+SKU0242,Product 0242,Toys,32.43,case
+SKU0243,Product 0243,Electronics,32.66,each
+SKU0244,Product 0244,Grocery,15.88,each
+SKU0245,Product 0245,Grocery,39.39,each
+SKU0246,Product 0246,Electronics,27.5,pallet
+SKU0247,Product 0247,Automotive,21.63,pallet
+SKU0248,Product 0248,Sporting Goods,31.34,each
+SKU0249,Product 0249,Automotive,18.1,case
+SKU0250,Product 0250,Electronics,25.69,case
+SKU0251,Product 0251,Apparel,36.86,pallet
+SKU0252,Product 0252,Sporting Goods,44.33,pallet
+SKU0253,Product 0253,Apparel,46.06,case
+SKU0254,Product 0254,Home & Garden,25.23,each
+SKU0255,Product 0255,Grocery,26.06,case
+SKU0256,Product 0256,Apparel,40.01,each
+SKU0257,Product 0257,Grocery,15.79,each
+SKU0258,Product 0258,Electronics,41.89,case
+SKU0259,Product 0259,Apparel,24.76,case
+SKU0260,Product 0260,Toys,5.88,case
+SKU0261,Product 0261,Automotive,3.7,each
+SKU0262,Product 0262,Apparel,42.12,each
+SKU0263,Product 0263,Home & Garden,2.87,each
+SKU0264,Product 0264,Health & Beauty,14.1,case
+SKU0265,Product 0265,Health & Beauty,16.77,case
+SKU0266,Product 0266,Toys,8.73,pallet
+SKU0267,Product 0267,Sporting Goods,15.76,case
+SKU0268,Product 0268,Home & Garden,37.16,each
+SKU0269,Product 0269,Toys,0.83,each
+SKU0270,Product 0270,Toys,41.38,each
+SKU0271,Product 0271,Home & Garden,42.84,each
+SKU0272,Product 0272,Electronics,18.68,each
+SKU0273,Product 0273,Apparel,7.77,each
+SKU0274,Product 0274,Health & Beauty,30.08,each
+SKU0275,Product 0275,Sporting Goods,6.07,case
+SKU0276,Product 0276,Sporting Goods,18.31,each
+SKU0277,Product 0277,Sporting Goods,47.93,each
+SKU0278,Product 0278,Automotive,49.77,each
+SKU0279,Product 0279,Electronics,38.63,each
+SKU0280,Product 0280,Electronics,15.62,case
+SKU0281,Product 0281,Home & Garden,34.41,each
+SKU0282,Product 0282,Sporting Goods,35.3,each
+SKU0283,Product 0283,Grocery,19.45,each
+SKU0284,Product 0284,Sporting Goods,32.08,pallet
+SKU0285,Product 0285,Sporting Goods,0.64,case
+SKU0286,Product 0286,Health & Beauty,10.53,each
+SKU0287,Product 0287,Apparel,26.3,each
+SKU0288,Product 0288,Toys,8.27,each
+SKU0289,Product 0289,Toys,8.38,each
+SKU0290,Product 0290,Sporting Goods,41.83,case
+SKU0291,Product 0291,Automotive,49.46,case
+SKU0292,Product 0292,Home & Garden,27.84,pallet
+SKU0293,Product 0293,Health & Beauty,41.97,each
+SKU0294,Product 0294,Home & Garden,49.52,each
+SKU0295,Product 0295,Toys,7.17,each
+SKU0296,Product 0296,Toys,22.47,each
+SKU0297,Product 0297,Automotive,19.69,pallet
+SKU0298,Product 0298,Sporting Goods,4.09,each
+SKU0299,Product 0299,Home & Garden,37.79,each
+SKU0300,Product 0300,Electronics,21.75,case
+SKU0301,Product 0301,Home & Garden,23.52,each
+SKU0302,Product 0302,Automotive,7.62,each
+SKU0303,Product 0303,Electronics,9.13,each
+SKU0304,Product 0304,Health & Beauty,45.36,each
+SKU0305,Product 0305,Toys,2.33,each
+SKU0306,Product 0306,Apparel,11.72,each
+SKU0307,Product 0307,Home & Garden,14.67,each
+SKU0308,Product 0308,Toys,24.56,each
+SKU0309,Product 0309,Home & Garden,29.36,each
+SKU0310,Product 0310,Electronics,24.72,pallet
+SKU0311,Product 0311,Grocery,4.3,each
+SKU0312,Product 0312,Grocery,12.26,case
+SKU0313,Product 0313,Electronics,42.2,case
+SKU0314,Product 0314,Home & Garden,31.92,each
+SKU0315,Product 0315,Apparel,32.49,pallet
+SKU0316,Product 0316,Grocery,33.54,each
+SKU0317,Product 0317,Grocery,38.17,each
+SKU0318,Product 0318,Grocery,3.0,each
+SKU0319,Product 0319,Health & Beauty,18.39,each
+SKU0320,Product 0320,Automotive,27.02,each
+SKU0321,Product 0321,Home & Garden,16.99,each
+SKU0322,Product 0322,Electronics,42.24,case
+SKU0323,Product 0323,Toys,24.18,each
+SKU0324,Product 0324,Health & Beauty,38.45,pallet
+SKU0325,Product 0325,Health & Beauty,42.62,case
+SKU0326,Product 0326,Apparel,25.29,pallet
+SKU0327,Product 0327,Apparel,45.49,each
+SKU0328,Product 0328,Electronics,29.4,pallet
+SKU0329,Product 0329,Apparel,42.53,case
+SKU0330,Product 0330,Toys,17.1,pallet
+SKU0331,Product 0331,Toys,24.99,each
+SKU0332,Product 0332,Home & Garden,26.62,pallet
+SKU0333,Product 0333,Home & Garden,5.34,case
+SKU0334,Product 0334,Automotive,19.99,each
+SKU0335,Product 0335,Sporting Goods,45.88,each
+SKU0336,Product 0336,Automotive,31.58,each
+SKU0337,Product 0337,Health & Beauty,8.96,pallet
+SKU0338,Product 0338,Home & Garden,17.01,each
+SKU0339,Product 0339,Apparel,9.66,each
+SKU0340,Product 0340,Health & Beauty,1.34,case
+SKU0341,Product 0341,Grocery,46.38,each
+SKU0342,Product 0342,Home & Garden,22.47,each
+SKU0343,Product 0343,Toys,15.45,case
+SKU0344,Product 0344,Toys,29.96,pallet
+SKU0345,Product 0345,Health & Beauty,0.46,case
+SKU0346,Product 0346,Home & Garden,13.97,case
+SKU0347,Product 0347,Health & Beauty,35.18,each
+SKU0348,Product 0348,Health & Beauty,31.73,case
+SKU0349,Product 0349,Apparel,49.09,case
+SKU0350,Product 0350,Apparel,31.06,each
+SKU0351,Product 0351,Toys,23.93,each
+SKU0352,Product 0352,Electronics,38.1,each
+SKU0353,Product 0353,Home & Garden,45.18,each
+SKU0354,Product 0354,Sporting Goods,36.06,each
+SKU0355,Product 0355,Health & Beauty,48.16,each
+SKU0356,Product 0356,Health & Beauty,39.12,pallet
+SKU0357,Product 0357,Apparel,43.35,each
+SKU0358,Product 0358,Health & Beauty,5.79,case
+SKU0359,Product 0359,Electronics,36.65,case
+SKU0360,Product 0360,Grocery,22.06,case
+SKU0361,Product 0361,Automotive,27.7,case
+SKU0362,Product 0362,Health & Beauty,32.74,each
+SKU0363,Product 0363,Apparel,48.49,pallet
+SKU0364,Product 0364,Health & Beauty,49.23,each
+SKU0365,Product 0365,Electronics,14.48,pallet
+SKU0366,Product 0366,Toys,36.71,each
+SKU0367,Product 0367,Sporting Goods,37.52,each
+SKU0368,Product 0368,Home & Garden,17.39,case
+SKU0369,Product 0369,Electronics,6.28,each
+SKU0370,Product 0370,Automotive,2.14,case
+SKU0371,Product 0371,Home & Garden,38.89,each
+SKU0372,Product 0372,Grocery,24.54,each
+SKU0373,Product 0373,Sporting Goods,49.28,case
+SKU0374,Product 0374,Home & Garden,23.3,pallet
+SKU0375,Product 0375,Health & Beauty,48.9,each
+SKU0376,Product 0376,Electronics,20.64,each
+SKU0377,Product 0377,Grocery,39.7,each
+SKU0378,Product 0378,Grocery,4.33,pallet
+SKU0379,Product 0379,Sporting Goods,27.82,case
+SKU0380,Product 0380,Home & Garden,40.12,each
+SKU0381,Product 0381,Electronics,46.24,each
+SKU0382,Product 0382,Health & Beauty,41.15,each
+SKU0383,Product 0383,Health & Beauty,1.94,each
+SKU0384,Product 0384,Apparel,18.7,pallet
+SKU0385,Product 0385,Electronics,2.53,case
+SKU0386,Product 0386,Electronics,5.55,each
+SKU0387,Product 0387,Electronics,33.8,case
+SKU0388,Product 0388,Automotive,35.69,each
+SKU0389,Product 0389,Health & Beauty,38.71,each
+SKU0390,Product 0390,Apparel,43.29,each
+SKU0391,Product 0391,Grocery,37.0,each
+SKU0392,Product 0392,Apparel,40.06,each
+SKU0393,Product 0393,Home & Garden,2.54,pallet
+SKU0394,Product 0394,Toys,11.8,case
+SKU0395,Product 0395,Grocery,31.13,each
+SKU0396,Product 0396,Automotive,42.92,pallet
+SKU0397,Product 0397,Electronics,0.32,case
+SKU0398,Product 0398,Apparel,25.78,pallet
+SKU0399,Product 0399,Home & Garden,33.9,case
+SKU0400,Product 0400,Home & Garden,1.58,each
+SKU0401,Product 0401,Health & Beauty,20.13,case
+SKU0402,Product 0402,Automotive,44.79,case
+SKU0403,Product 0403,Home & Garden,33.61,case
+SKU0404,Product 0404,Health & Beauty,11.96,each
+SKU0405,Product 0405,Sporting Goods,42.65,each
+SKU0406,Product 0406,Toys,17.47,each
+SKU0407,Product 0407,Sporting Goods,42.68,each
+SKU0408,Product 0408,Apparel,15.02,each
+SKU0409,Product 0409,Health & Beauty,29.56,each
+SKU0410,Product 0410,Electronics,19.91,pallet
+SKU0411,Product 0411,Apparel,13.81,each
+SKU0412,Product 0412,Apparel,44.34,pallet
+SKU0413,Product 0413,Home & Garden,9.46,each
+SKU0414,Product 0414,Apparel,4.33,case
+SKU0415,Product 0415,Electronics,17.16,each
+SKU0416,Product 0416,Grocery,35.91,case
+SKU0417,Product 0417,Health & Beauty,40.39,each
+SKU0418,Product 0418,Electronics,49.94,each
+SKU0419,Product 0419,Home & Garden,14.89,each
+SKU0420,Product 0420,Toys,20.46,case
+SKU0421,Product 0421,Health & Beauty,6.93,each
+SKU0422,Product 0422,Grocery,28.79,case
+SKU0423,Product 0423,Automotive,49.88,case
+SKU0424,Product 0424,Toys,35.07,each
+SKU0425,Product 0425,Sporting Goods,29.8,each
+SKU0426,Product 0426,Apparel,19.68,each
+SKU0427,Product 0427,Automotive,45.77,each
+SKU0428,Product 0428,Automotive,24.9,each
+SKU0429,Product 0429,Electronics,6.8,each
+SKU0430,Product 0430,Grocery,18.33,pallet
+SKU0431,Product 0431,Electronics,3.45,each
+SKU0432,Product 0432,Grocery,10.18,each
+SKU0433,Product 0433,Automotive,0.98,pallet
+SKU0434,Product 0434,Apparel,22.72,pallet
+SKU0435,Product 0435,Sporting Goods,31.76,each
+SKU0436,Product 0436,Electronics,17.23,each
+SKU0437,Product 0437,Toys,21.08,each
+SKU0438,Product 0438,Health & Beauty,47.96,case
+SKU0439,Product 0439,Electronics,37.62,pallet
+SKU0440,Product 0440,Sporting Goods,27.09,each
+SKU0441,Product 0441,Health & Beauty,14.3,each
+SKU0442,Product 0442,Home & Garden,44.86,each
+SKU0443,Product 0443,Apparel,11.83,pallet
+SKU0444,Product 0444,Sporting Goods,16.33,each
+SKU0445,Product 0445,Toys,45.46,each
+SKU0446,Product 0446,Grocery,26.52,each
+SKU0447,Product 0447,Home & Garden,37.14,each
+SKU0448,Product 0448,Health & Beauty,29.58,pallet
+SKU0449,Product 0449,Toys,32.71,each
+SKU0450,Product 0450,Home & Garden,15.04,each
+SKU0451,Product 0451,Health & Beauty,12.14,pallet
+SKU0452,Product 0452,Health & Beauty,16.19,case
+SKU0453,Product 0453,Sporting Goods,7.86,each
+SKU0454,Product 0454,Electronics,43.73,each
+SKU0455,Product 0455,Toys,14.23,pallet
+SKU0456,Product 0456,Toys,28.12,each
+SKU0457,Product 0457,Apparel,39.62,case
+SKU0458,Product 0458,Grocery,39.21,case
+SKU0459,Product 0459,Automotive,21.98,case
+SKU0460,Product 0460,Electronics,23.87,each
+SKU0461,Product 0461,Grocery,49.74,pallet
+SKU0462,Product 0462,Apparel,33.76,pallet
+SKU0463,Product 0463,Grocery,40.75,each
+SKU0464,Product 0464,Sporting Goods,45.14,case
+SKU0465,Product 0465,Electronics,39.4,case
+SKU0466,Product 0466,Health & Beauty,9.34,case
+SKU0467,Product 0467,Apparel,28.15,each
+SKU0468,Product 0468,Toys,5.18,each
+SKU0469,Product 0469,Apparel,32.68,pallet
+SKU0470,Product 0470,Health & Beauty,47.77,each
+SKU0471,Product 0471,Grocery,25.69,case
+SKU0472,Product 0472,Automotive,21.71,pallet
+SKU0473,Product 0473,Sporting Goods,1.89,case
+SKU0474,Product 0474,Sporting Goods,47.99,each
+SKU0475,Product 0475,Grocery,5.24,case
+SKU0476,Product 0476,Automotive,2.15,each
+SKU0477,Product 0477,Automotive,12.38,pallet
+SKU0478,Product 0478,Electronics,3.37,each
+SKU0479,Product 0479,Grocery,22.81,each
+SKU0480,Product 0480,Electronics,25.85,case
+SKU0481,Product 0481,Home & Garden,15.7,case
+SKU0482,Product 0482,Automotive,2.64,case
+SKU0483,Product 0483,Home & Garden,5.67,each
+SKU0484,Product 0484,Automotive,19.29,case
+SKU0485,Product 0485,Sporting Goods,3.12,case
+SKU0486,Product 0486,Apparel,34.94,case
+SKU0487,Product 0487,Home & Garden,10.43,case
+SKU0488,Product 0488,Toys,15.17,each
+SKU0489,Product 0489,Automotive,19.77,each
+SKU0490,Product 0490,Toys,20.89,pallet
+SKU0491,Product 0491,Health & Beauty,0.18,case
+SKU0492,Product 0492,Automotive,5.69,each
+SKU0493,Product 0493,Automotive,43.15,each
+SKU0494,Product 0494,Toys,0.16,case
+SKU0495,Product 0495,Home & Garden,25.46,case
+SKU0496,Product 0496,Sporting Goods,24.53,each
+SKU0497,Product 0497,Electronics,16.72,case
+SKU0498,Product 0498,Home & Garden,21.62,pallet
+SKU0499,Product 0499,Health & Beauty,39.05,each
+SKU0500,Product 0500,Sporting Goods,42.08,each

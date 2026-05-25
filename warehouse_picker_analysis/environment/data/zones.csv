@@ -1,0 +1,13 @@
+zone_id,zone_name,zone_type
+Z01,Bulk Storage A,bulk
+Z02,Bulk Storage B,bulk
+Z03,Pick Zone 1,pick
+Z04,Pick Zone 2,pick
+Z05,Pick Zone 3,pick
+Z06,Pick Zone 4,pick
+Z07,Reserve Storage A,reserve
+Z08,Reserve Storage B,reserve
+Z09,Receiving Dock,receiving
+Z10,Shipping Dock,shipping
+Z11,Staging Area A,staging
+Z12,Staging Area B,staging
