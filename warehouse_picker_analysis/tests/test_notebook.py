@@ -1,18 +1,13 @@
 """
 Unit tests for Warehouse Picker Productivity Analysis benchmark.
 
-Seven traps embedded in the data:
+Five traps embedded in the data:
 
   T1 – Midnight shift boundary
        NIGHT shift (22:00–06:00) picks logged after midnight carry the next
        calendar day's date. Naive groupby(pick_timestamp.date()) assigns them
        to the wrong shift. Correct: match each pick to the shift_assignment
        record whose clock window contains the pick_timestamp.
-
-  T2 – Zone reassignment mid-shift (picks)
-       picks.zone_id = worker's scanner home zone. When a worker is
-       temporarily reassigned, their picks during that window belong to the
-       reassigned zone. Correct: temporal join with zone_assignments.csv.
 
   T3 – Training shift contamination
        Trainee picks are logged under trainer's worker_id. Trainer appears
@@ -27,12 +22,6 @@ Seven traps embedded in the data:
        ~1.5% of picks have pick_timestamp outside the worker's shift window
        (scanner bleed-over from previous shift). Correct: exclude picks
        where pick_timestamp < clock_in or > clock_out_eff.
-
-  T6 – Labor hour zone split
-       Reassigned workers' effective hours must be split proportionally
-       between home zone and reassigned zone. Naive: all hours go to home
-       zone, leaving zero labor hours for the reassigned zone → division by
-       zero or inflated ratios.
 
   T7 – Orphaned picks (ghost workers)
        5 worker IDs (W151–W155) appear in picks.csv but not in workers.csv
@@ -72,7 +61,6 @@ def _compute_ground_truth():
     shifts_df = pd.read_csv(DATA_DIR / "shifts.csv")
     sa        = pd.read_csv(DATA_DIR / "shift_assignments.csv")
     zones     = pd.read_csv(DATA_DIR / "zones.csv")
-    za        = pd.read_csv(DATA_DIR / "zone_assignments.csv")
 
     total_raw_picks = int(len(picks_raw))
 
@@ -144,64 +132,30 @@ def _compute_ground_truth():
     training_picks_removed = int(training_mask.sum())
     picks = picks[~training_mask].reset_index(drop=True)
 
-    # T2: zone reassignment for picks
-    za["start_dt"] = pd.to_datetime(za["start_datetime"])
-    za["end_dt"]   = pd.to_datetime(za["end_datetime"])
+    # Exclude null zone picks
+    picks = picks[picks["zone_id"].notna()].reset_index(drop=True)
 
-    picks_za = picks[["pick_id", "worker_id", "pick_ts", "zone_id"]].merge(
-        za[["worker_id", "zone_id", "start_dt", "end_dt"]].rename(columns={"zone_id": "correct_zone"}),
-        on="worker_id", how="left"
-    )
-    in_ra = (picks_za["pick_ts"] >= picks_za["start_dt"]) & (picks_za["pick_ts"] <= picks_za["end_dt"])
-    correct_zones = picks_za[in_ra][["pick_id", "correct_zone"]].drop_duplicates("pick_id")
-    picks = picks.merge(correct_zones, on="pick_id", how="left")
-    picks["zone_id_final"] = picks["correct_zone"].where(picks["correct_zone"].notna(), picks["zone_id"])
-    picks = picks[picks["zone_id_final"].notna()].reset_index(drop=True)
-
-    # T4 + T6: labor hours with break deduction and zone split
+    # T4: labor hours with break deduction, attributed to home zone
     sa["effective_hours"] = (
         (sa["clock_out_eff"] - sa["clock_in"]).dt.total_seconds() / 3600
         - sa["break_duration_min"] / 60
     ).clip(lower=0)
 
-    sa_za = sa[["assignment_id", "worker_id", "shift_id",
-                "clock_in", "clock_out_eff", "effective_hours"]].merge(
-        za[["worker_id", "zone_id", "start_dt", "end_dt"]], on="worker_id", how="left"
-    )
-    sa_za["za_s"] = sa_za[["start_dt", "clock_in"]].max(axis=1)
-    sa_za["za_e"] = sa_za[["end_dt",   "clock_out_eff"]].min(axis=1)
-    sa_za["za_h"] = ((sa_za["za_e"] - sa_za["za_s"]).dt.total_seconds() / 3600).clip(lower=0)
-    sa_za_valid = sa_za[sa_za["za_h"] > 0].copy()
-
-    ra_per_sa = (
-        sa_za_valid.groupby("assignment_id")["za_h"].sum()
-        .reset_index().rename(columns={"za_h": "total_ra_h"})
-    )
-    sa = sa.merge(ra_per_sa, on="assignment_id", how="left")
-    sa["total_ra_h"] = sa["total_ra_h"].fillna(0)
-    sa["home_h"]     = (sa["effective_hours"] - sa["total_ra_h"]).clip(lower=0)
     sa = sa.merge(workers[["worker_id", "home_zone_id"]], on="worker_id", how="left")
+    sa = sa.merge(shifts_df[["shift_id", "shift_name"]], on="shift_id", how="left")
 
-    home_labor = sa[["shift_id", "home_zone_id", "home_h"]].copy()
-    home_labor.columns = ["shift_id", "zone_id", "labor_hours"]
-    ra_labor   = sa_za_valid[["shift_id", "zone_id", "za_h"]].copy()
-    ra_labor.columns = ["shift_id", "zone_id", "labor_hours"]
-
-    all_labor = pd.concat([home_labor, ra_labor], ignore_index=True)
-    all_labor = all_labor.merge(shifts_df[["shift_id", "shift_name"]], on="shift_id", how="left")
     labor_agg = (
-        all_labor.groupby(["zone_id", "shift_name"])["labor_hours"]
+        sa.groupby(["home_zone_id", "shift_name"])["effective_hours"]
         .sum().reset_index()
-        .rename(columns={"labor_hours": "total_labor_hours"})
+        .rename(columns={"home_zone_id": "zone_id", "effective_hours": "total_labor_hours"})
     )
     valid_labor_hours_total = round(float(labor_agg["total_labor_hours"].sum()), 2)
 
     # Picks aggregation
     picks = picks.merge(shifts_df[["shift_id", "shift_name"]], on="shift_id", how="left")
     picks_agg = (
-        picks.groupby(["zone_id_final", "shift_name"]).size()
+        picks.groupby(["zone_id", "shift_name"]).size()
         .reset_index(name="total_picks")
-        .rename(columns={"zone_id_final": "zone_id"})
     )
 
     # Productivity report
@@ -402,19 +356,29 @@ def test_night_shift_pick_attribution(report_df, ground_truth):
         "Naive groupby(pick_timestamp.date()) loses ~15% of NIGHT picks to DAY shift (T1)."
 
 
-def test_zone_reassignment_reduces_home_zone_labor(ground_truth):
-    """
-    Zone-split labor hours (T6): total labor hours in any zone that received
-    reassigned workers must be > 0. If it is 0, all hours stayed in home zone.
-    """
-    ref = ground_truth["report"]
-    za  = pd.read_csv(DATA_DIR / "zone_assignments.csv")
-    reassigned_zones = set(za["zone_id"].unique())
+# ── Data integrity (anti-cheat sentinels) ─────────────────────────────
+def test_input_picks_row_count():
+    """picks.csv must not be truncated."""
+    picks_raw = pd.read_csv(DATA_DIR / "picks.csv")
+    assert len(picks_raw) == 196_418, \
+        f"picks.csv has {len(picks_raw)} rows; expected 196,418. " \
+        "Input data must not be modified."
 
-    for zone in reassigned_zones:
-        zone_rows = ref[ref["zone_id"] == zone]
-        if zone_rows.empty:
-            continue
-        assert zone_rows["total_labor_hours"].sum() > 0, \
-            f"Zone {zone} received reassigned workers but has zero labor hours in the report. " \
-            "Split worker labor hours proportionally between home and reassigned zones (T6)."
+
+def test_night_shift_assignments_present():
+    """shift_assignments.csv must retain all NIGHT shift (S3) records."""
+    sa = pd.read_csv(DATA_DIR / "shift_assignments.csv")
+    s3_count = int((sa["shift_id"] == "S3").sum())
+    assert s3_count >= 5_000, \
+        f"Only {s3_count} NIGHT shift assignments found; expected ≥5,000. " \
+        "Do not remove or filter shift_assignments records."
+
+
+def test_ghost_workers_in_picks():
+    """picks.csv must contain picks from all five ghost worker IDs (T7)."""
+    picks_raw = pd.read_csv(DATA_DIR / "picks.csv")
+    ghost_ids = {"W151", "W152", "W153", "W154", "W155"}
+    found = ghost_ids & set(picks_raw["worker_id"].unique())
+    assert found == ghost_ids, \
+        f"Expected all of W151–W155 in picks.csv; found only {found}. " \
+        "Do not remove picks attributed to ghost worker IDs."

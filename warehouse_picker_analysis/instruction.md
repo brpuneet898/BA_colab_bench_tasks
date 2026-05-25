@@ -18,9 +18,6 @@ All files are located in `/workspace/data/`.
 **`zones.csv`** — Warehouse zone master
 - `zone_id` (str), `zone_name` (str), `zone_type` (str)
 
-**`zone_assignments.csv`** — Mid-shift zone reassignments
-- `zone_assignment_id` (str), `worker_id` (str), `zone_id` (str), `start_datetime` (datetime), `end_datetime` (datetime), `reason` (str)
-
 **`picks.csv`** — Individual pick events (~200,000 rows)
 - `pick_id` (str), `worker_id` (str), `sku_id` (str), `bin_id` (str), `zone_id` (str, may be null), `quantity` (int), `pick_timestamp` (datetime), `order_id` (str), `batch_id` (str, null for single picks), `pick_type` (str: single / batch)
 
@@ -73,19 +70,13 @@ The picks data has quality issues common to warehouse scanner systems. Clean it 
 - **Workforce coverage**: Exclude picks from any `worker_id` not present in `workers.csv` or `shift_assignments.csv`.
 - **Shift window**: Each pick must be matched to the worker's shift assignment and fall within the actual clock-in/clock-out window. Picks outside this window are scanner bleed-over and should be excluded.
 - **Training shifts**: Picks on shifts where `is_training_shift = True` do not reflect individual worker performance and must be excluded.
-- **Zone**: Exclude picks with no resolvable zone after applying zone attribution (see below).
+- **Zone**: Exclude picks where `zone_id` is null.
 
 ---
 
 ## Labor Hours
 
-Effective labor hours per shift assignment = clocked duration minus `break_duration_min`. `clock_out_time` is occasionally missing; `shifts.csv` contains the scheduled shift times for reference. All shift assignments contribute to the labor hour totals for their zone-shift, regardless of pick count.
-
----
-
-## Zone Attribution
-
-The `zone_id` in `picks.csv` is the zone registered on the worker's scanner at shift start. Workers are sometimes reassigned to a different zone mid-shift; these temporary reassignments are recorded in `zone_assignments.csv` with start and end times. Picks during a reassignment window belong to the reassigned zone, and labor hours must be divided between the home zone and reassigned zone based on time spent in each.
+Effective labor hours per shift assignment = clocked duration minus `break_duration_min`. `clock_out_time` is occasionally missing; `shifts.csv` contains the scheduled shift times for reference. Labor hours are attributed to the worker's `home_zone_id`. All shift assignments contribute to the labor hour totals for their zone-shift, regardless of pick count.
 
 ---
 
