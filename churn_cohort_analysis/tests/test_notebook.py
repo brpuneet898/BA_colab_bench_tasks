@@ -18,11 +18,11 @@ import pytest
 VARIABLES_PATH = Path("/logs/verifier/notebook_variables.json")
 
 EXPECTED = {
-    "cohort_size": 12,
-    "churned_users": 6,
-    "churn_rate": 0.5,
-    "inactivity_threshold": 12.0,
-    "high_risk_users": ["U11", "U12"],
+    "cohort_size": 14,
+    "churned_users": 5,
+    "churn_rate": 0.3571,
+    "inactivity_threshold": 18.0,
+    "high_risk_users": ["U08", "U11", "U12"],
 }
 
 
