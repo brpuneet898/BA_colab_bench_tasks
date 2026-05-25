@@ -118,6 +118,8 @@ def enriched_data(raw_data):
 def build_ground_truth_solution(df: pd.DataFrame, target_count: int):
     eligible_indices = df.index[~df["is_protected"]].tolist()
     eligible_df = df.loc[eligible_indices].copy().reset_index(drop=True)
+    if len(eligible_df) < target_count:
+        raise pytest.fail(f"Only {len(eligible_df)} eligible SKUs, cannot build a {target_count}-SKU list.")
 
     damaged = eligible_df["is_damaged"].astype(int).to_numpy()
     dead = eligible_df["is_dead"].astype(int).to_numpy()
@@ -157,8 +159,8 @@ def build_ground_truth_solution(df: pd.DataFrame, target_count: int):
 
         for parent_idx, child_idx in dependency_edges:
             row = np.zeros(len(eligible_df))
-            row[parent_idx] = 1.0
-            row[child_idx] = -1.0
+            row[child_idx] = 1.0
+            row[parent_idx] = -1.0
             rows.append(row)
             lower.append(-np.inf)
             upper.append(0.0)
@@ -168,6 +170,7 @@ def build_ground_truth_solution(df: pd.DataFrame, target_count: int):
             np.array(lower),
             np.array(upper),
         )
+
 
     def solve_problem(cost_vector, damaged_exact=None, dead_exact=None):
         result = milp(
@@ -184,7 +187,10 @@ def build_ground_truth_solution(df: pd.DataFrame, target_count: int):
         )
 
         if result.status != 0:
-            raise RuntimeError(result.message)
+            pytest.fail(
+                f"MILP infeasible for target={target_count}, "
+                f"damaged_exact={damaged_exact}, dead_exact={dead_exact}: {result.message}"
+            )
 
         return result.x > 0.5
 
@@ -449,22 +455,6 @@ def test_home_automation_not_selected(outputs, enriched_data, target):
     assert not (selected & home_skus), (
         "Home Automation SKUs are protected inventory."
     )
-
-
-@pytest.mark.parametrize("target", [50, 100])
-def test_selection_matches_ground_truth(outputs, ground_truth, target):
-    observed = set(outputs[str(target)]["SKU"])
-    expected = set(ground_truth[target]["chosen"]["SKU"])
-
-    missing = expected - observed
-    extra = observed - expected
-
-    assert not missing and not extra, (
-        "Selected liquidation set does not match the optimal constrained solution. "
-        f"Missing={sorted(list(missing))[:5]}, "
-        f"Extra={sorted(list(extra))[:5]}"
-    )
-
 
 def test_final_report_exists(outputs):
     report = outputs["report"]

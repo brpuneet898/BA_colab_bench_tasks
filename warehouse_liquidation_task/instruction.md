@@ -1,8 +1,6 @@
 # Warehouse Liquidation Strategy
 
-You are a senior inventory analyst supporting the merchandising team.
-
-The distribution center is close to capacity, and the VP of Merchandising wants a liquidation plan that clears space without violating strategic guardrails. Your job is to review the inventory file and the merchandising memo, then prepare two prioritized liquidation lists and a final summary report.
+Review the inventory data and merchandising memo, then create two liquidation lists and a final report.
 
 ## Files
 
