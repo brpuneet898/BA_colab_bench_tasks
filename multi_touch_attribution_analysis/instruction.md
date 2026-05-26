@@ -10,6 +10,8 @@ Apply **position-based (U-shaped) attribution** to each conversion:
 - **Last touch**: 40% of conversion revenue
 - **Middle touches**: the remaining 20%, split equally among all intermediate positions
 
+For paths with 1 or 2 eligible channels after deduplication, distribute revenue equally across them.
+
 ## Data Preparation Rules
 
 Only `click` touchpoints are eligible for attribution; exclude impressions.
@@ -18,7 +20,7 @@ Only `click` touchpoints are eligible for attribution; exclude impressions.
 
 **Lookback window**: each channel has its own lookback window (in days) defined in `channel_config.csv`. Only include touchpoints that fall within that channel's `lookback_days` before the conversion timestamp.
 
-**Channel deduplication**: within a single conversion's eligible path, if the same channel appears more than once, treat it as **one touchpoint**.
+**Channel deduplication**: within a single conversion's eligible path, if the same channel appears more than once, treat it as **one touchpoint**. Its position in the path is determined by its earliest appearance.
 
 **Conversion path isolation**: each user may convert multiple times. A conversion's eligible touchpoints are those that occurred **after the user's immediately preceding conversion** (or from the start of the data if it is the user's first conversion) and before the current conversion timestamp.
 

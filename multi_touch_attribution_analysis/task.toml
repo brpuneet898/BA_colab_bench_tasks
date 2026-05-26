@@ -1,5 +1,6 @@
 version = "1.0"
 [metadata]
+expert_time_estimate_hours = 3.0
 task_type = "colab-bench"
 category = "Marketing Analytics"
 tags = ["attribution-modeling", "multi-touch", "marketing-analytics", "data-cleaning", "temporal-join"]

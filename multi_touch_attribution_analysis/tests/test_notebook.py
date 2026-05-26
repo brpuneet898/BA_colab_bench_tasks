@@ -2,11 +2,11 @@ import json
 import os
 import pytest
 import pandas as pd
-from collections import defaultdict, Counter
+from collections import defaultdict
 from pathlib import Path
 
 if os.path.exists('/workspace/data'):
-    DATA_DIR     = Path('/workspace/data')
+    DATA_DIR      = Path('/workspace/data')
     WORKSPACE_DIR = Path('/workspace')
 else:
     DATA_DIR      = Path(__file__).parent.parent / 'environment' / 'data'
@@ -92,7 +92,7 @@ def ground_truth(raw_data):
     tp = (tp_raw[tp_raw['touchpoint_type'] == 'click']
           .copy().sort_values(['user_id', 'timestamp']).reset_index(drop=True))
 
-    # Direct suppression — sequential scan, O(n clicks)
+    # Direct suppression — sequential scan
     rows = tp.to_dict('records')
     last_nd = {}
     for row in rows:
@@ -106,16 +106,13 @@ def ground_truth(raw_data):
     tp = pd.DataFrame(rows)
 
     # Pre-group by user for O(1) lookup per conversion
-    user_tp = {uid: g.reset_index(drop=True) for uid, g in tp.groupby('user_id')}
+    user_tp   = {uid: g.reset_index(drop=True) for uid, g in tp.groupby('user_id')}
+    lb_series = pd.Series(lookback)
 
     conv = conv_raw.sort_values(['user_id', 'conversion_timestamp']).copy().reset_index(drop=True)
     conv['prev_ts'] = conv.groupby('user_id')['conversion_timestamp'].shift(1)
 
-    # Map each channel to its lookback days for vectorized filtering
-    lb_series = pd.Series(lookback)
-
-    channel_revenue  = defaultdict(float)
-    attributed_slots = []
+    channel_revenue = defaultdict(float)
 
     for _, c in conv.iterrows():
         uid, cts, rev, pts = c['user_id'], c['conversion_timestamp'], c['revenue'], c['prev_ts']
@@ -123,7 +120,6 @@ def ground_truth(raw_data):
         if utps is None:
             continue
 
-        # Path isolation (vectorized boolean mask)
         mask = utps['timestamp'] < cts
         if pd.notna(pts):
             mask &= utps['timestamp'] > pts
@@ -131,16 +127,17 @@ def ground_truth(raw_data):
         if path.empty:
             continue
 
-        # Per-channel lookback filter (fully vectorized)
-        days_before = (cts - path['timestamp']).dt.days
-        lb_vals     = path['channel'].map(lb_series).fillna(30)
-        elig = path[days_before <= lb_vals].copy()
+        # Exact Timedelta lookback — no hour truncation
+        lb_cutoffs = path['channel'].map(lb_series).fillna(30).apply(
+            lambda d: cts - pd.Timedelta(days=d)
+        )
+        elig = path[path['timestamp'] >= lb_cutoffs].copy()
         if elig.empty:
             continue
 
         elig = elig.sort_values('timestamp')
 
-        # Channel dedup — keep earliest per channel, re-sort by that timestamp
+        # Channel dedup — earliest appearance per channel defines position
         deduped = (elig.groupby('channel', sort=False)
                    .first().reset_index()
                    .sort_values('timestamp').reset_index(drop=True))
@@ -152,15 +149,15 @@ def ground_truth(raw_data):
 
         for i, (_, td) in enumerate(deduped.iterrows()):
             channel_revenue[td['channel']] += rev * weights[i]
-            attributed_slots.append(td['channel'])
 
-    click_counts = Counter(attributed_slots)
+    # Spend: total raw clicks per CPC channel; flat fee × 3 for flat-fee channels
+    raw_clicks = tp_raw[tp_raw['touchpoint_type'] == 'click']['channel'].value_counts().to_dict()
     all_ch = list(lookback.keys())
     spend = {}
     for ch in all_ch:
-        if cpc.get(ch, 0) > 0:      spend[ch] = round(cpc[ch] * click_counts.get(ch, 0), 2)
+        if cpc.get(ch, 0) > 0:       spend[ch] = round(cpc[ch] * raw_clicks.get(ch, 0), 2)
         elif flat_fee.get(ch, 0) > 0: spend[ch] = round(flat_fee[ch] * 3, 2)
-        else:                         spend[ch] = 0.0
+        else:                          spend[ch] = 0.0
 
     roas = {ch: round(channel_revenue.get(ch, 0.0) / spend[ch], 2)
             for ch in all_ch if spend[ch] > 0}
@@ -202,15 +199,29 @@ def test_email_attributed_revenue(notebook_vars, ground_truth):
     actual   = round(float(notebook_vars['email_attributed_revenue']), 2)
     assert abs(actual - expected) < 1.0, f"email {actual} != {expected}"
 
+def test_organic_social_attributed_revenue(notebook_vars, ground_truth):
+    if notebook_vars is None:
+        pytest.skip('notebook_variables.json not found')
+    channel_revenue, _, _ = ground_truth
+    expected = round(channel_revenue.get('organic_social', 0), 2)
+    actual   = round(float(notebook_vars['organic_social_attributed_revenue']), 2)
+    assert abs(actual - expected) < 1.0, f"organic_social {actual} != {expected}"
+
+def test_direct_attributed_revenue(notebook_vars, ground_truth):
+    if notebook_vars is None:
+        pytest.skip('notebook_variables.json not found')
+    channel_revenue, _, _ = ground_truth
+    expected = round(channel_revenue.get('direct', 0), 2)
+    actual   = round(float(notebook_vars['direct_attributed_revenue']), 2)
+    assert abs(actual - expected) < 1.0, f"direct {actual} != {expected}"
+
 def test_roas_email(notebook_vars, ground_truth):
     if notebook_vars is None:
         pytest.skip('notebook_variables.json not found')
     _, _, roas = ground_truth
     expected = roas.get('email', 0)
     actual   = round(float(notebook_vars['roas_email']), 2)
-    assert abs(actual - expected) < 0.10, (
-        f"roas_email {actual} != {expected}  (check flat-fee vs CPC billing)"
-    )
+    assert abs(actual - expected) < 0.10, f"roas_email {actual} != {expected}"
 
 def test_roas_paid_search(notebook_vars, ground_truth):
     if notebook_vars is None:
@@ -227,22 +238,3 @@ def test_roas_display(notebook_vars, ground_truth):
     expected = roas.get('display', 0)
     actual   = round(float(notebook_vars['roas_display']), 2)
     assert abs(actual - expected) < 0.10, f"roas_display {actual} != {expected}"
-
-def test_two_touchpoint_paths_handled(notebook_vars, ground_truth):
-    """Trap 1: 2-touchpoint paths must use 50/50 not 40/60."""
-    if notebook_vars is None:
-        pytest.skip('notebook_variables.json not found')
-    channel_revenue, _, _ = ground_truth
-    expected = round(sum(channel_revenue.values()), 2)
-    actual   = round(float(notebook_vars['total_attributed_revenue']), 2)
-    assert abs(actual - expected) < 1.0
-
-def test_direct_suppression_reduces_direct_share(notebook_vars):
-    """Trap 3: after suppression, direct should be a small fraction of total."""
-    if notebook_vars is None:
-        pytest.skip('notebook_variables.json not found')
-    direct_rev = float(notebook_vars.get('direct_attributed_revenue', 0))
-    total_rev  = float(notebook_vars['total_attributed_revenue'])
-    assert direct_rev / total_rev < 0.15, (
-        f"direct is {direct_rev / total_rev:.1%} of total — direct suppression may not be applied"
-    )
