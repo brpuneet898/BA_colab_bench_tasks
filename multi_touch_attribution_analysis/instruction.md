@@ -14,9 +14,9 @@ For paths with 1 or 2 eligible channels after deduplication, distribute revenue 
 
 ## Data Preparation Rules
 
-Only `click` touchpoints are eligible for attribution; exclude impressions.
+Only `click` touchpoints are eligible for attribution. Exclude all impression touchpoints before applying any further data preparation steps.
 
-**Direct traffic suppression**: a `direct` channel touchpoint that occurs within **6 hours** of a preceding touchpoint by the same user must be reassigned to that preceding channel. If no prior touchpoint exists within 6 hours, the `direct` touchpoint is kept as-is.
+**Direct traffic suppression**: a `direct` click touchpoint that occurs within **6 hours** of the immediately preceding click touchpoint by the same user must be reassigned to that preceding channel. If no immediately preceding click touchpoint exists within 6 hours, the `direct` touchpoint is kept as-is.
 
 **Lookback window**: each channel has its own lookback window (in days) defined in `channel_config.csv`. Only include touchpoints that fall within that channel's `lookback_days` before the conversion timestamp.
 
