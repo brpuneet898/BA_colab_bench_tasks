@@ -222,7 +222,7 @@ def test_report_sorted_descending(report_df):
 
 def test_report_no_zero_labor_hours(report_df):
     assert (report_df["total_labor_hours"] > 0).all(), \
-        "All rows must have total_labor_hours > 0 (T6: labor hour zone split required)"
+        "All rows must have total_labor_hours > 0; exclude zone-shift combinations with no labor hours"
 
 
 def test_report_valid_ratios(report_df):
@@ -298,10 +298,9 @@ def test_training_picks_removed(notebook_vars, ground_truth):
 
 def test_valid_labor_hours_total(notebook_vars, ground_truth):
     """
-    Catches T4 (break deduction) and T6 (zone split):
+    Catches T4 (break deduction):
       T4 – naive model uses raw clock duration, not clock_duration - break_duration_min.
-      T6 – naive model assigns all labor hours to home zone; reassigned zones get zero
-           hours, causing division-by-zero or inflated picks_per_labor_hour.
+           Missing clock_out_time must be filled with the scheduled shift end time.
     """
     assert "valid_labor_hours_total" in notebook_vars, \
         "Variable 'valid_labor_hours_total' not found."
@@ -322,8 +321,7 @@ def test_top_zone_shift_identity(report_df, ground_truth):
     actual = report_df.sort_values("picks_per_labor_hour", ascending=False).iloc[0]
     assert actual["zone_id"] == ref["zone_id"], \
         f"Top zone: expected '{ref['zone_id']}', got '{actual['zone_id']}'. " \
-        "Ensure zone reassignment (T2), training exclusion (T3), and break deduction (T4) " \
-        "are all applied before computing productivity."
+        "Ensure training exclusion (T3) and break deduction (T4) are applied before computing productivity."
     assert actual["shift_name"] == ref["shift_name"], \
         f"Top shift: expected '{ref['shift_name']}', got '{actual['shift_name']}'."
 
@@ -334,7 +332,7 @@ def test_top_zone_shift_ratio(report_df, ground_truth):
     actual_ratio = float(report_df.sort_values("picks_per_labor_hour", ascending=False).iloc[0]["picks_per_labor_hour"])
     assert abs(actual_ratio - ref_ratio) / max(ref_ratio, 1) < 0.05, \
         f"Top picks_per_labor_hour: expected≈{ref_ratio:.2f}, got {actual_ratio:.2f}. " \
-        "Inflated ratios indicate labor hours were not split for reassigned zones (T6)."
+        "Check that break deduction (T4) and training exclusion (T3) are applied correctly."
 
 
 def test_night_shift_pick_attribution(report_df, ground_truth):

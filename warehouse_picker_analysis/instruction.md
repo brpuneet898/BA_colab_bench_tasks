@@ -42,7 +42,7 @@ Save `productivity_report.csv` to `/workspace/productivity_report.csv` with exac
 | `total_labor_hours` | float | Total effective labor hours for pickers in this zone-shift (2 decimal places) |
 | `picks_per_labor_hour` | float | total_picks / total_labor_hours (2 decimal places) |
 
-Sort by `picks_per_labor_hour` descending.
+Include only zone-shift combinations where both `total_picks > 0` and `total_labor_hours > 0`. Sort by `picks_per_labor_hour` descending.
 
 ---
 
