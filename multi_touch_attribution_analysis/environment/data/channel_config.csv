@@ -1,6 +1,6 @@
 channel,lookback_days,cost_per_click,monthly_flat_fee
-paid_search,30,1.85,0.0
-display,7,0.45,0.0
-email,14,0.0,4500.0
-organic_social,60,0.0,0.0
-direct,30,0.0,0.0
+paid_search,30,185,0
+display,7,45,0
+email,14,0,450000
+organic_social,60,0,0
+direct,30,0,0

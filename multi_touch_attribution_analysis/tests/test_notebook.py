@@ -34,19 +34,23 @@ def raw_data():
 
 def test_input_touchpoints_row_count(raw_data):
     tp, _, _ = raw_data
-    assert len(tp) == 11_616, "Input touchpoints.csv must not be modified."
+    assert len(tp) == 33_406, "Input touchpoints.csv must not be modified."
 
 def test_input_conversions_row_count(raw_data):
     _, conv, _ = raw_data
-    assert len(conv) == 1_009, "Input conversions.csv must not be modified."
+    assert len(conv) == 3_359, "Input conversions.csv must not be modified."
 
 def test_direct_touchpoints_present(raw_data):
     tp, _, _ = raw_data
-    assert (tp['channel'] == 'direct').sum() >= 800
+    assert (tp['channel'] == 'direct').sum() >= 3_000
 
 def test_multi_conversion_users_present(raw_data):
     _, conv, _ = raw_data
-    assert (conv['user_id'].value_counts() >= 2).sum() >= 100
+    assert (conv['user_id'].value_counts() >= 2).sum() >= 300
+
+def test_refund_rows_present(raw_data):
+    _, conv, _ = raw_data
+    assert (conv['revenue'] < 0).sum() >= 25, "Refund rows must be present in conversions.csv."
 
 
 # ── Output file ──────────────────────────────────────────────────────────────
@@ -85,8 +89,17 @@ def ground_truth(raw_data):
     tp_raw, conv_raw, cfg = raw_data
 
     lookback = cfg.set_index('channel')['lookback_days'].to_dict()
-    cpc      = cfg.set_index('channel')['cost_per_click'].to_dict()
-    flat_fee = cfg.set_index('channel')['monthly_flat_fee'].to_dict()
+    # cost_per_click and monthly_flat_fee are stored in US cents — convert to dollars
+    cpc      = (cfg.set_index('channel')['cost_per_click']    / 100).to_dict()
+    flat_fee = (cfg.set_index('channel')['monthly_flat_fee']  / 100).to_dict()
+
+    # Normalise channel names: lowercase + underscores; drop unrecognised channels
+    valid_channels = set(lookback.keys())
+    tp_raw = tp_raw.copy()
+    tp_raw['channel'] = (tp_raw['channel']
+                         .str.lower()
+                         .str.replace('-', '_', regex=False))
+    tp_raw = tp_raw[tp_raw['channel'].isin(valid_channels)].reset_index(drop=True)
 
     # Convert touchpoint timestamps from US Eastern (naive) to UTC.
     # Q1 2024: EST (UTC-5) before 2024-03-10 03:00 ET, EDT (UTC-4) from that point on.
@@ -118,7 +131,13 @@ def ground_truth(raw_data):
     user_tp   = {uid: g.reset_index(drop=True) for uid, g in tp.groupby('user_id')}
     lb_series = pd.Series(lookback)
 
-    conv = conv_raw.sort_values(['user_id', 'conversion_timestamp']).copy().reset_index(drop=True)
+    # Net revenue per conversion_id: fully refunded conversions (net <= 0) are excluded.
+    net = (conv_raw.groupby('conversion_id')
+           .agg(user_id=('user_id', 'first'),
+                conversion_timestamp=('conversion_timestamp', 'min'),
+                revenue=('revenue', 'sum'))
+           .reset_index())
+    conv = net[net['revenue'] > 0].sort_values(['user_id', 'conversion_timestamp']).copy().reset_index(drop=True)
     conv['prev_ts'] = conv.groupby('user_id')['conversion_timestamp'].shift(1)
 
     channel_revenue = defaultdict(float)

@@ -16,7 +16,7 @@ For paths with 1 or 2 eligible channels after deduplication, distribute revenue 
 
 Only `click` touchpoints are eligible for attribution. Exclude all impression touchpoints before applying any further data preparation steps.
 
-**Direct traffic suppression**: a `direct` click touchpoint that occurs within **6 hours** of the immediately preceding click touchpoint by the same user must be reassigned to that preceding channel. If no immediately preceding click touchpoint exists within 6 hours, the `direct` touchpoint is kept as-is.
+**Direct traffic suppression**: evaluate this rule across each user's full click history before any per-conversion filtering. A `direct` click touchpoint that occurs within **6 hours** of the immediately preceding click touchpoint by the same user must be reassigned to that preceding channel. If no immediately preceding click touchpoint exists within 6 hours, the `direct` touchpoint is kept as-is.
 
 **Lookback window**: each channel has its own lookback window (in days) defined in `channel_config.csv`. Only include touchpoints that fall within that channel's `lookback_days` before the conversion timestamp.
 
@@ -34,9 +34,9 @@ Channels with zero spend have no ROAS.
 
 ## Input Data
 
-- `/workspace/data/touchpoints.csv` — `touchpoint_id`, `user_id`, `channel`, `timestamp` (US Eastern time), `touchpoint_type`
-- `/workspace/data/conversions.csv` — `conversion_id`, `user_id`, `conversion_timestamp` (UTC), `revenue`
-- `/workspace/data/channel_config.csv` — `channel`, `lookback_days`, `cost_per_click`, `monthly_flat_fee`
+- `/workspace/data/touchpoints.csv` — `touchpoint_id`, `user_id`, `channel`, `timestamp` (US Eastern time), `touchpoint_type`; channel values reflect the naming conventions of the source system at export time and may differ in capitalisation or delimiter from `channel_config.csv`; the export includes interactions from all integrated sources including third-party networks not present in `channel_config.csv`
+- `/workspace/data/conversions.csv` — `conversion_id`, `user_id`, `conversion_timestamp` (UTC), `revenue`; a `conversion_id` may appear more than once if the purchase was subsequently refunded — refund rows carry a negative `revenue` value
+- `/workspace/data/channel_config.csv` — `channel`, `lookback_days`, `cost_per_click` (US cents), `monthly_flat_fee` (US cents)
 
 ## Required Outputs
 
