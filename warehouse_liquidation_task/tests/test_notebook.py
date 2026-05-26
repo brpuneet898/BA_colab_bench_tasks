@@ -134,10 +134,11 @@ def build_ground_truth_solution(df: pd.DataFrame, target_count: int):
     }
 
     for _, row in eligible_df.iterrows():
-        parent_sku = str(row["Requires_Base_SKU"]).strip()
+        parent_sku = row["Requires_Base_SKU"]
 
-        if parent_sku:
-            if parent_sku in sku_to_position:
+        if pd.notna(parent_sku):
+            parent_sku = str(parent_sku).strip()
+            if parent_sku and parent_sku in sku_to_position:
                 parent_idx = sku_to_position[parent_sku]
                 child_idx = sku_to_position[row["SKU"]]
                 dependency_edges.append((parent_idx, child_idx))
@@ -311,17 +312,37 @@ def test_protected_items_not_selected(outputs, enriched_data, target):
 def test_dependency_rules(outputs, enriched_data, target):
     selected = set(outputs[str(target)]["SKU"])
 
-    selected_rows = enriched_data[
-        enriched_data["SKU"].isin(selected)
-    ]
+    dependency_rows = enriched_data[
+        enriched_data["Requires_Base_SKU"].notna()
+    ].copy()
 
-    for _, row in selected_rows.iterrows():
-        parent = str(row["Requires_Base_SKU"]).strip()
+    dependency_rows["Requires_Base_SKU"] = (
+        dependency_rows["Requires_Base_SKU"].astype(str).str.strip()
+    )
 
-        if parent:
+    # child -> parent
+    for _, row in dependency_rows.iterrows():
+        child = row["SKU"]
+        parent = row["Requires_Base_SKU"]
+
+        if child in selected and parent:
             assert parent in selected, (
-                f"Dependent SKU {row['SKU']} selected without required base SKU {parent}"
+                f"Dependent SKU {child} selected without required base SKU {parent}"
             )
+
+    # base -> all dependents
+    for base_sku in selected:
+        children = set(
+            dependency_rows.loc[
+                dependency_rows["Requires_Base_SKU"].eq(base_sku),
+                "SKU",
+            ]
+        )
+        missing_children = children - selected
+        assert not missing_children, (
+            f"Base SKU {base_sku} selected without dependent SKUs: "
+            f"{sorted(missing_children)}"
+        )
 
 
 @pytest.mark.parametrize("target", [50, 100])
@@ -408,7 +429,7 @@ def test_output_contains_mostly_damaged_then_dead(outputs, enriched_data, target
     ].copy()
 
     merged = outputs[str(target)].merge(
-        chosen[["SKU", "is_damaged", "is_dead"]],
+        chosen[["SKU", "is_damaged", "is_dead", "effective_volume"]],
         on="SKU",
         how="left",
     )
@@ -419,10 +440,22 @@ def test_output_contains_mostly_damaged_then_dead(outputs, enriched_data, target
         default=2,
     )
 
+    # Tier order: damaged -> dead -> optimized
     assert merged["tier"].tolist() == sorted(merged["tier"].tolist()), (
         "Priority ordering violated. Damaged inventory should appear before dead stock, "
         "which should appear before optimized inventory."
     )
+
+    # Tie-break inside each tier: total volume descending
+    for tier in [0, 1, 2]:
+        tier_df = merged[merged["tier"] == tier]
+        if len(tier_df) > 1:
+            assert tier_df["effective_volume"].tolist() == sorted(
+                tier_df["effective_volume"].tolist(),
+                reverse=True,
+            ), (
+                f"Tier {tier} is not sorted by total volume descending."
+            )
 
 
 @pytest.mark.parametrize("target", [50, 100])

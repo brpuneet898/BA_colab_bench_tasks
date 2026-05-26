@@ -4,7 +4,7 @@ Review the inventory data and merchandising memo, then create two liquidation li
 
 ## Files
 
-Use the following input files from `/workspace/data/`:
+Use the following input files from `/environment/data/`:
 
 * `Q3_Inventory_Sales_Data.csv`
 * `merchandising_strategy.txt`
@@ -44,6 +44,7 @@ Your liquidation recommendation must obey all of the following:
 3. **Respect dependencies**
 
    * If a SKU depends on a base SKU, then the base SKU and the dependent SKU must be treated consistently.
+   * If a base SKU is selected for liquidation, all dependent SKUs that require that base SKU must also be selected.
    * Do not leave orphaned accessories behind.
 
 4. **Priority order**
@@ -51,6 +52,7 @@ Your liquidation recommendation must obey all of the following:
    * Damaged SKUs must be prioritized first.
    * Dead stock must be prioritized next.
    * Remaining slots should be filled by the least attractive SKUs based on margin density.
+   * Within the same priority tier, break ties by total volume in descending order.
 
 5. **Dead stock rule**
 
