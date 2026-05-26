@@ -34,11 +34,11 @@ def raw_data():
 
 def test_input_touchpoints_row_count(raw_data):
     tp, _, _ = raw_data
-    assert len(tp) == 11_596, "Input touchpoints.csv must not be modified."
+    assert len(tp) == 11_616, "Input touchpoints.csv must not be modified."
 
 def test_input_conversions_row_count(raw_data):
     _, conv, _ = raw_data
-    assert len(conv) == 989, "Input conversions.csv must not be modified."
+    assert len(conv) == 1_009, "Input conversions.csv must not be modified."
 
 def test_direct_touchpoints_present(raw_data):
     tp, _, _ = raw_data
@@ -88,8 +88,17 @@ def ground_truth(raw_data):
     cpc      = cfg.set_index('channel')['cost_per_click'].to_dict()
     flat_fee = cfg.set_index('channel')['monthly_flat_fee'].to_dict()
 
-    # Clicks only
-    tp = (tp_raw[tp_raw['touchpoint_type'] == 'click']
+    # Convert touchpoint timestamps from US Eastern (naive) to UTC.
+    # Q1 2024: EST (UTC-5) before 2024-03-10 03:00 ET, EDT (UTC-4) from that point on.
+    DST_BOUNDARY = pd.Timestamp('2024-03-10 03:00:00')
+    tp_utc = tp_raw.copy()
+    offsets = tp_utc['timestamp'].apply(
+        lambda ts: pd.Timedelta(hours=5) if ts < DST_BOUNDARY else pd.Timedelta(hours=4)
+    )
+    tp_utc['timestamp'] = tp_utc['timestamp'] + offsets
+
+    # Clicks only (after timezone conversion)
+    tp = (tp_utc[tp_utc['touchpoint_type'] == 'click']
           .copy().sort_values(['user_id', 'timestamp']).reset_index(drop=True))
 
     # Direct suppression — sequential scan

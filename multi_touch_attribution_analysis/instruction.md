@@ -34,8 +34,8 @@ Channels with zero spend have no ROAS.
 
 ## Input Data
 
-- `/workspace/data/touchpoints.csv` — `touchpoint_id`, `user_id`, `channel`, `timestamp`, `touchpoint_type`
-- `/workspace/data/conversions.csv` — `conversion_id`, `user_id`, `conversion_timestamp`, `revenue`
+- `/workspace/data/touchpoints.csv` — `touchpoint_id`, `user_id`, `channel`, `timestamp` (US Eastern time), `touchpoint_type`
+- `/workspace/data/conversions.csv` — `conversion_id`, `user_id`, `conversion_timestamp` (UTC), `revenue`
 - `/workspace/data/channel_config.csv` — `channel`, `lookback_days`, `cost_per_click`, `monthly_flat_fee`
 
 ## Required Outputs
