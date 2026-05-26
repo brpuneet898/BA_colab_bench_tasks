@@ -1,0 +1,15 @@
+version = "1.0"
+[metadata]
+task_type = "colab-bench"
+category = "Marketing Analytics"
+tags = ["attribution-modeling", "multi-touch", "marketing-analytics", "data-cleaning", "temporal-join"]
+[verifier]
+timeout_sec = 3600.0
+[agent]
+timeout_sec = 10800.0
+[environment]
+allow_internet = true
+build_timeout_sec = 3600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
