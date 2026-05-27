@@ -9,7 +9,7 @@ FROM python:3.13-slim
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    && rm -rf /var/lib/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 # Install JupyterLab with MCP server extension and common data science packages
 # DO NOT MODIFY: These exact package versions are required for MCP integration

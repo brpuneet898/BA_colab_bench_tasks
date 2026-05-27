@@ -1,7 +1,7 @@
 """
 Unit tests for Market Basket Association Analysis benchmark.
 
-Seven traps embedded in the data:
+Six traps embedded in the data:
 
   1. Return transactions (quantity < 0)
      Transaction log includes all POS events, including returns.
@@ -23,18 +23,14 @@ Seven traps embedded in the data:
      transaction_ids at checkout.  basket_id is the correct unit of analysis,
      not transaction_id.
 
-  5. Duplicate rows from POS double-logging
-     Some transaction rows were logged twice during the POS migration.
-     Exact duplicate rows must be removed before analysis.
-
-  6. Basket contamination (basket_id spans both regular and promo_bundle types)
+  5. Basket contamination (basket_id spans both regular and promo_bundle types)
      Some basket_ids contain both organic customer purchases and promotional
      bundle items under the same basket_id.  A naive row-filter removes the
      bundle rows but keeps the regular items — which were influenced by the
      bundle placement and are not purely organic.  The entire basket must be
      excluded when any promo_bundle row is detected for that basket_id.
 
-  7. Within-basket return netting
+  6. Within-basket return netting
      Some items are purchased and returned within the same basket_id (customer
      changed their mind at checkout).  Filtering quantity < 0 removes the
      return row but leaves the original purchase row as a ghost.  Quantities

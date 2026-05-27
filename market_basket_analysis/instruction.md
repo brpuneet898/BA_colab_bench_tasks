@@ -1,5 +1,3 @@
-# Market Basket Association Analysis
-
 You are a data analyst at a regional grocery chain. The merchandising team wants to understand which products customers tend to buy together, so they can redesign shelf layouts and plan cross-promotional offers.
 
 You have been given three datasets exported from the point-of-sale (POS) system:
@@ -10,11 +8,11 @@ You have been given three datasets exported from the point-of-sale (POS) system:
 
 ## Your Task
 
-Perform a market basket association analysis on the transaction data to discover frequently co-purchased products. Use the **Apriori algorithm** with a minimum support of **0.03** and a minimum confidence of **0.30**. Report only rules with exactly one antecedent and one consequent.
+Perform a market basket association analysis on the transaction data to discover frequently co-purchased products. Use the Apriori algorithm with a minimum support of 0.03 and a minimum confidence of 0.30. Report only rules with exactly one antecedent and one consequent.
 
 ## Data Notes
 
-**transactions.csv** columns:
+transactions.csv columns:
 - `transaction_id` — POS transaction identifier
 - `basket_id` — customer basket identifier
 - `item_id` — product identifier at time of sale
@@ -24,7 +22,7 @@ Perform a market basket association analysis on the transaction data to discover
 
 A basket_id may contain both purchases and returns for the same product.
 
-**items.csv** columns:
+items.csv columns:
 - `item_id` — POS item identifier
 - `item_name` — display name of the item
 - `canonical_item_id` — stable product identifier
@@ -44,13 +42,13 @@ Save your association rules to `/workspace/association_rules.csv` with the follo
 | `confidence` | float | P(consequent \| antecedent) |
 | `lift` | float | Ratio of observed to expected co-occurrence |
 
-The file must be sorted by `lift` in **descending** order. Break ties by `antecedent` in ascending alphabetical order.
+The file must be sorted by `lift` in descending order. Break ties by `antecedent` in ascending alphabetical order.
 
 Each product should appear under a single consistent name in the output.
 
 ## Required Notebook Variables
 
-The following variables must be assigned at the **top level** of your notebook (not inside functions or classes) and must be plain Python integers so they can be serialised:
+The following variables must be assigned at the top level of your notebook (not inside functions or classes) and must be plain Python integers so they can be serialised:
 
 | Variable | Description |
 |---|---|
