@@ -39,7 +39,9 @@ WORKDIR /workspace
 RUN pip install --no-cache-dir \
     seaborn \
     pytest \
-    pytest-json-ctrf
+    pytest-json-ctrf \
+    scikit-learn \
+    scipy
 
 # Copy notebook and data
 COPY notebook.ipynb /workspace/

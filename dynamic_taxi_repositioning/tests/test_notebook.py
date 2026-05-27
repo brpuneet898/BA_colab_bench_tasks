@@ -49,6 +49,7 @@ compares the analyst outputs against expected values.
 """
 
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -74,7 +75,9 @@ else:
     DATA_DIR = Path("data")
     WORKSPACE = Path(".")
 
-VARIABLES_PATH = Path("/logs/verifier/notebook_variables.json")
+VARIABLES_PATH = Path(
+    os.environ.get("VARIABLES_PATH", "/logs/verifier/notebook_variables.json")
+)
 SUMMARY_PATH = WORKSPACE / "zone_repositioning_summary.csv"
 
 TRIPS_PATH = DATA_DIR / "trips.csv"
@@ -240,6 +243,11 @@ def _remove_impossible_repositions(chains):
     """
     Remove physically impossible reposition chains unless
     associated with shared rides.
+
+    Two cases are excluded:
+      1. Overlapping trips (idle_minutes < 0): a non-shared driver cannot
+         pick up a new passenger before dropping off the previous one.
+      2. Speed > 120 km/h: physically impossible repositioning speed.
     """
 
     chains = chains.copy()
@@ -255,7 +263,10 @@ def _remove_impossible_repositions(chains):
     )
 
     chains = chains[
-        (chains["implied_speed_kmh"] <= 120)
+        (
+            (chains["idle_minutes"] >= 0)
+            & (chains["implied_speed_kmh"] <= 120)
+        )
         | (chains["is_shared"])
     ].copy()
 
@@ -826,6 +837,8 @@ def test_airport_zones_not_extreme(summary_df):
     """
     Airport queue exemptions should prevent airports from appearing
     as extreme inefficiency outliers.
+
+    JFK = zone_id 132, LGA = zone_id 138.
     """
 
     summary_df = summary_df.sort_values(
@@ -835,9 +848,11 @@ def test_airport_zones_not_extreme(summary_df):
 
     top5 = set(summary_df.head(5)["reposition_from_zone"])
 
-    assert "JFK" not in top5, (
-        "JFK appears among top inefficiency zones. "
-        "Airport queue exemptions likely ignored."
+    AIRPORT_ZONE_IDS = {132, 138}  # JFK=132, LGA=138
+
+    assert not (AIRPORT_ZONE_IDS & top5), (
+        f"Airport zone(s) {AIRPORT_ZONE_IDS & top5} appear among top "
+        "inefficiency zones. Airport queue exemptions likely ignored."
     )
 
 

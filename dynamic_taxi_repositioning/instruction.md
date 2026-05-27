@@ -1,12 +1,10 @@
-# Dynamic Taxi Repositioning Efficiency Analysis
-
-Conduct a comprehensive operational efficiency analysis of **driver repositioning behavior** — the empty “deadhead” movement that occurs between a passenger dropoff and a driver’s next passenger pickup.
+Conduct a comprehensive operational efficiency analysis of driver repositioning behavior, the empty “deadhead” movement that occurs between a passenger dropoff and a driver’s next passenger pickup.
 
 We need to identify taxi zones that may be operationally inefficient because drivers:
 
-* spend excessive time idle between trips,
-* reposition long distances without passengers,
-* or exhibit inefficient post-dropoff movement patterns.
+- spend excessive time idle between trips,
+- reposition long distances without passengers,
+- or exhibit inefficient post-dropoff movement patterns.
 
 However, the dispatch and telemetry systems underwent multiple infrastructure migrations during the analysis period, and the resulting operational data may contain inconsistencies that could distort sequencing, idle-time reconstruction, and repositioning analysis if not handled carefully.
 
@@ -49,8 +47,8 @@ Fleet driver metadata.
 Columns:
 
 * `driver_id`
-* `service_month`
-* `fleet_name`
+* `fleet_type`
+* `home_borough`
 
 ---
 
@@ -77,7 +75,6 @@ Columns:
 * `service_month`
 * `offered_trip_ts`
 * `pickup_zone_id`
-* `status`
 
 ---
 
@@ -88,7 +85,6 @@ Registered pooled/shared ride identifiers.
 Columns:
 
 * `trip_id`
-* `shared_ride_id`
 
 ---
 
@@ -132,10 +128,10 @@ The results will be used to redesign dispatch recommendation logic and reduce op
 
 The raw operational telemetry may contain:
 
-* **`trips.csv`** — inconsistencies may have been introduced during platform migration; timestamp irregularities may be present.
-* **`dispatch_events.csv`** — duplicate events may be present due to retry mechanisms.
-* **`zones.csv`** — naming drift may have occurred over the analysis period.
-* **`zone_adjacency.csv`** — route coverage may be incomplete.
+* `trips.csv` — inconsistencies may have been introduced during platform migration; timestamp irregularities may be present.
+* `dispatch_events.csv` — duplicate events may be present due to retry mechanisms.
+* `zones.csv` — naming drift may have occurred over the analysis period.
+* `zone_adjacency.csv` — route coverage may be incomplete.
 * Overlapping and anomalous sequencing artifacts may be present across files.
 
 Carefully validate and reconstruct operational behavior before computing KPIs.
@@ -148,10 +144,10 @@ Your analysis should:
 * and exclude operationally implausible movement patterns where appropriate.
 
 Operational constraints to enforce:
-* **Duplicate Dispatches:** Dispatch retries generate duplicate rows within 15 seconds. These must be deduplicated.
-* **Idle Time:** Idle duration is considered operationally inefficient if it is 30 minutes or more.
-* **Session Gaps:** A gap of more than 4 hours between a dropoff and the next pickup constitutes a new session, not a repositioning chain.
-* **Max Speed:** Repositioning chains implying a travel speed greater than 120 km/h are physically impossible and must be excluded (unless they are part of a shared ride).
+* Duplicate Dispatches: Dispatch retries generate duplicate rows within 15 seconds. These must be deduplicated.
+* Idle Time: Idle duration is considered operationally inefficient if it is 30 minutes or more.
+* Session Gaps: A gap of more than 4 hours between a dropoff and the next pickup constitutes a new session, not a repositioning chain.
+* Max Speed: Repositioning chains implying a travel speed greater than 120 km/h are physically impossible and must be excluded (unless they are part of a shared ride).
 
 Operational assumptions should be justified using the available telemetry and supporting reference tables.
 
