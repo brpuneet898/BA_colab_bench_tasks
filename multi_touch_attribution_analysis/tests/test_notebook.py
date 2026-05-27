@@ -131,14 +131,17 @@ def ground_truth(raw_data):
     user_tp   = {uid: g.reset_index(drop=True) for uid, g in tp.groupby('user_id')}
     lb_series = pd.Series(lookback)
 
-    # Net revenue per conversion_id: fully refunded conversions (net <= 0) are excluded.
+    # Net revenue per conversion_id.
+    # ALL conversion events (including net-zero refunds) define path-isolation boundaries;
+    # only conversions with net revenue > 0 receive attribution credit.
     net = (conv_raw.groupby('conversion_id')
            .agg(user_id=('user_id', 'first'),
                 conversion_timestamp=('conversion_timestamp', 'min'),
                 revenue=('revenue', 'sum'))
            .reset_index())
-    conv = net[net['revenue'] > 0].sort_values(['user_id', 'conversion_timestamp']).copy().reset_index(drop=True)
-    conv['prev_ts'] = conv.groupby('user_id')['conversion_timestamp'].shift(1)
+    net_sorted = net.sort_values(['user_id', 'conversion_timestamp']).reset_index(drop=True)
+    net_sorted['prev_ts'] = net_sorted.groupby('user_id')['conversion_timestamp'].shift(1)
+    conv = net_sorted[net_sorted['revenue'] > 0].copy().reset_index(drop=True)
 
     channel_revenue = defaultdict(float)
 
