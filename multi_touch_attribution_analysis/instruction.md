@@ -12,7 +12,7 @@ Channel deduplication — within a single conversion's eligible path, if the sam
 
 Conversion path isolation — each user may convert multiple times. All conversion events (including those later fully refunded) define path boundaries. A conversion's eligible touchpoints are those that occurred after the user's immediately preceding conversion (or from the start of the data if it is the user's first conversion) and before the current conversion timestamp. Only conversions with net revenue greater than zero receive attribution credit.
 
-Cost and ROAS: channel costs are defined in channel_config.csv. Q1 covers January, February, and March (3 calendar months). Channels with zero spend have no ROAS. ROAS = attributed revenue / spend, rounded to 2 decimal places.
+Cost and ROAS: channel costs are defined in channel_config.csv. For CPC channels, spend is cost_per_click × total click count across all touchpoints in the dataset. For flat-fee channels, monthly_flat_fee is billed for each calendar month (January, February, or March) in which the channel recorded at least one click. Channels with zero spend have no ROAS. ROAS = attributed revenue / spend, rounded to 2 decimal places.
 
 Input data:
 

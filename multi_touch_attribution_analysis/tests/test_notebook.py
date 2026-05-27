@@ -34,7 +34,7 @@ def raw_data():
 
 def test_input_touchpoints_row_count(raw_data):
     tp, _, _ = raw_data
-    assert len(tp) == 33_406, "Input touchpoints.csv must not be modified."
+    assert len(tp) == 27_560, "Input touchpoints.csv must not be modified."
 
 def test_input_conversions_row_count(raw_data):
     _, conv, _ = raw_data
@@ -181,14 +181,22 @@ def ground_truth(raw_data):
         for i, (_, td) in enumerate(deduped.iterrows()):
             channel_revenue[td['channel']] += rev * weights[i]
 
-    # Spend: total raw clicks per CPC channel; flat fee × 3 for flat-fee channels
-    raw_clicks = tp_raw[tp_raw['touchpoint_type'] == 'click']['channel'].value_counts().to_dict()
+    # Spend: CPC channels use total raw clicks; flat-fee channels billed per active month
+    raw_clicks_df = tp_raw[tp_raw['touchpoint_type'] == 'click'].copy()
+    raw_clicks_df['month'] = raw_clicks_df['timestamp'].dt.month
+    raw_clicks = raw_clicks_df['channel'].value_counts().to_dict()
     all_ch = list(lookback.keys())
     spend = {}
     for ch in all_ch:
-        if cpc.get(ch, 0) > 0:       spend[ch] = round(cpc[ch] * raw_clicks.get(ch, 0), 2)
-        elif flat_fee.get(ch, 0) > 0: spend[ch] = round(flat_fee[ch] * 3, 2)
-        else:                          spend[ch] = 0.0
+        if cpc.get(ch, 0) > 0:
+            spend[ch] = round(cpc[ch] * raw_clicks.get(ch, 0), 2)
+        elif flat_fee.get(ch, 0) > 0:
+            # Billed only for months in which the channel had at least one click
+            ch_clicks = raw_clicks_df[raw_clicks_df['channel'] == ch]
+            active_months = ch_clicks['month'].nunique() if len(ch_clicks) > 0 else 0
+            spend[ch] = round(flat_fee[ch] * active_months, 2)
+        else:
+            spend[ch] = 0.0
 
     roas = {ch: round(channel_revenue.get(ch, 0.0) / spend[ch], 2)
             for ch in all_ch if spend[ch] > 0}
