@@ -72,7 +72,7 @@ def test_attribution_report_channels():
 
 def test_notebook_variables_exist(notebook_vars):
     if notebook_vars is None:
-        pytest.skip('notebook_variables.json not found')
+        pytest.fail('notebook_variables.json not found — notebook must export all required variables')
     for var in [
         'total_attributed_revenue', 'paid_search_attributed_revenue',
         'display_attributed_revenue', 'email_attributed_revenue',
