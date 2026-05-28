@@ -4,13 +4,13 @@ Attribution model: apply position-based (U-shaped) attribution to each conversio
 
 Data preparation: only click touchpoints are eligible for attribution; exclude all impression touchpoints before applying any further data preparation steps.
 
-Direct traffic suppression — evaluate this rule across each user's full click history before any per-conversion filtering. A direct click touchpoint that occurs within 6 hours of the immediately preceding click touchpoint by the same user must be reassigned to that preceding channel. If no immediately preceding click touchpoint exists within 6 hours, the direct touchpoint is kept as-is.
+Direct traffic suppression — a direct click touchpoint that occurs within 6 hours of the immediately preceding click touchpoint by the same user must be reassigned to that preceding channel. If no immediately preceding click touchpoint exists within 6 hours, the direct touchpoint is kept as-is.
 
 Lookback window — each channel has its own lookback window (in days) defined in channel_config.csv. Only include touchpoints that fall within that channel's lookback_days before the conversion timestamp.
 
 Channel deduplication — within a single conversion's eligible path, if the same channel appears more than once, treat it as one touchpoint. Its position in the path is determined by its earliest appearance.
 
-Conversion path isolation — each user may convert multiple times. All conversion events (including those later fully refunded) define path boundaries. A conversion's eligible touchpoints are those that occurred after the user's immediately preceding conversion (or from the start of the data if it is the user's first conversion) and before the current conversion timestamp. Only conversions with net revenue greater than zero receive attribution credit.
+Conversion path isolation — each user may convert multiple times. All conversion events define path boundaries. A conversion's eligible touchpoints are those that occurred after the user's immediately preceding conversion (or from the start of the data if it is the user's first conversion) and before the current conversion timestamp. Only conversions with net revenue greater than zero receive attribution credit.
 
 Cost and ROAS: channel costs are defined in channel_config.csv. For CPC channels, spend is cost_per_click × total click count across all touchpoints in the dataset. For flat-fee channels, monthly_flat_fee is billed for each calendar month (January, February, or March) in which the channel recorded at least one click. Channels with zero spend have no ROAS. ROAS = attributed revenue / spend, rounded to 2 decimal places.
 
