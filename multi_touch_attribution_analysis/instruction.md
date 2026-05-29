@@ -2,7 +2,7 @@ Build a Q1 2024 (January 1 – March 31) marketing attribution report that assig
 
 Attribution model: apply position-based (U-shaped) attribution to each conversion — first touch gets 40% of conversion revenue, last touch gets 40%, and the remaining 20% is split equally among all intermediate positions. For paths with 1 or 2 eligible channels after deduplication, distribute revenue equally across them.
 
-Data preparation: only click touchpoints are eligible for attribution; exclude all impression touchpoints before applying any further data preparation steps.
+Data preparation: only click touchpoints are eligible for attribution; exclude all impression touchpoints. Then normalise channel names to lowercase with hyphens replaced by underscores, and remove touchpoints whose normalised channel is not listed in channel_config.csv. Apply both of these filters before evaluating direct suppression.
 
 Direct traffic suppression — a direct click touchpoint that occurs within 6 hours of the immediately preceding click touchpoint by the same user must be reassigned to that preceding channel. If no immediately preceding click touchpoint exists within 6 hours, the direct touchpoint is kept as-is.
 
