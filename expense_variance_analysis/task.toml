@@ -1,0 +1,16 @@
+version = "2.0"
+[metadata]
+expert_time_estimate_hours = 1.5
+task_type = "colab-bench"
+category = "Financial Analytics"
+tags = ["expense-variance", "budget-analysis", "accrual-accounting", "unit-mismatch", "financial-reporting"]
+[verifier]
+timeout_sec = 1200.0
+[agent]
+timeout_sec = 2400.0
+[environment]
+allow_internet = false
+build_timeout_sec = 2400.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
