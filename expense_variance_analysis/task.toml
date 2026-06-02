@@ -1,9 +1,9 @@
 version = "2.0"
 [metadata]
-expert_time_estimate_hours = 1.5
+expert_time_estimate_hours = 2.0
 task_type = "colab-bench"
 category = "Financial Analytics"
-tags = ["expense-variance", "budget-analysis", "accrual-accounting", "unit-mismatch", "financial-reporting"]
+tags = ["payroll", "overtime", "variance-analysis", "temporal-join", "week-boundary"]
 [verifier]
 timeout_sec = 1200.0
 [agent]

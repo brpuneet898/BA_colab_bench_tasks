@@ -1,33 +1,36 @@
-Build a Q1 2024 (January–March) expense variance report that compares approved departmental spending against budget, broken down by category and month.
+Build a Q1 2024 (January 1 – March 31) weekly payroll cost variance report for a warehouse operation, comparing actual labour cost to budget by department and week.
 
-Variance calculation: for each (department, category, budget_month) combination, compute actual_spend_usd (sum of approved expenses), monthly_budget_usd (see note below), variance_usd = actual_spend_usd − monthly_budget_usd, and variance_pct = (variance_usd / monthly_budget_usd) × 100, rounded to 2 decimal places. Leave variance_pct null (or empty) where monthly_budget_usd is zero.
+Overtime rule: all employees are paid at their base hourly rate for the first 40 hours worked within a Monday-through-Sunday week. Any hours above 40 in that same week are paid at 1.5 times the base rate. The 40-hour threshold applies per employee per week.
 
-Budget amounts: budgeted_amount values in budgets.csv represent the monthly allocation for most categories. For the software_licenses and professional_services categories, budgeted_amount is the full annual contract value as exported from the planning system; the monthly budget for these two categories is therefore budgeted_amount / 12.
+Shift attribution: each shift is recorded with an exact start and end timestamp. When a shift spans a week boundary (i.e., begins in one Monday-to-Sunday week and ends in the next), the hours that fall before and after the boundary must each be counted in their respective week. A week boundary falls at midnight at the start of each Monday.
 
-Expense period: use expense_date to determine which budget month an expense belongs to.
+Payroll calculation steps:
+1. Compute the total hours each employee worked within each Monday-to-Sunday week (respecting the shift attribution rule above).
+2. Apply the overtime rule to determine regular hours and overtime hours per employee per week.
+3. Compute each employee's weekly payroll cost as: regular_hours × hourly_rate + overtime_hours × hourly_rate × 1.5.
+4. Aggregate weekly payroll cost by department and week.
 
-Approved expenses only: exclude any row where is_approved is False. These are submitted but unapproved claims and must not appear in actual spend.
+Budget: weekly_budget.csv provides the budgeted_hours and avg_hourly_rate for each department and week. Budgeted cost = budgeted_hours × avg_hourly_rate. The budget does not include an overtime premium.
 
 Input data:
 
-/workspace/data/expenses.csv — expense_id, department_id, category_id, expense_date (date the expense was incurred), payment_date (date the payment was issued to the vendor), amount_usd, is_approved, vendor_id; all expense_date values fall within Q1 2024
+/workspace/data/shifts.csv — shift_id, employee_id, shift_start (datetime, local warehouse time), shift_end (datetime, local warehouse time); a shift whose shift_end falls in a later Monday-to-Sunday week than its shift_start spans a week boundary
 
-/workspace/data/budgets.csv — department_id, category_id, budget_month (YYYY-MM), budgeted_amount (see budget amounts note above); one row per department–category–month combination for all three Q1 months
+/workspace/data/employees.csv — employee_id, department_id, hourly_rate
 
-/workspace/data/departments.csv — department_id, department_name, region
+/workspace/data/departments.csv — department_id, department_name
 
-/workspace/data/categories.csv — category_id, category_name
+/workspace/data/weekly_budget.csv — department_id, week_start (date, always a Monday), budgeted_hours, avg_hourly_rate
 
 Required outputs:
 
-Save /workspace/variance_report.csv with columns: department_id, department_name, category_id, category_name, budget_month, monthly_budget_usd, actual_spend_usd, variance_usd, variance_pct. Include all department–category–month combinations present in budgets.csv; where no approved expenses exist for a combination, set actual_spend_usd to 0.
+Save /workspace/payroll_variance_report.csv with columns: department_id, department_name, week_start, budgeted_cost, actual_cost, variance (actual_cost − budgeted_cost). Include one row per department per week (10 departments × 13 weeks = 130 rows), sorted by department_id then week_start.
 
 Assign the following top-level notebook variables as JSON-serializable scalars rounded to 2 decimal places:
 
-total_budgeted_usd — sum of monthly_budget_usd across all rows in the variance report
-total_actual_usd — sum of actual_spend_usd across all rows in the variance report
-total_variance_usd — total_actual_usd minus total_budgeted_usd
-over_budget_department_count — number of departments whose Q1 total actual_spend_usd exceeds their Q1 total monthly_budget_usd (integer)
-software_licenses_q1_budget_usd — sum of monthly_budget_usd for the software_licenses category across all departments and all three Q1 months
-march_actual_spend — sum of actual_spend_usd for budget_month 2024-03 across all departments and categories
-unapproved_expense_count — count of rows in expenses.csv where is_approved is False (integer, from the raw file before any filtering)
+total_budgeted_cost — sum of budgeted_cost across all rows in the variance report
+total_actual_cost — sum of actual_cost across all rows in the variance report
+total_variance — total_actual_cost minus total_budgeted_cost
+total_overtime_hours — total overtime hours worked across all employees and all weeks in Q1
+over_budget_week_count — number of department-week rows where actual_cost exceeds budgeted_cost (integer)
+cross_week_shift_count — number of shifts in shifts.csv whose shift_end falls in a different Monday-to-Sunday week than their shift_start (integer, computed from the raw file before any processing)

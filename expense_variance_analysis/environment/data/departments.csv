@@ -1,16 +1,11 @@
-department_id,department_name,region
-D01,Engineering,AMER
-D02,Sales,AMER
-D03,Marketing,EMEA
-D04,Operations,AMER
-D05,Finance,AMER
-D06,Human Resources,AMER
-D07,Legal,AMER
-D08,Information Technology,APAC
-D09,Product,AMER
-D10,Customer Success,AMER
-D11,Research & Development,EMEA
-D12,Supply Chain,APAC
-D13,Business Development,AMER
-D14,Data & Analytics,AMER
-D15,Executive,AMER
+department_id,department_name
+D01,Warehousing
+D02,Fulfillment
+D03,Shipping
+D04,Receiving
+D05,Quality Control
+D06,Customer Service
+D07,Maintenance
+D08,Security
+D09,Sorting
+D10,Loading Dock
