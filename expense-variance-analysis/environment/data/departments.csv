@@ -1,0 +1,11 @@
+department_id,department_name
+D01,Warehousing
+D02,Fulfillment
+D03,Shipping
+D04,Receiving
+D05,Sorting
+D06,Quality Control
+D07,Packaging
+D08,Dispatch
+D09,Returns
+D10,Inventory Control
