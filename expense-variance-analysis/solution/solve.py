@@ -87,7 +87,18 @@ def split_cross_week_shifts(shifts):
     seg2["seg_end"] = xw["shift_end_et"]
 
     segs = pd.concat([normal, seg1, seg2], ignore_index=True)
-    segs["hours"] = (segs["seg_end"] - segs["seg_start"]).dt.total_seconds() / 3600
+
+    # BOTTLENECK: naive ET subtraction overcounts by 1h for any segment that
+    # spans the DST spring-forward (2024-03-10 02:00 ET → 03:00 ET). Converting
+    # both endpoints to UTC before subtracting gives correct elapsed duration.
+    # seg_end is shift_end_et or the Monday boundary — both are ET naive.
+    _DST_ET = pd.Timestamp("2024-03-10 02:00:00")
+    _start_off = pd.to_timedelta(np.where(segs["seg_start"] < _DST_ET, 5, 4), unit="h")
+    _end_off = pd.to_timedelta(np.where(segs["seg_end"] < _DST_ET, 5, 4), unit="h")
+    segs["hours"] = (
+        (segs["seg_end"] + _end_off) - (segs["seg_start"] + _start_off)
+    ).dt.total_seconds() / 3600
+
     segs["week_start"] = week_start_of(segs["seg_start"]).dt.strftime("%Y-%m-%d")
     return segs
 

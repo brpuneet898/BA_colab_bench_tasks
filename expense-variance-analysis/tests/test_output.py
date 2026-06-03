@@ -136,7 +136,12 @@ def ground_truth():
     s1 = xw.copy(); s1["seg_start"] = xw["shift_start"]; s1["seg_end"] = xw["boundary"]
     s2 = xw.copy(); s2["seg_start"] = xw["boundary"];    s2["seg_end"] = xw["shift_end_et"]
     segs = pd.concat([normal, s1, s2], ignore_index=True)
-    segs["hours"] = (segs["seg_end"] - segs["seg_start"]).dt.total_seconds() / 3600
+    _DST_ET = pd.Timestamp("2024-03-10 02:00:00")
+    _s_off = pd.to_timedelta(np.where(segs["seg_start"] < _DST_ET, 5, 4), unit="h")
+    _e_off = pd.to_timedelta(np.where(segs["seg_end"] < _DST_ET, 5, 4), unit="h")
+    segs["hours"] = (
+        (segs["seg_end"] + _e_off) - (segs["seg_start"] + _s_off)
+    ).dt.total_seconds() / 3600
     segs["week_start"] = _week_start_of(segs["seg_start"]).dt.strftime("%Y-%m-%d")
 
     wh = (segs.groupby(["employee_id", "week_start"])["hours"]
