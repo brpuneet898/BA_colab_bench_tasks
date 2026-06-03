@@ -1,0 +1,607 @@
+lot_id,rejection_reason,rework_possible,rework_cost_per_unit,disposal_cost_per_unit
+LOT00016,pH deviation,False,20.76,61.09
+LOT00023,viscosity failure,True,16.54,65.89
+LOT00028,pH deviation,False,21.88,64.92
+LOT00032,viscosity failure,True,21.7,50.94
+LOT00042,pH deviation,True,18.12,53.86
+LOT00058,viscosity failure,False,20.16,54.57
+LOT00061,assay out of specification,False,17.18,53.09
+LOT00066,pH deviation,False,16.51,60.16
+LOT00070,assay out of specification,False,19.29,55.93
+LOT00083,assay out of specification,False,19.73,70.16
+LOT00084,viscosity failure,False,14.4,58.1
+LOT00095,viscosity failure,False,20.49,58.07
+LOT00118,microbial contamination,True,19.97,64.6
+LOT00145,particulate exceedance,True,14.0,69.27
+LOT00178,pH deviation,False,20.97,70.53
+LOT00180,viscosity failure,True,19.28,62.31
+LOT00193,viscosity failure,True,17.44,52.58
+LOT00204,particulate exceedance,True,17.49,67.19
+LOT00206,assay out of specification,False,20.44,50.36
+LOT00224,microbial contamination,False,16.07,58.05
+LOT00225,microbial contamination,False,16.85,61.86
+LOT00226,viscosity failure,True,19.46,53.71
+LOT00229,viscosity failure,False,14.41,65.78
+LOT00249,pH deviation,False,20.54,70.71
+LOT00253,microbial contamination,False,16.48,58.39
+LOT00255,microbial contamination,False,21.19,57.02
+LOT00277,assay out of specification,False,15.49,63.01
+LOT00281,microbial contamination,False,14.5,61.13
+LOT00283,assay out of specification,False,15.61,53.31
+LOT00286,microbial contamination,True,14.14,49.77
+LOT00311,microbial contamination,False,19.57,65.17
+LOT00325,particulate exceedance,True,21.57,71.26
+LOT00358,viscosity failure,True,20.56,62.59
+LOT00363,assay out of specification,False,15.98,67.09
+LOT00374,assay out of specification,False,15.67,62.56
+LOT00380,particulate exceedance,False,15.76,68.09
+LOT00437,assay out of specification,True,14.69,64.23
+LOT00451,pH deviation,True,21.66,65.8
+LOT00453,viscosity failure,False,19.12,69.12
+LOT00458,assay out of specification,False,19.2,70.74
+LOT00470,viscosity failure,True,17.72,55.62
+LOT00485,assay out of specification,False,14.13,55.61
+LOT00502,pH deviation,True,14.01,68.4
+LOT00531,microbial contamination,False,17.87,50.6
+LOT00548,assay out of specification,True,15.08,60.07
+LOT00582,pH deviation,False,15.53,68.0
+LOT00583,viscosity failure,False,19.47,68.76
+LOT00591,microbial contamination,False,15.06,57.19
+LOT00601,particulate exceedance,False,21.52,54.06
+LOT00620,assay out of specification,False,21.61,54.6
+LOT00632,microbial contamination,False,20.58,67.09
+LOT00635,pH deviation,False,14.5,65.76
+LOT00640,particulate exceedance,False,21.12,68.82
+LOT00647,particulate exceedance,False,15.38,54.23
+LOT00654,pH deviation,True,20.19,56.01
+LOT00666,pH deviation,True,15.99,49.21
+LOT00679,viscosity failure,True,18.5,52.44
+LOT00685,assay out of specification,True,17.83,57.15
+LOT00690,particulate exceedance,True,14.47,69.13
+LOT00703,viscosity failure,False,21.74,68.69
+LOT00721,microbial contamination,False,15.44,62.47
+LOT00733,pH deviation,False,19.77,50.82
+LOT00735,particulate exceedance,True,18.9,56.37
+LOT00823,microbial contamination,True,20.86,67.95
+LOT00853,pH deviation,True,15.14,58.83
+LOT00888,microbial contamination,False,17.21,56.21
+LOT00901,pH deviation,False,16.65,61.92
+LOT00912,microbial contamination,True,21.77,64.41
+LOT00917,pH deviation,False,16.05,49.9
+LOT00942,particulate exceedance,False,19.59,67.71
+LOT00955,assay out of specification,False,17.4,55.96
+LOT00956,assay out of specification,False,19.34,61.59
+LOT00958,viscosity failure,False,17.97,53.64
+LOT00974,pH deviation,False,16.36,53.21
+LOT00978,viscosity failure,False,19.01,63.03
+LOT00984,pH deviation,False,19.75,62.6
+LOT00997,microbial contamination,False,14.59,61.3
+LOT01020,assay out of specification,True,15.7,56.47
+LOT01021,assay out of specification,False,15.45,55.02
+LOT01046,viscosity failure,True,21.97,48.48
+LOT01069,particulate exceedance,True,15.59,64.32
+LOT01079,pH deviation,True,18.12,52.72
+LOT01083,assay out of specification,False,15.58,67.92
+LOT01085,assay out of specification,False,16.89,62.1
+LOT01118,microbial contamination,False,18.29,61.89
+LOT01125,microbial contamination,False,18.37,60.91
+LOT01135,pH deviation,True,17.53,61.27
+LOT01165,viscosity failure,False,18.33,58.62
+LOT01173,viscosity failure,False,20.58,49.94
+LOT01178,assay out of specification,False,21.76,69.18
+LOT01188,microbial contamination,True,18.94,51.97
+LOT01205,assay out of specification,False,19.26,68.62
+LOT01214,pH deviation,False,14.84,71.58
+LOT01216,viscosity failure,True,20.23,65.98
+LOT01217,viscosity failure,True,19.05,59.94
+LOT01221,pH deviation,False,15.05,57.77
+LOT01222,viscosity failure,False,19.2,60.98
+LOT01255,assay out of specification,False,21.7,64.54
+LOT01269,viscosity failure,False,17.56,66.68
+LOT01275,particulate exceedance,True,15.94,58.6
+LOT01284,assay out of specification,True,16.2,57.65
+LOT01285,viscosity failure,True,18.31,55.35
+LOT01321,pH deviation,False,20.0,55.24
+LOT01329,viscosity failure,False,17.06,63.6
+LOT01346,assay out of specification,False,21.1,57.66
+LOT01359,viscosity failure,False,17.01,50.44
+LOT01375,viscosity failure,False,20.09,68.17
+LOT01405,particulate exceedance,False,19.62,63.04
+LOT01412,pH deviation,True,15.12,54.22
+LOT01429,assay out of specification,False,19.81,63.2
+LOT01444,assay out of specification,True,19.84,55.39
+LOT01456,microbial contamination,True,19.49,50.89
+LOT01468,assay out of specification,False,14.2,52.38
+LOT01495,viscosity failure,False,14.57,64.99
+LOT01505,microbial contamination,True,18.38,67.57
+LOT01507,assay out of specification,True,14.45,56.35
+LOT01511,pH deviation,True,17.75,69.14
+LOT01515,assay out of specification,False,19.63,68.22
+LOT01519,viscosity failure,False,20.68,63.77
+LOT01524,viscosity failure,True,20.09,69.0
+LOT01534,pH deviation,False,16.92,66.05
+LOT01548,pH deviation,False,17.2,50.56
+LOT01571,viscosity failure,True,16.49,67.75
+LOT01578,viscosity failure,True,14.32,55.43
+LOT01634,particulate exceedance,True,15.91,65.79
+LOT01642,viscosity failure,False,20.26,71.38
+LOT01698,pH deviation,True,18.18,68.88
+LOT01715,microbial contamination,False,20.23,57.27
+LOT01723,microbial contamination,False,15.58,48.75
+LOT01725,viscosity failure,True,20.91,59.16
+LOT01747,microbial contamination,True,14.34,67.36
+LOT01751,viscosity failure,False,18.15,54.33
+LOT01759,viscosity failure,False,15.13,62.28
+LOT01771,pH deviation,True,21.97,61.79
+LOT01780,pH deviation,True,17.04,52.46
+LOT01789,microbial contamination,True,16.05,61.98
+LOT01805,particulate exceedance,True,20.54,54.85
+LOT01833,assay out of specification,True,17.47,67.04
+LOT01834,particulate exceedance,False,17.68,66.16
+LOT01844,assay out of specification,True,14.32,64.85
+LOT01850,pH deviation,False,19.36,49.96
+LOT01852,assay out of specification,False,20.56,52.25
+LOT01857,microbial contamination,False,21.15,63.52
+LOT01883,pH deviation,True,17.91,60.62
+LOT01899,pH deviation,False,19.71,71.61
+LOT01900,microbial contamination,True,17.74,71.08
+LOT01906,viscosity failure,False,17.37,52.51
+LOT01909,pH deviation,False,18.94,61.95
+LOT01910,viscosity failure,False,21.52,59.63
+LOT01914,assay out of specification,True,21.32,70.35
+LOT01919,assay out of specification,False,16.23,54.88
+LOT01921,viscosity failure,True,15.8,69.8
+LOT01931,viscosity failure,False,20.18,63.06
+LOT01935,pH deviation,True,21.31,61.33
+LOT01942,viscosity failure,False,19.04,57.91
+LOT01943,assay out of specification,False,14.35,57.26
+LOT01960,viscosity failure,True,17.36,51.34
+LOT01967,viscosity failure,False,21.05,66.61
+LOT01969,particulate exceedance,False,21.91,56.72
+LOT01974,viscosity failure,True,14.89,68.58
+LOT01979,particulate exceedance,False,18.92,53.88
+LOT01982,pH deviation,False,14.06,64.68
+LOT01997,assay out of specification,False,21.38,59.51
+LOT02012,pH deviation,False,14.67,57.88
+LOT02030,assay out of specification,True,18.63,53.86
+LOT02033,particulate exceedance,False,16.42,63.7
+LOT02044,microbial contamination,False,19.97,49.42
+LOT02055,viscosity failure,False,20.03,63.85
+LOT02073,microbial contamination,False,18.48,68.1
+LOT02084,viscosity failure,False,20.29,51.6
+LOT02107,viscosity failure,False,19.39,56.92
+LOT02147,microbial contamination,True,19.21,65.51
+LOT02167,particulate exceedance,False,16.31,65.79
+LOT02170,pH deviation,False,16.32,54.58
+LOT02182,assay out of specification,False,17.32,71.81
+LOT02186,pH deviation,False,16.0,70.86
+LOT02188,viscosity failure,False,17.23,64.01
+LOT02192,viscosity failure,True,17.54,64.11
+LOT02200,microbial contamination,False,18.33,50.57
+LOT02207,particulate exceedance,False,20.62,59.58
+LOT02212,pH deviation,False,18.13,65.37
+LOT02219,viscosity failure,True,21.65,51.98
+LOT02225,viscosity failure,False,19.16,62.3
+LOT02231,particulate exceedance,False,21.62,55.44
+LOT02261,pH deviation,True,16.35,50.59
+LOT02266,viscosity failure,True,16.86,69.08
+LOT02285,microbial contamination,False,18.28,62.95
+LOT02297,assay out of specification,False,18.51,56.24
+LOT02298,viscosity failure,False,21.72,53.02
+LOT02303,pH deviation,False,14.88,69.43
+LOT02309,viscosity failure,False,20.6,52.56
+LOT02315,viscosity failure,True,21.33,61.49
+LOT02317,assay out of specification,False,20.16,59.6
+LOT02333,microbial contamination,False,21.35,65.02
+LOT02342,pH deviation,False,20.42,60.71
+LOT02343,pH deviation,True,19.16,63.06
+LOT02354,microbial contamination,False,15.05,71.79
+LOT02381,microbial contamination,True,19.58,62.36
+LOT02382,viscosity failure,True,19.22,68.92
+LOT02397,particulate exceedance,False,21.93,50.8
+LOT02403,particulate exceedance,True,21.79,50.34
+LOT02406,pH deviation,False,21.66,61.81
+LOT02407,particulate exceedance,True,19.68,57.56
+LOT02412,assay out of specification,False,14.36,69.56
+LOT02418,particulate exceedance,False,17.81,57.45
+LOT02440,microbial contamination,True,21.52,59.74
+LOT02472,microbial contamination,True,21.77,54.78
+LOT02479,microbial contamination,False,21.97,50.76
+LOT02483,pH deviation,False,19.35,52.34
+LOT02492,particulate exceedance,True,18.45,54.01
+LOT02493,pH deviation,False,20.26,54.58
+LOT02497,assay out of specification,False,15.3,67.19
+LOT02501,microbial contamination,True,16.7,66.72
+LOT02503,assay out of specification,True,19.92,53.65
+LOT02505,viscosity failure,False,15.17,64.4
+LOT02510,pH deviation,True,18.32,66.53
+LOT02517,pH deviation,False,15.68,54.51
+LOT02519,pH deviation,True,19.98,61.01
+LOT02537,viscosity failure,False,18.91,60.5
+LOT02539,microbial contamination,False,16.77,52.2
+LOT02541,assay out of specification,True,20.64,48.11
+LOT02553,viscosity failure,True,20.46,62.05
+LOT02561,pH deviation,True,20.03,54.76
+LOT02564,viscosity failure,False,21.09,63.53
+LOT02566,pH deviation,False,18.52,66.09
+LOT02580,assay out of specification,False,17.24,61.51
+LOT02589,particulate exceedance,False,20.53,64.87
+LOT02606,viscosity failure,False,18.3,58.64
+LOT02631,pH deviation,True,15.78,55.35
+LOT02643,assay out of specification,False,21.98,66.61
+LOT02646,assay out of specification,False,14.19,48.07
+LOT02649,assay out of specification,False,14.94,52.54
+LOT02656,microbial contamination,True,21.63,50.91
+LOT02666,microbial contamination,True,16.64,63.3
+LOT02668,particulate exceedance,True,14.92,58.99
+LOT02671,pH deviation,True,19.03,67.76
+LOT02686,viscosity failure,False,20.6,60.17
+LOT02699,pH deviation,True,14.77,58.73
+LOT02703,viscosity failure,False,17.7,66.55
+LOT02747,viscosity failure,True,19.95,48.52
+LOT02751,viscosity failure,False,16.93,50.48
+LOT02757,microbial contamination,False,16.39,49.01
+LOT02758,particulate exceedance,False,17.07,69.62
+LOT02775,microbial contamination,True,18.63,50.57
+LOT02780,assay out of specification,True,15.74,63.83
+LOT02785,assay out of specification,False,20.92,63.08
+LOT02786,assay out of specification,False,16.35,58.87
+LOT02806,pH deviation,False,18.44,66.28
+LOT02811,particulate exceedance,True,21.93,55.58
+LOT02818,assay out of specification,False,16.32,49.55
+LOT02831,pH deviation,False,21.2,58.38
+LOT02840,assay out of specification,False,17.12,50.67
+LOT02844,pH deviation,False,19.12,57.6
+LOT02851,assay out of specification,False,18.16,69.32
+LOT02875,assay out of specification,True,18.47,52.05
+LOT02901,microbial contamination,True,19.9,57.01
+LOT02902,pH deviation,True,16.33,55.2
+LOT02910,microbial contamination,True,17.38,69.92
+LOT02919,viscosity failure,False,16.45,68.79
+LOT02922,pH deviation,False,15.63,69.56
+LOT02929,particulate exceedance,False,21.14,63.93
+LOT02930,pH deviation,False,17.08,57.56
+LOT02934,particulate exceedance,False,18.3,60.22
+LOT02939,pH deviation,True,21.16,50.51
+LOT02940,viscosity failure,False,17.86,68.6
+LOT02955,particulate exceedance,False,16.42,51.79
+LOT02956,particulate exceedance,False,18.08,54.78
+LOT02968,viscosity failure,False,19.17,61.08
+LOT02997,viscosity failure,False,19.89,56.42
+LOT03003,pH deviation,True,15.86,69.21
+LOT03013,pH deviation,False,14.56,51.71
+LOT03015,pH deviation,True,18.88,63.97
+LOT03017,pH deviation,True,18.17,54.22
+LOT03035,particulate exceedance,False,18.76,65.54
+LOT03049,pH deviation,False,19.38,67.2
+LOT03055,viscosity failure,False,15.9,50.18
+LOT03068,assay out of specification,False,18.67,48.62
+LOT03079,microbial contamination,True,17.53,57.65
+LOT03080,pH deviation,False,16.96,60.86
+LOT03081,assay out of specification,False,21.4,57.16
+LOT03082,assay out of specification,True,20.89,65.04
+LOT03112,viscosity failure,False,19.83,65.03
+LOT03120,assay out of specification,False,19.2,70.48
+LOT03134,microbial contamination,False,17.33,71.96
+LOT03140,microbial contamination,True,15.66,50.85
+LOT03156,pH deviation,True,21.74,55.79
+LOT03163,viscosity failure,False,15.17,51.91
+LOT03165,assay out of specification,False,21.94,52.9
+LOT03167,particulate exceedance,True,18.25,56.28
+LOT03198,viscosity failure,False,19.88,56.7
+LOT03199,assay out of specification,False,14.46,66.0
+LOT03209,viscosity failure,False,14.64,49.96
+LOT03216,microbial contamination,False,17.7,70.45
+LOT03219,microbial contamination,True,14.95,48.25
+LOT03220,assay out of specification,False,18.83,70.31
+LOT03225,assay out of specification,True,14.94,68.91
+LOT03227,viscosity failure,True,18.64,65.2
+LOT03229,particulate exceedance,True,20.99,66.58
+LOT03240,pH deviation,True,19.66,59.35
+LOT03246,assay out of specification,False,15.74,65.1
+LOT03257,microbial contamination,True,19.78,71.54
+LOT03263,pH deviation,True,19.09,49.54
+LOT03269,particulate exceedance,True,20.65,58.03
+LOT03274,assay out of specification,False,14.32,64.76
+LOT03285,assay out of specification,False,21.73,71.35
+LOT03293,microbial contamination,False,15.69,66.22
+LOT03308,microbial contamination,False,16.79,59.47
+LOT03312,pH deviation,False,15.98,51.79
+LOT03314,microbial contamination,True,14.34,70.26
+LOT03329,microbial contamination,False,14.85,65.36
+LOT03332,viscosity failure,True,21.04,60.09
+LOT03357,microbial contamination,True,17.78,61.71
+LOT03364,particulate exceedance,True,16.17,68.19
+LOT03369,microbial contamination,False,18.69,49.34
+LOT03395,pH deviation,True,19.91,71.31
+LOT03397,particulate exceedance,True,21.5,55.39
+LOT03423,particulate exceedance,False,18.07,66.66
+LOT03440,assay out of specification,True,21.79,70.19
+LOT03462,particulate exceedance,True,15.4,48.78
+LOT03464,assay out of specification,False,15.13,59.51
+LOT03469,assay out of specification,True,16.36,64.75
+LOT03470,viscosity failure,False,17.0,66.24
+LOT03472,microbial contamination,True,15.44,49.97
+LOT03477,microbial contamination,False,15.38,54.35
+LOT03491,pH deviation,True,20.08,48.5
+LOT03515,microbial contamination,False,20.78,66.89
+LOT03518,microbial contamination,False,16.26,60.51
+LOT03532,assay out of specification,False,20.06,70.07
+LOT03533,assay out of specification,False,18.72,48.09
+LOT03553,particulate exceedance,False,14.91,65.56
+LOT03566,particulate exceedance,False,17.7,50.09
+LOT03571,viscosity failure,True,21.26,52.7
+LOT03578,microbial contamination,True,20.55,55.23
+LOT03579,assay out of specification,True,19.94,62.34
+LOT03589,viscosity failure,False,15.75,54.61
+LOT03596,assay out of specification,False,15.8,56.96
+LOT03598,viscosity failure,True,14.0,67.28
+LOT03602,particulate exceedance,False,17.92,68.28
+LOT03605,pH deviation,True,15.36,57.37
+LOT03612,particulate exceedance,False,19.43,67.25
+LOT03614,viscosity failure,False,19.51,68.1
+LOT03624,pH deviation,False,18.49,64.48
+LOT03625,microbial contamination,True,18.34,55.41
+LOT03630,microbial contamination,False,14.65,70.81
+LOT03634,assay out of specification,False,15.45,66.77
+LOT03635,assay out of specification,True,14.37,61.13
+LOT03639,particulate exceedance,False,17.54,66.57
+LOT03640,pH deviation,False,16.16,61.14
+LOT03647,particulate exceedance,False,14.86,62.52
+LOT03650,assay out of specification,True,20.15,59.79
+LOT03655,particulate exceedance,True,20.71,63.34
+LOT03656,viscosity failure,False,19.32,48.31
+LOT03669,particulate exceedance,False,21.58,57.82
+LOT03671,pH deviation,False,15.19,59.35
+LOT03675,microbial contamination,True,18.48,63.18
+LOT03681,particulate exceedance,True,15.27,63.83
+LOT03684,viscosity failure,True,19.4,66.58
+LOT03685,viscosity failure,False,16.62,60.78
+LOT03693,microbial contamination,False,19.07,70.61
+LOT03698,particulate exceedance,False,20.89,63.15
+LOT03700,pH deviation,False,16.63,70.45
+LOT03717,pH deviation,False,18.05,59.06
+LOT03718,particulate exceedance,True,15.81,70.6
+LOT03722,pH deviation,True,17.57,64.37
+LOT03723,pH deviation,False,17.03,55.98
+LOT03749,microbial contamination,False,19.08,71.87
+LOT03750,microbial contamination,False,21.4,48.08
+LOT03757,microbial contamination,True,14.03,69.68
+LOT03761,viscosity failure,True,17.87,66.08
+LOT03771,particulate exceedance,True,14.1,56.61
+LOT03775,pH deviation,False,16.18,50.32
+LOT03798,particulate exceedance,True,21.29,49.58
+LOT03807,assay out of specification,True,14.89,63.54
+LOT03810,assay out of specification,False,16.79,65.9
+LOT03818,viscosity failure,False,20.95,52.48
+LOT03819,microbial contamination,True,17.65,60.82
+LOT03825,particulate exceedance,True,14.99,70.39
+LOT03839,viscosity failure,False,20.67,57.07
+LOT03856,microbial contamination,False,17.79,68.98
+LOT03858,microbial contamination,False,14.15,67.17
+LOT03863,viscosity failure,False,16.59,64.77
+LOT03874,microbial contamination,False,21.99,56.76
+LOT03888,particulate exceedance,True,19.53,59.56
+LOT03890,particulate exceedance,False,21.71,71.52
+LOT03892,pH deviation,True,16.36,70.29
+LOT03909,pH deviation,False,14.97,58.52
+LOT03922,assay out of specification,False,18.43,64.54
+LOT03926,pH deviation,True,17.45,70.04
+LOT03942,particulate exceedance,True,20.99,58.32
+LOT03974,microbial contamination,True,19.81,56.81
+LOT03995,viscosity failure,True,21.69,65.89
+LOT04004,pH deviation,True,16.38,69.52
+LOT04005,viscosity failure,False,19.67,50.42
+LOT04050,pH deviation,True,21.21,61.04
+LOT04057,assay out of specification,True,17.71,71.92
+LOT04068,particulate exceedance,True,19.92,66.15
+LOT04074,pH deviation,False,19.68,58.17
+LOT04075,microbial contamination,True,21.74,53.81
+LOT04080,microbial contamination,True,16.65,55.87
+LOT04103,assay out of specification,True,17.23,64.03
+LOT04104,assay out of specification,False,21.95,49.32
+LOT04109,particulate exceedance,True,14.24,62.34
+LOT04111,viscosity failure,False,19.74,66.32
+LOT04130,pH deviation,True,17.46,51.35
+LOT04148,microbial contamination,True,16.33,70.4
+LOT04149,viscosity failure,False,16.11,58.23
+LOT04163,particulate exceedance,False,18.5,57.03
+LOT04170,microbial contamination,False,14.7,63.19
+LOT04172,particulate exceedance,True,15.47,50.02
+LOT04182,particulate exceedance,True,21.64,51.08
+LOT04183,microbial contamination,True,14.2,70.19
+LOT04199,particulate exceedance,True,21.29,48.76
+LOT04200,viscosity failure,False,14.2,67.44
+LOT04203,microbial contamination,False,17.77,52.47
+LOT04207,assay out of specification,True,14.08,55.65
+LOT04214,microbial contamination,True,16.17,55.46
+LOT04223,microbial contamination,True,18.46,61.48
+LOT04231,assay out of specification,False,18.26,58.51
+LOT04233,particulate exceedance,True,17.57,66.22
+LOT04234,microbial contamination,True,18.92,65.38
+LOT04235,particulate exceedance,True,14.51,54.49
+LOT04236,particulate exceedance,True,17.0,50.14
+LOT04265,assay out of specification,False,20.92,70.75
+LOT04272,microbial contamination,False,19.96,59.76
+LOT04276,viscosity failure,False,19.89,54.6
+LOT04290,particulate exceedance,False,18.63,54.0
+LOT04293,particulate exceedance,False,19.03,63.8
+LOT04300,pH deviation,False,19.47,58.02
+LOT04305,viscosity failure,False,14.54,66.8
+LOT04315,viscosity failure,True,17.72,51.94
+LOT04316,particulate exceedance,False,19.61,57.64
+LOT04318,assay out of specification,True,21.68,55.01
+LOT04328,viscosity failure,True,16.42,65.47
+LOT04331,particulate exceedance,True,19.54,58.13
+LOT04337,assay out of specification,False,14.15,66.32
+LOT04341,pH deviation,True,17.82,67.99
+LOT04366,microbial contamination,False,20.71,66.63
+LOT04374,pH deviation,False,20.52,50.15
+LOT04378,viscosity failure,False,16.75,57.34
+LOT04407,assay out of specification,False,15.88,50.97
+LOT04415,viscosity failure,False,17.8,66.59
+LOT04468,microbial contamination,False,15.79,55.75
+LOT04481,assay out of specification,False,16.25,51.8
+LOT04494,particulate exceedance,False,18.28,68.69
+LOT04495,microbial contamination,False,20.87,56.56
+LOT04497,particulate exceedance,False,17.63,69.54
+LOT04510,particulate exceedance,False,19.81,68.64
+LOT04527,pH deviation,False,17.83,58.56
+LOT04535,microbial contamination,True,21.45,65.41
+LOT04551,assay out of specification,False,18.67,48.56
+LOT04557,pH deviation,False,17.7,61.94
+LOT04559,viscosity failure,True,14.84,55.77
+LOT04566,particulate exceedance,True,21.85,56.7
+LOT04570,particulate exceedance,False,14.34,60.12
+LOT04573,microbial contamination,False,14.79,53.23
+LOT04598,pH deviation,True,21.11,48.11
+LOT04610,microbial contamination,True,16.4,56.75
+LOT04625,microbial contamination,True,21.13,70.29
+LOT04626,pH deviation,False,15.6,67.87
+LOT04627,pH deviation,False,16.83,61.87
+LOT04629,viscosity failure,True,17.29,69.48
+LOT04634,assay out of specification,False,14.83,55.37
+LOT04647,pH deviation,True,16.38,49.28
+LOT04650,pH deviation,False,20.72,70.28
+LOT04665,viscosity failure,False,20.3,64.21
+LOT04675,microbial contamination,True,15.42,60.01
+LOT04691,pH deviation,False,18.37,69.29
+LOT04694,assay out of specification,True,16.5,71.68
+LOT04706,assay out of specification,True,19.47,71.58
+LOT04710,assay out of specification,True,15.73,58.37
+LOT04713,microbial contamination,False,21.95,67.51
+LOT04736,viscosity failure,True,20.29,63.14
+LOT04742,microbial contamination,False,17.52,63.17
+LOT04768,microbial contamination,False,14.11,62.79
+LOT04772,assay out of specification,True,17.55,71.33
+LOT04786,pH deviation,True,20.55,56.09
+LOT04797,microbial contamination,True,14.72,67.66
+LOT04807,particulate exceedance,False,19.5,67.15
+LOT04811,particulate exceedance,False,16.03,65.14
+LOT04821,particulate exceedance,False,18.59,48.93
+LOT04827,particulate exceedance,False,16.74,57.82
+LOT04830,microbial contamination,False,20.33,64.33
+LOT04836,pH deviation,False,20.87,49.24
+LOT04850,viscosity failure,True,17.81,66.76
+LOT04868,viscosity failure,True,15.1,64.69
+LOT04870,viscosity failure,False,14.36,68.37
+LOT04889,viscosity failure,False,15.67,68.65
+LOT04891,assay out of specification,False,17.87,51.02
+LOT04894,pH deviation,True,19.05,65.32
+LOT04895,pH deviation,False,21.12,48.25
+LOT04896,viscosity failure,True,20.01,64.34
+LOT04902,pH deviation,False,16.51,68.53
+LOT04904,viscosity failure,False,20.63,53.61
+LOT04913,assay out of specification,False,18.3,60.36
+LOT04917,viscosity failure,False,18.68,49.06
+LOT04920,viscosity failure,False,16.25,59.28
+LOT04924,viscosity failure,False,15.86,69.04
+LOT04927,assay out of specification,True,18.13,52.46
+LOT04940,pH deviation,True,21.67,61.77
+LOT04946,microbial contamination,True,14.64,57.64
+LOT04949,viscosity failure,False,16.85,52.08
+LOT04954,microbial contamination,False,20.66,61.5
+LOT04959,pH deviation,False,15.04,62.85
+LOT04961,microbial contamination,True,15.28,49.23
+LOT04974,microbial contamination,False,15.19,59.29
+LOT04987,viscosity failure,False,20.8,58.16
+LOT04993,viscosity failure,False,20.05,65.41
+LOT05003,assay out of specification,False,14.91,55.11
+LOT05006,pH deviation,True,21.19,52.36
+LOT05027,assay out of specification,True,19.61,55.73
+LOT05029,pH deviation,False,21.41,71.91
+LOT05041,assay out of specification,True,15.72,64.94
+LOT05042,assay out of specification,False,17.9,52.69
+LOT05043,assay out of specification,True,17.95,57.59
+LOT05077,viscosity failure,False,14.58,49.83
+LOT05093,pH deviation,True,18.18,53.11
+LOT05102,assay out of specification,False,21.14,70.65
+LOT05108,microbial contamination,True,21.54,69.01
+LOT05117,assay out of specification,True,15.34,68.86
+LOT05134,pH deviation,False,15.65,67.43
+LOT05138,particulate exceedance,False,17.16,53.28
+LOT05141,microbial contamination,False,20.16,60.26
+LOT05146,viscosity failure,False,18.24,55.8
+LOT05158,assay out of specification,False,17.39,52.93
+LOT05159,microbial contamination,True,21.99,67.19
+LOT05160,viscosity failure,False,19.33,64.85
+LOT05173,assay out of specification,True,17.15,57.0
+LOT05186,assay out of specification,False,16.42,62.83
+LOT05187,viscosity failure,False,17.28,55.01
+LOT05189,viscosity failure,True,18.48,48.92
+LOT05190,microbial contamination,False,18.87,57.6
+LOT05217,particulate exceedance,True,20.31,59.37
+LOT05218,particulate exceedance,False,16.78,63.54
+LOT05241,microbial contamination,False,21.86,66.44
+LOT05248,particulate exceedance,True,18.93,50.96
+LOT05251,microbial contamination,False,17.0,62.97
+LOT05261,particulate exceedance,True,17.17,52.95
+LOT05278,assay out of specification,False,19.81,48.9
+LOT05279,microbial contamination,True,18.77,59.64
+LOT05280,viscosity failure,False,16.43,57.32
+LOT05282,microbial contamination,True,15.89,58.2
+LOT05283,microbial contamination,False,17.25,56.09
+LOT05288,pH deviation,False,19.86,64.29
+LOT05296,pH deviation,True,17.36,60.77
+LOT05307,assay out of specification,False,18.63,70.56
+LOT05315,pH deviation,True,19.83,63.73
+LOT05321,pH deviation,True,20.26,58.29
+LOT05332,viscosity failure,False,16.89,54.28
+LOT05347,microbial contamination,False,16.96,68.43
+LOT05354,particulate exceedance,False,15.48,51.66
+LOT05375,particulate exceedance,False,17.16,60.9
+LOT05403,pH deviation,False,17.46,70.46
+LOT05409,microbial contamination,True,21.96,53.27
+LOT05412,assay out of specification,False,20.77,66.66
+LOT05419,pH deviation,True,15.37,57.64
+LOT05443,assay out of specification,False,17.14,48.75
+LOT05447,viscosity failure,True,14.23,66.14
+LOT05458,particulate exceedance,True,17.9,67.02
+LOT05469,microbial contamination,False,20.78,52.16
+LOT05482,viscosity failure,True,20.91,63.74
+LOT05500,viscosity failure,False,21.9,71.63
+LOT05504,assay out of specification,True,14.47,56.93
+LOT05505,pH deviation,False,14.43,68.8
+LOT05524,pH deviation,True,20.99,54.21
+LOT05560,assay out of specification,False,14.81,67.75
+LOT05562,pH deviation,True,16.47,57.79
+LOT05577,pH deviation,False,14.61,70.87
+LOT05582,microbial contamination,True,20.69,65.17
+LOT05602,assay out of specification,True,18.4,64.01
+LOT05611,particulate exceedance,False,18.12,65.19
+LOT05618,assay out of specification,True,17.42,70.59
+LOT05622,microbial contamination,False,14.01,66.25
+LOT05636,assay out of specification,False,16.07,67.17
+LOT05641,microbial contamination,True,21.19,58.43
+LOT05657,pH deviation,True,17.09,54.11
+LOT05667,microbial contamination,False,16.67,53.21
+LOT05695,particulate exceedance,False,14.42,53.45
+LOT05696,pH deviation,False,18.6,59.68
+LOT05697,particulate exceedance,False,20.94,59.49
+LOT05699,pH deviation,False,18.32,50.61
+LOT05714,viscosity failure,False,16.21,55.93
+LOT05716,microbial contamination,False,19.87,60.87
+LOT05729,pH deviation,False,18.07,64.69
+LOT05753,viscosity failure,True,14.23,62.46
+LOT05754,particulate exceedance,False,18.94,50.44
+LOT05762,pH deviation,False,16.82,61.71
+LOT05778,microbial contamination,False,18.21,50.48
+LOT05808,particulate exceedance,True,21.38,68.8
+LOT05811,assay out of specification,False,14.77,66.38
+LOT05824,viscosity failure,True,19.08,65.23
+LOT05835,assay out of specification,False,21.07,61.59
+LOT05852,pH deviation,False,17.56,56.23
+LOT05865,assay out of specification,False,14.69,58.53
+LOT05866,viscosity failure,True,20.96,59.48
+LOT05868,particulate exceedance,True,16.34,56.75
+LOT05875,assay out of specification,False,21.92,59.11
+LOT05879,viscosity failure,False,20.16,54.45
+LOT05882,microbial contamination,False,21.93,68.16
+LOT05897,pH deviation,False,17.01,63.7
+LOT05898,assay out of specification,True,17.25,65.05
+LOT05905,viscosity failure,False,18.88,53.42
+LOT05907,microbial contamination,False,20.71,58.51
+LOT05911,assay out of specification,False,19.06,68.19
+LOT05951,pH deviation,False,17.75,59.06
+LOT05954,assay out of specification,False,14.03,59.63
+LOT05956,particulate exceedance,False,19.95,49.9
