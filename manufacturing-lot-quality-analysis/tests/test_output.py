@@ -1,28 +1,31 @@
 """
 Tests for the Q1 2024 manufacturing lot quality report.
 
-The task requires computing pass rates, mean specification deviation, and cost of
-poor quality for a contract manufacturer's three production lines across Q1 2024.
+Four traps are embedded in the data:
 
-Several implementation details affect correctness:
+1. Slowly-changing specification limits — product_specifications.csv contains
+   multiple spec versions per product-test pair, each with an effective_from date.
+   The version applicable to a test result is determined by the result's tested_date.
+   Using the latest version for all results misclassifies January lots evaluated
+   against tighter V2 limits that were not yet in effect.
 
-1. product_specifications.csv contains multiple versions of specification limits
-   for some products, each with an effective_from date. The version applicable to
-   a given test result is determined by when the lot was tested, not the current
-   or latest version.
+2. Unit mismatch — Line L03 reports the T01 assay in ppm; specification limits are
+   in %. test_catalog.csv supplies reporting_unit and unit_conversion_factor.
+   Skipping unit normalisation makes all L03 T01 values appear wildly out of spec,
+   inflating failed_lot_count and collapsing the L03 pass rate.
 
-2. quality_results.csv contains measurements in different units for the same test
-   depending on which line performed the analysis. test_catalog.csv provides the
-   canonical reporting unit and a unit_conversion_factor; conversion applies only
-   when the result's units differ from the reporting unit.
+3. False-rejection records — rejection_events.csv contains entries for lots that
+   pass all quality tests (flagged for operational, not quality, reasons). COPQ
+   must be applied only to lots that fail quality testing; using rejection_events
+   membership as the failure criterion overcounts total COPQ by ~20%.
 
-3. rejection_events.csv distinguishes reworkable from non-reworkable lots, each
-   with a different per-unit remediation cost. Correct COPQ requires selecting the
-   applicable rate for each lot individually.
+4. Rework vs disposal cost — each failed lot has a rework_possible flag that
+   determines which per-unit cost applies. Using an average or the wrong rate
+   distorts COPQ for individual lots.
 
 Contract (instruction.md): the deliverable is
     /workspace/quality_report.csv  — one row per (line_id, product_id, month)
-    /workspace/summary.json        — five scalar keys
+    /workspace/summary.json        — six scalar keys
 """
 
 import json
@@ -91,23 +94,39 @@ def test_case_03_report_sort_order():
         "Report must be sorted by line_id, product_id, then month."
 
 
-def test_case_04_pass_rate_formula():
-    df = pd.read_csv(REPORT_PATH)
-    for _, row in df.iterrows():
-        expected = round(row["lots_passed"] / row["lots_produced"], 4)
-        assert abs(row["pass_rate"] - expected) < 1e-3, \
-            f"pass_rate != lots_passed/lots_produced for {row['line_id']}/{row['product_id']}/{row['month']}."
+# ── Hard test 1: failed lot count (exact integer) ─────────────────────────────
 
+def test_case_04_failed_lot_count(ground_truth):
+    """Exact count of lots failing at least one quality test.
+
+    Catches both unit-conversion errors (L03 ppm values inflate failures by ~3×
+    when not converted) and spec-version errors (using V2 for January adds ~100
+    false failures). Must be an int in summary.json.
+    """
+    with open(SUMMARY_PATH) as f:
+        s = json.load(f)
+    assert "failed_lot_count" in s, "summary.json must contain 'failed_lot_count'."
+    assert isinstance(s["failed_lot_count"], int), \
+        "failed_lot_count must be a plain int."
+    expected = ground_truth["failed_lot_count"]
+    assert s["failed_lot_count"] == expected, \
+        (f"failed_lot_count: got {s['failed_lot_count']}, expected {expected}. "
+         f"A lot fails if any quality-test result falls outside the applicable "
+         f"specification limits.")
+
+
+# ── Output schema ─────────────────────────────────────────────────────────────
 
 def test_case_05_summary_schema():
     assert SUMMARY_PATH.exists(), "summary.json not found in /workspace."
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
-    required = {"total_lots_produced","overall_pass_rate","total_copq",
-                "line_with_worst_pass_rate","product_with_highest_copq"}
+    required = {"total_lots_produced","failed_lot_count","overall_pass_rate",
+                "total_copq","line_with_worst_pass_rate","product_with_highest_copq"}
     missing = required - set(s.keys())
     assert not missing, f"Missing keys in summary.json: {missing}"
     assert isinstance(s["total_lots_produced"], int)
+    assert isinstance(s["failed_lot_count"], int)
     assert isinstance(s["overall_pass_rate"], float)
     assert isinstance(s["total_copq"], float)
     assert isinstance(s["line_with_worst_pass_rate"], str)
@@ -142,7 +161,7 @@ def ground_truth():
         catalog[["test_id","reporting_unit","unit_conversion_factor"]], on="test_id"
     )
 
-    # Unit normalization
+    # Unit normalisation
     jn["normalized_value"] = np.where(
         jn["units"] == jn["reporting_unit"],
         jn["measured_value"],
@@ -167,7 +186,8 @@ def ground_truth():
         .reset_index().rename(columns={"deviation":"mean_spec_deviation"})
     )
 
-    # COPQ
+    # COPQ — only for test-failed lots; false-rejection records for passing lots
+    # must not contribute
     failed = lots.merge(lot_pass[~lot_pass["lot_passed"]][["lot_id"]], on="lot_id")
     fc = failed.merge(rej, on="lot_id", how="left")
     fc["copq"] = np.where(
@@ -200,29 +220,42 @@ def ground_truth():
     prod_copq    = str(report.groupby("product_id")["total_copq"].sum().idxmax())
 
     return {
-        "report": report,
-        "total_copq": total_copq,
-        "overall_pass_rate": overall_pass,
+        "report":                    report,
+        "failed_lot_count":          int((~lot_pass["lot_passed"]).sum()),
+        "total_copq":                total_copq,
+        "overall_pass_rate":         overall_pass,
         "line_with_worst_pass_rate": line_worst,
         "product_with_highest_copq": prod_copq,
-        "lot_pass": lot_pass,
-        "_lots": lots,
+        "lot_pass":                  lot_pass,
+        "_lots":                     lots,
     }
 
 
-# ── Scalar correctness ────────────────────────────────────────────────────────
+# ── Hard test 2: overall pass rate (tight tolerance) ─────────────────────────
 
 def test_case_06_overall_pass_rate(ground_truth):
-    """Primary accuracy check — wrong if SCD or unit conversion is mishandled."""
+    """Overall pass rate must be within ±0.002 of ground truth.
+
+    Using the latest spec version for all lots (ignoring effective_from) shifts
+    ~100 January lots from pass to fail, a delta of ~0.017 — well outside ±0.002.
+    Skipping unit conversion for L03 shifts ~1800 lots, a delta of ~0.30.
+    """
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
-    assert abs(s["overall_pass_rate"] - ground_truth["overall_pass_rate"]) <= 0.005, \
+    assert abs(s["overall_pass_rate"] - ground_truth["overall_pass_rate"]) <= 0.002, \
         (f"overall_pass_rate: got {s['overall_pass_rate']}, "
-         f"expected {ground_truth['overall_pass_rate']} (±0.005)")
+         f"expected {ground_truth['overall_pass_rate']} (±0.002)")
 
+
+# ── Hard test 3: total COPQ ───────────────────────────────────────────────────
 
 def test_case_07_total_copq(ground_truth):
-    """COPQ: rework and disposal lots carry different per-unit costs and must be computed separately."""
+    """Total COPQ must be within ±2% of ground truth.
+
+    rejection_events.csv contains entries for lots that passed all quality tests.
+    COPQ must be derived from quality-test pass/fail, not rejection_events membership;
+    including false-rejection records inflates COPQ by ~20%.
+    """
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     rel_err = abs(s["total_copq"] - ground_truth["total_copq"]) / ground_truth["total_copq"]
@@ -231,13 +264,14 @@ def test_case_07_total_copq(ground_truth):
          f"expected {ground_truth['total_copq']} (±2%)")
 
 
-# ── Trap-specific row-level checks ────────────────────────────────────────────
+# ── Hard test 4: SCD — January pass rates for spec-revised products ───────────
 
 def test_case_08_revised_product_january_pass_rate(ground_truth):
-    """January pass rates for spec-revised products must use the pre-revision (V1) limits.
+    """≥90% of January rows for spec-revised products must be within ±0.02 of ground truth.
 
-    Ten products had their assay limits tightened on 2024-02-01. January lots must be
-    evaluated against the V1 specification that was in effect when they were tested.
+    V2 limits for ten products took effect 2024-02-01. January lots tested before
+    that date must be evaluated against V1. Using V2 for January tightens limits
+    and inflates failures; using V1 for February/March is the symmetric error.
     """
     report = pd.read_csv(REPORT_PATH)
     gt     = ground_truth["report"]
@@ -257,20 +291,23 @@ def test_case_08_revised_product_january_pass_rate(ground_truth):
         total += 1
         exp = float(jan_rev_gt.loc[idx, "pass_rate"])
         got = float(jan_rev_got.loc[idx, "pass_rate"])
-        if abs(got - exp) <= 0.05:
+        if abs(got - exp) <= 0.02:
             close += 1
 
-    assert total > 0, "No revised product January rows found in report."
-    assert close >= int(total * 0.8), \
-        (f"Only {close}/{total} revised-product January pass rates within ±0.05 "
-         f"of ground truth — SCD spec lookup likely incorrect.")
+    assert total > 0, "No revised-product January rows found in report."
+    assert close >= int(total * 0.9), \
+        (f"Only {close}/{total} revised-product January pass rates within ±0.02 "
+         f"of ground truth — spec-version lookup by tested_date likely incorrect.")
 
+
+# ── Hard test 5: unit conversion — L03 mean spec deviation ───────────────────
 
 def test_case_09_l03_mean_spec_deviation(ground_truth):
-    """L03 mean spec deviations must be computed after converting measurements to the reporting unit.
+    """≥90% of L03 rows must have mean_spec_deviation within ±2% of ground truth.
 
-    L03 reports the T01 assay in ppm; spec limits are in %. The conversion factor in
-    test_catalog.csv must be applied before comparing values to specification limits.
+    L03 reports the T01 assay in ppm; specification limits are in %.
+    Without applying the unit_conversion_factor from test_catalog.csv the
+    deviations are off by a factor of ~10 000.
     """
     report = pd.read_csv(REPORT_PATH)
     gt     = ground_truth["report"]
@@ -285,14 +322,16 @@ def test_case_09_l03_mean_spec_deviation(ground_truth):
         total += 1
         exp = float(l03_gt.loc[idx, "mean_spec_deviation"])
         got = float(l03_got.loc[idx, "mean_spec_deviation"])
-        if math.isclose(got, exp, rel_tol=0.05):
+        if math.isclose(got, exp, rel_tol=0.02):
             close += 1
 
     assert total > 0, "No L03 rows found in report."
-    assert close >= int(total * 0.8), \
-        (f"Only {close}/{total} L03 mean_spec_deviation values within ±5% of "
-         f"ground truth — unit conversion (ppm→%) likely not applied for L03.")
+    assert close >= int(total * 0.9), \
+        (f"Only {close}/{total} L03 mean_spec_deviation values within ±2% of "
+         f"ground truth — unit conversion from ppm to % likely not applied.")
 
+
+# ── Medium test: summary scalar identifiers ───────────────────────────────────
 
 def test_case_10_summary_scalars(ground_truth):
     """Line and product identifiers in summary must match ground truth exactly."""

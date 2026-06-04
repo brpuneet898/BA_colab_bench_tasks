@@ -185,11 +185,12 @@ def main():
     )
 
     summary = {
-        "total_lots_produced":    int(report["lots_produced"].sum()),
-        "overall_pass_rate":      overall_pass,
-        "total_copq":             total_copq,
-        "line_with_worst_pass_rate":   line_worst,
-        "product_with_highest_copq":   product_copq,
+        "total_lots_produced":       int(report["lots_produced"].sum()),
+        "failed_lot_count":          int((~lot_pass["lot_passed"]).sum()),
+        "overall_pass_rate":         overall_pass,
+        "total_copq":                total_copq,
+        "line_with_worst_pass_rate": line_worst,
+        "product_with_highest_copq": product_copq,
     }
     with open(WORKSPACE_DIR / "summary.json", "w") as f:
         json.dump(summary, f, indent=2)
