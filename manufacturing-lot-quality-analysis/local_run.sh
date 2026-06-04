@@ -1,5 +1,5 @@
 #!/bin/bash
-# Local debug loop for the expense-variance-analysis task.
+# Local debug loop for the manufacturing-lot-quality-analysis task.
 #
 # Mirrors how the harness treats /workspace/ as ephemeral: wipes it, restages
 # this task's data, runs the oracle, then runs the verifier.

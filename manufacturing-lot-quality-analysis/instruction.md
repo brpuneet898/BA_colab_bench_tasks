@@ -8,7 +8,7 @@ Mean specification deviation for a group is the average of `|measured_value − 
 
 Input data:
 
-`/workspace/data/production_lots.csv` — lot_id, product_id, line_id, batch_start_date, batch_end_date, quantity_produced
+`/workspace/data/production_lots.csv` — lot_id, product_id, line_id, batch_start_date, batch_end_date, quantity_produced; lot_id is assigned by each line's production controller
 
 `/workspace/data/quality_results.csv` — result_id, lot_id, test_id, measured_value, units, analyst_id, tested_date
 
