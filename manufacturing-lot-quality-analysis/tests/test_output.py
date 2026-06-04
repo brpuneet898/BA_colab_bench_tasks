@@ -50,10 +50,11 @@ REVISED_PRODUCTS = {
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
-    """Sentinel: lot count, V2 spec count, ppm unit presence."""
+    """Sentinel: lot count, V2 spec count, ppm unit presence, rejection event count."""
     lots  = pd.read_csv(DATA_DIR / "production_lots.csv")
     specs = pd.read_csv(DATA_DIR / "product_specifications.csv")
     res   = pd.read_csv(DATA_DIR / "quality_results.csv")
+    rej   = pd.read_csv(DATA_DIR / "rejection_events.csv")
 
     assert len(lots) == 5_992, "production_lots.csv row count must not be modified."
 
@@ -64,6 +65,9 @@ def test_case_01_input_data_not_tampered():
     ppm_count = (res["units"] == "ppm").sum()
     assert ppm_count > 1_000, \
         f"Expected >1000 ppm results from L03 legacy instrument, got {ppm_count}."
+
+    assert len(rej) == 656, \
+        f"rejection_events.csv row count must not be modified (expected 656, got {len(rej)})."
 
 
 # ── Output file structure ─────────────────────────────────────────────────────

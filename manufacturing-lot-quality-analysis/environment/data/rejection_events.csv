@@ -605,3 +605,53 @@ LOT05911,assay out of specification,False,19.06,68.19
 LOT05951,pH deviation,False,17.75,59.06
 LOT05954,assay out of specification,False,14.03,59.63
 LOT05956,particulate exceedance,False,19.95,49.9
+LOT00245,precautionary hold,False,23.42,58.0
+LOT00250,yield out of specification,False,21.07,55.11
+LOT00682,analytical variability,False,24.01,66.8
+LOT00970,customer specification query,False,22.88,64.97
+LOT00991,visual inspection failed,False,18.66,65.58
+LOT02645,precautionary hold,False,24.83,66.71
+LOT02664,yield out of specification,False,23.33,61.88
+LOT02691,analytical variability,False,23.5,63.53
+LOT02897,customer specification query,False,18.9,57.1
+LOT02978,visual inspection failed,False,21.15,56.72
+LOT03030,precautionary hold,False,20.6,65.03
+LOT03123,yield out of specification,False,24.49,62.07
+LOT03286,analytical variability,False,22.51,63.48
+LOT03396,customer specification query,False,23.76,66.47
+LOT03581,visual inspection failed,False,21.1,64.52
+LOT04096,precautionary hold,False,19.59,63.3
+LOT04464,yield out of specification,False,21.88,63.39
+LOT04703,analytical variability,False,18.45,59.56
+LOT05812,customer specification query,False,23.79,55.46
+LOT00157,visual inspection failed,False,22.42,61.55
+LOT00436,precautionary hold,False,23.31,58.22
+LOT00779,yield out of specification,False,20.48,61.13
+LOT00914,analytical variability,False,24.79,67.8
+LOT00977,customer specification query,False,24.25,58.51
+LOT01555,visual inspection failed,False,23.45,55.87
+LOT02482,precautionary hold,False,19.36,59.22
+LOT02650,yield out of specification,False,21.27,59.4
+LOT02704,analytical variability,False,18.31,64.93
+LOT03543,customer specification query,False,19.08,63.36
+LOT03736,visual inspection failed,False,22.78,66.76
+LOT03745,precautionary hold,False,23.21,64.96
+LOT03934,yield out of specification,False,24.77,61.1
+LOT04244,analytical variability,False,20.28,67.21
+LOT04459,customer specification query,False,20.59,57.5
+LOT05460,visual inspection failed,False,21.29,55.34
+LOT05925,precautionary hold,False,19.33,56.35
+LOT00619,yield out of specification,False,18.91,65.84
+LOT00856,analytical variability,False,21.33,61.93
+LOT01012,customer specification query,False,19.59,57.42
+LOT01319,visual inspection failed,False,22.69,62.52
+LOT01682,precautionary hold,False,21.06,57.28
+LOT01714,yield out of specification,False,23.83,65.44
+LOT02455,analytical variability,False,22.9,61.69
+LOT02594,customer specification query,False,20.19,60.72
+LOT02767,visual inspection failed,False,23.83,59.52
+LOT03276,precautionary hold,False,23.63,64.45
+LOT03504,yield out of specification,False,20.71,60.43
+LOT03733,analytical variability,False,20.02,56.31
+LOT03828,customer specification query,False,22.78,56.77
+LOT03903,visual inspection failed,False,18.98,69.43

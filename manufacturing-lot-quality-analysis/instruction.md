@@ -1,10 +1,10 @@
 Build a Q1 2024 (January 1 – March 31) production quality compliance report for a contract manufacturer operating three production lines. For each combination of line, product, and calendar month that produced at least one lot, compute the pass rate, mean specification deviation, and cost of poor quality.
 
-A lot passes if every one of its quality test results is within the applicable specification limits. Specification limits per product-test combination are in `product_specifications.csv`, which includes an `effective_from` column indicating when each version of the limits took effect. Use the specification version that was in effect when the lot was tested.
+A lot passes if every one of its quality test results is within the applicable specification limits. Specification limits per product-test combination are in `product_specifications.csv`. Some product-test combinations have multiple specification versions; each row carries an `effective_from` date indicating when that version of the limits took effect.
 
-Cost of poor quality (COPQ) applies only to lots that fail. Each failed lot appears in `rejection_events.csv` with a `rework_possible` flag and separate cost columns for rework and disposal. Use the applicable per-unit cost based on the lot's disposition.
+Cost of poor quality (COPQ) applies only to lots that fail. Rejection events are recorded in `rejection_events.csv` with a `rework_possible` flag and separate per-unit cost columns for rework and disposal outcomes.
 
-Mean specification deviation for a group is the average of `|measured_value_normalized − target_value| / ((upper_spec_limit − lower_spec_limit) / 2)` across all test results from lots in that group, where `measured_value_normalized` is the measured value expressed in the same units as the specification limits. Unit conversion factors are in `test_catalog.csv`.
+Mean specification deviation for a group is the average of `|measured_value − target_value| / ((upper_spec_limit − lower_spec_limit) / 2)` across all test results from lots in that group, where measured_value is expressed in the same units as the specification limits.
 
 Input data:
 
