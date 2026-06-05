@@ -1,6 +1,6 @@
 Build a Q1 2024 (January 1 – March 31) weekly payroll cost variance report for a warehouse operation, comparing actual labour cost to budget by department and week.
 
-Each employee's weekly payroll cost is the sum of regular hours (up to their department's weekly overtime threshold from `ot_policy.csv`) at their base rate, plus any hours above that threshold at 1.5× the base rate. The threshold resets each Monday. Weeks run Monday through Sunday.
+Shifts starting at or after 21:00 are classified as night shifts and are paid at 1.3× the employee's base hourly rate. Overtime is assessed on total weekly hours; the overtime premium is 0.5× the applicable shift rate (base rate for day shifts, 1.3× base rate for night shifts). The weekly overtime threshold resets each Monday. Weeks run Monday through Sunday.
 
 When an employee is temporarily reassigned to another department, the receiving department is charged for those hours at the employee's base hourly rate. Overtime is calculated on the employee's total weekly hours and the overtime premium stays with the home department.
 
@@ -8,9 +8,9 @@ Budget: `weekly_budget.csv` provides budgeted_hours and avg_hourly_rate per depa
 
 Input data:
 
-`/workspace/data/shifts.csv` — shift_id, employee_id, shift_start, shift_end
+`/workspace/data/shifts.csv` — shift_id, employee_id, shift_start (US Eastern), shift_end (US Eastern)
 
-`/workspace/data/employees.csv` — employee_id, department_id, hourly_rate, employee_type (full_time or contractor)
+`/workspace/data/employees.csv` — employee_id, department_id, hourly_rate, employee_type (full_time or contractor). Contractor hourly_rate values are stored in US cents by the HR export system.
 
 `/workspace/data/departments.csv` — department_id, department_name
 
