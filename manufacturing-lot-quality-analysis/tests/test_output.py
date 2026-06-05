@@ -1,23 +1,6 @@
 """
 Tests for the Q1 2024 manufacturing lot quality report.
 
-Three traps are embedded in the data:
-
-1. Slowly-changing specification limits — product_specifications.csv contains
-   multiple spec versions per product-test pair, each with an effective_from date.
-   The version applicable to a test result is determined by the result's tested_date.
-   Using the latest version for all results misclassifies January lots evaluated
-   against tighter V2 limits that were not yet in effect.
-
-2. Unit mismatch — Line L03 reports the T01 assay in ppm; specification limits are
-   in %. test_catalog.csv supplies reporting_unit and unit_conversion_factor.
-   Skipping unit normalisation makes all L03 T01 values appear wildly out of spec,
-   inflating failed_lot_count and collapsing the L03 pass rate.
-
-3. Rework vs disposal cost — each failed lot has a rework_possible flag that
-   determines which per-unit cost applies. Using an average or the wrong rate
-   distorts COPQ for individual lots.
-
 Contract (instruction.md): the deliverable is
     /workspace/quality_report.csv  — one row per (line_id, product_id, month)
     /workspace/summary.json        — six scalar keys
@@ -40,9 +23,17 @@ DATA_DIR    = WORKSPACE_DIR / "data" if (WORKSPACE_DIR / "data").exists() \
 REPORT_PATH  = WORKSPACE_DIR / "quality_report.csv"
 SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
 
-REVISED_PRODUCTS = {
-    "P003","P006","P009","P012","P015","P018","P020","P022","P023","P024"
-}
+def _revised_products():
+    """Products that have more than one spec version in product_specifications.csv."""
+    specs = pd.read_csv(
+        Path(__file__).parent.parent / "environment" / "data" / "product_specifications.csv"
+        if not Path("/workspace/data").exists()
+        else Path("/workspace/data/product_specifications.csv")
+    )
+    counts = specs.groupby(["product_id", "test_id"]).size()
+    return set(counts[counts > 1].reset_index()["product_id"].unique())
+
+REVISED_PRODUCTS = _revised_products()
 
 
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
@@ -54,7 +45,7 @@ def test_case_01_input_data_not_tampered():
     res   = pd.read_csv(DATA_DIR / "quality_results.csv")
     rej   = pd.read_csv(DATA_DIR / "rejection_events.csv")
 
-    assert len(lots) == 5_992, "production_lots.csv row count must not be modified."
+    assert len(lots) == 5_997, "production_lots.csv row count must not be modified."
 
     unique_ids = lots["lot_id"].nunique()
     assert unique_ids < 3_000, \
@@ -69,8 +60,17 @@ def test_case_01_input_data_not_tampered():
     assert ppm_count > 1_000, \
         f"Expected >1000 ppm results from L03 legacy instrument, got {ppm_count}."
 
-    assert len(rej) == 606, \
-        f"rejection_events.csv row count must not be modified (expected 606, got {len(rej)})."
+    assert len(rej) == 603, \
+        f"rejection_events.csv row count must not be modified (expected 603, got {len(rej)})."
+
+    lots2 = pd.read_csv(DATA_DIR / "production_lots.csv",
+                        parse_dates=["batch_start_datetime","batch_end_datetime"])
+    cross_month = (
+        lots2["batch_start_datetime"].dt.to_period("M") !=
+        lots2["batch_end_datetime"].dt.to_period("M")
+    ).sum()
+    assert cross_month >= 50, \
+        f"Expected >=50 lots where start and end fall in different calendar months, got {cross_month}."
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -97,12 +97,7 @@ def test_case_03_report_sort_order():
 # ── Hard test 1: failed lot count (exact integer) ─────────────────────────────
 
 def test_case_04_failed_lot_count(ground_truth):
-    """Exact count of lots failing at least one quality test.
-
-    Catches both unit-conversion errors (L03 ppm values inflate failures by ~3×
-    when not converted) and spec-version errors (using V2 for January adds ~100
-    false failures). Must be an int in summary.json.
-    """
+    """Exact count of lots failing at least one quality test. Must be an int in summary.json."""
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     assert "failed_lot_count" in s, "summary.json must contain 'failed_lot_count'."
@@ -138,7 +133,7 @@ def test_case_05_summary_schema():
 @pytest.fixture(scope="module")
 def ground_truth():
     lots    = pd.read_csv(DATA_DIR / "production_lots.csv",
-                          parse_dates=["batch_start_date","batch_end_date"])
+                          parse_dates=["batch_start_datetime","batch_end_datetime"])
     results = pd.read_csv(DATA_DIR / "quality_results.csv",
                           parse_dates=["tested_date"])
     specs   = pd.read_csv(DATA_DIR / "product_specifications.csv",
@@ -146,18 +141,19 @@ def ground_truth():
     catalog = pd.read_csv(DATA_DIR / "test_catalog.csv")
     rej     = pd.read_csv(DATA_DIR / "rejection_events.csv")
 
-    # lot_id resets monthly per line — disambiguate via date proximity
+    # Disambiguate lot_id via date proximity (use date portion of batch_end_datetime)
     lots["_lot_row"] = np.arange(len(lots))
+    lots["_batch_end_date"] = lots["batch_end_datetime"].dt.normalize()
     r_multi = results.merge(
-        lots[["lot_id","product_id","line_id","batch_end_date","_lot_row"]], on="lot_id"
+        lots[["lot_id","product_id","line_id","_batch_end_date","_lot_row"]], on="lot_id"
     )
-    r_multi["_days"] = (r_multi["tested_date"] - r_multi["batch_end_date"]).dt.days
+    r_multi["_days"] = (r_multi["tested_date"] - r_multi["_batch_end_date"]).dt.days
     r_multi = r_multi[(r_multi["_days"] >= 0) & (r_multi["_days"] <= 3)].copy()
     r = r_multi.loc[r_multi.groupby("result_id")["_days"].idxmin()].drop(
-        columns=["_days", "batch_end_date"]
+        columns=["_days", "_batch_end_date"]
     )
 
-    # SCD join: cross-merge, filter to effective_from <= tested_date, keep latest
+    # Join each result to its applicable spec version
     merged = r.merge(
         specs[["product_id","test_id","lower_spec_limit",
                "upper_spec_limit","target_value","effective_from"]],
@@ -166,14 +162,19 @@ def ground_truth():
     valid = merged[merged["effective_from"] <= merged["tested_date"]].copy()
     idx   = valid.groupby("result_id")["effective_from"].idxmax()
     jn    = valid.loc[idx].merge(
-        catalog[["test_id","reporting_unit","unit_conversion_factor"]], on="test_id"
+        catalog[["test_id","reporting_unit"]], on="test_id"
     )
 
-    # Unit normalisation
+    # Normalise measured values to spec reporting units
+    # ppm -> %: 1% = 10,000 ppm (SI definition)
     jn["normalized_value"] = np.where(
         jn["units"] == jn["reporting_unit"],
         jn["measured_value"],
-        jn["measured_value"] * jn["unit_conversion_factor"],
+        np.where(
+            (jn["units"] == "ppm") & (jn["reporting_unit"] == "%"),
+            jn["measured_value"] * 1e-4,
+            jn["measured_value"],
+        ),
     )
     jn["in_spec"] = (
         (jn["normalized_value"] >= jn["lower_spec_limit"]) &
@@ -184,9 +185,10 @@ def ground_truth():
     lot_pass = jn.groupby("_lot_row")["in_spec"].all().reset_index()
     lot_pass.columns = ["_lot_row","lot_passed"]
 
+    # Month attribution uses batch_start_datetime (production start date)
     # Spec deviation per (line_id, product_id, month)
-    jn2 = jn.merge(lots[["_lot_row","batch_end_date"]], on="_lot_row")
-    jn2["month"]     = jn2["batch_end_date"].dt.to_period("M").astype(str)
+    jn2 = jn.merge(lots[["_lot_row","batch_start_datetime"]], on="_lot_row")
+    jn2["month"]     = jn2["batch_start_datetime"].dt.to_period("M").astype(str)
     half_width       = (jn2["upper_spec_limit"] - jn2["lower_spec_limit"]) / 2
     jn2["deviation"] = (jn2["normalized_value"] - jn2["target_value"]).abs() / half_width
     spec_dev = (
@@ -206,10 +208,10 @@ def ground_truth():
     )
     copq_lot = fc[["_lot_row","copq"]]
 
-    # Report
+    # Report — month by batch_start_datetime
     base = lots.merge(lot_pass, on="_lot_row").merge(copq_lot, on="_lot_row", how="left")
     base["copq"]  = base["copq"].fillna(0.0)
-    base["month"] = base["batch_end_date"].dt.to_period("M").astype(str)
+    base["month"] = base["batch_start_datetime"].dt.to_period("M").astype(str)
     agg = (
         base.groupby(["line_id","product_id","month"])
         .agg(lots_produced=("_lot_row","count"),
@@ -230,7 +232,7 @@ def ground_truth():
 
     return {
         "report":                    report,
-        "failed_lot_count":          int((~lot_pass["lot_passed"]).sum()),  # 606
+        "failed_lot_count":          int((~lot_pass["lot_passed"]).sum()),
         "total_copq":                total_copq,
         "overall_pass_rate":         overall_pass,
         "line_with_worst_pass_rate": line_worst,
@@ -240,30 +242,26 @@ def ground_truth():
     }
 
 
-# ── Hard test 2: overall pass rate (tight tolerance) ─────────────────────────
+# ── Hard test 2: production month attribution ─────────────────────────────────
 
-def test_case_06_overall_pass_rate(ground_truth):
-    """Overall pass rate must be within ±0.002 of ground truth.
-
-    Using the latest spec version for all lots (ignoring effective_from) shifts
-    ~100 January lots from pass to fail, a delta of ~0.017 — well outside ±0.002.
-    Skipping unit conversion for L03 shifts ~1800 lots, a delta of ~0.30.
-    """
-    with open(SUMMARY_PATH) as f:
-        s = json.load(f)
-    assert abs(s["overall_pass_rate"] - ground_truth["overall_pass_rate"]) <= 0.002, \
-        (f"overall_pass_rate: got {s['overall_pass_rate']}, "
-         f"expected {ground_truth['overall_pass_rate']} (±0.002)")
+def test_case_06_production_month_attribution(ground_truth):
+    """Monthly lots_produced counts must match ground truth within ±10 per month."""
+    report = pd.read_csv(REPORT_PATH)
+    gt     = ground_truth["report"]
+    agg_gt  = gt.groupby("month")["lots_produced"].sum()
+    agg_rep = report.groupby("month")["lots_produced"].sum()
+    for month, exp in agg_gt.items():
+        got = int(agg_rep.get(month, 0))
+        assert abs(got - int(exp)) <= 10, (
+            f"lots_produced for {month}: got {got}, expected {int(exp)} (±10). "
+            f"Each lot belongs to the calendar month of its production start."
+        )
 
 
 # ── Hard test 3: total COPQ ───────────────────────────────────────────────────
 
 def test_case_07_total_copq(ground_truth):
-    """Total COPQ must be within ±2% of ground truth.
-
-    Each failed lot carries a rework_possible flag; the wrong per-unit cost
-    (rework_cost_per_unit vs disposal_cost_per_unit) distorts total COPQ.
-    """
+    """Total COPQ must be within ±2% of ground truth."""
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     rel_err = abs(s["total_copq"] - ground_truth["total_copq"]) / ground_truth["total_copq"]
@@ -275,12 +273,7 @@ def test_case_07_total_copq(ground_truth):
 # ── Hard test 4: SCD — January pass rates for spec-revised products ───────────
 
 def test_case_08_revised_product_january_pass_rate(ground_truth):
-    """≥90% of January rows for spec-revised products must be within ±0.02 of ground truth.
-
-    V2 limits for ten products took effect 2024-02-01. January lots tested before
-    that date must be evaluated against V1. Using V2 for January tightens limits
-    and inflates failures; using V1 for February/March is the symmetric error.
-    """
+    """≥90% of January rows for products with multiple spec versions must be within ±0.02 of ground truth."""
     report = pd.read_csv(REPORT_PATH)
     gt     = ground_truth["report"]
     jan_rev_gt = gt[
@@ -311,12 +304,7 @@ def test_case_08_revised_product_january_pass_rate(ground_truth):
 # ── Hard test 5: unit conversion — L03 mean spec deviation ───────────────────
 
 def test_case_09_l03_mean_spec_deviation(ground_truth):
-    """≥90% of L03 rows must have mean_spec_deviation within ±2% of ground truth.
-
-    L03 reports the T01 assay in ppm; specification limits are in %.
-    Without applying the unit_conversion_factor from test_catalog.csv the
-    deviations are off by a factor of ~10 000.
-    """
+    """≥90% of L03 rows must have mean_spec_deviation within ±2% of ground truth."""
     report = pd.read_csv(REPORT_PATH)
     gt     = ground_truth["report"]
     l03_gt  = gt[gt["line_id"] == "L03"].set_index(["product_id","month"])

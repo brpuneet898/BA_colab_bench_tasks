@@ -8,8 +8,12 @@ quality_results.csv references lot_id but not the calendar month, so a naïve
 merge on lot_id alone produces up to three candidate lots per result.
 
 Disambiguation: testing always follows batch completion by 1–3 days.  Filter to
-the candidate lot whose batch_end_date is the closest predecessor of tested_date
-within a four-day window.  This yields a 1-to-1 mapping from result to lot.
+the candidate lot whose batch_end_datetime (date portion) is the closest
+predecessor of tested_date within a four-day window.  This yields a 1-to-1
+mapping from result to lot.
+
+Month attribution uses batch_start_datetime — a night-shift lot that begins
+on Jan 31 and completes on Feb 1 belongs to January.
 
 A temporary row-index column (_lot_row) is used as a stable unique key throughout
 so that downstream aggregations are never confused by the repeated lot_id strings.
@@ -33,7 +37,7 @@ else:
 def load_data():
     lots = pd.read_csv(
         DATA_DIR / "production_lots.csv",
-        parse_dates=["batch_start_date", "batch_end_date"],
+        parse_dates=["batch_start_datetime", "batch_end_datetime"],
     )
     lots["_lot_row"] = np.arange(len(lots))   # stable unique identifier
     results = pd.read_csv(DATA_DIR / "quality_results.csv", parse_dates=["tested_date"])
@@ -47,17 +51,19 @@ def link_results_to_lots(results, lots):
     """Return one row per quality result with the correct lot's metadata attached.
 
     lot_id repeats across months; testing follows batch completion by 1–3 days,
-    so filter to the candidate lot with batch_end_date just before tested_date.
+    so filter to the candidate lot with batch_end_datetime just before tested_date.
     """
+    lots2 = lots.copy()
+    lots2["_batch_end_date"] = lots2["batch_end_datetime"].dt.normalize()
     r = results.merge(
-        lots[["lot_id", "product_id", "line_id", "batch_end_date", "_lot_row"]],
+        lots2[["lot_id", "product_id", "line_id", "_batch_end_date", "_lot_row"]],
         on="lot_id",
     )
-    r["_days"] = (r["tested_date"] - r["batch_end_date"]).dt.days
+    r["_days"] = (r["tested_date"] - r["_batch_end_date"]).dt.days
     r = r[(r["_days"] >= 0) & (r["_days"] <= 3)].copy()
-    # Rare ties (same lot_id + same batch_end_date): keep the closest match
+    # Rare ties (same lot_id + same batch_end_datetime date): keep the closest match
     r = r.loc[r.groupby("result_id")["_days"].idxmin()]
-    return r.drop(columns=["_days", "batch_end_date"])
+    return r.drop(columns=["_days", "_batch_end_date"])
 
 
 def scd_spec_join(results_with_lots, specs):
@@ -73,13 +79,16 @@ def scd_spec_join(results_with_lots, specs):
 
 
 def normalize_units(results_with_specs, catalog):
-    r = results_with_specs.merge(
-        catalog[["test_id", "reporting_unit", "unit_conversion_factor"]], on="test_id"
-    )
+    r = results_with_specs.merge(catalog[["test_id", "reporting_unit"]], on="test_id")
+    # ppm -> %: 1% = 10,000 ppm (SI definition)
     r["normalized_value"] = np.where(
         r["units"] == r["reporting_unit"],
         r["measured_value"],
-        r["measured_value"] * r["unit_conversion_factor"],
+        np.where(
+            (r["units"] == "ppm") & (r["reporting_unit"] == "%"),
+            r["measured_value"] * 1e-4,
+            r["measured_value"],
+        ),
     )
     return r
 
@@ -99,8 +108,8 @@ def evaluate_pass_fail(results_normalized):
 
 
 def compute_spec_deviation(results_normalized, lots):
-    r = results_normalized.merge(lots[["_lot_row", "batch_end_date"]], on="_lot_row")
-    r["month"]     = r["batch_end_date"].dt.to_period("M").astype(str)
+    r = results_normalized.merge(lots[["_lot_row", "batch_start_datetime"]], on="_lot_row")
+    r["month"]     = r["batch_start_datetime"].dt.to_period("M").astype(str)
     half_width     = (r["upper_spec_limit"] - r["lower_spec_limit"]) / 2
     r["deviation"] = (r["normalized_value"] - r["target_value"]).abs() / half_width
     return (
@@ -128,7 +137,7 @@ def compute_copq(lots, lot_pass, rejection_events):
 def build_report(lots, lot_pass, copq_per_lot, spec_dev):
     base = lots.merge(lot_pass, on="_lot_row").merge(copq_per_lot, on="_lot_row", how="left")
     base["copq"]  = base["copq"].fillna(0.0)
-    base["month"] = base["batch_end_date"].dt.to_period("M").astype(str)
+    base["month"] = base["batch_start_datetime"].dt.to_period("M").astype(str)
 
     agg = (
         base.groupby(["line_id", "product_id", "month"])
