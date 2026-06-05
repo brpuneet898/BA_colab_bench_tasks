@@ -7,10 +7,14 @@ appear up to three times (once per month) in that file.  Each quality result in
 quality_results.csv references lot_id but not the calendar month, so a naïve
 merge on lot_id alone produces up to three candidate lots per result.
 
-Disambiguation: testing always follows batch completion by 1–3 days.  Filter to
-the candidate lot whose batch_end_datetime (date portion) is the closest
-predecessor of tested_date within a four-day window.  This yields a 1-to-1
-mapping from result to lot.
+Disambiguation: testing always follows batch completion by 1–5 days (retests
+may run up to 5 days after batch_end).  Filter to the candidate lot whose
+batch_end_datetime (date portion) is the closest predecessor of tested_date
+within a five-day window.  This yields a 1-to-1 mapping from result to lot.
+
+Retest supersession: some lots have two results for the same test (original
+measurement plus a confirmatory retest).  Keep only the most recently tested
+result per (lot, test) for pass/fail and spec-deviation calculations.
 
 Month attribution uses batch_start_datetime — a night-shift lot that begins
 on Jan 31 and completes on Feb 1 belongs to January.
@@ -39,19 +43,20 @@ def load_data():
         DATA_DIR / "production_lots.csv",
         parse_dates=["batch_start_datetime", "batch_end_datetime"],
     )
-    lots["_lot_row"] = np.arange(len(lots))   # stable unique identifier
+    lots["_lot_row"] = np.arange(len(lots))
     results = pd.read_csv(DATA_DIR / "quality_results.csv", parse_dates=["tested_date"])
     specs   = pd.read_csv(DATA_DIR / "product_specifications.csv", parse_dates=["effective_from"])
     catalog = pd.read_csv(DATA_DIR / "test_catalog.csv")
-    rej     = pd.read_csv(DATA_DIR / "rejection_events.csv")
+    rej     = pd.read_csv(DATA_DIR / "rejection_events.csv", parse_dates=["rejection_date"])
     return lots, results, specs, catalog, rej
 
 
 def link_results_to_lots(results, lots):
     """Return one row per quality result with the correct lot's metadata attached.
 
-    lot_id repeats across months; testing follows batch completion by 1–3 days,
+    lot_id repeats across months; testing follows batch completion by 1-5 days,
     so filter to the candidate lot with batch_end_datetime just before tested_date.
+    Then apply retest supersession: keep only the latest result per (lot, test).
     """
     lots2 = lots.copy()
     lots2["_batch_end_date"] = lots2["batch_end_datetime"].dt.normalize()
@@ -60,9 +65,13 @@ def link_results_to_lots(results, lots):
         on="lot_id",
     )
     r["_days"] = (r["tested_date"] - r["_batch_end_date"]).dt.days
-    r = r[(r["_days"] >= 0) & (r["_days"] <= 3)].copy()
-    # Rare ties (same lot_id + same batch_end_datetime date): keep the closest match
+    r = r[(r["_days"] >= 0) & (r["_days"] <= 5)].copy()
     r = r.loc[r.groupby("result_id")["_days"].idxmin()]
+
+    # Retest supersession: keep only the most recently tested result per (lot, test)
+    r = r.sort_values("tested_date")
+    r = r.loc[r.groupby(["_lot_row", "test_id"])["tested_date"].idxmax()]
+
     return r.drop(columns=["_days", "_batch_end_date"])
 
 
@@ -121,17 +130,32 @@ def compute_spec_deviation(results_normalized, lots):
 
 def compute_copq(lots, lot_pass, rejection_events):
     failed = lots.merge(lot_pass[~lot_pass["lot_passed"]][["_lot_row"]], on="_lot_row")
+    failed["_batch_end_date"] = failed["batch_end_datetime"].dt.normalize()
+
+    # Match each rejection event to the failed lot whose batch completed most recently
+    # before rejection_date (same lot_id, closest preceding batch_end_datetime).
     fc = failed.merge(rejection_events, on="lot_id", how="left")
-    # If a lot_id appears more than once in rejection_events (different months),
-    # keep the record closest to this lot's batch_end_date.
-    if fc.duplicated("_lot_row").any():
-        fc = fc.loc[fc.groupby("_lot_row").apply(lambda g: g.index[0])]
-    fc["copq"] = np.where(
-        fc["rework_possible"],
-        fc["quantity_produced"] * fc["rework_cost_per_unit"],
-        fc["quantity_produced"] * fc["disposal_cost_per_unit"],
+    fc["_rej_days"] = (fc["rejection_date"] - fc["_batch_end_date"]).dt.days
+    fc_valid = fc[fc["_rej_days"] >= 0].copy()
+    if len(fc_valid) > 0 and fc_valid.duplicated("_lot_row").any():
+        best = fc_valid.loc[fc_valid.groupby("_lot_row")["_rej_days"].idxmin()]
+    else:
+        best = fc_valid
+
+    fc_clean = failed[["_lot_row", "quantity_produced"]].merge(
+        best[["_lot_row", "rework_possible", "rework_cost_per_unit", "disposal_cost_per_unit"]],
+        on="_lot_row", how="left",
     )
-    return fc[["_lot_row", "copq"]]
+    fc_clean["copq"] = np.where(
+        fc_clean["rework_possible"].notna(),
+        np.where(
+            fc_clean["rework_possible"],
+            fc_clean["quantity_produced"] * fc_clean["rework_cost_per_unit"],
+            fc_clean["quantity_produced"] * fc_clean["disposal_cost_per_unit"],
+        ),
+        0.0,
+    )
+    return fc_clean[["_lot_row", "copq"]]
 
 
 def build_report(lots, lot_pass, copq_per_lot, spec_dev):

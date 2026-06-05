@@ -4,6 +4,16 @@ Tests for the Q1 2024 manufacturing lot quality report.
 Contract (instruction.md): the deliverable is
     /workspace/quality_report.csv  — one row per (line_id, product_id, month)
     /workspace/summary.json        — six scalar keys
+
+Reasoning challenges embedded in the data:
+  1. lot_id resets monthly per line — the same string appears up to 3× across Q1;
+     results must be matched to the correct lot via batch_end_datetime proximity.
+  2. Some lots have a retest result for T01 (more recent than the original);
+     only the latest result per (lot, test) is used for pass/fail.
+  3. product_specifications has two versions per revised product; the version
+     effective at tested_date applies, not the version at production start.
+  4. Line L03 T01 results are in ppm; spec limits are in % (1% = 10,000 ppm).
+  5. Night-shift lots crossing midnight belong to the month of batch_start.
 """
 
 import json
@@ -23,6 +33,7 @@ DATA_DIR    = WORKSPACE_DIR / "data" if (WORKSPACE_DIR / "data").exists() \
 REPORT_PATH  = WORKSPACE_DIR / "quality_report.csv"
 SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
 
+
 def _revised_products():
     """Products that have more than one spec version in product_specifications.csv."""
     specs = pd.read_csv(
@@ -39,7 +50,8 @@ REVISED_PRODUCTS = _revised_products()
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
-    """Sentinel: lot count, non-unique lot_ids, V2 spec count, ppm unit presence, rejection event count."""
+    """Sentinel: lot count, non-unique lot_ids, V2 spec count, ppm unit presence,
+    rejection event count, retest result presence, cross-month lot count."""
     lots  = pd.read_csv(DATA_DIR / "production_lots.csv")
     specs = pd.read_csv(DATA_DIR / "product_specifications.csv")
     res   = pd.read_csv(DATA_DIR / "quality_results.csv")
@@ -60,11 +72,15 @@ def test_case_01_input_data_not_tampered():
     assert ppm_count > 1_000, \
         f"Expected >1000 ppm results from L03 legacy instrument, got {ppm_count}."
 
-    assert len(rej) == 603, \
-        f"rejection_events.csv row count must not be modified (expected 603, got {len(rej)})."
+    assert len(res) == 30_015, \
+        (f"quality_results.csv must not be modified (expected 30,015 rows including "
+         f"retest results, got {len(res)}).")
+
+    assert len(rej) == 573, \
+        f"rejection_events.csv row count must not be modified (expected 573, got {len(rej)})."
 
     lots2 = pd.read_csv(DATA_DIR / "production_lots.csv",
-                        parse_dates=["batch_start_datetime","batch_end_datetime"])
+                        parse_dates=["batch_start_datetime", "batch_end_datetime"])
     cross_month = (
         lots2["batch_start_datetime"].dt.to_period("M") !=
         lots2["batch_end_datetime"].dt.to_period("M")
@@ -78,8 +94,8 @@ def test_case_01_input_data_not_tampered():
 def test_case_02_report_exists_and_shape():
     assert REPORT_PATH.exists(), "quality_report.csv not found in /workspace."
     df = pd.read_csv(REPORT_PATH)
-    required = {"line_id","product_id","month","lots_produced","lots_passed",
-                "pass_rate","mean_spec_deviation","total_copq"}
+    required = {"line_id", "product_id", "month", "lots_produced", "lots_passed",
+                "pass_rate", "mean_spec_deviation", "total_copq"}
     missing = required - set(df.columns)
     assert not missing, f"Missing columns: {missing}"
     assert len(df) >= 100, f"Expected at least 100 rows, got {len(df)}."
@@ -87,7 +103,7 @@ def test_case_02_report_exists_and_shape():
 
 def test_case_03_report_sort_order():
     df = pd.read_csv(REPORT_PATH)
-    expected = df.sort_values(["line_id","product_id","month"]).reset_index(drop=True)
+    expected = df.sort_values(["line_id", "product_id", "month"]).reset_index(drop=True)
     assert list(df["line_id"])    == list(expected["line_id"]) and \
            list(df["product_id"]) == list(expected["product_id"]) and \
            list(df["month"])      == list(expected["month"]), \
@@ -106,8 +122,8 @@ def test_case_04_failed_lot_count(ground_truth):
     expected = ground_truth["failed_lot_count"]
     assert s["failed_lot_count"] == expected, \
         (f"failed_lot_count: got {s['failed_lot_count']}, expected {expected}. "
-         f"A lot fails if any quality-test result falls outside the applicable "
-         f"specification limits.")
+         f"A lot fails if any quality-test result (using the most recently tested "
+         f"result per lot-test pair) falls outside the applicable specification limits.")
 
 
 # ── Output schema ─────────────────────────────────────────────────────────────
@@ -116,8 +132,8 @@ def test_case_05_summary_schema():
     assert SUMMARY_PATH.exists(), "summary.json not found in /workspace."
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
-    required = {"total_lots_produced","failed_lot_count","overall_pass_rate",
-                "total_copq","line_with_worst_pass_rate","product_with_highest_copq"}
+    required = {"total_lots_produced", "failed_lot_count", "overall_pass_rate",
+                "total_copq", "line_with_worst_pass_rate", "product_with_highest_copq"}
     missing = required - set(s.keys())
     assert not missing, f"Missing keys in summary.json: {missing}"
     assert isinstance(s["total_lots_produced"], int)
@@ -133,37 +149,40 @@ def test_case_05_summary_schema():
 @pytest.fixture(scope="module")
 def ground_truth():
     lots    = pd.read_csv(DATA_DIR / "production_lots.csv",
-                          parse_dates=["batch_start_datetime","batch_end_datetime"])
+                          parse_dates=["batch_start_datetime", "batch_end_datetime"])
     results = pd.read_csv(DATA_DIR / "quality_results.csv",
                           parse_dates=["tested_date"])
     specs   = pd.read_csv(DATA_DIR / "product_specifications.csv",
                           parse_dates=["effective_from"])
     catalog = pd.read_csv(DATA_DIR / "test_catalog.csv")
-    rej     = pd.read_csv(DATA_DIR / "rejection_events.csv")
+    rej     = pd.read_csv(DATA_DIR / "rejection_events.csv",
+                          parse_dates=["rejection_date"])
 
-    # Disambiguate lot_id via date proximity (use date portion of batch_end_datetime)
+    # Disambiguate lot_id via date proximity (batch_end_datetime, 5-day window)
     lots["_lot_row"] = np.arange(len(lots))
     lots["_batch_end_date"] = lots["batch_end_datetime"].dt.normalize()
     r_multi = results.merge(
-        lots[["lot_id","product_id","line_id","_batch_end_date","_lot_row"]], on="lot_id"
+        lots[["lot_id", "product_id", "line_id", "_batch_end_date", "_lot_row"]], on="lot_id"
     )
     r_multi["_days"] = (r_multi["tested_date"] - r_multi["_batch_end_date"]).dt.days
-    r_multi = r_multi[(r_multi["_days"] >= 0) & (r_multi["_days"] <= 3)].copy()
+    r_multi = r_multi[(r_multi["_days"] >= 0) & (r_multi["_days"] <= 5)].copy()
     r = r_multi.loc[r_multi.groupby("result_id")["_days"].idxmin()].drop(
         columns=["_days", "_batch_end_date"]
     )
 
-    # Join each result to its applicable spec version
+    # Retest supersession: keep only the most recent result per (lot, test)
+    r = r.sort_values("tested_date")
+    r = r.loc[r.groupby(["_lot_row", "test_id"])["tested_date"].idxmax()]
+
+    # Join each result to its applicable spec version (effective at tested_date)
     merged = r.merge(
-        specs[["product_id","test_id","lower_spec_limit",
-               "upper_spec_limit","target_value","effective_from"]],
-        on=["product_id","test_id"], how="left",
+        specs[["product_id", "test_id", "lower_spec_limit",
+               "upper_spec_limit", "target_value", "effective_from"]],
+        on=["product_id", "test_id"], how="left",
     )
     valid = merged[merged["effective_from"] <= merged["tested_date"]].copy()
     idx   = valid.groupby("result_id")["effective_from"].idxmax()
-    jn    = valid.loc[idx].merge(
-        catalog[["test_id","reporting_unit"]], on="test_id"
-    )
+    jn    = valid.loc[idx].merge(catalog[["test_id", "reporting_unit"]], on="test_id")
 
     # Normalise measured values to spec reporting units
     # ppm -> %: 1% = 10,000 ppm (SI definition)
@@ -181,46 +200,56 @@ def ground_truth():
         (jn["normalized_value"] <= jn["upper_spec_limit"])
     )
 
-    # Lot-level pass/fail — group by _lot_row (unique per lot instance)
+    # Lot-level pass/fail
     lot_pass = jn.groupby("_lot_row")["in_spec"].all().reset_index()
-    lot_pass.columns = ["_lot_row","lot_passed"]
+    lot_pass.columns = ["_lot_row", "lot_passed"]
 
     # Month attribution uses batch_start_datetime (production start date)
-    # Spec deviation per (line_id, product_id, month)
-    jn2 = jn.merge(lots[["_lot_row","batch_start_datetime"]], on="_lot_row")
+    jn2 = jn.merge(lots[["_lot_row", "batch_start_datetime"]], on="_lot_row")
     jn2["month"]     = jn2["batch_start_datetime"].dt.to_period("M").astype(str)
     half_width       = (jn2["upper_spec_limit"] - jn2["lower_spec_limit"]) / 2
     jn2["deviation"] = (jn2["normalized_value"] - jn2["target_value"]).abs() / half_width
     spec_dev = (
-        jn2.groupby(["line_id","product_id","month"])["deviation"].mean()
-        .reset_index().rename(columns={"deviation":"mean_spec_deviation"})
+        jn2.groupby(["line_id", "product_id", "month"])["deviation"].mean()
+        .reset_index().rename(columns={"deviation": "mean_spec_deviation"})
     )
 
-    # COPQ — only for test-failed lots
+    # COPQ — match rejection events via rejection_date proximity to batch_end_datetime
     failed = lots.merge(lot_pass[~lot_pass["lot_passed"]][["_lot_row"]], on="_lot_row")
+    failed["_bed"] = failed["batch_end_datetime"].dt.normalize()
     fc = failed.merge(rej, on="lot_id", how="left")
-    if fc.duplicated("_lot_row").any():
-        fc = fc.loc[fc.groupby("_lot_row").apply(lambda g: g.index[0])]
-    fc["copq"] = np.where(
-        fc["rework_possible"],
-        fc["quantity_produced"] * fc["rework_cost_per_unit"],
-        fc["quantity_produced"] * fc["disposal_cost_per_unit"],
+    fc["_rej_days"] = (fc["rejection_date"] - fc["_bed"]).dt.days
+    fc_valid = fc[fc["_rej_days"] >= 0].copy()
+    if len(fc_valid) > 0 and fc_valid.duplicated("_lot_row").any():
+        best = fc_valid.loc[fc_valid.groupby("_lot_row")["_rej_days"].idxmin()]
+    else:
+        best = fc_valid
+    fc_clean = failed[["_lot_row", "quantity_produced"]].merge(
+        best[["_lot_row", "rework_possible", "rework_cost_per_unit", "disposal_cost_per_unit"]],
+        on="_lot_row", how="left",
     )
-    copq_lot = fc[["_lot_row","copq"]]
+    fc_clean["copq"] = np.where(
+        fc_clean["rework_possible"].notna(),
+        np.where(fc_clean["rework_possible"],
+                 fc_clean["quantity_produced"] * fc_clean["rework_cost_per_unit"],
+                 fc_clean["quantity_produced"] * fc_clean["disposal_cost_per_unit"]),
+        0.0,
+    )
+    copq_lot = fc_clean[["_lot_row", "copq"]]
 
     # Report — month by batch_start_datetime
     base = lots.merge(lot_pass, on="_lot_row").merge(copq_lot, on="_lot_row", how="left")
     base["copq"]  = base["copq"].fillna(0.0)
     base["month"] = base["batch_start_datetime"].dt.to_period("M").astype(str)
     agg = (
-        base.groupby(["line_id","product_id","month"])
-        .agg(lots_produced=("_lot_row","count"),
-             lots_passed=("lot_passed","sum"),
-             total_copq=("copq","sum"))
+        base.groupby(["line_id", "product_id", "month"])
+        .agg(lots_produced=("_lot_row", "count"),
+             lots_passed=("lot_passed", "sum"),
+             total_copq=("copq", "sum"))
         .reset_index()
     )
     agg["pass_rate"] = (agg["lots_passed"] / agg["lots_produced"]).round(4)
-    report = agg.merge(spec_dev, on=["line_id","product_id","month"])
+    report = agg.merge(spec_dev, on=["line_id", "product_id", "month"])
 
     # Summary scalars
     total_copq   = float(round(report["total_copq"].sum(), 2))
@@ -278,11 +307,11 @@ def test_case_08_revised_product_january_pass_rate(ground_truth):
     gt     = ground_truth["report"]
     jan_rev_gt = gt[
         (gt["product_id"].isin(REVISED_PRODUCTS)) & (gt["month"] == "2024-01")
-    ].set_index(["line_id","product_id"])
+    ].set_index(["line_id", "product_id"])
 
     jan_rev_got = report[
         (report["product_id"].isin(REVISED_PRODUCTS)) & (report["month"] == "2024-01")
-    ].set_index(["line_id","product_id"])
+    ].set_index(["line_id", "product_id"])
 
     close = 0
     total = 0
@@ -298,7 +327,7 @@ def test_case_08_revised_product_january_pass_rate(ground_truth):
     assert total > 0, "No revised-product January rows found in report."
     assert close >= int(total * 0.9), \
         (f"Only {close}/{total} revised-product January pass rates within ±0.02 "
-         f"of ground truth — spec-version lookup by tested_date likely incorrect.")
+         f"of ground truth — retest supersession or spec-version lookup may be incorrect.")
 
 
 # ── Hard test 5: unit conversion — L03 mean spec deviation ───────────────────
@@ -307,8 +336,8 @@ def test_case_09_l03_mean_spec_deviation(ground_truth):
     """≥90% of L03 rows must have mean_spec_deviation within ±2% of ground truth."""
     report = pd.read_csv(REPORT_PATH)
     gt     = ground_truth["report"]
-    l03_gt  = gt[gt["line_id"] == "L03"].set_index(["product_id","month"])
-    l03_got = report[report["line_id"] == "L03"].set_index(["product_id","month"])
+    l03_gt  = gt[gt["line_id"] == "L03"].set_index(["product_id", "month"])
+    l03_got = report[report["line_id"] == "L03"].set_index(["product_id", "month"])
 
     close = 0
     total = 0
