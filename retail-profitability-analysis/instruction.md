@@ -1,6 +1,8 @@
 Build a 2024 annual profitability report for a multi-channel retailer that sells across five sales channels and five product categories. Compute net profit by channel, by product category, and by calendar month, then identify the top and bottom performer in each dimension.
 
-Net profit for each dimension must fully account for all costs and obligations associated with that dimension. Channel profitability must reflect the actual net value retained after handling returned merchandise. Category profitability must deduct each category's share of shared operational overhead, allocated according to the rules in `cost_allocation_rules.csv`. Monthly profitability must reflect all promotional obligations recorded in `promotions.csv`.
+Sales returns are processed through the originating sales channel; channel profitability must reflect the net profit earned after accounting for customer refunds and return-handling costs. Shared operational overhead must be allocated to product categories according to the rules defined in `cost_allocation_rules.csv`; category profitability must reflect each category's assigned share of these costs. Promotional cashback obligations apply to revenue earned during a campaign's active dates; monthly profitability must reflect all obligations recorded in `promotions.csv`.
+
+The company's total net profit is total gross profit minus all return losses, minus all allocated shared overhead, minus all promotional cashback obligations.
 
 **Input data**
 
@@ -37,4 +39,4 @@ Save `/workspace/summary.json` with the following keys:
 - `least_profitable_category` (str) — category_id with the lowest net profit
 - `best_margin_month` (str, YYYY-MM) — month with the highest net profit
 - `worst_margin_month` (str, YYYY-MM) — month with the lowest net profit
-- `total_net_profit` (float, rounded to 2 decimal places) — net profit summed across all dimensions after all deductions
+- `total_net_profit` (float, rounded to 2 decimal places) — total gross profit minus all return losses, all allocated shared overhead, and all promotional cashback obligations

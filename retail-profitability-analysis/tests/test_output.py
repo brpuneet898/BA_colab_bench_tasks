@@ -46,27 +46,40 @@ SUM_PATH = WORKSPACE_DIR / "summary.json"
 
 def test_case_01_input_data_not_tampered():
     """Hardcoded row counts ensure the agent cannot game dynamic ground truth by
-    truncating the input files."""
-    orders  = pd.read_csv(DATA_DIR / "orders.csv")
-    returns = pd.read_csv(DATA_DIR / "returns.csv")
+    truncating or modifying input files."""
+    orders       = pd.read_csv(DATA_DIR / "orders.csv")
+    returns      = pd.read_csv(DATA_DIR / "returns.csv")
+    shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
+    alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
+    promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
 
+    # Trap 1 anchors
     assert len(orders) == 54_894, \
         f"orders.csv must not be modified (expected 54,894 rows, got {len(orders)})."
     assert len(returns) == 8_363, \
         f"returns.csv must not be modified (expected 8,363 rows, got {len(returns)})."
-
-    # CH03 return signal must be present
     ch03_returns = returns[returns["channel_id"] == "CH03"]
     assert len(ch03_returns) >= 6_000, \
         f"CH03 return rows must not be removed (expected ≥6,000, got {len(ch03_returns)})."
 
-    # November volume spike must be present (promotions.csv must not be emptied)
+    # Trap 2 anchors — shared_costs and allocation rules must not be stripped
+    assert len(shared_costs) == 24, \
+        f"shared_costs.csv must not be modified (expected 24 rows, got {len(shared_costs)})."
+    assert float(shared_costs["total_cost"].sum()) >= 500_000, \
+        "shared_costs.csv annual total must not be reduced below $500,000."
+    assert set(alloc_rules["allocation_basis"].unique()) == {"order_count"}, \
+        "cost_allocation_rules.csv allocation_basis values must not be changed."
+
+    # Trap 3 anchors — November volume spike and cashback rate
     orders["month"] = pd.to_datetime(orders["order_date"]).dt.month
     nov_count = len(orders[orders["month"] == 11])
     jun_count = len(orders[orders["month"] == 6])
     assert nov_count > jun_count * 1.5, \
-        f"November order count ({nov_count}) should be >1.5x June ({jun_count}); " \
-        f"promotions.csv may have been modified."
+        f"November order count ({nov_count}) should be >1.5x June ({jun_count})."
+    assert len(promotions) == 1, \
+        f"promotions.csv must not be modified (expected 1 row, got {len(promotions)})."
+    assert float(promotions.iloc[0]["cashback_pct"]) >= 0.40, \
+        "promotions.csv cashback_pct must not be reduced below 0.40."
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -92,6 +105,14 @@ def test_case_04_category_report_schema():
     missing  = required - set(df.columns)
     assert not missing, f"category_profitability.csv missing columns: {missing}"
     assert len(df) == 5, f"Expected 5 rows (one per category), got {len(df)}."
+
+
+def test_case_04b_monthly_report_schema():
+    df = pd.read_csv(MO_PATH)
+    required = {"month", "net_profit"}
+    missing  = required - set(df.columns)
+    assert not missing, f"monthly_profitability.csv missing columns: {missing}"
+    assert len(df) == 12, f"Expected 12 rows (one per calendar month), got {len(df)}."
 
 
 def test_case_05_summary_schema():
@@ -173,19 +194,24 @@ def ground_truth():
     mo_net = mo_gp - cashback_by_month.reindex(mo_gp.index, fill_value=0.0)
 
     total_net = float(round(
-        float(ch_net.sum()) - float(cat_alloc.sum()) - float(cashback_by_month.sum()),
+        float(orders["gross_profit"].sum())
+        - float(ret["return_cost"].sum())
+        - float(cat_alloc.sum())
+        - float(cashback_by_month.sum()),
         2,
     ))
 
     return {
-        "most_profitable_channel":  str(ch_net.idxmax()),
-        "least_profitable_channel": str(ch_net.idxmin()),
-        "ch_net":                   ch_net,
-        "most_profitable_category": str(cat_net.idxmax()),
+        "most_profitable_channel":   str(ch_net.idxmax()),
+        "least_profitable_channel":  str(ch_net.idxmin()),
+        "ch_net":                    ch_net,
+        "most_profitable_category":  str(cat_net.idxmax()),
         "least_profitable_category": str(cat_net.idxmin()),
-        "best_margin_month":        str(mo_net.idxmax()),
-        "worst_margin_month":       str(mo_net.idxmin()),
-        "total_net_profit":         total_net,
+        "cat_net":                   cat_net,
+        "best_margin_month":         str(mo_net.idxmax()),
+        "worst_margin_month":        str(mo_net.idxmin()),
+        "mo_net":                    mo_net,
+        "total_net_profit":          total_net,
     }
 
 
@@ -262,6 +288,21 @@ def test_case_09_most_profitable_category(ground_truth):
     )
 
 
+def test_case_09b_least_profitable_category(ground_truth):
+    """Least profitable category must match order-count-based allocation ground truth."""
+    if not SUM_PATH.exists():
+        pytest.skip("summary.json not found")
+    with open(SUM_PATH) as f:
+        s = json.load(f)
+    exp = ground_truth["least_profitable_category"]
+    got = s.get("least_profitable_category", "")
+    assert got == exp, (
+        f"least_profitable_category: got {got!r}, expected {exp!r}. "
+        f"Shared costs must be split by order_count as specified in "
+        f"cost_allocation_rules.csv, not by revenue."
+    )
+
+
 # ── Hard test 5: best and worst margin months (Trap 3) ───────────────────────
 
 def test_case_10_margin_months(ground_truth):
@@ -286,4 +327,71 @@ def test_case_10_margin_months(ground_truth):
     assert got_worst == exp_worst, (
         f"worst_margin_month: got {got_worst!r}, expected {exp_worst!r}. "
         f"November's cashback obligation ({exp_worst}) drives it to negative net profit."
+    )
+
+
+# ── Hard test 6: category net profit values (Trap 2 support) ─────────────────
+
+def test_case_11_category_net_profit_values(ground_truth):
+    """All five category net_profit values must be within ±10% of ground truth.
+    Revenue-based allocation over-charges high-revenue/low-order categories
+    (Electronics) and under-charges high-order/low-revenue ones (Apparel)."""
+    if not CAT_PATH.exists():
+        pytest.skip("category_profitability.csv not found")
+    df     = pd.read_csv(CAT_PATH).set_index("category_id")
+    cat_gt = ground_truth["cat_net"]
+    errors = []
+    for cat_id, exp in cat_gt.items():
+        if cat_id not in df.index:
+            errors.append(f"  {cat_id}: missing from report")
+            continue
+        got = float(df.loc[cat_id, "net_profit"])
+        tol = max(abs(exp) * 0.10, 2_000.0)
+        if abs(got - exp) > tol:
+            errors.append(f"  {cat_id}: got ${got:,.0f}, expected ${exp:,.0f} (±10%)")
+    assert not errors, "Category net profit values outside ±10% tolerance:\n" + "\n".join(errors)
+
+
+# ── Hard test 7: monthly net profit values (Trap 3 support) ──────────────────
+
+def test_case_12_monthly_net_profit_values(ground_truth):
+    """Best and worst month net_profit values must be within ±10% of ground truth.
+    Without cashback, November shows as the best month with a large positive value;
+    the correct value is negative."""
+    if not MO_PATH.exists():
+        pytest.skip("monthly_profitability.csv not found")
+    df    = pd.read_csv(MO_PATH).set_index("month")
+    mo_gt = ground_truth["mo_net"]
+
+    for label, mo_id in [
+        ("best_margin_month",  ground_truth["best_margin_month"]),
+        ("worst_margin_month", ground_truth["worst_margin_month"]),
+    ]:
+        if mo_id not in df.index:
+            pytest.fail(f"{mo_id} missing from monthly_profitability.csv")
+        exp = float(mo_gt[mo_id])
+        got = float(df.loc[mo_id, "net_profit"])
+        tol = max(abs(exp) * 0.10, 5_000.0)
+        assert abs(got - exp) <= tol, (
+            f"{label} ({mo_id}) net_profit: got ${got:,.0f}, expected ${exp:,.0f} (±10%). "
+            f"Cashback obligations from promotions.csv must be deducted."
+        )
+
+
+# ── Hard test 8: total net profit (all three deductions) ─────────────────────
+
+def test_case_13_total_net_profit(ground_truth):
+    """total_net_profit must account for all three cost categories: return losses,
+    shared overhead, and promotional cashback. Omitting any one deduction inflates
+    the result significantly."""
+    if not SUM_PATH.exists():
+        pytest.skip("summary.json not found")
+    with open(SUM_PATH) as f:
+        s = json.load(f)
+    exp = ground_truth["total_net_profit"]
+    got = float(s.get("total_net_profit", 0.0))
+    tol = max(abs(exp) * 0.05, 5_000.0)
+    assert abs(got - exp) <= tol, (
+        f"total_net_profit: got ${got:,.2f}, expected ${exp:,.2f} (±5%). "
+        f"Must equal total gross profit minus return losses, shared overhead, and cashback."
     )
