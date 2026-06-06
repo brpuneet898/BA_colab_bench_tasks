@@ -1,0 +1,3 @@
+cost_type,allocation_basis
+warehousing,order_count
+fulfillment,order_count
