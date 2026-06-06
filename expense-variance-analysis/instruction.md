@@ -2,6 +2,8 @@ Build a Q1 2024 (January 1 – March 31) weekly payroll cost variance report for
 
 Shifts starting at or after 21:00 are classified as night shifts and are paid at 1.3× the employee's base hourly rate. Overtime is assessed on total weekly hours; the overtime premium is 0.5× the applicable shift rate (base rate for day shifts, 1.3× base rate for night shifts). The weekly overtime threshold resets each Monday. Weeks run Monday through Sunday.
 
+All payroll calculations in this report must follow legal compliance(e.g. FLSA).
+
 When an employee is temporarily reassigned to another department, the receiving department is charged for those hours at the employee's base hourly rate. Overtime is calculated on the employee's total weekly hours and the overtime premium stays with the home department.
 
 Budget: `weekly_budget.csv` provides budgeted_hours and avg_hourly_rate per department per week. Budgeted cost = budgeted_hours × avg_hourly_rate with no overtime premium.
