@@ -66,10 +66,8 @@ ch_net = ch_gp - ch_ret.reindex(ch_gp.index, fill_value=0.0)
 
 ch_report = (
     pd.DataFrame({
-        "channel_id":    ch_net.index,
-        "gross_profit":  ch_gp.reindex(ch_net.index).round(2).values,
-        "return_losses": ch_ret.reindex(ch_net.index, fill_value=0.0).round(2).values,
-        "net_profit":    ch_net.round(2).values,
+        "channel_id": ch_net.index,
+        "net_profit": ch_net.round(2).values,
     })
     .sort_values("net_profit", ascending=False)
     .reset_index(drop=True)
@@ -99,10 +97,8 @@ cat_net = cat_gp - cat_alloc
 
 cat_report = (
     pd.DataFrame({
-        "category_id":          cat_net.index,
-        "gross_profit":         cat_gp.reindex(cat_net.index).round(2).values,
-        "allocated_shared_cost": cat_alloc.reindex(cat_net.index).round(2).values,
-        "net_profit":           cat_net.round(2).values,
+        "category_id": cat_net.index,
+        "net_profit":  cat_net.round(2).values,
     })
     .sort_values("net_profit", ascending=False)
     .reset_index(drop=True)
@@ -132,10 +128,8 @@ mo_net = mo_gp - cashback_by_month.reindex(mo_gp.index, fill_value=0.0)
 
 mo_report = (
     pd.DataFrame({
-        "month":               mo_net.index,
-        "gross_profit":        mo_gp.reindex(mo_net.index).round(2).values,
-        "cashback_obligation": cashback_by_month.reindex(mo_net.index, fill_value=0.0).round(2).values,
-        "net_profit":          mo_net.round(2).values,
+        "month":      mo_net.index,
+        "net_profit": mo_net.round(2).values,
     })
     .sort_values("month")
     .reset_index(drop=True)

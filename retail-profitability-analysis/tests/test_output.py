@@ -80,7 +80,7 @@ def test_case_02_outputs_exist():
 
 def test_case_03_channel_report_schema():
     df = pd.read_csv(CH_PATH)
-    required = {"channel_id", "gross_profit", "return_losses", "net_profit"}
+    required = {"channel_id", "net_profit"}
     missing  = required - set(df.columns)
     assert not missing, f"channel_profitability.csv missing columns: {missing}"
     assert len(df) == 5, f"Expected 5 rows (one per channel), got {len(df)}."
@@ -88,7 +88,7 @@ def test_case_03_channel_report_schema():
 
 def test_case_04_category_report_schema():
     df = pd.read_csv(CAT_PATH)
-    required = {"category_id", "gross_profit", "allocated_shared_cost", "net_profit"}
+    required = {"category_id", "net_profit"}
     missing  = required - set(df.columns)
     assert not missing, f"category_profitability.csv missing columns: {missing}"
     assert len(df) == 5, f"Expected 5 rows (one per category), got {len(df)}."
@@ -226,10 +226,11 @@ def test_case_07_least_profitable_channel(ground_truth):
 # ── Hard test 3: channel net profit values (Trap 1 support) ──────────────────
 
 def test_case_08_channel_net_profit_values(ground_truth):
-    """All five channel net_profit values must be within ±10% of ground truth."""
+    """All five channel net_profit values must be within ±10% of ground truth.
+    A model that ignores returns will report CH03 net profit ~$1.1M instead of -$143K."""
     if not CH_PATH.exists():
         pytest.skip("channel_profitability.csv not found")
-    df  = pd.read_csv(CH_PATH).set_index("channel_id")
+    df    = pd.read_csv(CH_PATH).set_index("channel_id")
     ch_gt = ground_truth["ch_net"]
     errors = []
     for ch_id, exp in ch_gt.items():
@@ -239,9 +240,7 @@ def test_case_08_channel_net_profit_values(ground_truth):
         got = float(df.loc[ch_id, "net_profit"])
         tol = max(abs(exp) * 0.10, 500.0)
         if abs(got - exp) > tol:
-            errors.append(
-                f"  {ch_id}: got ${got:,.0f}, expected ${exp:,.0f} (±10%)"
-            )
+            errors.append(f"  {ch_id}: got ${got:,.0f}, expected ${exp:,.0f} (±10%)")
     assert not errors, "Channel net profit values outside ±10% tolerance:\n" + "\n".join(errors)
 
 
