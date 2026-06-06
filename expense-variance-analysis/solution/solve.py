@@ -15,6 +15,13 @@ Key observations from the data:
    full-time). Divide by 100 before any cost calculation.
 
 4. D05 uses a 36h/week OT threshold; D08 uses 44h/week (from ot_policy.csv).
+
+5. shifts.csv contains ~20 records with duration > 16 h (clock-out date entry
+   errors). These must be excluded before computing costs.
+
+6. transfers.csv records employees who moved departments on 2024-02-05.
+   employees.csv shows their current (post-transfer) department. Shifts before
+   the effective date must be attributed to from_dept_id.
 """
 
 import json
@@ -28,6 +35,7 @@ WORKSPACE_DIR = Path("/workspace")
 NIGHT_START_HOUR = 21
 NIGHT_RATE_MULT  = 1.3
 OT_MULT          = 1.5
+MAX_SHIFT_HOURS  = 16.0   # shifts longer than this are data-entry errors
 
 
 def load_data():
@@ -38,6 +46,7 @@ def load_data():
         pd.read_csv(DATA_DIR / "ot_policy.csv"),
         pd.read_csv(DATA_DIR / "reassignments.csv"),
         pd.read_csv(DATA_DIR / "weekly_budget.csv"),
+        pd.read_csv(DATA_DIR / "transfers.csv",    parse_dates=["effective_date"]),
     )
 
 
@@ -48,6 +57,11 @@ def fix_contractor_rates(employees):
     return emp
 
 
+def filter_duration_outliers(shifts):
+    hours = (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
+    return shifts[hours <= MAX_SHIFT_HOURS].copy()
+
+
 def week_start_of(ts):
     return (ts - pd.to_timedelta(ts.dt.weekday, unit="D")).dt.normalize()
 
@@ -55,12 +69,8 @@ def week_start_of(ts):
 def build_segments(shifts):
     """Tag night shifts, split cross-Monday shifts, return per-segment rows."""
     sh = shifts.copy()
-    # BOTTLENECK: night classification is based solely on shift_start hour; a flat
-    # rate for all shifts silently drops ~$98k in shift premiums across Q1.
     sh["is_night"] = sh["shift_start"].dt.hour >= NIGHT_START_HOUR
 
-    # BOTTLENECK: Sunday-night shifts that end Monday morning cross the week boundary;
-    # hours must be split at midnight so each week's aggregation is correct.
     crosses = week_start_of(sh["shift_start"]) != week_start_of(sh["shift_end"])
     normal  = sh[~crosses].copy()
     normal["seg_start"] = normal["shift_start"]
@@ -78,17 +88,24 @@ def build_segments(shifts):
     return segs
 
 
-def compute_weekly_costs(segs, employees, ot_policy):
+def apply_transfer_corrections(segs, transfers):
+    """Override department_id for segments that predate each employee's transfer."""
+    for _, tr in transfers.iterrows():
+        mask = (segs["employee_id"] == tr["employee_id"]) & \
+               (segs["seg_start"] < tr["effective_date"])
+        segs.loc[mask, "department_id"] = tr["from_dept_id"]
+    return segs
+
+
+def compute_weekly_costs(segs, employees, ot_policy, transfers):
     """Per employee-week cost with night-shift rate and chronological OT allocation."""
     segs = segs.merge(employees[["employee_id", "department_id", "hourly_rate"]],
                       on="employee_id")
+    segs = apply_transfer_corrections(segs, transfers)
     segs = segs.merge(ot_policy, on="department_id")
-    # BOTTLENECK: night shifts carry 1.3× rate; OT on night hours is 1.95× base,
-    # not 1.5× base. Using a uniform rate for all shifts gives the wrong OT premium.
+
     segs["eff_rate"] = segs["hourly_rate"] * np.where(segs["is_night"], NIGHT_RATE_MULT, 1.0)
 
-    # BOTTLENECK: OT allocation is chronological — cumulative hours within the
-    # employee-week determine when the threshold is crossed, not a weekly aggregate.
     segs = segs.sort_values(["employee_id", "week_start", "seg_start"]).reset_index(drop=True)
     segs["cum_before"] = (segs.groupby(["employee_id", "week_start"])["seg_hours"]
                              .cumsum() - segs["seg_hours"])
@@ -140,10 +157,11 @@ def build_report(dept_week, budget, depts):
 
 
 def main():
-    shifts, employees, depts, ot_policy, reassignments, budget = load_data()
+    shifts, employees, depts, ot_policy, reassignments, budget, transfers = load_data()
     employees = fix_contractor_rates(employees)
+    shifts    = filter_duration_outliers(shifts)
     segs      = build_segments(shifts)
-    emp_wk    = compute_weekly_costs(segs, employees, ot_policy)
+    emp_wk    = compute_weekly_costs(segs, employees, ot_policy, transfers)
     dept_week = apply_reassignments(emp_wk, employees, reassignments)
     report    = build_report(dept_week, budget, depts)
 

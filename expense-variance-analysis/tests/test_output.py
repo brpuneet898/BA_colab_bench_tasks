@@ -20,6 +20,16 @@ What makes this task genuinely hard:
 4. Per-department OT thresholds: D05 uses 36h/week, D08 uses 44h/week (from
    ot_policy.csv). A flat 40h threshold produces wrong costs for both.
 
+5. Duration outliers: ~20 shifts have durations of 26–34 h due to clock-out
+   date entry errors. They appear as clear outliers in .describe() on computed
+   shift hours. An agent that includes them inflates total hours and cost.
+
+6. Mid-quarter transfers: 10 employees moved departments on 2024-02-05.
+   employees.csv shows their post-transfer department. Shifts before the
+   effective date must be attributed to from_dept_id in transfers.csv.
+   An agent that uses employees.csv as a static lookup misattributes five
+   weeks of pre-transfer labor to the wrong department.
+
 Contract (instruction.md): the agent writes
     /workspace/payroll_variance_report.csv  (130 rows, 6 columns)
     /workspace/summary.json                 (5 scalar keys)
@@ -42,16 +52,21 @@ DATA_DIR = (WORKSPACE_DIR / "data") if (WORKSPACE_DIR / "data").exists() \
 REPORT_PATH  = WORKSPACE_DIR / "payroll_variance_report.csv"
 SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
 
-NIGHT_START_HOUR = 21          # shifts starting at or after 21:00 are night shifts
-NIGHT_RATE_MULT  = 1.3         # night shift rate = 1.3 × base
-OT_MULT          = 1.5         # overtime premium factor
+NIGHT_START_HOUR = 21
+NIGHT_RATE_MULT  = 1.3
+OT_MULT          = 1.5
+MAX_SHIFT_HOURS  = 16.0   # shifts longer than this are data-entry errors
 
 
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
-    shifts = pd.read_csv(DATA_DIR / "shifts.csv", parse_dates=["shift_start"])
-    assert len(shifts) == 35_756, "shifts.csv row count must not be modified."
+    shifts = pd.read_csv(DATA_DIR / "shifts.csv", parse_dates=["shift_start", "shift_end"])
+    assert len(shifts) == 35_780, "shifts.csv row count must not be modified."
+
+    durations = (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
+    assert (durations > 16).sum() >= 20, \
+        "At least 20 duration-outlier shifts (> 16 h) must be present."
 
     night = (shifts["shift_start"].dt.hour >= NIGHT_START_HOUR).sum()
     assert night >= 1_500, f"At least 1,500 night shifts must be present (found {night})."
@@ -64,6 +79,10 @@ def test_case_01_input_data_not_tampered():
     ot = pd.read_csv(DATA_DIR / "ot_policy.csv").set_index("department_id")["weekly_ot_threshold"]
     assert ot["D05"] == 36.0, "D05 must have a 36h OT threshold."
     assert ot["D08"] == 44.0, "D08 must have a 44h OT threshold."
+
+    transfers = pd.read_csv(DATA_DIR / "transfers.csv")
+    assert len(transfers) >= 10, "At least 10 department transfer records must be present."
+    assert {"employee_id", "from_dept_id", "to_dept_id", "effective_date"} <= set(transfers.columns)
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -120,13 +139,19 @@ def ground_truth():
     ot_policy    = pd.read_csv(DATA_DIR / "ot_policy.csv")
     reassignments= pd.read_csv(DATA_DIR / "reassignments.csv")
     budget       = pd.read_csv(DATA_DIR / "weekly_budget.csv")
+    transfers    = pd.read_csv(DATA_DIR / "transfers.csv",
+                               parse_dates=["effective_date"])
 
     # Trap 3: contractor rates in cents
     emp = employees.copy()
     emp.loc[emp["employee_type"] == "contractor", "hourly_rate"] /= 100.0
 
-    # Trap 1: night shift flag from shift_start hour
+    # Trap 5: exclude duration outliers (> 16 h are data-entry errors)
     sh = shifts.copy()
+    sh["_dur_h"] = (sh["shift_end"] - sh["shift_start"]).dt.total_seconds() / 3600
+    sh = sh[sh["_dur_h"] <= MAX_SHIFT_HOURS].copy()
+
+    # Trap 1: night shift flag from shift_start hour
     sh["is_night"] = sh["shift_start"].dt.hour >= NIGHT_START_HOUR
 
     # Trap 2: split cross-midnight shifts at Monday boundary
@@ -146,7 +171,15 @@ def ground_truth():
     segs["seg_hours"] = (segs["seg_end"] - segs["seg_start"]).dt.total_seconds() / 3600
     segs["week_start"] = _week_start_of(segs["seg_start"]).dt.strftime("%Y-%m-%d")
 
+    # Merge employees — gives post-transfer department for transferred employees
     segs = segs.merge(emp[["employee_id", "department_id", "hourly_rate"]], on="employee_id")
+
+    # Trap 6: correct department attribution for pre-transfer segments
+    for _, tr in transfers.iterrows():
+        mask = (segs["employee_id"] == tr["employee_id"]) & \
+               (segs["seg_start"] < tr["effective_date"])
+        segs.loc[mask, "department_id"] = tr["from_dept_id"]
+
     segs = segs.merge(ot_policy, on="department_id")
 
     # Trap 1: effective rate per segment (1.3× for night shifts)
@@ -207,7 +240,8 @@ def ground_truth():
 # ── Scalar value correctness ──────────────────────────────────────────────────
 
 def test_case_06_total_overtime_hours(ground_truth):
-    """Wrong if night shift rate is not applied before computing OT premium."""
+    """Wrong if night shift rate is not applied before computing OT premium,
+    or if duration-outlier shifts are included (they generate spurious OT hours)."""
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     assert abs(s["total_overtime_hours"] - ground_truth["total_overtime_hours"]) <= 1.0, \
@@ -216,7 +250,7 @@ def test_case_06_total_overtime_hours(ground_truth):
 
 
 def test_case_07_total_actual_cost(ground_truth):
-    """Wrong if night shift premium (1.3× rate) or contractor cents are missed."""
+    """Wrong if night shift premium, contractor cents, or duration outliers are missed."""
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     assert abs(s["total_actual_cost"] - ground_truth["total_actual_cost"]) <= 1.0, \
@@ -228,14 +262,17 @@ def test_case_07_total_actual_cost(ground_truth):
 
 def test_case_08_night_shift_premium_magnitude(ground_truth):
     """Night premium must add meaningfully to actual costs vs a flat-rate calculation."""
-    # Recompute total cost WITHOUT night premium to measure the gap
     shifts    = pd.read_csv(DATA_DIR / "shifts.csv", parse_dates=["shift_start", "shift_end"])
     employees = pd.read_csv(DATA_DIR / "employees.csv")
     emp = employees.copy()
     emp.loc[emp["employee_type"] == "contractor", "hourly_rate"] /= 100.0
 
+    # Only consider valid shifts
+    durations = (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
+    valid_shifts = shifts[durations <= MAX_SHIFT_HOURS]
+
     total_night_hours = 0.0
-    night_shifts = shifts[shifts["shift_start"].dt.hour >= NIGHT_START_HOUR]
+    night_shifts = valid_shifts[valid_shifts["shift_start"].dt.hour >= NIGHT_START_HOUR]
     for _, row in night_shifts.iterrows():
         h = (row["shift_end"] - row["shift_start"]).total_seconds() / 3600
         total_night_hours += h
@@ -245,8 +282,6 @@ def test_case_08_night_shift_premium_magnitude(ground_truth):
 
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
-    gap = s["total_actual_cost"] - (ground_truth["total_actual_cost"]
-                                    - total_night_hours * avg_rate * (NIGHT_RATE_MULT - 1.0))
     assert s["total_actual_cost"] >= ground_truth["total_actual_cost"] - min_expected_premium, \
         ("total_actual_cost is too low — night shift premium (1.3× for shifts starting "
          f"at or after {NIGHT_START_HOUR}:00) appears to be missing or underapplied.")
@@ -279,3 +314,39 @@ def test_case_10_reassignment_and_row_accuracy(ground_truth):
     close = (abs(merged["actual_cost_got"] - merged["actual_cost_exp"]) <= 1.0).sum()
     assert close >= 120, \
         f"Only {close}/130 rows match ground truth within ±1.0."
+
+
+def test_case_11_pre_transfer_department_attribution(ground_truth):
+    """Shifts before an employee's transfer date must be attributed to from_dept_id.
+
+    employees.csv reflects each employee's current (post-transfer) department.
+    transfers.csv records the effective date and the department they came from.
+    Using employees.csv as a static department lookup misattributes five weeks
+    of pre-transfer labor to the wrong department.
+    """
+    transfers = pd.read_csv(DATA_DIR / "transfers.csv", parse_dates=["effective_date"])
+    report    = pd.read_csv(REPORT_PATH)
+    gt        = ground_truth["_report"]
+
+    # Check from_dept rows in the five pre-transfer weeks (2024-01-01 through 2024-01-29)
+    pre_transfer_weeks = pd.date_range("2024-01-01", periods=5, freq="7D") \
+                           .strftime("%Y-%m-%d").tolist()
+    from_depts = transfers["from_dept_id"].unique()
+
+    errors = []
+    for dept in from_depts:
+        for ws in pre_transfer_weeks:
+            gt_row  = gt  [(gt  ["department_id"] == dept) & (gt  ["week_start"] == ws)]
+            rep_row = report[(report["department_id"] == dept) & (report["week_start"] == ws)]
+            if gt_row.empty or rep_row.empty:
+                continue
+            exp = float(round(gt_row["actual_cost"].iloc[0], 2))
+            got = float(rep_row["actual_cost"].iloc[0])
+            if abs(got - exp) > 5.0:
+                errors.append(f"  {dept}/{ws}: got {got:.2f}, expected {exp:.2f}")
+
+    assert not errors, (
+        f"{len(errors)} from_dept rows have incorrect costs in pre-transfer weeks. "
+        f"Shifts before the effective_date in transfers.csv must be charged to from_dept_id:\n"
+        + "\n".join(errors[:5])
+    )

@@ -20,6 +20,8 @@ Input data:
 
 `/workspace/data/weekly_budget.csv` — department_id, week_start (date, always a Monday), budgeted_hours, avg_hourly_rate
 
+`/workspace/data/transfers.csv` — employee_id, from_dept_id, to_dept_id, effective_date
+
 Required outputs:
 
 Save `/workspace/payroll_variance_report.csv` with columns: department_id, department_name, week_start, budgeted_cost, actual_cost, variance (actual_cost − budgeted_cost). Include one row per department per week (10 departments × 13 weeks = 130 rows), sorted by department_id then week_start.
