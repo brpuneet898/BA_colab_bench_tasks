@@ -25,12 +25,13 @@ Key observations from the data:
 """
 
 import json
+import os
 import numpy as np
 import pandas as pd
 from pathlib import Path
 
-DATA_DIR      = Path("/workspace/data")
-WORKSPACE_DIR = Path("/workspace")
+DATA_DIR      = Path(os.environ.get("DATA_DIR",      "/workspace/data"))
+WORKSPACE_DIR = Path(os.environ.get("WORKSPACE_DIR", "/workspace"))
 
 NIGHT_START_HOUR = 21
 NIGHT_RATE_MULT  = 1.3

@@ -2,13 +2,13 @@ Build a Q1 2024 (January 1 – March 31) weekly payroll cost variance report for
 
 Shifts starting at or after 21:00 are classified as night shifts and are paid at 1.3× the employee's base hourly rate. Overtime is assessed on total weekly hours; the overtime premium is 0.5× the applicable shift rate (base rate for day shifts, 1.3× base rate for night shifts). The weekly overtime threshold resets each Monday. Weeks run Monday through Sunday. Shifts spanning the Sunday/Monday midnight boundary contribute hours to each respective week. The night shift classification and its 1.3× rate apply to all hours of the qualifying shift.
 
-When an employee is temporarily reassigned to another department, the receiving department is charged for those hours at the employee's base hourly rate. Overtime is calculated on the employee's total weekly hours and the overtime premium stays with the home department.
+Shifts are attributed to the department the employee was assigned to at the time of the shift. When an employee is temporarily reassigned to another department, the receiving department is charged for those hours at the employee's base hourly rate. Overtime is calculated on the employee's total weekly hours and the overtime premium stays with the home department.
 
 Budget: `weekly_budget.csv` provides budgeted_hours and avg_hourly_rate per department per week. Budgeted cost = budgeted_hours × avg_hourly_rate with no overtime premium.
 
 Input data:
 
-`/workspace/data/shifts.csv` — shift_id, employee_id, shift_start, shift_end
+`/workspace/data/shifts.csv` — shift_id, employee_id, shift_start, shift_end. Warehouse shifts run 6–14 hours; records with durations outside this range are data-entry errors and must be excluded before analysis.
 
 `/workspace/data/employees.csv` — employee_id, department_id, hourly_rate, employee_type (full_time or contractor). Contractor hourly_rate values are stored in US cents by the HR export system.
 

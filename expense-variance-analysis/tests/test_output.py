@@ -36,18 +36,27 @@ Contract (instruction.md): the agent writes
 """
 
 import json
+import os
 import numpy as np
 import pandas as pd
 import pytest
 from pathlib import Path
 
-if Path("/workspace").exists():
+_ws_env = os.environ.get("WORKSPACE_DIR")
+if _ws_env:
+    WORKSPACE_DIR = Path(_ws_env)
+elif Path("/workspace").exists():
     WORKSPACE_DIR = Path("/workspace")
 else:
     WORKSPACE_DIR = Path(__file__).parent.parent
 
-DATA_DIR = (WORKSPACE_DIR / "data") if (WORKSPACE_DIR / "data").exists() \
-    else Path(__file__).parent.parent / "environment" / "data"
+_data_env = os.environ.get("DATA_DIR")
+if _data_env:
+    DATA_DIR = Path(_data_env)
+elif (WORKSPACE_DIR / "data").exists():
+    DATA_DIR = WORKSPACE_DIR / "data"
+else:
+    DATA_DIR = Path(__file__).parent.parent / "environment" / "data"
 
 REPORT_PATH  = WORKSPACE_DIR / "payroll_variance_report.csv"
 SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
