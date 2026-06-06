@@ -8,7 +8,7 @@ Budget: `weekly_budget.csv` provides budgeted_hours and avg_hourly_rate per depa
 
 Input data:
 
-`/workspace/data/shifts.csv` — shift_id, employee_id, shift_start (US Eastern), shift_end (US Eastern)
+`/workspace/data/shifts.csv` — shift_id, employee_id, shift_start, shift_end
 
 `/workspace/data/employees.csv` — employee_id, department_id, hourly_rate, employee_type (full_time or contractor). Contractor hourly_rate values are stored in US cents by the HR export system.
 
