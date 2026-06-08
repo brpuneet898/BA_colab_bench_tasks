@@ -1,241 +1,3001 @@
-deal_id,cancelled_date
-D00426,2024-04-24
-D00432,2024-04-04
-D00437,2024-03-12
-D00442,2024-03-13
-D00465,2024-02-01
-D00469,2024-02-27
-D00490,2024-04-12
-D00507,2024-04-15
-D00532,2024-04-30
-D00540,2024-02-08
-D00550,2024-02-23
-D00559,2024-04-09
-D00565,2024-03-04
-D00572,2024-02-23
-D00622,2024-02-26
-D00629,2024-04-23
-D00639,2024-04-18
-D00642,2024-02-01
-D00649,2024-04-16
-D00651,2024-03-22
-D00665,2024-04-17
-D00675,2024-03-28
-D00676,2024-04-02
-D00681,2024-03-23
-D00685,2024-04-07
-D00707,2024-04-14
-D00708,2024-03-17
-D00719,2024-02-11
-D00727,2024-02-09
-D00732,2024-03-09
-D00744,2024-03-14
-D00751,2024-04-18
-D00755,2024-02-03
-D00762,2024-04-20
-D00776,2024-02-05
-D00788,2024-03-16
-D00804,2024-03-10
-D00809,2024-03-22
-D00811,2024-02-04
-D00824,2024-04-09
-D00837,2024-02-13
-D00852,2024-04-11
-D00855,2024-03-23
-D00858,2024-04-20
-D00873,2024-04-29
-D00882,2024-04-16
-D00883,2024-03-12
-D00893,2024-03-09
-D00898,2024-03-31
-D00899,2024-03-30
-D00927,2024-04-12
-D00929,2024-03-15
-D00934,2024-03-13
-D00944,2024-02-11
-D00946,2024-02-16
-D00951,2024-04-14
-D00962,2024-04-30
-D00964,2024-03-26
-D00969,2024-03-02
-D00971,2024-02-06
-D00986,2024-02-04
-D00991,2024-04-01
-D00996,2024-03-29
-D00998,2024-02-26
-D01020,2024-02-17
-D01027,2024-02-07
-D01038,2024-04-02
-D01050,2024-03-26
-D01056,2024-03-01
-D01119,2024-04-06
-D01137,2024-04-17
-D01149,2024-03-18
-D01151,2024-02-24
-D01155,2024-02-01
-D01157,2024-04-12
-D01159,2024-03-23
-D01171,2024-03-03
-D01175,2024-02-01
-D01176,2024-04-14
-D01187,2024-04-24
-D01193,2024-03-15
-D01209,2024-02-25
-D01214,2024-03-27
-D01219,2024-04-19
-D01229,2024-03-24
-D01238,2024-02-02
-D01243,2024-02-18
-D01264,2024-02-09
-D01267,2024-03-09
-D01274,2024-03-12
-D01312,2024-03-20
-D01316,2024-04-09
-D01330,2024-02-11
-D01355,2024-04-25
-D01360,2024-02-24
-D01365,2024-03-18
-D01373,2024-02-19
-D01402,2024-03-03
-D01409,2024-04-15
-D01415,2024-02-05
-D01421,2024-03-15
-D01425,2024-03-24
-D01434,2024-03-23
-D01439,2024-03-06
-D01441,2024-03-06
-D01457,2024-04-22
-D01463,2024-02-22
-D01464,2024-03-15
-D01485,2024-03-04
-D01486,2024-04-09
-D01488,2024-04-13
-D01490,2024-04-17
-D01501,2024-02-08
-D01503,2024-02-09
-D01510,2024-03-05
-D01531,2024-03-11
-D01536,2024-02-06
-D01545,2024-04-21
-D01546,2024-04-21
-D01553,2024-03-10
-D01557,2024-04-10
-D01559,2024-03-22
-D01564,2024-03-31
-D01565,2024-04-19
-D01577,2024-02-09
-D01584,2024-02-21
-D01593,2024-03-10
-D01594,2024-04-21
-D01601,2024-03-25
-D01612,2024-03-07
-D01621,2024-02-03
-D01630,2024-03-25
-D01639,2024-02-25
-D01659,2024-03-01
-D01687,2024-04-30
-D01688,2024-03-19
-D01720,2024-02-13
-D01721,2024-02-05
-D01723,2024-03-06
-D01724,2024-02-06
-D01731,2024-03-10
-D01736,2024-03-09
-D01752,2024-04-20
-D01757,2024-03-02
-D01762,2024-02-25
-D01774,2024-03-27
-D01777,2024-03-29
-D01784,2024-02-04
-D01796,2024-02-08
-D01807,2024-02-16
-D01821,2024-04-10
-D01828,2024-02-19
-D01836,2024-04-30
-D01837,2024-03-11
-D01838,2024-04-25
-D01843,2024-02-23
-D01848,2024-03-10
-D01853,2024-02-13
-D01856,2024-04-17
-D01889,2024-03-25
-D01894,2024-02-07
-D01898,2024-04-07
-D01902,2024-04-20
-D01904,2024-04-02
-D01907,2024-04-13
-D01928,2024-02-25
-D01939,2024-03-10
-D01963,2024-04-17
-D01964,2024-03-26
-D01977,2024-03-27
-D01982,2024-04-10
-D01986,2024-03-27
-D01994,2024-02-12
-D02000,2024-02-20
-D02002,2024-04-11
-D02005,2024-02-22
-D02007,2024-03-31
-D02012,2024-03-14
-D02043,2024-03-27
-D02048,2024-02-22
-D02056,2024-02-28
-D02057,2024-04-02
-D02061,2024-02-16
-D02062,2024-02-28
-D02066,2024-04-30
-D02076,2024-02-14
-D02078,2024-03-23
-D02084,2024-02-14
-D02118,2024-04-04
-D02139,2024-02-12
-D02148,2024-03-23
-D02164,2024-03-11
-D02168,2024-04-03
-D02169,2024-02-01
-D02170,2024-03-18
-D02183,2024-03-20
-D02188,2024-02-22
-D02196,2024-02-27
-D02198,2024-04-04
-D02207,2024-03-21
-D02214,2024-03-24
-D02219,2024-04-25
-D02227,2024-03-08
-D02263,2024-04-19
-D02264,2024-04-28
-D02266,2024-03-23
-D02273,2024-02-20
-D02275,2024-03-09
-D02277,2024-02-05
-D02284,2024-04-03
-D02285,2024-02-25
-D02298,2024-04-24
-D02299,2024-03-30
-D02300,2024-03-16
-D02302,2024-02-17
-D02313,2024-02-09
-D02314,2024-04-01
-D02321,2024-04-09
-D02324,2024-02-24
-D02326,2024-02-01
-D02328,2024-02-29
-D02331,2024-04-09
-D02353,2024-03-24
-D02354,2024-02-08
-D02355,2024-02-11
-D02357,2024-02-10
-D02388,2024-04-09
-D02391,2024-04-11
-D02393,2024-03-08
-D02402,2024-04-03
-D02421,2024-02-02
-D02425,2024-03-22
-D02431,2024-02-25
-D02433,2024-04-14
-D02436,2024-03-15
-D02447,2024-04-17
-D02449,2024-03-22
-D02472,2024-03-13
-D02477,2024-04-26
-D02497,2024-04-30
+deal_id,cancelled_date,reason_code,initiated_by
+D013021,2024-04-13,Budget Cut,Rep
+D013044,2024-03-22,Competitor Switch,Admin
+D013059,2024-02-06,Competitor Switch,Rep
+D013064,2024-04-09,Customer Churn,Admin
+D013068,2024-03-15,Customer Churn,Rep
+D013079,2024-02-20,Admin Error,Admin
+D013080,2024-03-15,Budget Cut,Rep
+D013082,2024-04-16,Downgrade,Admin
+D013102,2024-03-02,Competitor Switch,Rep
+D013110,2024-03-28,Non-Renewal,Rep
+D013116,2024-02-03,Non-Renewal,Rep
+D013117,2024-02-14,Competitor Switch,Rep
+D013123,2024-04-29,Competitor Switch,Rep
+D013127,2024-03-09,Customer Churn,Customer
+D013129,2024-04-26,Customer Churn,Admin
+D013132,2024-02-18,Non-Renewal,Rep
+D013133,2024-02-19,Customer Churn,Rep
+D013139,2024-02-29,Budget Cut,Admin
+D013148,2024-03-02,Non-Renewal,Customer
+D013166,2024-03-17,Customer Churn,Customer
+D013180,2024-03-13,Budget Cut,Admin
+D013187,2024-02-17,Admin Error,Customer
+D013208,2024-03-26,Admin Error,Customer
+D013221,2024-02-07,Non-Renewal,Rep
+D013243,2024-02-03,Downgrade,Rep
+D013260,2024-02-06,Budget Cut,Rep
+D013287,2024-03-05,Admin Error,Admin
+D013289,2024-04-25,Competitor Switch,Admin
+D013292,2024-04-27,Customer Churn,Customer
+D013295,2024-02-26,Competitor Switch,Customer
+D013302,2024-03-09,Competitor Switch,Rep
+D013320,2024-04-03,Competitor Switch,Customer
+D013338,2024-03-09,Downgrade,Admin
+D013368,2024-02-15,Admin Error,Customer
+D013369,2024-02-05,Downgrade,Rep
+D013373,2024-02-22,Downgrade,Customer
+D013375,2024-03-27,Admin Error,Admin
+D013382,2024-04-22,Non-Renewal,Customer
+D013389,2024-03-13,Budget Cut,Customer
+D013401,2024-04-24,Budget Cut,Admin
+D013405,2024-04-27,Downgrade,Rep
+D013408,2024-02-03,Non-Renewal,Rep
+D013410,2024-02-15,Downgrade,Admin
+D013414,2024-02-03,Non-Renewal,Rep
+D013419,2024-02-04,Budget Cut,Customer
+D013423,2024-02-12,Downgrade,Admin
+D013429,2024-04-28,Non-Renewal,Customer
+D013446,2024-03-27,Competitor Switch,Admin
+D013455,2024-04-06,Admin Error,Rep
+D013456,2024-04-10,Competitor Switch,Admin
+D013457,2024-04-18,Downgrade,Customer
+D013465,2024-02-02,Admin Error,Customer
+D013482,2024-03-26,Downgrade,Customer
+D013484,2024-04-20,Customer Churn,Admin
+D013529,2024-03-01,Customer Churn,Admin
+D013564,2024-04-15,Admin Error,Customer
+D013566,2024-03-14,Admin Error,Customer
+D013592,2024-03-24,Non-Renewal,Admin
+D013601,2024-02-12,Admin Error,Customer
+D013602,2024-02-12,Downgrade,Customer
+D013605,2024-02-05,Customer Churn,Admin
+D013615,2024-04-26,Budget Cut,Rep
+D013624,2024-04-28,Budget Cut,Rep
+D013632,2024-04-12,Competitor Switch,Customer
+D013673,2024-03-25,Downgrade,Customer
+D013680,2024-03-04,Admin Error,Customer
+D013681,2024-03-21,Customer Churn,Admin
+D013685,2024-02-20,Competitor Switch,Rep
+D013692,2024-03-08,Competitor Switch,Admin
+D013712,2024-02-02,Customer Churn,Customer
+D013751,2024-03-04,Downgrade,Rep
+D013758,2024-02-21,Admin Error,Admin
+D013767,2024-03-13,Admin Error,Admin
+D013770,2024-02-23,Non-Renewal,Customer
+D013771,2024-04-24,Budget Cut,Rep
+D013775,2024-03-22,Non-Renewal,Admin
+D013788,2024-02-08,Non-Renewal,Admin
+D013795,2024-04-13,Budget Cut,Rep
+D013800,2024-04-19,Competitor Switch,Customer
+D013810,2024-02-02,Non-Renewal,Rep
+D013821,2024-02-21,Downgrade,Customer
+D013822,2024-03-30,Non-Renewal,Rep
+D013826,2024-03-26,Non-Renewal,Admin
+D013833,2024-04-20,Non-Renewal,Rep
+D013868,2024-03-21,Non-Renewal,Admin
+D013888,2024-04-02,Budget Cut,Rep
+D013893,2024-02-18,Admin Error,Rep
+D013899,2024-03-10,Downgrade,Admin
+D013903,2024-04-19,Downgrade,Customer
+D013904,2024-02-09,Non-Renewal,Admin
+D013912,2024-04-15,Competitor Switch,Customer
+D013915,2024-02-19,Customer Churn,Admin
+D013918,2024-03-15,Customer Churn,Rep
+D013926,2024-03-23,Customer Churn,Rep
+D013932,2024-02-18,Admin Error,Rep
+D013938,2024-04-17,Downgrade,Rep
+D013957,2024-03-18,Budget Cut,Customer
+D013970,2024-03-20,Budget Cut,Admin
+D013982,2024-02-20,Budget Cut,Rep
+D014000,2024-03-26,Admin Error,Customer
+D014001,2024-02-11,Competitor Switch,Customer
+D014015,2024-04-23,Downgrade,Admin
+D014018,2024-02-16,Downgrade,Admin
+D014022,2024-03-25,Customer Churn,Admin
+D014030,2024-03-31,Customer Churn,Admin
+D014032,2024-03-01,Admin Error,Admin
+D014035,2024-03-11,Downgrade,Rep
+D014057,2024-02-05,Non-Renewal,Rep
+D014059,2024-04-19,Downgrade,Customer
+D014067,2024-02-12,Customer Churn,Customer
+D014076,2024-03-11,Competitor Switch,Rep
+D014104,2024-03-09,Competitor Switch,Customer
+D014111,2024-02-04,Downgrade,Admin
+D014119,2024-02-12,Competitor Switch,Customer
+D014124,2024-03-22,Competitor Switch,Customer
+D014131,2024-04-30,Competitor Switch,Customer
+D014140,2024-02-14,Downgrade,Admin
+D014141,2024-03-26,Downgrade,Rep
+D014149,2024-02-14,Budget Cut,Rep
+D014163,2024-02-14,Admin Error,Rep
+D014209,2024-02-21,Customer Churn,Rep
+D014229,2024-02-19,Non-Renewal,Customer
+D014238,2024-02-02,Admin Error,Rep
+D014240,2024-03-08,Competitor Switch,Rep
+D014259,2024-02-25,Downgrade,Rep
+D014260,2024-03-06,Competitor Switch,Customer
+D014268,2024-02-22,Admin Error,Rep
+D014277,2024-04-04,Customer Churn,Rep
+D014278,2024-04-25,Downgrade,Admin
+D014283,2024-03-04,Budget Cut,Admin
+D014323,2024-03-01,Customer Churn,Admin
+D014364,2024-04-16,Downgrade,Admin
+D014402,2024-04-11,Admin Error,Admin
+D014418,2024-04-12,Customer Churn,Rep
+D014424,2024-02-17,Customer Churn,Customer
+D014425,2024-02-10,Budget Cut,Customer
+D014445,2024-04-28,Budget Cut,Admin
+D014455,2024-02-01,Downgrade,Customer
+D014459,2024-04-06,Downgrade,Customer
+D014487,2024-03-20,Customer Churn,Admin
+D014488,2024-04-16,Downgrade,Admin
+D014510,2024-03-06,Downgrade,Rep
+D014511,2024-03-26,Non-Renewal,Customer
+D014514,2024-02-08,Non-Renewal,Rep
+D014518,2024-03-15,Competitor Switch,Admin
+D014520,2024-02-01,Admin Error,Admin
+D014533,2024-03-15,Downgrade,Rep
+D014548,2024-03-10,Competitor Switch,Admin
+D014553,2024-02-24,Non-Renewal,Rep
+D014555,2024-03-13,Downgrade,Admin
+D014564,2024-04-19,Admin Error,Admin
+D014583,2024-03-03,Customer Churn,Rep
+D014588,2024-02-17,Competitor Switch,Customer
+D014591,2024-02-14,Downgrade,Admin
+D014623,2024-04-13,Non-Renewal,Admin
+D014630,2024-02-05,Budget Cut,Rep
+D014631,2024-02-18,Non-Renewal,Customer
+D014642,2024-03-03,Customer Churn,Rep
+D014653,2024-04-27,Customer Churn,Customer
+D014673,2024-04-29,Competitor Switch,Customer
+D014700,2024-03-07,Non-Renewal,Admin
+D014703,2024-02-21,Non-Renewal,Customer
+D014720,2024-04-17,Non-Renewal,Admin
+D014744,2024-03-13,Budget Cut,Admin
+D014749,2024-04-29,Competitor Switch,Admin
+D014781,2024-03-16,Budget Cut,Rep
+D014782,2024-03-11,Customer Churn,Rep
+D014791,2024-02-08,Non-Renewal,Customer
+D014792,2024-04-16,Non-Renewal,Rep
+D014797,2024-02-21,Customer Churn,Rep
+D014803,2024-04-19,Customer Churn,Customer
+D014808,2024-02-13,Competitor Switch,Rep
+D014817,2024-04-16,Competitor Switch,Rep
+D014825,2024-04-11,Non-Renewal,Customer
+D014844,2024-02-29,Downgrade,Rep
+D014849,2024-04-07,Downgrade,Admin
+D014853,2024-02-26,Customer Churn,Admin
+D014859,2024-04-18,Admin Error,Rep
+D014873,2024-03-30,Competitor Switch,Rep
+D014874,2024-03-06,Customer Churn,Customer
+D014877,2024-02-01,Admin Error,Admin
+D014891,2024-04-22,Admin Error,Admin
+D014897,2024-03-27,Admin Error,Rep
+D014910,2024-04-02,Non-Renewal,Admin
+D014923,2024-04-13,Non-Renewal,Customer
+D014925,2024-02-05,Admin Error,Customer
+D014931,2024-02-25,Competitor Switch,Rep
+D014932,2024-03-25,Admin Error,Customer
+D014949,2024-04-26,Non-Renewal,Admin
+D014984,2024-03-29,Budget Cut,Rep
+D014990,2024-02-29,Downgrade,Rep
+D014996,2024-03-13,Downgrade,Rep
+D015029,2024-02-22,Non-Renewal,Rep
+D015034,2024-03-17,Budget Cut,Customer
+D015044,2024-04-20,Budget Cut,Admin
+D015062,2024-02-28,Non-Renewal,Customer
+D015065,2024-02-05,Budget Cut,Rep
+D015078,2024-04-18,Downgrade,Admin
+D015116,2024-04-23,Customer Churn,Rep
+D015127,2024-03-08,Downgrade,Admin
+D015131,2024-02-06,Admin Error,Admin
+D015139,2024-02-16,Downgrade,Customer
+D015143,2024-03-30,Non-Renewal,Admin
+D015146,2024-03-18,Budget Cut,Customer
+D015148,2024-02-07,Non-Renewal,Customer
+D015151,2024-03-10,Admin Error,Rep
+D015152,2024-04-27,Customer Churn,Rep
+D015177,2024-02-10,Competitor Switch,Customer
+D015180,2024-03-14,Customer Churn,Customer
+D015182,2024-03-05,Customer Churn,Customer
+D015199,2024-03-16,Competitor Switch,Admin
+D015204,2024-02-17,Downgrade,Customer
+D015220,2024-03-12,Non-Renewal,Rep
+D015250,2024-04-15,Budget Cut,Rep
+D015256,2024-04-12,Downgrade,Admin
+D015262,2024-04-14,Admin Error,Rep
+D015265,2024-04-27,Admin Error,Customer
+D015271,2024-04-16,Budget Cut,Customer
+D015272,2024-04-03,Customer Churn,Customer
+D015276,2024-02-02,Admin Error,Rep
+D015285,2024-04-23,Budget Cut,Rep
+D015316,2024-04-25,Competitor Switch,Rep
+D015317,2024-02-02,Customer Churn,Customer
+D015320,2024-04-04,Competitor Switch,Rep
+D015334,2024-02-10,Budget Cut,Customer
+D015340,2024-02-08,Budget Cut,Customer
+D015350,2024-02-10,Downgrade,Customer
+D015353,2024-04-13,Budget Cut,Rep
+D015355,2024-04-12,Budget Cut,Rep
+D015362,2024-03-12,Admin Error,Customer
+D015363,2024-02-27,Non-Renewal,Rep
+D015378,2024-03-06,Non-Renewal,Rep
+D015379,2024-04-25,Non-Renewal,Customer
+D015397,2024-04-23,Customer Churn,Rep
+D015409,2024-02-22,Non-Renewal,Rep
+D015416,2024-04-12,Customer Churn,Admin
+D015427,2024-04-26,Customer Churn,Rep
+D015431,2024-02-15,Downgrade,Admin
+D015440,2024-03-05,Competitor Switch,Admin
+D015447,2024-04-26,Non-Renewal,Admin
+D015465,2024-04-25,Budget Cut,Admin
+D015470,2024-03-20,Customer Churn,Rep
+D015476,2024-02-22,Non-Renewal,Admin
+D015492,2024-04-01,Competitor Switch,Admin
+D015506,2024-04-30,Non-Renewal,Customer
+D015536,2024-04-24,Downgrade,Rep
+D015540,2024-04-12,Customer Churn,Customer
+D015542,2024-04-01,Competitor Switch,Customer
+D015552,2024-02-04,Admin Error,Customer
+D015555,2024-03-03,Competitor Switch,Admin
+D015557,2024-03-28,Admin Error,Customer
+D015558,2024-02-25,Competitor Switch,Customer
+D015564,2024-03-21,Non-Renewal,Rep
+D015584,2024-03-10,Budget Cut,Admin
+D015591,2024-02-07,Downgrade,Rep
+D015592,2024-03-17,Competitor Switch,Admin
+D015593,2024-03-03,Budget Cut,Admin
+D015609,2024-03-21,Customer Churn,Rep
+D015610,2024-04-20,Budget Cut,Rep
+D015625,2024-02-14,Downgrade,Admin
+D015637,2024-04-01,Non-Renewal,Customer
+D015645,2024-02-11,Competitor Switch,Customer
+D015652,2024-03-06,Downgrade,Rep
+D015654,2024-03-31,Budget Cut,Rep
+D015663,2024-04-15,Admin Error,Rep
+D015670,2024-04-18,Admin Error,Rep
+D015671,2024-02-13,Non-Renewal,Customer
+D015684,2024-03-01,Downgrade,Customer
+D015691,2024-03-16,Budget Cut,Customer
+D015726,2024-03-13,Non-Renewal,Customer
+D015731,2024-02-09,Admin Error,Rep
+D015735,2024-04-01,Customer Churn,Customer
+D015738,2024-02-04,Non-Renewal,Admin
+D015765,2024-03-02,Admin Error,Rep
+D015804,2024-04-30,Competitor Switch,Rep
+D015807,2024-04-05,Downgrade,Customer
+D015808,2024-03-21,Competitor Switch,Admin
+D015809,2024-03-10,Customer Churn,Admin
+D015817,2024-03-21,Budget Cut,Rep
+D015827,2024-02-15,Non-Renewal,Admin
+D015838,2024-04-17,Downgrade,Rep
+D015839,2024-03-28,Budget Cut,Customer
+D015846,2024-02-29,Downgrade,Admin
+D015852,2024-02-22,Competitor Switch,Admin
+D015854,2024-02-01,Downgrade,Admin
+D015859,2024-02-05,Admin Error,Rep
+D015861,2024-02-09,Non-Renewal,Admin
+D015865,2024-04-28,Downgrade,Admin
+D015871,2024-03-09,Customer Churn,Customer
+D015875,2024-04-23,Competitor Switch,Customer
+D015881,2024-04-16,Non-Renewal,Rep
+D015891,2024-02-12,Competitor Switch,Rep
+D015903,2024-02-21,Non-Renewal,Rep
+D015907,2024-04-18,Admin Error,Customer
+D015916,2024-03-06,Admin Error,Admin
+D015923,2024-03-06,Downgrade,Customer
+D015932,2024-04-29,Admin Error,Rep
+D015937,2024-04-21,Downgrade,Rep
+D015958,2024-03-18,Competitor Switch,Customer
+D015969,2024-04-19,Admin Error,Admin
+D015977,2024-03-05,Admin Error,Rep
+D015987,2024-02-19,Downgrade,Rep
+D016024,2024-03-06,Competitor Switch,Rep
+D016034,2024-04-05,Competitor Switch,Customer
+D016041,2024-02-14,Budget Cut,Admin
+D016045,2024-03-27,Budget Cut,Rep
+D016065,2024-03-31,Downgrade,Admin
+D016081,2024-04-22,Non-Renewal,Rep
+D016083,2024-04-08,Admin Error,Customer
+D016100,2024-04-07,Budget Cut,Customer
+D016122,2024-02-04,Competitor Switch,Admin
+D016123,2024-02-25,Admin Error,Admin
+D016125,2024-02-06,Admin Error,Rep
+D016133,2024-03-11,Competitor Switch,Customer
+D016136,2024-04-24,Competitor Switch,Admin
+D016143,2024-03-16,Competitor Switch,Customer
+D016188,2024-03-01,Customer Churn,Customer
+D016198,2024-02-08,Budget Cut,Rep
+D016206,2024-04-23,Non-Renewal,Rep
+D016211,2024-02-14,Budget Cut,Rep
+D016213,2024-03-07,Budget Cut,Customer
+D016228,2024-02-23,Budget Cut,Admin
+D016232,2024-03-14,Budget Cut,Customer
+D016237,2024-04-13,Downgrade,Rep
+D016251,2024-04-13,Downgrade,Customer
+D016255,2024-02-23,Budget Cut,Admin
+D016260,2024-04-02,Budget Cut,Customer
+D016271,2024-03-17,Admin Error,Rep
+D016276,2024-03-10,Competitor Switch,Rep
+D016280,2024-03-06,Budget Cut,Customer
+D016293,2024-04-05,Non-Renewal,Rep
+D016316,2024-04-02,Budget Cut,Rep
+D016328,2024-04-05,Customer Churn,Rep
+D016357,2024-02-01,Budget Cut,Admin
+D016364,2024-03-19,Customer Churn,Rep
+D016365,2024-03-31,Customer Churn,Rep
+D016371,2024-04-20,Competitor Switch,Admin
+D016393,2024-03-31,Competitor Switch,Admin
+D016410,2024-02-20,Budget Cut,Rep
+D016416,2024-02-14,Admin Error,Rep
+D016427,2024-04-06,Competitor Switch,Admin
+D016437,2024-04-23,Customer Churn,Admin
+D016441,2024-04-30,Admin Error,Admin
+D016453,2024-04-01,Admin Error,Admin
+D016465,2024-03-30,Customer Churn,Customer
+D016473,2024-03-25,Budget Cut,Admin
+D016496,2024-03-17,Non-Renewal,Admin
+D016499,2024-02-23,Customer Churn,Customer
+D016504,2024-02-13,Competitor Switch,Customer
+D016513,2024-04-29,Admin Error,Rep
+D016523,2024-03-03,Non-Renewal,Rep
+D016540,2024-04-03,Competitor Switch,Customer
+D016545,2024-02-25,Non-Renewal,Customer
+D016554,2024-02-15,Customer Churn,Rep
+D016555,2024-03-17,Competitor Switch,Admin
+D016559,2024-03-29,Budget Cut,Admin
+D016563,2024-04-20,Downgrade,Customer
+D016574,2024-04-14,Customer Churn,Rep
+D016579,2024-03-05,Customer Churn,Customer
+D016602,2024-04-03,Downgrade,Rep
+D016603,2024-02-08,Budget Cut,Admin
+D016623,2024-02-20,Customer Churn,Rep
+D016628,2024-02-14,Competitor Switch,Rep
+D016656,2024-03-19,Non-Renewal,Admin
+D016675,2024-04-25,Competitor Switch,Customer
+D016693,2024-03-15,Customer Churn,Rep
+D016710,2024-02-07,Admin Error,Admin
+D016711,2024-04-03,Budget Cut,Admin
+D016715,2024-02-11,Downgrade,Admin
+D016720,2024-03-31,Downgrade,Customer
+D016722,2024-04-27,Non-Renewal,Admin
+D016729,2024-04-24,Admin Error,Customer
+D016740,2024-04-19,Customer Churn,Admin
+D016747,2024-02-02,Non-Renewal,Admin
+D016760,2024-03-10,Customer Churn,Customer
+D016767,2024-03-11,Downgrade,Rep
+D016768,2024-02-24,Customer Churn,Admin
+D016776,2024-04-13,Non-Renewal,Rep
+D016781,2024-04-05,Budget Cut,Rep
+D016786,2024-04-29,Customer Churn,Rep
+D016790,2024-02-20,Competitor Switch,Customer
+D016796,2024-04-18,Admin Error,Rep
+D016798,2024-03-12,Budget Cut,Rep
+D016801,2024-04-30,Admin Error,Admin
+D016802,2024-03-22,Customer Churn,Admin
+D016805,2024-04-30,Admin Error,Admin
+D016806,2024-04-04,Customer Churn,Admin
+D016815,2024-03-17,Non-Renewal,Rep
+D016838,2024-02-02,Admin Error,Admin
+D016845,2024-04-23,Budget Cut,Customer
+D016857,2024-03-23,Non-Renewal,Rep
+D016860,2024-03-24,Customer Churn,Customer
+D016870,2024-04-05,Downgrade,Customer
+D016880,2024-04-28,Budget Cut,Admin
+D016901,2024-02-02,Budget Cut,Admin
+D016911,2024-02-12,Downgrade,Rep
+D016937,2024-03-07,Admin Error,Rep
+D016938,2024-02-23,Budget Cut,Customer
+D016955,2024-03-30,Downgrade,Rep
+D016960,2024-02-05,Downgrade,Customer
+D016972,2024-02-17,Admin Error,Customer
+D016976,2024-04-10,Non-Renewal,Rep
+D017005,2024-03-23,Non-Renewal,Rep
+D017020,2024-04-05,Budget Cut,Rep
+D017022,2024-02-16,Downgrade,Rep
+D017023,2024-02-19,Admin Error,Admin
+D017041,2024-02-16,Downgrade,Rep
+D017045,2024-04-16,Admin Error,Rep
+D017052,2024-04-24,Customer Churn,Rep
+D017061,2024-03-01,Customer Churn,Rep
+D017063,2024-03-25,Non-Renewal,Rep
+D017068,2024-03-25,Non-Renewal,Customer
+D017085,2024-03-15,Non-Renewal,Rep
+D017096,2024-03-26,Budget Cut,Admin
+D017101,2024-03-29,Budget Cut,Rep
+D017109,2024-02-05,Competitor Switch,Admin
+D017124,2024-03-15,Downgrade,Customer
+D017125,2024-02-26,Non-Renewal,Rep
+D017149,2024-03-28,Customer Churn,Admin
+D017152,2024-03-06,Budget Cut,Customer
+D017153,2024-04-22,Downgrade,Customer
+D017159,2024-02-18,Non-Renewal,Rep
+D017174,2024-04-06,Non-Renewal,Customer
+D017188,2024-04-15,Non-Renewal,Admin
+D017192,2024-02-28,Admin Error,Customer
+D017197,2024-03-17,Admin Error,Customer
+D017199,2024-04-27,Customer Churn,Admin
+D017208,2024-03-31,Customer Churn,Rep
+D017235,2024-04-15,Budget Cut,Customer
+D017244,2024-04-08,Budget Cut,Admin
+D017268,2024-03-05,Budget Cut,Rep
+D017270,2024-02-22,Admin Error,Rep
+D017272,2024-03-03,Downgrade,Customer
+D017273,2024-03-18,Competitor Switch,Rep
+D017289,2024-04-30,Non-Renewal,Rep
+D017301,2024-02-08,Non-Renewal,Rep
+D017343,2024-04-13,Non-Renewal,Customer
+D017362,2024-02-15,Customer Churn,Rep
+D017375,2024-03-10,Competitor Switch,Customer
+D017411,2024-02-28,Customer Churn,Customer
+D017416,2024-04-04,Non-Renewal,Customer
+D017419,2024-03-23,Customer Churn,Admin
+D017427,2024-04-28,Customer Churn,Customer
+D017437,2024-02-05,Admin Error,Rep
+D017448,2024-02-20,Customer Churn,Rep
+D017451,2024-03-12,Admin Error,Rep
+D017459,2024-02-28,Customer Churn,Admin
+D017477,2024-04-13,Downgrade,Rep
+D017480,2024-02-24,Admin Error,Admin
+D017488,2024-02-03,Customer Churn,Customer
+D017490,2024-04-06,Non-Renewal,Rep
+D017496,2024-03-26,Admin Error,Admin
+D017516,2024-02-03,Downgrade,Customer
+D017525,2024-04-03,Customer Churn,Rep
+D017532,2024-02-03,Non-Renewal,Admin
+D017536,2024-04-08,Non-Renewal,Rep
+D017538,2024-02-10,Downgrade,Admin
+D017540,2024-02-05,Customer Churn,Rep
+D017558,2024-03-20,Competitor Switch,Admin
+D017565,2024-02-29,Budget Cut,Rep
+D017581,2024-03-05,Customer Churn,Customer
+D017600,2024-04-02,Competitor Switch,Rep
+D017612,2024-03-18,Budget Cut,Admin
+D017627,2024-03-22,Non-Renewal,Admin
+D017628,2024-02-23,Downgrade,Rep
+D017629,2024-02-06,Budget Cut,Rep
+D017644,2024-04-03,Budget Cut,Admin
+D017646,2024-04-28,Non-Renewal,Admin
+D017670,2024-04-19,Competitor Switch,Admin
+D017676,2024-03-08,Competitor Switch,Customer
+D017694,2024-04-14,Admin Error,Rep
+D017705,2024-04-25,Customer Churn,Customer
+D017714,2024-03-14,Admin Error,Rep
+D017715,2024-02-15,Competitor Switch,Admin
+D017724,2024-03-05,Budget Cut,Rep
+D017729,2024-03-21,Customer Churn,Admin
+D017737,2024-04-20,Competitor Switch,Customer
+D017752,2024-03-07,Budget Cut,Rep
+D017754,2024-04-24,Admin Error,Admin
+D017757,2024-04-25,Non-Renewal,Customer
+D017773,2024-04-04,Customer Churn,Rep
+D017775,2024-03-30,Customer Churn,Customer
+D017800,2024-02-24,Competitor Switch,Admin
+D017825,2024-02-06,Customer Churn,Admin
+D017833,2024-02-19,Non-Renewal,Customer
+D017862,2024-04-15,Budget Cut,Rep
+D017891,2024-04-18,Customer Churn,Rep
+D017895,2024-03-11,Admin Error,Admin
+D017901,2024-02-29,Downgrade,Rep
+D017935,2024-04-06,Budget Cut,Rep
+D017939,2024-03-17,Admin Error,Rep
+D017944,2024-02-12,Customer Churn,Admin
+D017964,2024-04-11,Downgrade,Customer
+D017965,2024-03-04,Budget Cut,Rep
+D017982,2024-04-28,Admin Error,Rep
+D017991,2024-02-06,Budget Cut,Rep
+D017995,2024-02-20,Downgrade,Admin
+D018004,2024-03-22,Budget Cut,Rep
+D018017,2024-04-02,Competitor Switch,Admin
+D018037,2024-04-25,Admin Error,Admin
+D018040,2024-03-05,Downgrade,Customer
+D018050,2024-03-06,Downgrade,Admin
+D018051,2024-02-18,Competitor Switch,Rep
+D018057,2024-02-22,Non-Renewal,Admin
+D018062,2024-04-28,Non-Renewal,Rep
+D018076,2024-04-06,Downgrade,Rep
+D018084,2024-02-05,Competitor Switch,Customer
+D018087,2024-02-11,Customer Churn,Admin
+D018097,2024-04-18,Downgrade,Customer
+D018121,2024-02-08,Customer Churn,Rep
+D018133,2024-03-07,Budget Cut,Rep
+D018136,2024-03-16,Budget Cut,Rep
+D018138,2024-02-22,Competitor Switch,Rep
+D018139,2024-03-16,Competitor Switch,Customer
+D018141,2024-04-07,Budget Cut,Admin
+D018144,2024-03-19,Downgrade,Customer
+D018149,2024-02-05,Budget Cut,Admin
+D018153,2024-04-21,Budget Cut,Customer
+D018159,2024-03-29,Downgrade,Customer
+D018162,2024-03-13,Admin Error,Admin
+D018198,2024-02-26,Budget Cut,Customer
+D018200,2024-02-19,Budget Cut,Customer
+D018241,2024-03-03,Non-Renewal,Admin
+D018254,2024-02-14,Downgrade,Customer
+D018269,2024-02-25,Budget Cut,Customer
+D018271,2024-02-21,Customer Churn,Rep
+D018304,2024-03-22,Customer Churn,Customer
+D018307,2024-04-29,Admin Error,Rep
+D018313,2024-03-10,Competitor Switch,Admin
+D018317,2024-02-04,Customer Churn,Admin
+D018318,2024-02-05,Downgrade,Customer
+D018339,2024-03-20,Admin Error,Rep
+D018343,2024-04-14,Non-Renewal,Rep
+D018345,2024-04-10,Non-Renewal,Admin
+D018346,2024-03-06,Budget Cut,Admin
+D018361,2024-03-12,Customer Churn,Rep
+D018362,2024-02-04,Customer Churn,Customer
+D018363,2024-02-03,Customer Churn,Rep
+D018364,2024-04-29,Admin Error,Rep
+D018372,2024-03-27,Customer Churn,Customer
+D018375,2024-02-13,Downgrade,Rep
+D018377,2024-04-02,Budget Cut,Admin
+D018381,2024-02-03,Budget Cut,Rep
+D018384,2024-04-14,Competitor Switch,Rep
+D018396,2024-04-06,Customer Churn,Admin
+D018432,2024-04-16,Budget Cut,Rep
+D018436,2024-03-20,Admin Error,Admin
+D018447,2024-02-12,Budget Cut,Customer
+D018452,2024-03-08,Competitor Switch,Rep
+D018464,2024-02-05,Non-Renewal,Admin
+D018477,2024-04-16,Budget Cut,Customer
+D018479,2024-03-09,Non-Renewal,Customer
+D018482,2024-04-28,Admin Error,Admin
+D018483,2024-03-04,Budget Cut,Rep
+D018506,2024-03-24,Non-Renewal,Rep
+D018529,2024-02-03,Budget Cut,Customer
+D018532,2024-04-29,Customer Churn,Rep
+D018541,2024-02-16,Admin Error,Customer
+D018547,2024-03-17,Admin Error,Admin
+D018558,2024-04-06,Non-Renewal,Admin
+D018576,2024-04-11,Budget Cut,Admin
+D018581,2024-02-29,Competitor Switch,Admin
+D018585,2024-04-22,Downgrade,Rep
+D018595,2024-04-29,Budget Cut,Rep
+D018642,2024-02-24,Non-Renewal,Customer
+D018648,2024-04-10,Non-Renewal,Admin
+D018652,2024-02-04,Budget Cut,Customer
+D018659,2024-04-08,Downgrade,Admin
+D018665,2024-03-24,Downgrade,Admin
+D018667,2024-04-08,Admin Error,Admin
+D018670,2024-04-15,Competitor Switch,Rep
+D018673,2024-04-24,Customer Churn,Rep
+D018676,2024-02-12,Non-Renewal,Rep
+D018677,2024-03-01,Non-Renewal,Customer
+D018711,2024-03-03,Competitor Switch,Admin
+D018713,2024-04-09,Customer Churn,Admin
+D018722,2024-04-26,Customer Churn,Admin
+D018731,2024-03-30,Competitor Switch,Admin
+D018736,2024-02-01,Competitor Switch,Admin
+D018747,2024-03-04,Admin Error,Rep
+D018748,2024-02-02,Budget Cut,Rep
+D018757,2024-04-02,Admin Error,Admin
+D018761,2024-04-25,Budget Cut,Rep
+D018779,2024-03-24,Downgrade,Admin
+D018804,2024-02-23,Admin Error,Admin
+D018826,2024-04-12,Budget Cut,Rep
+D018833,2024-03-21,Competitor Switch,Rep
+D018842,2024-04-30,Non-Renewal,Customer
+D018852,2024-02-14,Non-Renewal,Admin
+D018872,2024-02-21,Competitor Switch,Rep
+D018880,2024-03-02,Budget Cut,Admin
+D018903,2024-03-04,Downgrade,Admin
+D018904,2024-02-12,Customer Churn,Rep
+D018908,2024-03-11,Downgrade,Rep
+D018913,2024-03-09,Non-Renewal,Customer
+D018922,2024-04-17,Competitor Switch,Customer
+D018928,2024-03-02,Downgrade,Admin
+D018946,2024-04-19,Non-Renewal,Rep
+D018955,2024-02-01,Customer Churn,Customer
+D018958,2024-02-17,Customer Churn,Admin
+D018963,2024-03-01,Downgrade,Admin
+D018969,2024-02-23,Downgrade,Customer
+D018970,2024-02-10,Customer Churn,Admin
+D018974,2024-03-29,Downgrade,Customer
+D018983,2024-02-12,Admin Error,Customer
+D019006,2024-03-13,Admin Error,Customer
+D019007,2024-02-18,Competitor Switch,Admin
+D019021,2024-03-29,Budget Cut,Admin
+D019031,2024-04-25,Downgrade,Rep
+D019039,2024-04-23,Downgrade,Admin
+D019050,2024-04-21,Non-Renewal,Admin
+D019090,2024-02-07,Non-Renewal,Admin
+D019105,2024-02-12,Customer Churn,Customer
+D019115,2024-03-06,Non-Renewal,Admin
+D019134,2024-03-09,Competitor Switch,Admin
+D019139,2024-04-12,Competitor Switch,Customer
+D019143,2024-03-23,Admin Error,Admin
+D019154,2024-03-16,Budget Cut,Customer
+D019160,2024-04-10,Downgrade,Rep
+D019165,2024-04-27,Non-Renewal,Admin
+D019172,2024-03-31,Customer Churn,Customer
+D019177,2024-03-24,Downgrade,Admin
+D019187,2024-04-21,Downgrade,Rep
+D019192,2024-02-06,Competitor Switch,Admin
+D019210,2024-04-19,Customer Churn,Admin
+D019235,2024-02-05,Admin Error,Customer
+D019261,2024-03-11,Downgrade,Customer
+D019278,2024-02-22,Customer Churn,Customer
+D019291,2024-02-21,Budget Cut,Customer
+D019295,2024-04-14,Non-Renewal,Rep
+D019300,2024-02-19,Non-Renewal,Customer
+D019319,2024-02-05,Admin Error,Rep
+D019322,2024-03-30,Budget Cut,Rep
+D019337,2024-04-28,Admin Error,Customer
+D019340,2024-02-26,Admin Error,Customer
+D019347,2024-03-31,Competitor Switch,Customer
+D019351,2024-03-30,Budget Cut,Customer
+D019378,2024-02-08,Admin Error,Customer
+D019384,2024-03-06,Competitor Switch,Customer
+D019385,2024-03-24,Customer Churn,Rep
+D019393,2024-02-17,Admin Error,Rep
+D019398,2024-04-17,Customer Churn,Customer
+D019400,2024-03-18,Competitor Switch,Customer
+D019402,2024-04-03,Admin Error,Rep
+D019416,2024-02-10,Budget Cut,Admin
+D019463,2024-02-17,Budget Cut,Rep
+D019466,2024-04-23,Non-Renewal,Rep
+D019489,2024-02-23,Budget Cut,Customer
+D019491,2024-04-07,Competitor Switch,Rep
+D019506,2024-04-08,Non-Renewal,Customer
+D019523,2024-04-10,Competitor Switch,Customer
+D019549,2024-02-08,Downgrade,Admin
+D019554,2024-03-25,Competitor Switch,Customer
+D019567,2024-03-26,Competitor Switch,Customer
+D019574,2024-02-02,Competitor Switch,Rep
+D019602,2024-02-22,Budget Cut,Rep
+D019603,2024-03-01,Downgrade,Admin
+D019612,2024-03-29,Admin Error,Customer
+D019625,2024-04-25,Budget Cut,Customer
+D019628,2024-04-25,Competitor Switch,Rep
+D019638,2024-04-07,Downgrade,Customer
+D019644,2024-02-01,Competitor Switch,Admin
+D019647,2024-03-31,Non-Renewal,Customer
+D019665,2024-04-03,Competitor Switch,Admin
+D019667,2024-02-09,Admin Error,Admin
+D019672,2024-04-16,Non-Renewal,Admin
+D019683,2024-03-11,Customer Churn,Customer
+D019693,2024-04-26,Admin Error,Rep
+D019699,2024-04-25,Non-Renewal,Rep
+D019704,2024-04-19,Non-Renewal,Customer
+D019728,2024-03-10,Customer Churn,Admin
+D019729,2024-04-09,Admin Error,Rep
+D019731,2024-04-28,Customer Churn,Rep
+D019734,2024-04-20,Admin Error,Customer
+D019741,2024-04-21,Competitor Switch,Customer
+D019744,2024-04-01,Competitor Switch,Customer
+D019746,2024-03-14,Admin Error,Rep
+D019753,2024-03-30,Competitor Switch,Admin
+D019759,2024-02-16,Downgrade,Customer
+D019771,2024-04-27,Competitor Switch,Customer
+D019775,2024-03-06,Budget Cut,Rep
+D019779,2024-02-10,Competitor Switch,Admin
+D019784,2024-04-10,Non-Renewal,Rep
+D019788,2024-02-09,Admin Error,Customer
+D019818,2024-04-12,Non-Renewal,Admin
+D019820,2024-04-20,Customer Churn,Customer
+D019834,2024-03-01,Budget Cut,Rep
+D019844,2024-03-04,Competitor Switch,Rep
+D019849,2024-02-11,Competitor Switch,Admin
+D019861,2024-02-28,Downgrade,Customer
+D019889,2024-03-05,Customer Churn,Customer
+D019894,2024-04-20,Competitor Switch,Admin
+D019900,2024-04-18,Competitor Switch,Customer
+D019903,2024-04-03,Admin Error,Rep
+D019923,2024-03-12,Competitor Switch,Customer
+D019972,2024-02-05,Customer Churn,Admin
+D019988,2024-02-21,Customer Churn,Customer
+D020003,2024-04-03,Non-Renewal,Customer
+D020009,2024-02-18,Competitor Switch,Customer
+D020026,2024-02-29,Downgrade,Rep
+D020033,2024-03-28,Admin Error,Customer
+D020036,2024-03-17,Downgrade,Customer
+D020048,2024-03-27,Budget Cut,Rep
+D020059,2024-03-05,Admin Error,Admin
+D020060,2024-02-26,Customer Churn,Rep
+D020065,2024-03-15,Customer Churn,Admin
+D020079,2024-02-20,Budget Cut,Admin
+D020082,2024-02-08,Admin Error,Admin
+D020097,2024-04-08,Non-Renewal,Admin
+D020125,2024-04-17,Customer Churn,Admin
+D020128,2024-03-17,Admin Error,Customer
+D020134,2024-04-17,Admin Error,Admin
+D020143,2024-03-20,Non-Renewal,Rep
+D020160,2024-02-18,Admin Error,Admin
+D020171,2024-04-27,Non-Renewal,Admin
+D020177,2024-02-25,Competitor Switch,Customer
+D020200,2024-03-29,Customer Churn,Admin
+D020227,2024-04-27,Non-Renewal,Admin
+D020230,2024-03-13,Admin Error,Rep
+D020249,2024-04-23,Customer Churn,Rep
+D020250,2024-03-26,Non-Renewal,Rep
+D020252,2024-02-09,Non-Renewal,Admin
+D020256,2024-03-28,Competitor Switch,Rep
+D020262,2024-02-04,Budget Cut,Rep
+D020266,2024-04-16,Admin Error,Admin
+D020278,2024-02-10,Admin Error,Customer
+D020282,2024-02-11,Downgrade,Customer
+D020299,2024-02-07,Non-Renewal,Customer
+D020309,2024-03-01,Competitor Switch,Admin
+D020310,2024-02-15,Admin Error,Customer
+D020322,2024-02-18,Downgrade,Customer
+D020332,2024-03-19,Downgrade,Rep
+D020346,2024-03-11,Admin Error,Rep
+D020349,2024-03-22,Budget Cut,Rep
+D020352,2024-03-20,Budget Cut,Rep
+D020376,2024-04-12,Non-Renewal,Rep
+D020377,2024-02-23,Competitor Switch,Customer
+D020395,2024-02-16,Customer Churn,Admin
+D020401,2024-04-06,Competitor Switch,Customer
+D020439,2024-04-23,Customer Churn,Rep
+D020440,2024-04-28,Downgrade,Rep
+D020490,2024-04-14,Budget Cut,Rep
+D020492,2024-02-08,Competitor Switch,Customer
+D020497,2024-04-23,Competitor Switch,Admin
+D020511,2024-02-01,Non-Renewal,Customer
+D020518,2024-04-10,Admin Error,Admin
+D020521,2024-04-01,Customer Churn,Admin
+D020522,2024-03-18,Customer Churn,Customer
+D020527,2024-02-04,Customer Churn,Rep
+D020528,2024-04-11,Customer Churn,Admin
+D020544,2024-04-17,Downgrade,Customer
+D020547,2024-02-11,Admin Error,Rep
+D020550,2024-04-26,Admin Error,Customer
+D020556,2024-03-26,Downgrade,Rep
+D020564,2024-04-22,Competitor Switch,Rep
+D020591,2024-02-19,Non-Renewal,Customer
+D020628,2024-02-03,Non-Renewal,Rep
+D020639,2024-04-27,Customer Churn,Admin
+D020645,2024-02-06,Admin Error,Admin
+D020649,2024-03-28,Downgrade,Customer
+D020654,2024-02-04,Non-Renewal,Admin
+D020697,2024-04-04,Customer Churn,Admin
+D020708,2024-04-18,Customer Churn,Rep
+D020711,2024-04-28,Customer Churn,Rep
+D020717,2024-04-24,Admin Error,Customer
+D020718,2024-03-09,Non-Renewal,Customer
+D020719,2024-04-16,Non-Renewal,Customer
+D020721,2024-04-15,Admin Error,Rep
+D020737,2024-04-27,Downgrade,Admin
+D020741,2024-04-12,Competitor Switch,Rep
+D020744,2024-03-30,Non-Renewal,Customer
+D020766,2024-04-08,Budget Cut,Admin
+D020769,2024-03-14,Admin Error,Admin
+D020779,2024-03-22,Downgrade,Admin
+D020788,2024-02-21,Budget Cut,Rep
+D020808,2024-03-22,Customer Churn,Customer
+D020827,2024-03-02,Non-Renewal,Admin
+D020831,2024-04-03,Non-Renewal,Admin
+D020845,2024-02-09,Downgrade,Rep
+D020865,2024-03-09,Downgrade,Customer
+D020877,2024-04-27,Admin Error,Customer
+D020963,2024-02-25,Admin Error,Rep
+D020969,2024-03-04,Non-Renewal,Admin
+D020976,2024-02-26,Admin Error,Rep
+D021006,2024-04-10,Customer Churn,Customer
+D021017,2024-04-21,Admin Error,Customer
+D021019,2024-04-14,Customer Churn,Admin
+D021044,2024-02-05,Customer Churn,Admin
+D021062,2024-02-23,Competitor Switch,Admin
+D021067,2024-04-03,Budget Cut,Customer
+D021078,2024-03-14,Downgrade,Customer
+D021083,2024-03-26,Admin Error,Customer
+D021093,2024-04-02,Downgrade,Customer
+D021097,2024-02-11,Non-Renewal,Rep
+D021106,2024-03-23,Competitor Switch,Customer
+D021133,2024-04-02,Customer Churn,Admin
+D021134,2024-03-27,Downgrade,Rep
+D021141,2024-04-14,Budget Cut,Customer
+D021162,2024-03-10,Admin Error,Admin
+D021168,2024-04-20,Non-Renewal,Customer
+D021174,2024-03-04,Downgrade,Rep
+D021175,2024-04-08,Budget Cut,Rep
+D021181,2024-04-17,Budget Cut,Customer
+D021219,2024-04-03,Downgrade,Rep
+D021234,2024-03-18,Non-Renewal,Customer
+D021235,2024-02-16,Admin Error,Admin
+D021254,2024-04-05,Downgrade,Admin
+D021255,2024-02-09,Non-Renewal,Customer
+D021256,2024-04-30,Admin Error,Admin
+D021265,2024-04-05,Customer Churn,Admin
+D021272,2024-02-27,Competitor Switch,Rep
+D021274,2024-03-10,Downgrade,Rep
+D021297,2024-02-01,Customer Churn,Customer
+D021299,2024-02-01,Customer Churn,Admin
+D021301,2024-03-28,Competitor Switch,Rep
+D021309,2024-04-23,Downgrade,Admin
+D021314,2024-04-16,Budget Cut,Admin
+D021315,2024-03-20,Budget Cut,Customer
+D021329,2024-02-10,Admin Error,Rep
+D021344,2024-04-29,Non-Renewal,Rep
+D021353,2024-02-02,Admin Error,Admin
+D021361,2024-02-02,Customer Churn,Rep
+D021373,2024-03-12,Customer Churn,Admin
+D021374,2024-02-27,Non-Renewal,Admin
+D021377,2024-04-24,Customer Churn,Customer
+D021394,2024-03-06,Competitor Switch,Admin
+D021406,2024-04-14,Budget Cut,Admin
+D021408,2024-04-21,Competitor Switch,Customer
+D021411,2024-02-24,Non-Renewal,Customer
+D021414,2024-02-27,Non-Renewal,Rep
+D021430,2024-03-18,Non-Renewal,Customer
+D021443,2024-02-23,Admin Error,Rep
+D021453,2024-03-21,Budget Cut,Admin
+D021473,2024-02-08,Non-Renewal,Customer
+D021477,2024-02-04,Admin Error,Rep
+D021479,2024-03-27,Admin Error,Customer
+D021480,2024-02-19,Non-Renewal,Admin
+D021495,2024-04-15,Customer Churn,Admin
+D021501,2024-03-05,Customer Churn,Rep
+D021504,2024-04-25,Non-Renewal,Rep
+D021509,2024-02-18,Customer Churn,Admin
+D021538,2024-04-09,Non-Renewal,Customer
+D021539,2024-03-03,Customer Churn,Customer
+D021550,2024-03-30,Competitor Switch,Customer
+D021558,2024-03-19,Customer Churn,Rep
+D021565,2024-02-16,Customer Churn,Rep
+D021575,2024-02-03,Non-Renewal,Rep
+D021577,2024-02-02,Budget Cut,Rep
+D021590,2024-03-18,Non-Renewal,Customer
+D021592,2024-04-17,Non-Renewal,Admin
+D021600,2024-03-11,Admin Error,Customer
+D021601,2024-02-13,Customer Churn,Customer
+D021613,2024-04-21,Budget Cut,Customer
+D021621,2024-04-11,Customer Churn,Rep
+D021623,2024-02-15,Competitor Switch,Admin
+D021627,2024-03-28,Non-Renewal,Admin
+D021639,2024-04-01,Budget Cut,Customer
+D021649,2024-02-19,Customer Churn,Customer
+D021657,2024-02-09,Admin Error,Customer
+D021658,2024-04-26,Customer Churn,Admin
+D021671,2024-04-18,Admin Error,Admin
+D021673,2024-02-28,Non-Renewal,Customer
+D021689,2024-03-10,Admin Error,Admin
+D021716,2024-02-05,Competitor Switch,Customer
+D021719,2024-04-23,Competitor Switch,Customer
+D021722,2024-04-04,Non-Renewal,Customer
+D021742,2024-03-03,Downgrade,Admin
+D021744,2024-03-13,Downgrade,Customer
+D021745,2024-04-12,Competitor Switch,Customer
+D021750,2024-02-21,Admin Error,Customer
+D021753,2024-03-15,Downgrade,Admin
+D021760,2024-03-14,Non-Renewal,Customer
+D021765,2024-04-24,Customer Churn,Customer
+D021772,2024-02-12,Non-Renewal,Customer
+D021785,2024-02-06,Downgrade,Admin
+D021817,2024-04-12,Competitor Switch,Rep
+D021831,2024-03-20,Non-Renewal,Customer
+D021842,2024-04-24,Admin Error,Rep
+D021845,2024-04-04,Downgrade,Customer
+D021858,2024-04-23,Competitor Switch,Rep
+D021859,2024-03-30,Non-Renewal,Admin
+D021872,2024-04-18,Non-Renewal,Admin
+D021875,2024-04-15,Admin Error,Admin
+D021894,2024-03-16,Non-Renewal,Rep
+D021936,2024-02-10,Admin Error,Rep
+D021961,2024-02-15,Budget Cut,Customer
+D021970,2024-02-12,Downgrade,Rep
+D021975,2024-02-03,Downgrade,Rep
+D021980,2024-03-13,Non-Renewal,Admin
+D021991,2024-02-21,Admin Error,Admin
+D021992,2024-02-12,Competitor Switch,Rep
+D021993,2024-02-03,Competitor Switch,Rep
+D022008,2024-04-08,Non-Renewal,Customer
+D022012,2024-02-21,Competitor Switch,Customer
+D022014,2024-02-12,Downgrade,Admin
+D022017,2024-03-28,Non-Renewal,Customer
+D022029,2024-03-21,Admin Error,Rep
+D022070,2024-04-19,Customer Churn,Rep
+D022073,2024-02-18,Budget Cut,Customer
+D022087,2024-03-28,Competitor Switch,Customer
+D022106,2024-02-06,Customer Churn,Rep
+D022124,2024-04-29,Downgrade,Admin
+D022130,2024-04-22,Customer Churn,Rep
+D022136,2024-03-11,Competitor Switch,Customer
+D022149,2024-03-13,Competitor Switch,Customer
+D022152,2024-03-27,Competitor Switch,Rep
+D022159,2024-03-14,Customer Churn,Admin
+D022161,2024-02-16,Budget Cut,Customer
+D022170,2024-04-08,Downgrade,Rep
+D022182,2024-04-09,Competitor Switch,Admin
+D022195,2024-04-29,Competitor Switch,Rep
+D022214,2024-03-25,Downgrade,Admin
+D022219,2024-02-16,Competitor Switch,Customer
+D022221,2024-02-17,Downgrade,Rep
+D022225,2024-02-14,Budget Cut,Customer
+D022226,2024-04-23,Non-Renewal,Admin
+D022231,2024-03-31,Admin Error,Admin
+D022247,2024-03-30,Non-Renewal,Customer
+D022279,2024-02-08,Budget Cut,Customer
+D022280,2024-04-03,Customer Churn,Admin
+D022294,2024-04-08,Competitor Switch,Customer
+D022300,2024-03-21,Competitor Switch,Admin
+D022309,2024-03-12,Budget Cut,Rep
+D022316,2024-04-09,Customer Churn,Customer
+D022338,2024-03-07,Non-Renewal,Admin
+D022342,2024-04-15,Admin Error,Customer
+D022363,2024-03-21,Competitor Switch,Customer
+D022384,2024-02-24,Admin Error,Customer
+D022389,2024-03-22,Admin Error,Customer
+D022392,2024-03-17,Admin Error,Admin
+D022402,2024-04-01,Admin Error,Customer
+D022408,2024-02-11,Customer Churn,Customer
+D022416,2024-02-22,Downgrade,Rep
+D022437,2024-02-23,Downgrade,Customer
+D022454,2024-04-06,Budget Cut,Rep
+D022462,2024-04-28,Customer Churn,Rep
+D022486,2024-03-05,Competitor Switch,Customer
+D022509,2024-04-14,Competitor Switch,Customer
+D022520,2024-02-09,Downgrade,Rep
+D022522,2024-03-31,Downgrade,Rep
+D022523,2024-02-01,Competitor Switch,Rep
+D022535,2024-03-28,Budget Cut,Customer
+D022563,2024-03-31,Non-Renewal,Customer
+D022581,2024-04-29,Non-Renewal,Admin
+D022584,2024-04-30,Non-Renewal,Customer
+D022589,2024-03-16,Competitor Switch,Admin
+D022590,2024-03-01,Budget Cut,Admin
+D022597,2024-04-18,Competitor Switch,Rep
+D022613,2024-04-23,Admin Error,Admin
+D022616,2024-03-04,Customer Churn,Rep
+D022646,2024-03-27,Customer Churn,Rep
+D022654,2024-02-26,Admin Error,Rep
+D022657,2024-02-20,Downgrade,Admin
+D022666,2024-03-04,Competitor Switch,Admin
+D022673,2024-02-26,Non-Renewal,Customer
+D022675,2024-03-11,Budget Cut,Admin
+D022690,2024-02-18,Customer Churn,Rep
+D022709,2024-03-12,Competitor Switch,Customer
+D022718,2024-02-18,Budget Cut,Customer
+D022733,2024-02-27,Budget Cut,Admin
+D022738,2024-04-24,Budget Cut,Rep
+D022757,2024-03-29,Competitor Switch,Customer
+D022760,2024-02-11,Admin Error,Rep
+D022761,2024-03-12,Admin Error,Rep
+D022766,2024-02-03,Budget Cut,Customer
+D022777,2024-04-23,Non-Renewal,Rep
+D022796,2024-04-15,Budget Cut,Admin
+D022798,2024-04-03,Admin Error,Rep
+D022813,2024-03-07,Customer Churn,Customer
+D022816,2024-02-08,Competitor Switch,Admin
+D022829,2024-04-25,Customer Churn,Customer
+D022864,2024-04-09,Non-Renewal,Customer
+D022871,2024-04-27,Non-Renewal,Customer
+D022872,2024-04-15,Downgrade,Admin
+D022886,2024-04-19,Non-Renewal,Rep
+D022904,2024-02-02,Customer Churn,Customer
+D022916,2024-04-08,Customer Churn,Customer
+D022930,2024-02-02,Competitor Switch,Customer
+D022932,2024-04-08,Competitor Switch,Admin
+D022945,2024-03-29,Non-Renewal,Rep
+D022953,2024-02-25,Competitor Switch,Rep
+D022966,2024-03-16,Downgrade,Customer
+D022979,2024-02-25,Admin Error,Admin
+D023007,2024-02-28,Customer Churn,Rep
+D023032,2024-03-20,Non-Renewal,Rep
+D023042,2024-03-26,Admin Error,Admin
+D023052,2024-03-06,Budget Cut,Rep
+D023060,2024-02-23,Customer Churn,Customer
+D023072,2024-02-07,Competitor Switch,Customer
+D023073,2024-02-07,Competitor Switch,Rep
+D023076,2024-04-09,Non-Renewal,Admin
+D023119,2024-04-17,Competitor Switch,Rep
+D023132,2024-04-18,Customer Churn,Customer
+D023141,2024-02-06,Downgrade,Customer
+D023145,2024-03-13,Customer Churn,Customer
+D023168,2024-03-04,Non-Renewal,Rep
+D023174,2024-02-20,Admin Error,Customer
+D023229,2024-03-20,Non-Renewal,Admin
+D023268,2024-03-19,Downgrade,Rep
+D023271,2024-02-16,Downgrade,Customer
+D023278,2024-03-01,Downgrade,Admin
+D023282,2024-03-06,Competitor Switch,Rep
+D023290,2024-02-09,Admin Error,Rep
+D023301,2024-04-24,Competitor Switch,Rep
+D023320,2024-02-07,Competitor Switch,Customer
+D023332,2024-04-30,Competitor Switch,Rep
+D023346,2024-02-20,Budget Cut,Rep
+D023348,2024-03-17,Competitor Switch,Admin
+D023351,2024-03-20,Non-Renewal,Customer
+D023391,2024-04-22,Non-Renewal,Rep
+D023400,2024-03-28,Competitor Switch,Rep
+D023405,2024-03-21,Customer Churn,Rep
+D023415,2024-03-26,Non-Renewal,Rep
+D023436,2024-04-13,Budget Cut,Admin
+D023446,2024-03-31,Admin Error,Customer
+D023454,2024-03-13,Competitor Switch,Rep
+D023457,2024-02-14,Downgrade,Admin
+D023468,2024-03-05,Competitor Switch,Customer
+D023477,2024-02-10,Customer Churn,Rep
+D023495,2024-03-03,Downgrade,Customer
+D023497,2024-04-14,Customer Churn,Admin
+D023498,2024-04-16,Customer Churn,Admin
+D023499,2024-02-03,Downgrade,Rep
+D023504,2024-04-04,Customer Churn,Rep
+D023513,2024-03-24,Budget Cut,Rep
+D023522,2024-02-18,Downgrade,Rep
+D023526,2024-04-08,Admin Error,Customer
+D023544,2024-04-15,Non-Renewal,Rep
+D023547,2024-02-26,Competitor Switch,Rep
+D023549,2024-02-11,Downgrade,Customer
+D023554,2024-03-26,Budget Cut,Customer
+D023561,2024-04-17,Downgrade,Customer
+D023575,2024-02-28,Competitor Switch,Rep
+D023594,2024-03-23,Budget Cut,Customer
+D023595,2024-04-27,Customer Churn,Rep
+D023659,2024-04-17,Downgrade,Customer
+D023664,2024-02-07,Admin Error,Customer
+D023681,2024-04-19,Budget Cut,Customer
+D023690,2024-02-29,Budget Cut,Rep
+D023695,2024-02-14,Non-Renewal,Rep
+D023702,2024-02-27,Non-Renewal,Rep
+D023705,2024-03-01,Non-Renewal,Admin
+D023712,2024-04-01,Admin Error,Admin
+D023716,2024-02-08,Competitor Switch,Rep
+D023735,2024-04-10,Admin Error,Rep
+D023738,2024-02-15,Admin Error,Admin
+D023756,2024-03-06,Admin Error,Customer
+D023764,2024-03-17,Budget Cut,Customer
+D023765,2024-03-15,Non-Renewal,Rep
+D023766,2024-03-10,Non-Renewal,Admin
+D023768,2024-04-22,Downgrade,Admin
+D023811,2024-02-07,Budget Cut,Rep
+D023824,2024-04-15,Admin Error,Admin
+D023829,2024-02-05,Downgrade,Customer
+D023841,2024-02-04,Budget Cut,Rep
+D023847,2024-02-21,Non-Renewal,Customer
+D023860,2024-02-23,Downgrade,Admin
+D023883,2024-04-11,Non-Renewal,Rep
+D023894,2024-03-02,Budget Cut,Rep
+D023895,2024-04-14,Competitor Switch,Admin
+D023896,2024-03-24,Non-Renewal,Rep
+D023902,2024-02-24,Customer Churn,Rep
+D023927,2024-03-01,Competitor Switch,Admin
+D023933,2024-02-18,Competitor Switch,Admin
+D023934,2024-04-19,Downgrade,Rep
+D023937,2024-03-22,Budget Cut,Rep
+D023938,2024-02-23,Budget Cut,Rep
+D023939,2024-03-15,Budget Cut,Rep
+D023943,2024-03-01,Admin Error,Admin
+D023953,2024-02-29,Non-Renewal,Customer
+D023965,2024-04-08,Downgrade,Customer
+D023968,2024-03-05,Customer Churn,Customer
+D023976,2024-04-18,Competitor Switch,Admin
+D023986,2024-03-25,Non-Renewal,Admin
+D023993,2024-04-22,Customer Churn,Rep
+D024000,2024-03-23,Competitor Switch,Admin
+D024001,2024-03-08,Non-Renewal,Rep
+D024005,2024-03-01,Non-Renewal,Rep
+D024026,2024-04-30,Non-Renewal,Rep
+D024028,2024-04-19,Downgrade,Rep
+D024037,2024-04-07,Customer Churn,Rep
+D024040,2024-04-18,Budget Cut,Customer
+D024041,2024-02-04,Budget Cut,Customer
+D024048,2024-03-12,Budget Cut,Customer
+D024058,2024-02-19,Competitor Switch,Rep
+D024069,2024-03-11,Budget Cut,Admin
+D024070,2024-04-08,Budget Cut,Customer
+D024075,2024-03-08,Competitor Switch,Customer
+D024079,2024-02-09,Budget Cut,Customer
+D024094,2024-03-17,Non-Renewal,Rep
+D024097,2024-03-03,Customer Churn,Customer
+D024101,2024-02-04,Non-Renewal,Rep
+D024123,2024-04-24,Customer Churn,Customer
+D024131,2024-02-21,Downgrade,Rep
+D024144,2024-02-08,Budget Cut,Customer
+D024162,2024-04-14,Competitor Switch,Admin
+D024171,2024-03-08,Admin Error,Customer
+D024180,2024-04-03,Non-Renewal,Rep
+D024185,2024-02-15,Admin Error,Customer
+D024186,2024-04-07,Non-Renewal,Admin
+D024204,2024-04-27,Competitor Switch,Rep
+D024206,2024-04-03,Competitor Switch,Rep
+D024214,2024-02-03,Admin Error,Rep
+D024217,2024-02-11,Non-Renewal,Admin
+D024219,2024-02-02,Admin Error,Customer
+D024220,2024-03-01,Non-Renewal,Rep
+D024234,2024-04-25,Downgrade,Rep
+D024255,2024-02-02,Budget Cut,Customer
+D024278,2024-04-27,Competitor Switch,Admin
+D024288,2024-02-02,Non-Renewal,Admin
+D024298,2024-02-19,Competitor Switch,Customer
+D024299,2024-03-29,Downgrade,Rep
+D024303,2024-02-27,Budget Cut,Rep
+D024309,2024-03-19,Budget Cut,Rep
+D024317,2024-02-24,Customer Churn,Customer
+D024320,2024-03-15,Admin Error,Customer
+D024325,2024-04-04,Budget Cut,Admin
+D024354,2024-02-17,Competitor Switch,Admin
+D024381,2024-02-27,Competitor Switch,Customer
+D024398,2024-04-26,Customer Churn,Admin
+D024405,2024-04-18,Admin Error,Customer
+D024409,2024-04-16,Admin Error,Rep
+D024413,2024-02-17,Admin Error,Customer
+D024419,2024-04-13,Budget Cut,Admin
+D024426,2024-04-18,Budget Cut,Admin
+D024434,2024-02-02,Competitor Switch,Admin
+D024435,2024-03-06,Downgrade,Customer
+D024441,2024-04-22,Competitor Switch,Rep
+D024442,2024-02-03,Customer Churn,Rep
+D024451,2024-04-08,Budget Cut,Admin
+D024458,2024-04-11,Admin Error,Rep
+D024470,2024-03-20,Budget Cut,Admin
+D024484,2024-03-06,Customer Churn,Admin
+D024485,2024-02-22,Downgrade,Admin
+D024486,2024-03-14,Budget Cut,Customer
+D024488,2024-04-08,Downgrade,Customer
+D024501,2024-03-05,Customer Churn,Rep
+D024503,2024-02-14,Non-Renewal,Rep
+D024508,2024-03-27,Customer Churn,Admin
+D024513,2024-04-09,Downgrade,Admin
+D024518,2024-04-14,Non-Renewal,Rep
+D024523,2024-04-22,Downgrade,Rep
+D024542,2024-04-18,Non-Renewal,Customer
+D024547,2024-03-29,Downgrade,Customer
+D024556,2024-03-31,Competitor Switch,Customer
+D024582,2024-03-02,Competitor Switch,Rep
+D024606,2024-04-29,Downgrade,Rep
+D024628,2024-04-22,Budget Cut,Rep
+D024632,2024-04-23,Downgrade,Admin
+D024650,2024-04-03,Competitor Switch,Admin
+D024661,2024-03-13,Budget Cut,Customer
+D024668,2024-03-03,Customer Churn,Customer
+D024718,2024-04-21,Customer Churn,Admin
+D024733,2024-04-27,Budget Cut,Rep
+D024739,2024-02-14,Budget Cut,Rep
+D024754,2024-02-06,Downgrade,Customer
+D024756,2024-04-14,Non-Renewal,Admin
+D024781,2024-02-02,Admin Error,Admin
+D024793,2024-04-11,Customer Churn,Rep
+D024795,2024-04-06,Competitor Switch,Admin
+D024796,2024-03-16,Admin Error,Admin
+D024802,2024-03-30,Downgrade,Rep
+D024812,2024-04-01,Competitor Switch,Admin
+D024822,2024-03-12,Customer Churn,Admin
+D024845,2024-04-13,Downgrade,Customer
+D024850,2024-02-22,Admin Error,Customer
+D024879,2024-02-27,Admin Error,Rep
+D024886,2024-02-11,Downgrade,Customer
+D024910,2024-03-05,Downgrade,Admin
+D024913,2024-04-20,Non-Renewal,Rep
+D024936,2024-03-11,Customer Churn,Customer
+D024937,2024-03-05,Budget Cut,Admin
+D024945,2024-02-03,Budget Cut,Rep
+D024970,2024-03-03,Admin Error,Customer
+D024971,2024-03-18,Downgrade,Rep
+D024974,2024-03-28,Competitor Switch,Customer
+D024988,2024-02-11,Budget Cut,Rep
+D024989,2024-03-18,Budget Cut,Admin
+D025005,2024-04-27,Downgrade,Admin
+D025021,2024-02-16,Customer Churn,Admin
+D025025,2024-04-20,Budget Cut,Admin
+D025028,2024-02-22,Customer Churn,Admin
+D025035,2024-04-13,Budget Cut,Rep
+D025040,2024-04-16,Competitor Switch,Admin
+D025042,2024-04-21,Customer Churn,Admin
+D025048,2024-04-14,Downgrade,Admin
+D025057,2024-02-01,Non-Renewal,Rep
+D025060,2024-03-18,Customer Churn,Admin
+D025063,2024-03-01,Customer Churn,Customer
+D025081,2024-03-14,Non-Renewal,Admin
+D025094,2024-04-04,Customer Churn,Rep
+D025100,2024-02-05,Non-Renewal,Admin
+D025101,2024-02-19,Competitor Switch,Rep
+D025104,2024-03-27,Admin Error,Customer
+D025111,2024-03-27,Non-Renewal,Admin
+D025116,2024-03-09,Customer Churn,Rep
+D025123,2024-04-27,Non-Renewal,Rep
+D025127,2024-03-07,Customer Churn,Customer
+D025128,2024-02-27,Admin Error,Admin
+D025133,2024-04-26,Budget Cut,Rep
+D025148,2024-03-22,Admin Error,Customer
+D025151,2024-03-11,Non-Renewal,Rep
+D025165,2024-03-20,Downgrade,Admin
+D025171,2024-04-17,Admin Error,Customer
+D025182,2024-04-25,Customer Churn,Customer
+D025183,2024-04-16,Downgrade,Rep
+D025184,2024-02-18,Downgrade,Rep
+D025188,2024-03-26,Downgrade,Customer
+D025189,2024-04-09,Competitor Switch,Admin
+D025190,2024-04-13,Customer Churn,Admin
+D025195,2024-02-14,Budget Cut,Customer
+D025210,2024-03-27,Downgrade,Rep
+D025212,2024-03-25,Budget Cut,Rep
+D025245,2024-04-29,Downgrade,Customer
+D025247,2024-03-29,Non-Renewal,Admin
+D025268,2024-04-30,Customer Churn,Rep
+D025282,2024-04-25,Downgrade,Admin
+D025311,2024-04-21,Admin Error,Admin
+D025324,2024-02-14,Competitor Switch,Admin
+D025333,2024-03-08,Downgrade,Customer
+D025344,2024-03-01,Non-Renewal,Customer
+D025345,2024-02-10,Non-Renewal,Rep
+D025371,2024-03-04,Admin Error,Customer
+D025379,2024-04-22,Budget Cut,Admin
+D025401,2024-03-19,Competitor Switch,Rep
+D025403,2024-02-11,Non-Renewal,Rep
+D025405,2024-02-17,Admin Error,Admin
+D025410,2024-04-26,Downgrade,Customer
+D025415,2024-04-28,Customer Churn,Rep
+D025421,2024-03-08,Budget Cut,Customer
+D025426,2024-03-21,Competitor Switch,Customer
+D025429,2024-03-09,Downgrade,Rep
+D025436,2024-03-28,Admin Error,Customer
+D025439,2024-03-20,Non-Renewal,Customer
+D025441,2024-03-23,Competitor Switch,Customer
+D025446,2024-03-21,Downgrade,Rep
+D025457,2024-03-12,Admin Error,Customer
+D025485,2024-03-24,Downgrade,Customer
+D025492,2024-03-01,Non-Renewal,Admin
+D025494,2024-03-30,Admin Error,Customer
+D025520,2024-02-02,Competitor Switch,Customer
+D025526,2024-03-30,Customer Churn,Customer
+D025542,2024-03-19,Non-Renewal,Customer
+D025548,2024-04-06,Downgrade,Customer
+D025552,2024-03-12,Downgrade,Customer
+D025575,2024-04-09,Budget Cut,Customer
+D025588,2024-03-06,Customer Churn,Customer
+D025603,2024-03-12,Budget Cut,Rep
+D025606,2024-03-25,Non-Renewal,Admin
+D025623,2024-04-03,Customer Churn,Customer
+D025630,2024-03-24,Budget Cut,Customer
+D025639,2024-02-26,Downgrade,Customer
+D025649,2024-02-15,Downgrade,Rep
+D025652,2024-04-20,Budget Cut,Admin
+D025653,2024-02-15,Admin Error,Customer
+D025661,2024-03-14,Admin Error,Rep
+D025678,2024-03-14,Downgrade,Admin
+D025720,2024-03-21,Budget Cut,Admin
+D025731,2024-03-20,Non-Renewal,Admin
+D025743,2024-04-15,Budget Cut,Rep
+D025748,2024-03-12,Budget Cut,Rep
+D025753,2024-02-21,Budget Cut,Admin
+D025775,2024-02-22,Downgrade,Rep
+D025801,2024-04-10,Non-Renewal,Rep
+D025806,2024-03-26,Customer Churn,Customer
+D025808,2024-04-17,Downgrade,Customer
+D025822,2024-03-07,Admin Error,Rep
+D025839,2024-02-08,Downgrade,Rep
+D025841,2024-03-04,Admin Error,Admin
+D025844,2024-04-09,Admin Error,Rep
+D025846,2024-03-09,Admin Error,Admin
+D025852,2024-03-15,Non-Renewal,Customer
+D025879,2024-04-29,Downgrade,Rep
+D025885,2024-02-12,Non-Renewal,Admin
+D025893,2024-04-12,Downgrade,Rep
+D025903,2024-04-08,Non-Renewal,Rep
+D025906,2024-03-12,Downgrade,Customer
+D025925,2024-03-22,Customer Churn,Rep
+D025928,2024-03-27,Downgrade,Rep
+D025939,2024-04-20,Non-Renewal,Rep
+D025951,2024-04-09,Customer Churn,Admin
+D025964,2024-04-11,Admin Error,Customer
+D025967,2024-04-22,Downgrade,Rep
+D025973,2024-03-18,Non-Renewal,Admin
+D026015,2024-04-26,Competitor Switch,Customer
+D026029,2024-04-12,Customer Churn,Rep
+D026037,2024-04-30,Downgrade,Rep
+D026038,2024-03-31,Customer Churn,Admin
+D026050,2024-03-05,Budget Cut,Rep
+D026058,2024-03-31,Budget Cut,Customer
+D026062,2024-02-29,Customer Churn,Customer
+D026065,2024-03-29,Downgrade,Customer
+D026077,2024-02-09,Customer Churn,Customer
+D026081,2024-03-19,Budget Cut,Customer
+D026089,2024-03-25,Downgrade,Admin
+D026095,2024-02-13,Admin Error,Customer
+D026099,2024-03-17,Budget Cut,Admin
+D026100,2024-02-10,Customer Churn,Customer
+D026108,2024-03-13,Downgrade,Admin
+D026129,2024-04-18,Customer Churn,Customer
+D026139,2024-04-19,Non-Renewal,Admin
+D026148,2024-02-05,Customer Churn,Rep
+D026157,2024-03-09,Downgrade,Rep
+D026163,2024-04-12,Downgrade,Customer
+D026193,2024-03-25,Customer Churn,Customer
+D026201,2024-02-19,Budget Cut,Rep
+D026202,2024-03-30,Customer Churn,Customer
+D026217,2024-04-27,Admin Error,Admin
+D026221,2024-03-26,Downgrade,Admin
+D026242,2024-04-30,Admin Error,Customer
+D026288,2024-03-07,Downgrade,Admin
+D026301,2024-03-05,Non-Renewal,Admin
+D026302,2024-03-16,Customer Churn,Rep
+D026313,2024-02-02,Customer Churn,Customer
+D026317,2024-03-09,Budget Cut,Customer
+D026318,2024-04-19,Budget Cut,Customer
+D026325,2024-02-13,Downgrade,Rep
+D026330,2024-03-02,Competitor Switch,Rep
+D026346,2024-02-20,Customer Churn,Customer
+D026353,2024-04-01,Competitor Switch,Customer
+D026365,2024-03-31,Admin Error,Admin
+D026370,2024-02-26,Downgrade,Rep
+D026380,2024-04-29,Competitor Switch,Rep
+D026391,2024-02-28,Customer Churn,Admin
+D026396,2024-04-20,Competitor Switch,Admin
+D026398,2024-03-24,Non-Renewal,Customer
+D026400,2024-02-14,Admin Error,Customer
+D026407,2024-02-11,Downgrade,Customer
+D026418,2024-02-06,Customer Churn,Rep
+D026436,2024-04-17,Downgrade,Admin
+D026439,2024-04-05,Non-Renewal,Customer
+D026447,2024-02-01,Non-Renewal,Customer
+D026466,2024-04-30,Customer Churn,Admin
+D026482,2024-03-01,Customer Churn,Admin
+D026492,2024-02-05,Admin Error,Rep
+D026493,2024-03-27,Admin Error,Admin
+D026510,2024-04-01,Downgrade,Customer
+D026516,2024-02-05,Customer Churn,Admin
+D026523,2024-03-30,Budget Cut,Rep
+D026544,2024-03-23,Competitor Switch,Admin
+D026553,2024-02-29,Competitor Switch,Admin
+D026562,2024-03-21,Non-Renewal,Customer
+D026568,2024-02-03,Budget Cut,Customer
+D026584,2024-04-22,Customer Churn,Admin
+D026597,2024-04-09,Downgrade,Rep
+D026602,2024-02-06,Non-Renewal,Rep
+D026605,2024-03-02,Customer Churn,Admin
+D026612,2024-02-09,Non-Renewal,Admin
+D026620,2024-04-08,Downgrade,Rep
+D026622,2024-04-12,Downgrade,Customer
+D026624,2024-04-26,Downgrade,Customer
+D026635,2024-04-24,Admin Error,Rep
+D026637,2024-04-23,Budget Cut,Rep
+D026642,2024-04-19,Admin Error,Rep
+D026649,2024-02-10,Competitor Switch,Rep
+D026664,2024-02-27,Competitor Switch,Customer
+D026671,2024-04-10,Non-Renewal,Admin
+D026691,2024-02-01,Admin Error,Admin
+D026693,2024-02-11,Budget Cut,Customer
+D026710,2024-04-09,Downgrade,Customer
+D026718,2024-03-27,Non-Renewal,Rep
+D026720,2024-04-27,Budget Cut,Customer
+D026721,2024-02-16,Customer Churn,Customer
+D026725,2024-02-01,Non-Renewal,Admin
+D026739,2024-02-29,Budget Cut,Customer
+D026754,2024-04-28,Non-Renewal,Customer
+D026759,2024-03-07,Budget Cut,Customer
+D026761,2024-04-19,Budget Cut,Rep
+D026773,2024-02-29,Competitor Switch,Admin
+D026782,2024-04-14,Downgrade,Admin
+D026798,2024-02-04,Customer Churn,Rep
+D026808,2024-02-27,Non-Renewal,Customer
+D026852,2024-03-01,Admin Error,Admin
+D026858,2024-04-21,Customer Churn,Rep
+D026893,2024-02-16,Budget Cut,Customer
+D026914,2024-03-11,Admin Error,Admin
+D026918,2024-03-27,Non-Renewal,Rep
+D026919,2024-04-22,Customer Churn,Customer
+D026943,2024-04-19,Admin Error,Admin
+D026947,2024-02-12,Customer Churn,Admin
+D026980,2024-02-09,Non-Renewal,Admin
+D026983,2024-02-15,Non-Renewal,Admin
+D026990,2024-03-20,Non-Renewal,Customer
+D027018,2024-04-21,Competitor Switch,Rep
+D027026,2024-03-20,Downgrade,Admin
+D027036,2024-04-23,Customer Churn,Rep
+D027044,2024-03-16,Non-Renewal,Customer
+D027060,2024-04-02,Budget Cut,Admin
+D027073,2024-02-02,Customer Churn,Rep
+D027097,2024-04-24,Budget Cut,Rep
+D027101,2024-02-15,Non-Renewal,Customer
+D027102,2024-04-05,Admin Error,Customer
+D027104,2024-03-04,Budget Cut,Admin
+D027131,2024-04-11,Admin Error,Customer
+D027134,2024-04-22,Non-Renewal,Rep
+D027140,2024-02-18,Admin Error,Admin
+D027144,2024-02-05,Competitor Switch,Customer
+D027166,2024-04-23,Budget Cut,Rep
+D027173,2024-02-13,Admin Error,Customer
+D027179,2024-02-22,Non-Renewal,Rep
+D027184,2024-02-24,Budget Cut,Customer
+D027201,2024-02-29,Admin Error,Admin
+D027234,2024-02-23,Budget Cut,Admin
+D027246,2024-02-23,Budget Cut,Customer
+D027247,2024-02-08,Customer Churn,Customer
+D027254,2024-02-12,Admin Error,Rep
+D027258,2024-04-05,Competitor Switch,Rep
+D027260,2024-02-06,Budget Cut,Customer
+D027262,2024-02-08,Downgrade,Rep
+D027265,2024-03-22,Non-Renewal,Rep
+D027273,2024-03-28,Budget Cut,Rep
+D027278,2024-04-27,Customer Churn,Admin
+D027294,2024-02-02,Budget Cut,Customer
+D027309,2024-02-03,Competitor Switch,Admin
+D027326,2024-03-11,Non-Renewal,Customer
+D027336,2024-03-25,Non-Renewal,Rep
+D027363,2024-03-15,Competitor Switch,Admin
+D027379,2024-04-05,Budget Cut,Rep
+D027386,2024-02-20,Budget Cut,Rep
+D027388,2024-02-08,Downgrade,Customer
+D027390,2024-03-20,Downgrade,Customer
+D027394,2024-03-24,Admin Error,Admin
+D027417,2024-03-05,Budget Cut,Customer
+D027420,2024-03-11,Customer Churn,Rep
+D027431,2024-03-07,Customer Churn,Customer
+D027448,2024-02-25,Downgrade,Rep
+D027451,2024-03-03,Admin Error,Rep
+D027452,2024-04-21,Competitor Switch,Admin
+D027469,2024-03-23,Customer Churn,Admin
+D027471,2024-02-18,Competitor Switch,Customer
+D027477,2024-04-18,Non-Renewal,Rep
+D027479,2024-04-07,Customer Churn,Customer
+D027502,2024-04-28,Budget Cut,Rep
+D027507,2024-02-03,Admin Error,Admin
+D027509,2024-03-11,Downgrade,Admin
+D027516,2024-03-03,Budget Cut,Rep
+D027533,2024-02-24,Customer Churn,Admin
+D027539,2024-02-14,Customer Churn,Rep
+D027544,2024-02-19,Customer Churn,Customer
+D027550,2024-04-16,Competitor Switch,Admin
+D027558,2024-03-15,Downgrade,Rep
+D027560,2024-03-12,Downgrade,Admin
+D027568,2024-03-09,Customer Churn,Admin
+D027605,2024-03-14,Admin Error,Customer
+D027628,2024-03-05,Customer Churn,Customer
+D027641,2024-02-04,Customer Churn,Admin
+D027644,2024-03-12,Non-Renewal,Admin
+D027647,2024-04-07,Non-Renewal,Customer
+D027664,2024-03-24,Competitor Switch,Admin
+D027669,2024-02-14,Customer Churn,Customer
+D027676,2024-04-11,Admin Error,Customer
+D027680,2024-04-13,Customer Churn,Customer
+D027683,2024-02-02,Downgrade,Rep
+D027686,2024-03-29,Competitor Switch,Admin
+D027696,2024-03-07,Downgrade,Rep
+D027697,2024-03-25,Budget Cut,Admin
+D027698,2024-03-26,Budget Cut,Customer
+D027701,2024-02-16,Competitor Switch,Admin
+D027724,2024-03-21,Admin Error,Customer
+D027741,2024-02-11,Competitor Switch,Customer
+D027744,2024-02-16,Admin Error,Rep
+D027763,2024-04-18,Budget Cut,Admin
+D027768,2024-04-28,Customer Churn,Rep
+D027769,2024-03-16,Customer Churn,Rep
+D027777,2024-04-05,Budget Cut,Customer
+D027786,2024-02-23,Admin Error,Rep
+D027799,2024-02-21,Admin Error,Rep
+D027807,2024-03-24,Budget Cut,Admin
+D027811,2024-02-01,Admin Error,Admin
+D027821,2024-04-19,Admin Error,Rep
+D027835,2024-03-17,Customer Churn,Rep
+D027841,2024-04-02,Customer Churn,Customer
+D027845,2024-04-16,Competitor Switch,Customer
+D027846,2024-02-21,Non-Renewal,Customer
+D027848,2024-04-02,Budget Cut,Rep
+D027851,2024-04-06,Downgrade,Customer
+D027853,2024-02-15,Budget Cut,Customer
+D027857,2024-02-28,Non-Renewal,Customer
+D027874,2024-03-18,Downgrade,Rep
+D027891,2024-03-25,Non-Renewal,Customer
+D027898,2024-04-02,Admin Error,Rep
+D027908,2024-03-13,Budget Cut,Rep
+D027916,2024-04-07,Customer Churn,Rep
+D027933,2024-03-19,Competitor Switch,Customer
+D027937,2024-02-15,Downgrade,Rep
+D027956,2024-02-02,Budget Cut,Rep
+D027957,2024-03-01,Customer Churn,Admin
+D027958,2024-04-05,Competitor Switch,Admin
+D027959,2024-03-26,Admin Error,Admin
+D027960,2024-02-28,Non-Renewal,Admin
+D027962,2024-04-06,Admin Error,Admin
+D027968,2024-02-23,Budget Cut,Rep
+D027971,2024-04-18,Competitor Switch,Customer
+D027972,2024-04-13,Non-Renewal,Admin
+D027995,2024-03-22,Admin Error,Admin
+D028045,2024-04-12,Downgrade,Customer
+D028049,2024-03-11,Admin Error,Rep
+D028068,2024-04-04,Downgrade,Admin
+D028070,2024-03-25,Non-Renewal,Rep
+D028076,2024-03-28,Customer Churn,Rep
+D028081,2024-04-09,Downgrade,Rep
+D028083,2024-02-25,Admin Error,Rep
+D028088,2024-02-17,Downgrade,Admin
+D028091,2024-03-22,Non-Renewal,Admin
+D028096,2024-03-06,Non-Renewal,Customer
+D028111,2024-04-10,Competitor Switch,Admin
+D028131,2024-03-08,Budget Cut,Rep
+D028142,2024-04-15,Budget Cut,Rep
+D028146,2024-02-02,Customer Churn,Admin
+D028160,2024-04-04,Downgrade,Admin
+D028166,2024-04-24,Competitor Switch,Admin
+D028174,2024-02-10,Customer Churn,Customer
+D028190,2024-02-10,Admin Error,Customer
+D028195,2024-04-07,Non-Renewal,Rep
+D028210,2024-04-28,Competitor Switch,Customer
+D028219,2024-02-29,Budget Cut,Admin
+D028231,2024-02-22,Competitor Switch,Admin
+D028247,2024-02-01,Customer Churn,Customer
+D028252,2024-02-17,Budget Cut,Customer
+D028262,2024-03-10,Non-Renewal,Customer
+D028266,2024-04-19,Downgrade,Rep
+D028279,2024-02-16,Non-Renewal,Admin
+D028300,2024-02-21,Budget Cut,Admin
+D028309,2024-03-14,Competitor Switch,Admin
+D028314,2024-03-30,Competitor Switch,Rep
+D028340,2024-02-15,Competitor Switch,Admin
+D028346,2024-04-21,Downgrade,Rep
+D028370,2024-03-03,Admin Error,Customer
+D028381,2024-04-26,Downgrade,Rep
+D028396,2024-02-24,Competitor Switch,Customer
+D028400,2024-03-09,Competitor Switch,Admin
+D028412,2024-02-12,Budget Cut,Admin
+D028415,2024-03-14,Admin Error,Rep
+D028435,2024-02-21,Customer Churn,Admin
+D028440,2024-03-31,Competitor Switch,Rep
+D028466,2024-02-06,Admin Error,Customer
+D028471,2024-02-05,Competitor Switch,Rep
+D028472,2024-04-13,Non-Renewal,Customer
+D028484,2024-02-03,Budget Cut,Admin
+D028498,2024-02-03,Competitor Switch,Rep
+D028501,2024-03-25,Customer Churn,Admin
+D028502,2024-03-02,Budget Cut,Rep
+D028505,2024-03-24,Competitor Switch,Rep
+D028516,2024-03-15,Competitor Switch,Customer
+D028549,2024-04-28,Downgrade,Rep
+D028561,2024-02-23,Admin Error,Customer
+D028562,2024-04-23,Customer Churn,Customer
+D028567,2024-02-19,Customer Churn,Admin
+D028575,2024-02-22,Customer Churn,Customer
+D028593,2024-02-05,Competitor Switch,Customer
+D028595,2024-04-28,Customer Churn,Admin
+D028598,2024-04-09,Non-Renewal,Admin
+D028617,2024-03-25,Customer Churn,Rep
+D028628,2024-04-14,Downgrade,Customer
+D028636,2024-03-14,Customer Churn,Admin
+D028641,2024-02-28,Budget Cut,Customer
+D028644,2024-03-23,Budget Cut,Admin
+D028656,2024-02-18,Non-Renewal,Admin
+D028677,2024-03-07,Competitor Switch,Rep
+D028688,2024-04-07,Customer Churn,Rep
+D028700,2024-03-19,Admin Error,Customer
+D028704,2024-03-23,Customer Churn,Customer
+D028719,2024-02-15,Non-Renewal,Customer
+D028721,2024-02-03,Admin Error,Admin
+D028725,2024-03-29,Budget Cut,Rep
+D028738,2024-03-29,Admin Error,Rep
+D028741,2024-03-10,Budget Cut,Admin
+D028777,2024-02-18,Non-Renewal,Admin
+D028780,2024-03-12,Downgrade,Admin
+D028802,2024-02-20,Competitor Switch,Rep
+D028808,2024-03-21,Admin Error,Admin
+D028815,2024-03-15,Downgrade,Rep
+D028817,2024-04-26,Downgrade,Admin
+D028823,2024-02-16,Budget Cut,Rep
+D028830,2024-02-09,Budget Cut,Rep
+D028840,2024-03-17,Competitor Switch,Admin
+D028841,2024-02-13,Customer Churn,Rep
+D028860,2024-04-27,Admin Error,Admin
+D028864,2024-04-19,Admin Error,Admin
+D028867,2024-03-05,Competitor Switch,Admin
+D028880,2024-02-28,Competitor Switch,Rep
+D028881,2024-02-06,Downgrade,Rep
+D028882,2024-03-07,Customer Churn,Customer
+D028893,2024-03-27,Budget Cut,Customer
+D028907,2024-03-18,Downgrade,Rep
+D028912,2024-04-21,Competitor Switch,Customer
+D028918,2024-03-27,Budget Cut,Admin
+D028920,2024-02-22,Downgrade,Admin
+D028932,2024-04-10,Budget Cut,Admin
+D028941,2024-04-24,Budget Cut,Customer
+D028968,2024-04-28,Customer Churn,Rep
+D028973,2024-04-08,Budget Cut,Rep
+D028979,2024-02-14,Customer Churn,Admin
+D028997,2024-03-31,Budget Cut,Customer
+D029018,2024-03-13,Competitor Switch,Customer
+D029035,2024-02-17,Competitor Switch,Admin
+D029040,2024-02-18,Customer Churn,Admin
+D029045,2024-02-24,Competitor Switch,Customer
+D029051,2024-04-19,Downgrade,Rep
+D029062,2024-02-23,Competitor Switch,Admin
+D029063,2024-02-15,Budget Cut,Rep
+D029064,2024-03-25,Competitor Switch,Customer
+D029071,2024-03-17,Admin Error,Admin
+D029088,2024-03-22,Competitor Switch,Admin
+D029091,2024-03-19,Customer Churn,Customer
+D029131,2024-04-18,Non-Renewal,Rep
+D029132,2024-02-27,Non-Renewal,Admin
+D029138,2024-03-06,Admin Error,Admin
+D029143,2024-04-02,Customer Churn,Admin
+D029145,2024-03-09,Customer Churn,Customer
+D029147,2024-03-23,Competitor Switch,Admin
+D029148,2024-02-08,Downgrade,Rep
+D029149,2024-02-27,Competitor Switch,Admin
+D029156,2024-02-08,Downgrade,Customer
+D029160,2024-02-19,Admin Error,Rep
+D029162,2024-04-20,Customer Churn,Admin
+D029172,2024-03-24,Competitor Switch,Rep
+D029175,2024-02-08,Competitor Switch,Rep
+D029177,2024-02-01,Budget Cut,Rep
+D029192,2024-02-06,Admin Error,Customer
+D029193,2024-02-06,Non-Renewal,Rep
+D029200,2024-04-07,Admin Error,Rep
+D029212,2024-02-18,Customer Churn,Admin
+D029241,2024-02-28,Budget Cut,Admin
+D029270,2024-02-27,Non-Renewal,Customer
+D029293,2024-03-18,Admin Error,Admin
+D029301,2024-02-01,Non-Renewal,Admin
+D029302,2024-04-25,Budget Cut,Customer
+D029311,2024-02-28,Customer Churn,Customer
+D029322,2024-03-31,Competitor Switch,Admin
+D029342,2024-03-13,Competitor Switch,Admin
+D029372,2024-03-19,Admin Error,Admin
+D029378,2024-02-13,Competitor Switch,Admin
+D029383,2024-04-24,Non-Renewal,Customer
+D029390,2024-03-27,Customer Churn,Customer
+D029401,2024-04-26,Budget Cut,Admin
+D029433,2024-04-23,Budget Cut,Rep
+D029436,2024-02-17,Admin Error,Admin
+D029438,2024-04-20,Non-Renewal,Admin
+D029443,2024-02-11,Admin Error,Rep
+D029466,2024-03-02,Downgrade,Admin
+D029478,2024-02-03,Downgrade,Customer
+D029499,2024-04-01,Admin Error,Rep
+D029501,2024-02-06,Downgrade,Admin
+D029531,2024-04-12,Admin Error,Rep
+D029534,2024-03-29,Competitor Switch,Customer
+D029538,2024-03-24,Competitor Switch,Customer
+D029578,2024-03-02,Customer Churn,Rep
+D029582,2024-03-24,Downgrade,Admin
+D029586,2024-04-11,Non-Renewal,Rep
+D029612,2024-03-07,Downgrade,Rep
+D029614,2024-04-24,Non-Renewal,Customer
+D029675,2024-04-25,Admin Error,Admin
+D029677,2024-03-11,Admin Error,Customer
+D029697,2024-03-23,Budget Cut,Rep
+D029703,2024-03-11,Admin Error,Rep
+D029704,2024-02-15,Budget Cut,Admin
+D029741,2024-02-14,Downgrade,Customer
+D029761,2024-03-10,Admin Error,Customer
+D029769,2024-02-08,Budget Cut,Rep
+D029777,2024-02-22,Budget Cut,Customer
+D029793,2024-04-11,Downgrade,Rep
+D029826,2024-03-16,Competitor Switch,Customer
+D029829,2024-04-01,Admin Error,Rep
+D029840,2024-04-25,Customer Churn,Admin
+D029854,2024-02-18,Admin Error,Admin
+D029860,2024-02-28,Downgrade,Customer
+D029900,2024-04-01,Budget Cut,Admin
+D029926,2024-04-19,Competitor Switch,Admin
+D029928,2024-02-26,Non-Renewal,Rep
+D029933,2024-04-24,Downgrade,Customer
+D029946,2024-03-23,Customer Churn,Customer
+D029951,2024-02-12,Admin Error,Customer
+D029963,2024-04-03,Downgrade,Customer
+D029968,2024-02-04,Customer Churn,Customer
+D029969,2024-03-31,Budget Cut,Customer
+D029973,2024-03-26,Customer Churn,Admin
+D029977,2024-03-06,Competitor Switch,Admin
+D029991,2024-03-31,Budget Cut,Admin
+D029995,2024-02-25,Downgrade,Rep
+D029999,2024-04-11,Competitor Switch,Admin
+D030002,2024-04-13,Customer Churn,Rep
+D030004,2024-03-24,Customer Churn,Customer
+D030021,2024-03-06,Customer Churn,Customer
+D030022,2024-02-03,Customer Churn,Admin
+D030027,2024-02-24,Competitor Switch,Admin
+D030030,2024-03-20,Budget Cut,Customer
+D030031,2024-02-20,Non-Renewal,Admin
+D030036,2024-03-22,Downgrade,Admin
+D030041,2024-04-13,Competitor Switch,Customer
+D030062,2024-03-02,Non-Renewal,Admin
+D030066,2024-04-11,Competitor Switch,Rep
+D030067,2024-03-08,Non-Renewal,Customer
+D030076,2024-03-12,Budget Cut,Admin
+D030085,2024-02-04,Downgrade,Rep
+D030092,2024-03-23,Admin Error,Admin
+D030114,2024-04-27,Customer Churn,Rep
+D030125,2024-02-05,Admin Error,Admin
+D030127,2024-03-04,Non-Renewal,Admin
+D030132,2024-04-17,Downgrade,Customer
+D030134,2024-02-08,Non-Renewal,Customer
+D030144,2024-04-16,Admin Error,Admin
+D030179,2024-02-27,Non-Renewal,Admin
+D030180,2024-03-21,Budget Cut,Rep
+D030184,2024-02-10,Budget Cut,Rep
+D030194,2024-02-27,Budget Cut,Admin
+D030195,2024-04-11,Non-Renewal,Rep
+D030204,2024-03-15,Budget Cut,Admin
+D030210,2024-03-01,Budget Cut,Customer
+D030216,2024-04-10,Admin Error,Customer
+D030239,2024-03-12,Non-Renewal,Admin
+D030240,2024-04-06,Competitor Switch,Customer
+D030248,2024-03-25,Budget Cut,Rep
+D030254,2024-03-22,Customer Churn,Customer
+D030270,2024-03-16,Admin Error,Admin
+D030288,2024-04-03,Competitor Switch,Rep
+D030315,2024-03-09,Budget Cut,Rep
+D030324,2024-03-15,Admin Error,Admin
+D030328,2024-03-03,Admin Error,Admin
+D030343,2024-02-04,Customer Churn,Rep
+D030345,2024-04-30,Budget Cut,Rep
+D030372,2024-03-18,Downgrade,Rep
+D030384,2024-03-12,Customer Churn,Admin
+D030432,2024-02-02,Non-Renewal,Admin
+D030441,2024-03-29,Downgrade,Admin
+D030451,2024-02-04,Competitor Switch,Admin
+D030455,2024-04-16,Competitor Switch,Admin
+D030462,2024-02-03,Competitor Switch,Admin
+D030480,2024-03-04,Admin Error,Customer
+D030521,2024-03-10,Non-Renewal,Admin
+D030533,2024-03-08,Admin Error,Rep
+D030539,2024-02-17,Budget Cut,Rep
+D030541,2024-03-08,Downgrade,Customer
+D030570,2024-02-05,Downgrade,Admin
+D030587,2024-03-02,Customer Churn,Admin
+D030600,2024-02-01,Non-Renewal,Customer
+D030603,2024-04-28,Competitor Switch,Admin
+D030612,2024-04-29,Customer Churn,Rep
+D030614,2024-04-16,Non-Renewal,Customer
+D030618,2024-03-25,Competitor Switch,Customer
+D030635,2024-04-27,Budget Cut,Rep
+D030648,2024-04-30,Downgrade,Customer
+D030692,2024-03-07,Customer Churn,Customer
+D030701,2024-03-29,Downgrade,Rep
+D030702,2024-04-30,Customer Churn,Customer
+D030710,2024-04-13,Non-Renewal,Admin
+D030716,2024-04-10,Customer Churn,Rep
+D030742,2024-03-18,Customer Churn,Admin
+D030750,2024-03-10,Admin Error,Admin
+D030760,2024-02-10,Budget Cut,Rep
+D030762,2024-02-21,Admin Error,Rep
+D030769,2024-04-29,Admin Error,Admin
+D030788,2024-04-25,Budget Cut,Rep
+D030792,2024-02-20,Competitor Switch,Customer
+D030798,2024-03-28,Customer Churn,Rep
+D030826,2024-02-23,Budget Cut,Admin
+D030839,2024-04-18,Customer Churn,Customer
+D030844,2024-02-11,Budget Cut,Admin
+D030855,2024-02-08,Competitor Switch,Admin
+D030859,2024-04-08,Downgrade,Admin
+D030864,2024-02-25,Competitor Switch,Rep
+D030877,2024-02-14,Customer Churn,Customer
+D030885,2024-03-11,Competitor Switch,Rep
+D030915,2024-03-12,Admin Error,Admin
+D030926,2024-03-04,Downgrade,Admin
+D030933,2024-02-18,Non-Renewal,Rep
+D030955,2024-04-18,Budget Cut,Rep
+D030958,2024-02-03,Non-Renewal,Rep
+D030963,2024-03-31,Customer Churn,Customer
+D030974,2024-02-25,Competitor Switch,Customer
+D030980,2024-03-10,Admin Error,Rep
+D031000,2024-03-21,Non-Renewal,Admin
+D031012,2024-03-15,Competitor Switch,Rep
+D031054,2024-02-15,Competitor Switch,Admin
+D031060,2024-03-28,Non-Renewal,Admin
+D031061,2024-02-24,Downgrade,Admin
+D031074,2024-04-17,Admin Error,Admin
+D031082,2024-04-17,Budget Cut,Customer
+D031087,2024-03-04,Downgrade,Customer
+D031102,2024-04-20,Non-Renewal,Admin
+D031106,2024-02-12,Competitor Switch,Admin
+D031112,2024-02-10,Admin Error,Rep
+D031114,2024-02-11,Budget Cut,Admin
+D031119,2024-04-20,Customer Churn,Customer
+D031140,2024-03-15,Admin Error,Rep
+D031144,2024-04-16,Budget Cut,Customer
+D031150,2024-03-03,Admin Error,Admin
+D031176,2024-03-04,Downgrade,Customer
+D031191,2024-03-22,Customer Churn,Admin
+D031193,2024-02-17,Admin Error,Rep
+D031197,2024-02-22,Budget Cut,Admin
+D031203,2024-02-14,Downgrade,Admin
+D031241,2024-02-29,Competitor Switch,Rep
+D031246,2024-02-05,Downgrade,Admin
+D031249,2024-02-13,Competitor Switch,Customer
+D031259,2024-04-20,Admin Error,Admin
+D031262,2024-03-25,Customer Churn,Customer
+D031263,2024-02-03,Non-Renewal,Customer
+D031287,2024-03-29,Downgrade,Customer
+D031304,2024-02-27,Non-Renewal,Customer
+D031307,2024-02-01,Customer Churn,Customer
+D031310,2024-02-19,Competitor Switch,Rep
+D031312,2024-03-10,Non-Renewal,Admin
+D031330,2024-02-25,Customer Churn,Customer
+D031343,2024-02-08,Competitor Switch,Rep
+D031346,2024-04-19,Admin Error,Admin
+D031352,2024-03-15,Budget Cut,Admin
+D031356,2024-02-14,Downgrade,Customer
+D031364,2024-04-16,Budget Cut,Rep
+D031372,2024-04-20,Budget Cut,Rep
+D031378,2024-03-31,Budget Cut,Admin
+D031379,2024-03-14,Non-Renewal,Customer
+D031390,2024-02-23,Customer Churn,Customer
+D031391,2024-04-13,Customer Churn,Customer
+D031399,2024-02-08,Non-Renewal,Rep
+D031400,2024-03-17,Customer Churn,Customer
+D031412,2024-03-12,Admin Error,Customer
+D031425,2024-02-29,Budget Cut,Rep
+D031431,2024-02-22,Admin Error,Admin
+D031442,2024-02-16,Admin Error,Rep
+D031448,2024-03-16,Admin Error,Rep
+D031450,2024-04-30,Downgrade,Rep
+D031451,2024-02-22,Customer Churn,Customer
+D031473,2024-04-25,Downgrade,Admin
+D031495,2024-03-31,Downgrade,Rep
+D031500,2024-04-13,Downgrade,Customer
+D031507,2024-04-13,Downgrade,Rep
+D031525,2024-02-21,Non-Renewal,Admin
+D031537,2024-03-21,Competitor Switch,Customer
+D031539,2024-03-31,Downgrade,Rep
+D031542,2024-03-26,Non-Renewal,Rep
+D031554,2024-04-30,Downgrade,Rep
+D031558,2024-03-11,Admin Error,Customer
+D031570,2024-04-06,Non-Renewal,Rep
+D031578,2024-03-23,Non-Renewal,Admin
+D031590,2024-03-07,Downgrade,Rep
+D031599,2024-04-25,Budget Cut,Admin
+D031613,2024-04-02,Non-Renewal,Customer
+D031615,2024-02-15,Admin Error,Rep
+D031621,2024-03-16,Non-Renewal,Rep
+D031638,2024-04-10,Downgrade,Customer
+D031648,2024-03-01,Admin Error,Customer
+D031659,2024-02-12,Competitor Switch,Customer
+D031663,2024-04-26,Non-Renewal,Customer
+D031665,2024-03-05,Customer Churn,Admin
+D031670,2024-03-08,Customer Churn,Rep
+D031677,2024-04-14,Downgrade,Rep
+D031687,2024-03-15,Customer Churn,Customer
+D031707,2024-03-10,Downgrade,Rep
+D031731,2024-03-16,Downgrade,Rep
+D031733,2024-03-09,Competitor Switch,Rep
+D031735,2024-04-21,Non-Renewal,Rep
+D031737,2024-03-30,Downgrade,Admin
+D031743,2024-04-10,Customer Churn,Rep
+D031782,2024-02-10,Non-Renewal,Admin
+D031787,2024-02-19,Budget Cut,Rep
+D031790,2024-04-11,Customer Churn,Customer
+D031792,2024-04-24,Competitor Switch,Customer
+D031794,2024-04-26,Budget Cut,Customer
+D031799,2024-03-11,Budget Cut,Admin
+D031836,2024-02-04,Admin Error,Customer
+D031841,2024-02-03,Customer Churn,Rep
+D031842,2024-04-11,Budget Cut,Admin
+D031843,2024-03-16,Competitor Switch,Customer
+D031858,2024-02-07,Customer Churn,Rep
+D031860,2024-03-07,Non-Renewal,Customer
+D031862,2024-03-25,Competitor Switch,Customer
+D031882,2024-03-05,Admin Error,Rep
+D031887,2024-03-26,Budget Cut,Admin
+D031908,2024-03-27,Competitor Switch,Admin
+D031909,2024-04-12,Non-Renewal,Rep
+D031920,2024-03-29,Non-Renewal,Admin
+D031932,2024-04-02,Budget Cut,Admin
+D031955,2024-02-05,Budget Cut,Customer
+D031972,2024-04-12,Customer Churn,Rep
+D031988,2024-02-24,Competitor Switch,Customer
+D031991,2024-04-18,Budget Cut,Admin
+D032014,2024-04-22,Downgrade,Rep
+D032015,2024-02-02,Budget Cut,Admin
+D032024,2024-02-19,Downgrade,Customer
+D032030,2024-02-01,Admin Error,Rep
+D032048,2024-04-28,Downgrade,Rep
+D032063,2024-02-20,Budget Cut,Customer
+D032064,2024-02-24,Non-Renewal,Rep
+D032074,2024-03-29,Admin Error,Rep
+D032075,2024-02-16,Downgrade,Rep
+D032095,2024-03-21,Competitor Switch,Admin
+D032098,2024-04-28,Downgrade,Customer
+D032123,2024-04-28,Admin Error,Customer
+D032127,2024-03-30,Non-Renewal,Admin
+D032132,2024-03-26,Budget Cut,Admin
+D032142,2024-03-04,Budget Cut,Rep
+D032150,2024-03-11,Budget Cut,Admin
+D032156,2024-03-23,Customer Churn,Rep
+D032158,2024-02-01,Customer Churn,Admin
+D032159,2024-02-25,Downgrade,Rep
+D032172,2024-03-28,Downgrade,Admin
+D032185,2024-04-20,Budget Cut,Rep
+D032201,2024-04-10,Customer Churn,Admin
+D032206,2024-04-01,Competitor Switch,Rep
+D032226,2024-03-15,Budget Cut,Rep
+D032248,2024-02-19,Non-Renewal,Customer
+D032256,2024-04-22,Admin Error,Rep
+D032259,2024-04-11,Customer Churn,Rep
+D032270,2024-04-15,Admin Error,Rep
+D032276,2024-02-21,Admin Error,Admin
+D032281,2024-04-18,Customer Churn,Rep
+D032283,2024-04-09,Budget Cut,Admin
+D032287,2024-02-21,Customer Churn,Rep
+D032288,2024-04-22,Admin Error,Customer
+D032351,2024-03-02,Admin Error,Admin
+D032364,2024-04-25,Customer Churn,Rep
+D032395,2024-03-15,Competitor Switch,Admin
+D032399,2024-04-01,Downgrade,Admin
+D032412,2024-02-12,Downgrade,Rep
+D032423,2024-02-17,Customer Churn,Customer
+D032424,2024-04-28,Non-Renewal,Rep
+D032428,2024-04-20,Competitor Switch,Rep
+D032431,2024-02-14,Competitor Switch,Admin
+D032439,2024-02-19,Non-Renewal,Rep
+D032444,2024-03-11,Downgrade,Rep
+D032468,2024-04-26,Competitor Switch,Admin
+D032475,2024-04-19,Downgrade,Customer
+D032495,2024-04-04,Admin Error,Admin
+D032497,2024-04-06,Customer Churn,Customer
+D032507,2024-04-19,Admin Error,Admin
+D032518,2024-03-10,Budget Cut,Admin
+D032523,2024-03-09,Budget Cut,Rep
+D032527,2024-03-15,Non-Renewal,Customer
+D032564,2024-03-11,Competitor Switch,Rep
+D032565,2024-03-10,Competitor Switch,Admin
+D032575,2024-03-19,Admin Error,Rep
+D032582,2024-03-18,Budget Cut,Rep
+D032598,2024-04-19,Admin Error,Rep
+D032601,2024-03-03,Customer Churn,Customer
+D032602,2024-02-29,Downgrade,Rep
+D032609,2024-02-25,Customer Churn,Customer
+D032612,2024-03-17,Customer Churn,Customer
+D032621,2024-02-03,Downgrade,Customer
+D032623,2024-04-03,Downgrade,Customer
+D032624,2024-03-24,Competitor Switch,Admin
+D032638,2024-04-01,Downgrade,Customer
+D032644,2024-02-10,Non-Renewal,Admin
+D032648,2024-04-12,Admin Error,Rep
+D032652,2024-03-15,Admin Error,Rep
+D032669,2024-02-28,Budget Cut,Admin
+D032671,2024-04-22,Customer Churn,Customer
+D032696,2024-02-12,Budget Cut,Customer
+D032697,2024-04-27,Admin Error,Admin
+D032705,2024-04-01,Downgrade,Admin
+D032706,2024-04-20,Downgrade,Admin
+D032716,2024-02-11,Admin Error,Admin
+D032728,2024-02-28,Budget Cut,Rep
+D032735,2024-03-09,Competitor Switch,Rep
+D032798,2024-03-15,Admin Error,Customer
+D032829,2024-02-01,Non-Renewal,Rep
+D032831,2024-03-16,Admin Error,Admin
+D032841,2024-03-18,Downgrade,Admin
+D032844,2024-04-09,Customer Churn,Rep
+D032846,2024-03-05,Competitor Switch,Admin
+D032870,2024-04-07,Non-Renewal,Admin
+D032876,2024-02-23,Non-Renewal,Customer
+D032887,2024-03-14,Non-Renewal,Customer
+D032892,2024-03-22,Competitor Switch,Customer
+D032899,2024-02-01,Budget Cut,Admin
+D032900,2024-02-01,Non-Renewal,Admin
+D032907,2024-02-27,Budget Cut,Rep
+D032931,2024-04-24,Competitor Switch,Admin
+D032944,2024-04-15,Admin Error,Rep
+D032955,2024-03-02,Non-Renewal,Customer
+D032956,2024-02-10,Downgrade,Rep
+D032960,2024-02-27,Downgrade,Rep
+D032989,2024-02-14,Admin Error,Rep
+D033002,2024-04-04,Competitor Switch,Admin
+D033011,2024-02-09,Budget Cut,Admin
+D033079,2024-03-12,Budget Cut,Admin
+D033093,2024-04-07,Customer Churn,Customer
+D033101,2024-04-17,Admin Error,Rep
+D033120,2024-03-09,Downgrade,Admin
+D033135,2024-04-13,Competitor Switch,Rep
+D033145,2024-04-28,Non-Renewal,Admin
+D033159,2024-04-17,Budget Cut,Rep
+D033162,2024-02-22,Customer Churn,Rep
+D033173,2024-04-25,Budget Cut,Customer
+D033175,2024-04-18,Customer Churn,Rep
+D033179,2024-03-31,Non-Renewal,Admin
+D033185,2024-03-23,Admin Error,Rep
+D033190,2024-03-25,Non-Renewal,Customer
+D033197,2024-03-13,Budget Cut,Admin
+D033204,2024-04-23,Competitor Switch,Customer
+D033215,2024-02-13,Budget Cut,Admin
+D033216,2024-02-03,Admin Error,Admin
+D033252,2024-04-10,Customer Churn,Rep
+D033278,2024-02-15,Competitor Switch,Rep
+D033284,2024-04-17,Budget Cut,Customer
+D033310,2024-02-05,Admin Error,Rep
+D033327,2024-03-15,Budget Cut,Customer
+D033334,2024-03-24,Competitor Switch,Customer
+D033343,2024-02-13,Downgrade,Admin
+D033347,2024-04-08,Competitor Switch,Customer
+D033372,2024-02-02,Budget Cut,Rep
+D033377,2024-02-25,Customer Churn,Rep
+D033378,2024-03-25,Admin Error,Customer
+D033405,2024-02-08,Customer Churn,Rep
+D033406,2024-02-09,Admin Error,Rep
+D033408,2024-04-16,Non-Renewal,Admin
+D033427,2024-02-27,Non-Renewal,Customer
+D033430,2024-04-07,Customer Churn,Customer
+D033433,2024-02-28,Customer Churn,Admin
+D033435,2024-02-05,Customer Churn,Rep
+D033458,2024-03-20,Downgrade,Admin
+D033461,2024-03-24,Admin Error,Rep
+D033479,2024-03-02,Admin Error,Customer
+D033491,2024-04-04,Budget Cut,Rep
+D033496,2024-03-04,Downgrade,Admin
+D033501,2024-02-15,Customer Churn,Customer
+D033510,2024-03-24,Budget Cut,Customer
+D033523,2024-02-08,Competitor Switch,Admin
+D033533,2024-03-29,Customer Churn,Rep
+D033545,2024-04-19,Budget Cut,Customer
+D033558,2024-03-30,Downgrade,Customer
+D033568,2024-03-11,Customer Churn,Admin
+D033595,2024-02-13,Downgrade,Rep
+D033609,2024-02-06,Downgrade,Admin
+D033612,2024-04-12,Customer Churn,Rep
+D033613,2024-04-07,Customer Churn,Customer
+D033615,2024-04-02,Competitor Switch,Rep
+D033624,2024-02-19,Competitor Switch,Admin
+D033633,2024-02-22,Competitor Switch,Customer
+D033648,2024-04-13,Downgrade,Rep
+D033663,2024-03-05,Admin Error,Admin
+D033664,2024-03-21,Non-Renewal,Customer
+D033674,2024-04-20,Admin Error,Admin
+D033678,2024-02-17,Customer Churn,Customer
+D033694,2024-02-07,Downgrade,Rep
+D033695,2024-04-19,Customer Churn,Customer
+D033715,2024-03-23,Competitor Switch,Admin
+D033720,2024-04-12,Budget Cut,Customer
+D033730,2024-04-26,Budget Cut,Rep
+D033739,2024-04-25,Non-Renewal,Admin
+D033758,2024-02-09,Budget Cut,Customer
+D033759,2024-04-20,Non-Renewal,Customer
+D033760,2024-02-04,Admin Error,Rep
+D033761,2024-02-07,Downgrade,Customer
+D033762,2024-03-04,Admin Error,Admin
+D033786,2024-02-22,Customer Churn,Customer
+D033795,2024-03-22,Customer Churn,Customer
+D033805,2024-03-01,Downgrade,Rep
+D033814,2024-02-16,Downgrade,Customer
+D033818,2024-02-28,Customer Churn,Customer
+D033823,2024-02-05,Budget Cut,Rep
+D033837,2024-02-09,Downgrade,Rep
+D033838,2024-02-11,Admin Error,Customer
+D033854,2024-02-10,Budget Cut,Admin
+D033857,2024-04-01,Competitor Switch,Customer
+D033862,2024-04-24,Competitor Switch,Rep
+D033867,2024-03-18,Customer Churn,Admin
+D033880,2024-03-19,Customer Churn,Admin
+D033881,2024-03-30,Competitor Switch,Rep
+D033912,2024-02-18,Downgrade,Rep
+D033924,2024-04-12,Competitor Switch,Admin
+D033927,2024-03-12,Downgrade,Admin
+D033928,2024-02-21,Admin Error,Admin
+D033930,2024-02-15,Non-Renewal,Rep
+D033933,2024-04-25,Non-Renewal,Customer
+D033943,2024-02-02,Customer Churn,Admin
+D033945,2024-03-19,Admin Error,Customer
+D033949,2024-02-21,Non-Renewal,Customer
+D033959,2024-02-10,Downgrade,Rep
+D033964,2024-04-23,Competitor Switch,Rep
+D034005,2024-03-11,Competitor Switch,Rep
+D034008,2024-04-21,Competitor Switch,Customer
+D034015,2024-03-14,Admin Error,Admin
+D034016,2024-02-28,Customer Churn,Customer
+D034019,2024-04-22,Budget Cut,Admin
+D034033,2024-03-27,Customer Churn,Admin
+D034046,2024-04-21,Competitor Switch,Rep
+D034052,2024-02-23,Downgrade,Rep
+D034056,2024-04-03,Admin Error,Rep
+D034058,2024-03-24,Customer Churn,Admin
+D034066,2024-02-15,Customer Churn,Admin
+D034067,2024-02-13,Downgrade,Customer
+D034087,2024-02-24,Admin Error,Customer
+D034105,2024-04-06,Downgrade,Admin
+D034109,2024-02-18,Admin Error,Admin
+D034128,2024-02-21,Budget Cut,Customer
+D034153,2024-03-28,Budget Cut,Customer
+D034173,2024-04-18,Non-Renewal,Rep
+D034189,2024-04-01,Customer Churn,Admin
+D034193,2024-03-28,Competitor Switch,Admin
+D034199,2024-02-19,Budget Cut,Rep
+D034204,2024-02-29,Admin Error,Customer
+D034231,2024-03-25,Budget Cut,Customer
+D034242,2024-02-17,Admin Error,Rep
+D034247,2024-04-26,Non-Renewal,Rep
+D034258,2024-03-09,Non-Renewal,Admin
+D034260,2024-04-20,Budget Cut,Admin
+D034287,2024-03-14,Customer Churn,Admin
+D034294,2024-03-22,Customer Churn,Rep
+D034317,2024-04-29,Downgrade,Rep
+D034345,2024-04-05,Customer Churn,Rep
+D034360,2024-02-17,Downgrade,Admin
+D034361,2024-03-25,Non-Renewal,Rep
+D034380,2024-02-26,Admin Error,Admin
+D034386,2024-03-15,Customer Churn,Customer
+D034404,2024-03-23,Downgrade,Customer
+D034412,2024-04-17,Competitor Switch,Admin
+D034417,2024-02-02,Customer Churn,Customer
+D034421,2024-03-14,Budget Cut,Rep
+D034425,2024-02-21,Non-Renewal,Rep
+D034428,2024-04-17,Competitor Switch,Customer
+D034446,2024-03-22,Customer Churn,Customer
+D034451,2024-03-11,Competitor Switch,Customer
+D034452,2024-02-13,Customer Churn,Rep
+D034461,2024-02-04,Customer Churn,Rep
+D034464,2024-04-09,Competitor Switch,Admin
+D034473,2024-04-30,Budget Cut,Admin
+D034475,2024-03-14,Downgrade,Customer
+D034483,2024-03-16,Downgrade,Customer
+D034496,2024-02-12,Downgrade,Rep
+D034509,2024-03-18,Non-Renewal,Rep
+D034513,2024-02-07,Non-Renewal,Admin
+D034530,2024-02-18,Non-Renewal,Admin
+D034543,2024-04-27,Budget Cut,Customer
+D034545,2024-02-01,Competitor Switch,Rep
+D034549,2024-04-08,Customer Churn,Admin
+D034551,2024-02-26,Budget Cut,Customer
+D034560,2024-02-16,Admin Error,Rep
+D034586,2024-04-16,Customer Churn,Customer
+D034592,2024-02-29,Admin Error,Admin
+D034597,2024-02-23,Budget Cut,Rep
+D034603,2024-03-20,Downgrade,Customer
+D034605,2024-04-19,Customer Churn,Rep
+D034621,2024-03-21,Customer Churn,Admin
+D034631,2024-02-28,Admin Error,Admin
+D034636,2024-04-01,Customer Churn,Admin
+D034639,2024-02-14,Customer Churn,Rep
+D034644,2024-03-19,Admin Error,Rep
+D034663,2024-02-27,Budget Cut,Rep
+D034672,2024-03-30,Customer Churn,Customer
+D034676,2024-02-22,Competitor Switch,Customer
+D034683,2024-03-23,Admin Error,Customer
+D034698,2024-03-26,Non-Renewal,Admin
+D034705,2024-02-08,Customer Churn,Admin
+D034710,2024-04-20,Customer Churn,Customer
+D034721,2024-02-21,Downgrade,Admin
+D034723,2024-04-22,Non-Renewal,Rep
+D034729,2024-04-14,Admin Error,Customer
+D034741,2024-02-09,Customer Churn,Customer
+D034746,2024-04-05,Non-Renewal,Customer
+D034772,2024-02-02,Non-Renewal,Admin
+D034781,2024-04-29,Admin Error,Customer
+D034782,2024-03-22,Budget Cut,Customer
+D034787,2024-04-19,Admin Error,Customer
+D034794,2024-03-07,Admin Error,Customer
+D034796,2024-02-13,Budget Cut,Customer
+D034798,2024-03-10,Non-Renewal,Rep
+D034825,2024-02-10,Customer Churn,Rep
+D034839,2024-03-13,Customer Churn,Admin
+D034846,2024-03-09,Competitor Switch,Admin
+D034865,2024-04-02,Admin Error,Rep
+D034909,2024-04-24,Budget Cut,Admin
+D034936,2024-03-27,Budget Cut,Customer
+D034944,2024-02-19,Non-Renewal,Admin
+D034951,2024-03-08,Competitor Switch,Customer
+D034973,2024-03-09,Competitor Switch,Rep
+D034995,2024-03-31,Competitor Switch,Rep
+D034999,2024-03-26,Non-Renewal,Rep
+D035003,2024-02-14,Budget Cut,Rep
+D035016,2024-02-23,Admin Error,Customer
+D035020,2024-04-11,Admin Error,Customer
+D035023,2024-02-18,Competitor Switch,Rep
+D035043,2024-03-24,Downgrade,Admin
+D035046,2024-02-22,Admin Error,Rep
+D035047,2024-03-27,Non-Renewal,Customer
+D035050,2024-04-24,Competitor Switch,Customer
+D035065,2024-04-16,Admin Error,Admin
+D035069,2024-04-30,Downgrade,Customer
+D035094,2024-04-02,Competitor Switch,Customer
+D035111,2024-02-06,Budget Cut,Admin
+D035112,2024-03-07,Non-Renewal,Rep
+D035117,2024-03-26,Admin Error,Rep
+D035132,2024-03-16,Competitor Switch,Admin
+D035139,2024-02-28,Non-Renewal,Customer
+D035140,2024-03-25,Admin Error,Customer
+D035153,2024-03-23,Admin Error,Customer
+D035174,2024-03-23,Admin Error,Customer
+D035180,2024-04-01,Non-Renewal,Customer
+D035198,2024-02-19,Customer Churn,Admin
+D035215,2024-02-12,Competitor Switch,Admin
+D035216,2024-04-16,Customer Churn,Rep
+D035222,2024-04-03,Budget Cut,Admin
+D035244,2024-02-12,Admin Error,Rep
+D035257,2024-02-12,Downgrade,Customer
+D035269,2024-02-26,Admin Error,Admin
+D035274,2024-03-06,Competitor Switch,Customer
+D035280,2024-04-28,Admin Error,Customer
+D035286,2024-03-16,Customer Churn,Admin
+D035318,2024-03-01,Non-Renewal,Customer
+D035323,2024-04-29,Admin Error,Customer
+D035331,2024-03-26,Non-Renewal,Admin
+D035344,2024-02-17,Competitor Switch,Admin
+D035360,2024-03-01,Budget Cut,Rep
+D035363,2024-04-01,Budget Cut,Admin
+D035371,2024-04-28,Non-Renewal,Customer
+D035372,2024-03-31,Customer Churn,Admin
+D035385,2024-03-12,Customer Churn,Customer
+D035399,2024-02-26,Downgrade,Rep
+D035416,2024-03-31,Customer Churn,Customer
+D035426,2024-02-29,Competitor Switch,Rep
+D035436,2024-04-13,Non-Renewal,Admin
+D035444,2024-04-29,Admin Error,Admin
+D035449,2024-02-25,Admin Error,Customer
+D035453,2024-03-16,Budget Cut,Rep
+D035464,2024-02-28,Budget Cut,Admin
+D035475,2024-02-28,Non-Renewal,Customer
+D035478,2024-04-03,Downgrade,Rep
+D035486,2024-04-15,Customer Churn,Admin
+D035489,2024-03-11,Admin Error,Rep
+D035494,2024-04-17,Non-Renewal,Customer
+D035498,2024-03-25,Budget Cut,Rep
+D035508,2024-03-23,Budget Cut,Rep
+D035527,2024-04-03,Non-Renewal,Rep
+D035530,2024-02-16,Competitor Switch,Customer
+D035538,2024-02-05,Admin Error,Customer
+D035544,2024-04-17,Customer Churn,Rep
+D035560,2024-04-10,Non-Renewal,Admin
+D035561,2024-03-13,Admin Error,Customer
+D035567,2024-04-17,Downgrade,Customer
+D035581,2024-02-16,Downgrade,Customer
+D035584,2024-03-29,Non-Renewal,Customer
+D035593,2024-04-11,Customer Churn,Customer
+D035628,2024-02-24,Non-Renewal,Rep
+D035629,2024-04-28,Non-Renewal,Rep
+D035651,2024-04-09,Non-Renewal,Customer
+D035653,2024-03-01,Customer Churn,Customer
+D035655,2024-04-11,Admin Error,Rep
+D035672,2024-04-30,Competitor Switch,Customer
+D035676,2024-02-24,Budget Cut,Admin
+D035685,2024-02-05,Budget Cut,Customer
+D035701,2024-03-18,Admin Error,Admin
+D035702,2024-04-02,Downgrade,Rep
+D035711,2024-04-15,Non-Renewal,Admin
+D035735,2024-02-19,Non-Renewal,Admin
+D035737,2024-03-11,Non-Renewal,Customer
+D035742,2024-02-23,Downgrade,Rep
+D035744,2024-04-07,Competitor Switch,Rep
+D035755,2024-03-02,Admin Error,Rep
+D035766,2024-02-20,Non-Renewal,Admin
+D035768,2024-04-19,Budget Cut,Customer
+D035779,2024-02-01,Downgrade,Customer
+D035786,2024-03-27,Competitor Switch,Customer
+D035813,2024-04-10,Downgrade,Rep
+D035814,2024-04-27,Budget Cut,Admin
+D035820,2024-02-07,Customer Churn,Rep
+D035828,2024-02-09,Budget Cut,Rep
+D035839,2024-03-01,Admin Error,Rep
+D035840,2024-04-02,Downgrade,Rep
+D035845,2024-04-24,Admin Error,Admin
+D035846,2024-02-05,Budget Cut,Rep
+D035850,2024-04-30,Customer Churn,Admin
+D035886,2024-02-05,Competitor Switch,Rep
+D035888,2024-03-27,Admin Error,Rep
+D035894,2024-03-25,Admin Error,Rep
+D035896,2024-04-29,Non-Renewal,Customer
+D035920,2024-04-21,Admin Error,Customer
+D035952,2024-02-25,Downgrade,Customer
+D035960,2024-04-14,Non-Renewal,Admin
+D035975,2024-03-13,Admin Error,Rep
+D035978,2024-04-22,Downgrade,Rep
+D035986,2024-04-20,Non-Renewal,Admin
+D035991,2024-03-27,Competitor Switch,Customer
+D035999,2024-03-12,Customer Churn,Customer
+D036029,2024-04-02,Non-Renewal,Admin
+D036031,2024-02-14,Customer Churn,Rep
+D036052,2024-02-13,Non-Renewal,Admin
+D036067,2024-04-05,Competitor Switch,Rep
+D036081,2024-04-08,Admin Error,Admin
+D036083,2024-02-10,Downgrade,Customer
+D036085,2024-02-29,Customer Churn,Customer
+D036090,2024-03-14,Competitor Switch,Admin
+D036093,2024-04-13,Competitor Switch,Rep
+D036150,2024-02-21,Admin Error,Admin
+D036153,2024-04-05,Non-Renewal,Rep
+D036173,2024-04-27,Competitor Switch,Customer
+D036185,2024-03-08,Downgrade,Rep
+D036196,2024-04-22,Budget Cut,Admin
+D036211,2024-02-21,Competitor Switch,Rep
+D036231,2024-02-28,Customer Churn,Admin
+D036250,2024-03-04,Admin Error,Admin
+D036260,2024-03-15,Competitor Switch,Customer
+D036266,2024-03-24,Non-Renewal,Rep
+D036279,2024-03-04,Downgrade,Admin
+D036281,2024-04-30,Downgrade,Rep
+D036294,2024-02-16,Non-Renewal,Customer
+D036301,2024-02-26,Downgrade,Customer
+D036308,2024-03-09,Competitor Switch,Rep
+D036325,2024-04-22,Non-Renewal,Customer
+D036331,2024-03-28,Budget Cut,Admin
+D036334,2024-03-01,Budget Cut,Admin
+D036342,2024-02-01,Competitor Switch,Admin
+D036356,2024-03-15,Admin Error,Rep
+D036359,2024-04-15,Non-Renewal,Rep
+D036362,2024-03-20,Competitor Switch,Customer
+D036401,2024-04-01,Budget Cut,Customer
+D036411,2024-03-01,Competitor Switch,Customer
+D036420,2024-04-21,Downgrade,Admin
+D036421,2024-02-07,Non-Renewal,Customer
+D036430,2024-03-25,Admin Error,Customer
+D036440,2024-02-08,Customer Churn,Customer
+D036462,2024-03-22,Admin Error,Rep
+D036491,2024-03-04,Non-Renewal,Admin
+D036525,2024-02-22,Downgrade,Rep
+D036552,2024-03-14,Customer Churn,Customer
+D036568,2024-04-25,Downgrade,Customer
+D036572,2024-02-05,Competitor Switch,Customer
+D036594,2024-04-06,Budget Cut,Rep
+D036598,2024-02-21,Competitor Switch,Rep
+D036612,2024-02-27,Non-Renewal,Admin
+D036622,2024-04-20,Non-Renewal,Admin
+D036623,2024-04-03,Competitor Switch,Admin
+D036624,2024-03-02,Customer Churn,Customer
+D036637,2024-02-05,Admin Error,Rep
+D036640,2024-03-18,Admin Error,Admin
+D036651,2024-02-16,Budget Cut,Admin
+D036652,2024-04-27,Customer Churn,Admin
+D036671,2024-04-30,Downgrade,Admin
+D036682,2024-02-12,Non-Renewal,Rep
+D036701,2024-03-28,Customer Churn,Admin
+D036713,2024-04-23,Downgrade,Admin
+D036733,2024-03-08,Admin Error,Customer
+D036751,2024-04-27,Admin Error,Admin
+D036780,2024-04-23,Competitor Switch,Admin
+D036786,2024-02-26,Budget Cut,Admin
+D036787,2024-02-22,Customer Churn,Customer
+D036792,2024-03-14,Admin Error,Customer
+D036794,2024-02-20,Admin Error,Admin
+D036805,2024-02-19,Customer Churn,Admin
+D036815,2024-02-03,Budget Cut,Customer
+D036825,2024-04-18,Admin Error,Rep
+D036830,2024-03-03,Competitor Switch,Admin
+D036831,2024-04-13,Non-Renewal,Customer
+D036838,2024-02-27,Non-Renewal,Admin
+D036840,2024-02-09,Non-Renewal,Admin
+D036845,2024-02-04,Competitor Switch,Admin
+D036847,2024-02-27,Customer Churn,Customer
+D036850,2024-03-22,Competitor Switch,Rep
+D036851,2024-04-03,Budget Cut,Customer
+D036856,2024-03-16,Competitor Switch,Rep
+D036857,2024-02-26,Budget Cut,Customer
+D036864,2024-02-28,Downgrade,Rep
+D036874,2024-03-18,Non-Renewal,Rep
+D036908,2024-03-12,Downgrade,Admin
+D036917,2024-03-09,Non-Renewal,Rep
+D036932,2024-03-28,Budget Cut,Rep
+D036933,2024-03-11,Customer Churn,Rep
+D036947,2024-02-20,Customer Churn,Rep
+D036948,2024-02-25,Downgrade,Customer
+D036949,2024-02-01,Customer Churn,Admin
+D036966,2024-02-11,Budget Cut,Rep
+D036971,2024-03-31,Budget Cut,Admin
+D036976,2024-02-03,Budget Cut,Admin
+D036986,2024-04-04,Admin Error,Rep
+D036994,2024-02-10,Budget Cut,Admin
+D036997,2024-04-30,Customer Churn,Admin
+D037012,2024-02-18,Competitor Switch,Admin
+D037020,2024-02-28,Budget Cut,Admin
+D037037,2024-03-29,Competitor Switch,Customer
+D037038,2024-03-28,Non-Renewal,Customer
+D037041,2024-04-16,Customer Churn,Customer
+D037063,2024-02-16,Budget Cut,Customer
+D037109,2024-02-16,Budget Cut,Admin
+D037115,2024-03-15,Admin Error,Customer
+D037120,2024-02-17,Downgrade,Rep
+D037127,2024-04-16,Admin Error,Admin
+D037128,2024-02-20,Downgrade,Customer
+D037146,2024-03-17,Customer Churn,Admin
+D037148,2024-03-02,Non-Renewal,Customer
+D037156,2024-03-09,Admin Error,Rep
+D037157,2024-03-06,Budget Cut,Rep
+D037159,2024-03-09,Non-Renewal,Admin
+D037160,2024-02-27,Competitor Switch,Admin
+D037171,2024-04-15,Competitor Switch,Rep
+D037184,2024-02-06,Customer Churn,Customer
+D037191,2024-02-23,Competitor Switch,Admin
+D037194,2024-03-01,Admin Error,Customer
+D037216,2024-04-29,Admin Error,Admin
+D037224,2024-03-03,Admin Error,Rep
+D037226,2024-04-19,Customer Churn,Customer
+D037227,2024-04-04,Non-Renewal,Customer
+D037233,2024-03-19,Admin Error,Customer
+D037243,2024-03-31,Competitor Switch,Customer
+D037244,2024-03-05,Customer Churn,Customer
+D037258,2024-02-14,Non-Renewal,Customer
+D037264,2024-03-09,Admin Error,Rep
+D037285,2024-02-04,Customer Churn,Rep
+D037292,2024-02-20,Admin Error,Customer
+D037297,2024-04-19,Budget Cut,Admin
+D037309,2024-04-04,Budget Cut,Admin
+D037320,2024-03-27,Admin Error,Rep
+D037327,2024-03-11,Admin Error,Admin
+D037329,2024-04-08,Budget Cut,Admin
+D037330,2024-04-04,Non-Renewal,Rep
+D037331,2024-03-05,Budget Cut,Rep
+D037332,2024-04-14,Non-Renewal,Rep
+D037334,2024-03-15,Non-Renewal,Customer
+D037349,2024-03-11,Customer Churn,Customer
+D037368,2024-03-02,Admin Error,Rep
+D037372,2024-04-13,Competitor Switch,Customer
+D037381,2024-03-02,Customer Churn,Admin
+D037387,2024-02-23,Admin Error,Customer
+D037389,2024-04-06,Non-Renewal,Customer
+D037391,2024-02-10,Competitor Switch,Admin
+D037412,2024-02-16,Downgrade,Customer
+D037415,2024-03-30,Downgrade,Rep
+D037426,2024-02-17,Customer Churn,Customer
+D037429,2024-02-18,Budget Cut,Admin
+D037431,2024-02-20,Budget Cut,Customer
+D037434,2024-03-08,Budget Cut,Customer
+D037438,2024-03-30,Competitor Switch,Rep
+D037441,2024-04-27,Admin Error,Rep
+D037452,2024-02-17,Non-Renewal,Rep
+D037457,2024-03-16,Admin Error,Admin
+D037462,2024-04-07,Customer Churn,Admin
+D037484,2024-02-28,Non-Renewal,Rep
+D037490,2024-03-07,Budget Cut,Admin
+D037502,2024-04-27,Budget Cut,Rep
+D037531,2024-03-03,Non-Renewal,Admin
+D037549,2024-02-09,Budget Cut,Customer
+D037556,2024-04-18,Admin Error,Rep
+D037562,2024-02-13,Admin Error,Admin
+D037567,2024-03-19,Customer Churn,Admin
+D037577,2024-03-16,Budget Cut,Customer
+D037586,2024-04-14,Competitor Switch,Customer
+D037610,2024-03-21,Non-Renewal,Rep
+D037613,2024-04-06,Non-Renewal,Admin
+D037625,2024-03-11,Competitor Switch,Rep
+D037626,2024-04-03,Admin Error,Customer
+D037636,2024-02-26,Admin Error,Customer
+D037647,2024-04-19,Non-Renewal,Customer
+D037662,2024-03-19,Non-Renewal,Rep
+D037684,2024-03-26,Non-Renewal,Customer
+D037707,2024-04-07,Downgrade,Customer
+D037716,2024-02-08,Customer Churn,Admin
+D037720,2024-02-27,Competitor Switch,Admin
+D037724,2024-02-27,Competitor Switch,Customer
+D037734,2024-03-23,Customer Churn,Rep
+D037737,2024-02-04,Non-Renewal,Rep
+D037738,2024-04-19,Non-Renewal,Admin
+D037743,2024-02-25,Competitor Switch,Rep
+D037757,2024-03-04,Downgrade,Admin
+D037764,2024-03-27,Budget Cut,Customer
+D037768,2024-04-03,Budget Cut,Customer
+D037785,2024-02-18,Downgrade,Customer
+D037796,2024-04-17,Budget Cut,Customer
+D037813,2024-02-11,Budget Cut,Rep
+D037818,2024-03-10,Competitor Switch,Rep
+D037833,2024-02-07,Budget Cut,Admin
+D037842,2024-04-08,Non-Renewal,Customer
+D037846,2024-02-29,Customer Churn,Admin
+D037851,2024-04-23,Admin Error,Customer
+D037852,2024-02-09,Non-Renewal,Admin
+D037854,2024-04-29,Customer Churn,Rep
+D037871,2024-03-06,Budget Cut,Admin
+D037883,2024-02-21,Downgrade,Admin
+D037884,2024-04-25,Budget Cut,Rep
+D037896,2024-04-06,Non-Renewal,Rep
+D037909,2024-04-06,Non-Renewal,Customer
+D037910,2024-03-02,Budget Cut,Customer
+D037913,2024-03-05,Downgrade,Customer
+D037915,2024-03-25,Competitor Switch,Rep
+D037923,2024-04-01,Customer Churn,Customer
+D037924,2024-04-11,Customer Churn,Rep
+D037930,2024-04-12,Downgrade,Rep
+D037956,2024-04-24,Budget Cut,Rep
+D037959,2024-02-04,Admin Error,Rep
+D037963,2024-04-18,Non-Renewal,Rep
+D037967,2024-03-25,Non-Renewal,Admin
+D037978,2024-04-22,Budget Cut,Admin
+D037980,2024-04-14,Budget Cut,Customer
+D037982,2024-04-16,Non-Renewal,Customer
+D037984,2024-03-15,Non-Renewal,Admin
+D037985,2024-04-19,Budget Cut,Customer
+D037986,2024-02-27,Downgrade,Admin
+D037991,2024-04-02,Downgrade,Customer
+D037992,2024-04-22,Non-Renewal,Admin
+D037995,2024-02-06,Competitor Switch,Admin
+D038025,2024-04-20,Downgrade,Rep
+D038040,2024-04-22,Downgrade,Rep
+D038055,2024-02-13,Admin Error,Rep
+D038073,2024-03-02,Admin Error,Customer
+D038081,2024-03-05,Admin Error,Customer
+D038090,2024-02-26,Competitor Switch,Rep
+D038110,2024-02-15,Competitor Switch,Admin
+D038113,2024-04-04,Customer Churn,Rep
+D038118,2024-04-24,Downgrade,Rep
+D038121,2024-03-09,Budget Cut,Customer
+D038122,2024-02-01,Customer Churn,Rep
+D038123,2024-04-18,Competitor Switch,Admin
+D038140,2024-03-23,Budget Cut,Admin
+D038156,2024-02-25,Competitor Switch,Rep
+D038174,2024-04-07,Downgrade,Admin
+D038184,2024-02-05,Non-Renewal,Customer
+D038187,2024-04-23,Budget Cut,Customer
+D038200,2024-04-17,Competitor Switch,Customer
+D038211,2024-03-27,Competitor Switch,Customer
+D038242,2024-03-08,Budget Cut,Customer
+D038244,2024-02-15,Downgrade,Rep
+D038260,2024-04-16,Competitor Switch,Admin
+D038265,2024-02-18,Customer Churn,Rep
+D038312,2024-03-30,Admin Error,Customer
+D038325,2024-02-26,Competitor Switch,Admin
+D038338,2024-04-15,Admin Error,Admin
+D038344,2024-03-12,Budget Cut,Admin
+D038351,2024-04-25,Budget Cut,Admin
+D038352,2024-03-31,Admin Error,Admin
+D038354,2024-03-24,Downgrade,Admin
+D038382,2024-02-26,Customer Churn,Admin
+D038385,2024-02-04,Non-Renewal,Admin
+D038394,2024-03-18,Customer Churn,Rep
+D038411,2024-02-20,Admin Error,Rep
+D038417,2024-02-10,Admin Error,Admin
+D038419,2024-04-07,Competitor Switch,Rep
+D038458,2024-04-22,Competitor Switch,Admin
+D038462,2024-04-07,Admin Error,Admin
+D038484,2024-03-02,Non-Renewal,Customer
+D038487,2024-03-10,Admin Error,Rep
+D038492,2024-03-12,Customer Churn,Admin
+D038509,2024-03-12,Admin Error,Customer
+D038511,2024-04-06,Non-Renewal,Customer
+D038525,2024-02-06,Downgrade,Rep
+D038526,2024-03-06,Budget Cut,Customer
+D038531,2024-04-07,Budget Cut,Admin
+D038545,2024-04-22,Competitor Switch,Admin
+D038547,2024-03-17,Budget Cut,Admin
+D038552,2024-04-21,Budget Cut,Rep
+D038570,2024-04-16,Budget Cut,Admin
+D038581,2024-02-15,Customer Churn,Admin
+D038593,2024-03-25,Budget Cut,Customer
+D038603,2024-04-08,Customer Churn,Rep
+D038625,2024-02-23,Customer Churn,Admin
+D038626,2024-04-03,Non-Renewal,Customer
+D038628,2024-04-17,Customer Churn,Rep
+D038643,2024-04-14,Admin Error,Customer
+D038650,2024-04-03,Downgrade,Admin
+D038654,2024-03-13,Customer Churn,Customer
+D038656,2024-04-14,Admin Error,Rep
+D038666,2024-04-30,Non-Renewal,Customer
+D038670,2024-03-29,Downgrade,Rep
+D038675,2024-02-08,Customer Churn,Admin
+D038698,2024-03-02,Non-Renewal,Customer
+D038719,2024-02-15,Competitor Switch,Admin
+D038721,2024-04-02,Competitor Switch,Rep
+D038726,2024-02-19,Budget Cut,Rep
+D038729,2024-02-16,Competitor Switch,Admin
+D038743,2024-04-27,Competitor Switch,Rep
+D038762,2024-03-10,Budget Cut,Admin
+D038776,2024-03-21,Budget Cut,Admin
+D038784,2024-02-19,Competitor Switch,Rep
+D038786,2024-03-20,Customer Churn,Admin
+D038829,2024-03-21,Downgrade,Admin
+D038834,2024-04-17,Admin Error,Customer
+D038851,2024-03-02,Competitor Switch,Admin
+D038858,2024-02-10,Customer Churn,Admin
+D038861,2024-03-26,Competitor Switch,Rep
+D038862,2024-04-08,Downgrade,Rep
+D038873,2024-02-20,Non-Renewal,Customer
+D038889,2024-03-08,Competitor Switch,Customer
+D038891,2024-03-08,Competitor Switch,Customer
+D038894,2024-04-26,Budget Cut,Customer
+D038909,2024-03-10,Budget Cut,Customer
+D038912,2024-04-08,Non-Renewal,Rep
+D038918,2024-04-07,Downgrade,Customer
+D038924,2024-04-21,Budget Cut,Admin
+D038941,2024-03-18,Competitor Switch,Admin
+D038960,2024-03-04,Downgrade,Admin
+D038965,2024-04-12,Competitor Switch,Admin
+D038973,2024-02-27,Competitor Switch,Admin
+D038974,2024-03-13,Non-Renewal,Rep
+D039006,2024-04-12,Non-Renewal,Rep
+D039012,2024-02-16,Downgrade,Rep
+D039035,2024-03-05,Budget Cut,Admin
+D039048,2024-04-03,Budget Cut,Admin
+D039050,2024-02-02,Admin Error,Customer
+D039052,2024-03-06,Competitor Switch,Customer
+D039078,2024-02-25,Downgrade,Customer
+D039086,2024-02-18,Downgrade,Admin
+D039089,2024-02-25,Competitor Switch,Customer
+D039108,2024-04-23,Downgrade,Customer
+D039114,2024-02-01,Admin Error,Admin
+D039115,2024-03-11,Non-Renewal,Rep
+D039116,2024-04-29,Admin Error,Rep
+D039125,2024-03-04,Budget Cut,Admin
+D039140,2024-03-01,Non-Renewal,Admin
+D039141,2024-04-14,Competitor Switch,Rep
+D039151,2024-03-25,Non-Renewal,Admin
+D039157,2024-03-27,Non-Renewal,Admin
+D039174,2024-02-01,Customer Churn,Admin
+D039181,2024-02-22,Admin Error,Admin
+D039187,2024-04-25,Downgrade,Customer
+D039200,2024-04-09,Admin Error,Admin
+D039254,2024-04-03,Downgrade,Customer
+D039264,2024-03-26,Budget Cut,Admin
+D039271,2024-02-14,Budget Cut,Admin
+D039273,2024-04-17,Downgrade,Customer
+D039286,2024-02-03,Budget Cut,Customer
+D039292,2024-02-05,Competitor Switch,Admin
+D039295,2024-02-08,Competitor Switch,Admin
+D039310,2024-03-03,Non-Renewal,Customer
+D039315,2024-03-19,Admin Error,Rep
+D039316,2024-02-09,Budget Cut,Customer
+D039322,2024-02-09,Downgrade,Rep
+D039335,2024-04-04,Admin Error,Admin
+D039399,2024-03-27,Non-Renewal,Rep
+D039415,2024-04-01,Non-Renewal,Customer
+D039424,2024-04-16,Admin Error,Admin
+D039425,2024-02-08,Downgrade,Customer
+D039451,2024-02-11,Competitor Switch,Admin
+D039460,2024-02-14,Non-Renewal,Admin
+D039461,2024-03-05,Customer Churn,Rep
+D039464,2024-03-19,Budget Cut,Rep
+D039475,2024-03-27,Downgrade,Customer
+D039478,2024-02-04,Budget Cut,Customer
+D039487,2024-03-29,Budget Cut,Admin
+D039497,2024-02-09,Customer Churn,Rep
+D039498,2024-04-06,Non-Renewal,Customer
+D039513,2024-03-09,Competitor Switch,Rep
+D039516,2024-04-24,Non-Renewal,Customer
+D039517,2024-04-27,Competitor Switch,Rep
+D039531,2024-02-22,Non-Renewal,Rep
+D039537,2024-03-25,Competitor Switch,Admin
+D039538,2024-04-30,Competitor Switch,Customer
+D039541,2024-02-17,Non-Renewal,Admin
+D039557,2024-03-19,Competitor Switch,Customer
+D039565,2024-03-06,Budget Cut,Customer
+D039571,2024-04-30,Budget Cut,Rep
+D039601,2024-04-23,Budget Cut,Customer
+D039605,2024-04-12,Customer Churn,Admin
+D039624,2024-03-05,Admin Error,Customer
+D039629,2024-04-04,Admin Error,Customer
+D039633,2024-03-14,Customer Churn,Customer
+D039644,2024-03-29,Non-Renewal,Admin
+D039655,2024-02-15,Customer Churn,Customer
+D039656,2024-02-19,Downgrade,Rep
+D039664,2024-02-06,Downgrade,Admin
+D039666,2024-04-05,Non-Renewal,Admin
+D039685,2024-04-25,Non-Renewal,Admin
+D039688,2024-04-21,Competitor Switch,Rep
+D039689,2024-02-02,Non-Renewal,Rep
+D039700,2024-04-28,Customer Churn,Customer
+D039712,2024-04-04,Downgrade,Rep
+D039720,2024-04-05,Downgrade,Customer
+D039728,2024-02-27,Competitor Switch,Customer
+D039735,2024-02-25,Non-Renewal,Customer
+D039743,2024-03-28,Competitor Switch,Admin
+D039745,2024-04-01,Non-Renewal,Customer
+D039758,2024-04-04,Budget Cut,Customer
+D039765,2024-02-03,Competitor Switch,Customer
+D039766,2024-04-14,Competitor Switch,Admin
+D039772,2024-03-06,Customer Churn,Admin
+D039791,2024-04-30,Downgrade,Customer
+D039793,2024-04-21,Competitor Switch,Customer
+D039806,2024-04-28,Competitor Switch,Rep
+D039807,2024-04-09,Customer Churn,Customer
+D039818,2024-02-16,Customer Churn,Rep
+D039827,2024-02-02,Admin Error,Admin
+D039829,2024-02-19,Downgrade,Customer
+D039832,2024-03-26,Admin Error,Customer
+D039838,2024-02-11,Admin Error,Admin
+D039852,2024-02-18,Downgrade,Rep
+D039877,2024-03-14,Non-Renewal,Admin
+D039881,2024-04-12,Downgrade,Rep
+D039882,2024-03-31,Customer Churn,Admin
+D039890,2024-03-10,Downgrade,Admin
+D039919,2024-04-21,Budget Cut,Rep
+D039922,2024-02-19,Downgrade,Admin
+D039940,2024-04-25,Non-Renewal,Admin
+D039943,2024-04-07,Admin Error,Admin
+D039957,2024-03-24,Competitor Switch,Rep
+D039965,2024-04-15,Admin Error,Admin
+D039968,2024-02-21,Budget Cut,Rep
+D039973,2024-02-21,Downgrade,Rep
+D039986,2024-03-15,Admin Error,Rep
+D040003,2024-02-25,Competitor Switch,Rep
+D040025,2024-02-14,Downgrade,Admin
+D040026,2024-04-04,Competitor Switch,Admin
+D040031,2024-03-09,Admin Error,Rep
+D040039,2024-02-13,Downgrade,Admin
+D040048,2024-02-16,Customer Churn,Customer
+D040055,2024-02-14,Competitor Switch,Customer
+D040058,2024-03-12,Budget Cut,Rep
+D040069,2024-04-04,Admin Error,Rep
+D040074,2024-02-14,Budget Cut,Customer
+D040081,2024-02-17,Customer Churn,Rep
+D040088,2024-03-25,Competitor Switch,Admin
+D040106,2024-03-29,Downgrade,Rep
+D040124,2024-03-17,Downgrade,Rep
+D040138,2024-03-19,Competitor Switch,Rep
+D040153,2024-03-02,Downgrade,Rep
+D040173,2024-03-15,Admin Error,Customer
+D040176,2024-02-10,Competitor Switch,Customer
+D040184,2024-02-07,Customer Churn,Admin
+D040187,2024-02-24,Customer Churn,Rep
+D040210,2024-04-19,Admin Error,Rep
+D040216,2024-03-22,Admin Error,Rep
+D040217,2024-02-01,Customer Churn,Admin
+D040221,2024-03-25,Budget Cut,Rep
+D040227,2024-03-29,Customer Churn,Rep
+D040245,2024-02-19,Budget Cut,Admin
+D040252,2024-04-19,Customer Churn,Rep
+D040264,2024-04-26,Customer Churn,Customer
+D040278,2024-03-02,Admin Error,Rep
+D040279,2024-04-27,Downgrade,Rep
+D040288,2024-03-31,Non-Renewal,Admin
+D040292,2024-02-12,Non-Renewal,Admin
+D040313,2024-04-15,Downgrade,Admin
+D040321,2024-03-28,Admin Error,Admin
+D040332,2024-03-22,Non-Renewal,Rep
+D040340,2024-03-26,Competitor Switch,Admin
+D040345,2024-02-26,Budget Cut,Customer
+D040357,2024-04-22,Competitor Switch,Admin
+D040358,2024-04-03,Competitor Switch,Rep
+D040365,2024-04-06,Customer Churn,Rep
+D040380,2024-02-01,Non-Renewal,Rep
+D040391,2024-02-28,Downgrade,Customer
+D040398,2024-02-11,Budget Cut,Rep
+D040403,2024-02-13,Downgrade,Customer
+D040406,2024-02-10,Budget Cut,Rep
+D040408,2024-02-06,Downgrade,Customer
+D040410,2024-04-16,Customer Churn,Customer
+D040421,2024-02-13,Admin Error,Admin
+D040429,2024-03-15,Admin Error,Admin
+D040454,2024-02-15,Downgrade,Admin
+D040465,2024-02-28,Downgrade,Rep
+D040519,2024-03-12,Non-Renewal,Admin
+D040536,2024-02-13,Customer Churn,Admin
+D040540,2024-03-31,Budget Cut,Admin
+D040552,2024-02-26,Customer Churn,Rep
+D040560,2024-03-20,Competitor Switch,Customer
+D040561,2024-03-18,Budget Cut,Customer
+D040568,2024-02-10,Customer Churn,Rep
+D040587,2024-04-06,Competitor Switch,Customer
+D040590,2024-02-02,Non-Renewal,Admin
+D040593,2024-03-16,Customer Churn,Rep
+D040645,2024-03-16,Competitor Switch,Rep
+D040653,2024-03-29,Downgrade,Rep
+D040669,2024-02-11,Non-Renewal,Customer
+D040677,2024-04-26,Non-Renewal,Admin
+D040681,2024-04-29,Competitor Switch,Customer
+D040724,2024-03-29,Competitor Switch,Admin
+D040725,2024-03-17,Customer Churn,Rep
+D040731,2024-04-07,Downgrade,Rep
+D040738,2024-03-26,Non-Renewal,Admin
+D040744,2024-04-02,Downgrade,Customer
+D040746,2024-04-01,Non-Renewal,Admin
+D040759,2024-03-23,Customer Churn,Customer
+D040762,2024-04-18,Customer Churn,Customer
+D040769,2024-04-12,Budget Cut,Rep
+D040785,2024-02-03,Competitor Switch,Admin
+D040786,2024-02-23,Competitor Switch,Admin
+D040794,2024-03-21,Customer Churn,Customer
+D040796,2024-03-12,Non-Renewal,Admin
+D040811,2024-03-09,Competitor Switch,Rep
+D040820,2024-03-07,Downgrade,Admin
+D040827,2024-04-10,Competitor Switch,Rep
+D040828,2024-02-19,Competitor Switch,Rep
+D040831,2024-02-08,Admin Error,Admin
+D040870,2024-04-12,Non-Renewal,Customer
+D040871,2024-02-01,Competitor Switch,Admin
+D040872,2024-03-26,Admin Error,Admin
+D040880,2024-02-27,Competitor Switch,Admin
+D040884,2024-02-09,Admin Error,Rep
+D040885,2024-02-06,Non-Renewal,Admin
+D040894,2024-02-02,Downgrade,Customer
+D040899,2024-04-16,Admin Error,Admin
+D040914,2024-03-28,Non-Renewal,Rep
+D040938,2024-04-17,Admin Error,Rep
+D040942,2024-02-27,Budget Cut,Admin
+D040962,2024-02-03,Competitor Switch,Customer
+D040968,2024-04-07,Downgrade,Rep
+D040975,2024-02-07,Customer Churn,Customer
+D040986,2024-03-05,Budget Cut,Customer
+D040992,2024-04-30,Non-Renewal,Rep
+D041020,2024-03-12,Downgrade,Customer
+D041046,2024-04-18,Budget Cut,Admin
+D041049,2024-04-02,Non-Renewal,Admin
+D041055,2024-02-21,Budget Cut,Admin
+D041068,2024-03-02,Competitor Switch,Customer
+D041069,2024-04-06,Downgrade,Customer
+D041077,2024-02-11,Competitor Switch,Rep
+D041080,2024-03-19,Non-Renewal,Rep
+D041090,2024-03-16,Budget Cut,Customer
+D041124,2024-04-16,Budget Cut,Rep
+D041126,2024-03-29,Budget Cut,Rep
+D041130,2024-03-26,Non-Renewal,Admin
+D041145,2024-04-03,Downgrade,Customer
+D041149,2024-04-27,Budget Cut,Rep
+D041170,2024-02-09,Admin Error,Admin
+D041171,2024-02-28,Admin Error,Rep
+D041173,2024-04-06,Downgrade,Admin
+D041176,2024-04-30,Budget Cut,Rep
+D041180,2024-03-20,Downgrade,Customer
+D041194,2024-03-13,Downgrade,Rep
+D041195,2024-04-14,Customer Churn,Customer
+D041210,2024-04-05,Competitor Switch,Rep
+D041214,2024-02-18,Customer Churn,Admin
+D041220,2024-03-11,Admin Error,Customer
+D041230,2024-02-28,Customer Churn,Customer
+D041236,2024-02-10,Admin Error,Rep
+D041243,2024-04-07,Budget Cut,Admin
+D041249,2024-02-14,Customer Churn,Admin
+D041252,2024-03-26,Non-Renewal,Customer
+D041254,2024-02-19,Admin Error,Customer
+D041274,2024-03-08,Budget Cut,Customer
+D041275,2024-02-07,Non-Renewal,Rep
+D041287,2024-04-29,Non-Renewal,Rep
+D041288,2024-03-30,Admin Error,Rep
+D041300,2024-03-20,Competitor Switch,Customer
+D041301,2024-04-13,Budget Cut,Customer
+D041306,2024-02-25,Budget Cut,Admin
+D041334,2024-03-19,Admin Error,Rep
+D041350,2024-03-06,Admin Error,Admin
+D041362,2024-03-01,Budget Cut,Admin
+D041372,2024-02-17,Customer Churn,Customer
+D041374,2024-04-08,Budget Cut,Customer
+D041386,2024-03-12,Budget Cut,Admin
+D041389,2024-03-12,Budget Cut,Admin
+D041401,2024-02-02,Non-Renewal,Customer
+D041412,2024-02-26,Customer Churn,Customer
+D041414,2024-03-19,Non-Renewal,Admin
+D041435,2024-03-24,Non-Renewal,Rep
+D041439,2024-03-26,Downgrade,Customer
+D041446,2024-04-23,Budget Cut,Customer
+D041454,2024-04-30,Admin Error,Customer
+D041477,2024-02-18,Competitor Switch,Admin
+D041488,2024-04-28,Competitor Switch,Admin
+D041495,2024-03-08,Budget Cut,Customer
+D041499,2024-04-26,Admin Error,Customer
+D041525,2024-02-18,Customer Churn,Rep
+D041539,2024-03-01,Non-Renewal,Admin
+D041550,2024-03-12,Customer Churn,Customer
+D041564,2024-04-13,Customer Churn,Rep
+D041578,2024-04-11,Budget Cut,Rep
+D041600,2024-03-22,Budget Cut,Rep
+D041603,2024-03-06,Budget Cut,Admin
+D041624,2024-03-24,Non-Renewal,Customer
+D041628,2024-03-19,Competitor Switch,Admin
+D041651,2024-03-28,Budget Cut,Admin
+D041661,2024-02-29,Budget Cut,Rep
+D041686,2024-04-26,Downgrade,Customer
+D041691,2024-04-09,Downgrade,Customer
+D041709,2024-04-02,Budget Cut,Rep
+D041712,2024-04-14,Downgrade,Customer
+D041714,2024-03-26,Customer Churn,Admin
+D041720,2024-03-31,Budget Cut,Admin
+D041723,2024-02-07,Competitor Switch,Admin
+D041733,2024-03-07,Customer Churn,Rep
+D041735,2024-02-09,Admin Error,Customer
+D041742,2024-04-20,Customer Churn,Admin
+D041744,2024-02-08,Admin Error,Admin
+D041750,2024-03-17,Customer Churn,Rep
+D041755,2024-04-30,Non-Renewal,Customer
+D041765,2024-02-03,Admin Error,Customer
+D041784,2024-02-25,Budget Cut,Customer
+D041809,2024-02-01,Admin Error,Rep
+D041818,2024-04-29,Downgrade,Rep
+D041828,2024-02-17,Non-Renewal,Customer
+D041831,2024-04-15,Downgrade,Admin
+D041833,2024-03-20,Budget Cut,Admin
+D041839,2024-02-20,Customer Churn,Rep
+D041844,2024-03-22,Competitor Switch,Rep
+D041848,2024-03-26,Non-Renewal,Admin
+D041854,2024-03-02,Competitor Switch,Customer
+D041855,2024-04-23,Customer Churn,Customer
+D041865,2024-03-04,Non-Renewal,Customer
+D041880,2024-02-05,Downgrade,Customer
+D041900,2024-04-15,Downgrade,Rep
+D041901,2024-02-11,Admin Error,Admin
+D041911,2024-02-14,Downgrade,Admin
+D041915,2024-02-22,Admin Error,Admin
+D041917,2024-03-29,Customer Churn,Customer
+D041922,2024-04-26,Budget Cut,Customer
+D041930,2024-02-25,Non-Renewal,Admin
+D041940,2024-03-20,Admin Error,Customer
+D041947,2024-04-25,Downgrade,Admin
+D041968,2024-02-15,Admin Error,Rep
+D041971,2024-03-27,Admin Error,Customer
+D041974,2024-04-28,Admin Error,Customer
+D041985,2024-03-06,Customer Churn,Admin
+D041988,2024-03-04,Admin Error,Admin
+D041990,2024-04-13,Admin Error,Rep
+D042001,2024-04-14,Competitor Switch,Admin
+D042008,2024-02-19,Admin Error,Rep
+D042029,2024-03-10,Budget Cut,Customer
+D042030,2024-02-10,Non-Renewal,Admin
+D042038,2024-02-27,Competitor Switch,Rep
+D042044,2024-03-06,Non-Renewal,Rep
+D042049,2024-04-28,Budget Cut,Customer
+D042054,2024-02-20,Customer Churn,Admin
+D042059,2024-04-26,Budget Cut,Rep
+D042067,2024-03-29,Downgrade,Rep
+D042070,2024-02-14,Admin Error,Customer
+D042078,2024-04-19,Non-Renewal,Rep
+D042081,2024-04-01,Budget Cut,Admin
+D042088,2024-04-28,Downgrade,Customer
+D042112,2024-02-25,Downgrade,Customer
+D042119,2024-04-12,Competitor Switch,Admin
+D042153,2024-03-21,Competitor Switch,Customer
+D042168,2024-02-17,Admin Error,Rep
+D042171,2024-04-22,Competitor Switch,Customer
+D042176,2024-04-27,Budget Cut,Rep
+D042182,2024-04-18,Admin Error,Rep
+D042187,2024-04-05,Downgrade,Customer
+D042188,2024-04-06,Competitor Switch,Admin
+D042200,2024-02-29,Budget Cut,Rep
+D042202,2024-04-03,Downgrade,Rep
+D042215,2024-02-01,Admin Error,Admin
+D042217,2024-03-04,Customer Churn,Admin
+D042226,2024-04-04,Non-Renewal,Customer
+D042233,2024-03-20,Budget Cut,Customer
+D042235,2024-04-01,Downgrade,Customer
+D042237,2024-04-30,Admin Error,Admin
+D042247,2024-02-02,Admin Error,Rep
+D042253,2024-04-22,Budget Cut,Customer
+D042260,2024-02-25,Competitor Switch,Customer
+D042265,2024-04-13,Downgrade,Admin
+D042293,2024-03-12,Non-Renewal,Rep
+D042294,2024-03-29,Budget Cut,Customer
+D042299,2024-03-13,Competitor Switch,Rep
+D042306,2024-02-22,Non-Renewal,Rep
+D042325,2024-03-02,Budget Cut,Admin
+D042336,2024-02-05,Downgrade,Admin
+D042343,2024-03-12,Downgrade,Customer
+D042348,2024-03-12,Non-Renewal,Admin
+D042358,2024-04-19,Customer Churn,Rep
+D042364,2024-02-28,Customer Churn,Rep
+D042366,2024-04-28,Customer Churn,Rep
+D042375,2024-04-17,Customer Churn,Rep
+D042377,2024-04-04,Budget Cut,Rep
+D042395,2024-02-27,Competitor Switch,Rep
+D042399,2024-03-12,Budget Cut,Admin
+D042400,2024-04-03,Downgrade,Admin
+D042405,2024-04-30,Non-Renewal,Customer
+D042440,2024-03-03,Non-Renewal,Customer
+D042444,2024-04-11,Customer Churn,Rep
+D042445,2024-03-04,Customer Churn,Customer
+D042460,2024-03-22,Admin Error,Customer
+D042462,2024-04-15,Admin Error,Rep
+D042469,2024-02-05,Customer Churn,Customer
+D042480,2024-03-02,Non-Renewal,Admin
+D042482,2024-04-22,Customer Churn,Customer
+D042487,2024-03-16,Non-Renewal,Customer
+D042525,2024-02-05,Non-Renewal,Admin
+D042533,2024-02-22,Customer Churn,Customer
+D042554,2024-03-03,Budget Cut,Customer
+D042573,2024-03-07,Customer Churn,Rep
+D042574,2024-02-20,Customer Churn,Rep
+D042586,2024-02-21,Non-Renewal,Admin
+D042594,2024-03-22,Non-Renewal,Customer
+D042598,2024-04-20,Downgrade,Rep
+D042612,2024-02-10,Admin Error,Rep
+D042616,2024-03-29,Admin Error,Rep
+D042627,2024-02-05,Non-Renewal,Rep
+D042641,2024-03-01,Customer Churn,Admin
+D042643,2024-03-07,Downgrade,Customer
+D042645,2024-04-25,Competitor Switch,Rep
+D042651,2024-02-19,Competitor Switch,Customer
+D042656,2024-03-09,Non-Renewal,Admin
+D042662,2024-03-19,Admin Error,Customer
+D042687,2024-03-12,Admin Error,Rep
+D042695,2024-04-11,Downgrade,Admin
+D042696,2024-04-16,Competitor Switch,Admin
+D042703,2024-03-25,Admin Error,Admin
+D042708,2024-02-05,Downgrade,Rep
+D042713,2024-02-15,Non-Renewal,Admin
+D042716,2024-04-26,Admin Error,Rep
+D042718,2024-03-05,Budget Cut,Customer
+D042719,2024-03-24,Competitor Switch,Rep
+D042725,2024-02-02,Downgrade,Admin
+D042737,2024-02-15,Non-Renewal,Admin
+D042772,2024-02-01,Admin Error,Customer
+D042777,2024-04-09,Downgrade,Rep
+D042788,2024-02-24,Competitor Switch,Rep
+D042790,2024-04-05,Budget Cut,Customer
+D042814,2024-03-03,Budget Cut,Admin
+D042832,2024-03-25,Budget Cut,Rep
+D042841,2024-03-27,Admin Error,Admin
+D042854,2024-03-11,Downgrade,Admin
+D042893,2024-02-10,Downgrade,Customer
+D042913,2024-03-28,Customer Churn,Customer
+D042946,2024-04-09,Non-Renewal,Rep
+D042955,2024-04-22,Competitor Switch,Admin
+D042956,2024-02-17,Competitor Switch,Customer
+D042959,2024-03-17,Non-Renewal,Admin
+D042980,2024-03-17,Budget Cut,Rep
+D042981,2024-04-14,Budget Cut,Admin
+D042983,2024-02-23,Downgrade,Admin
+D042989,2024-02-11,Competitor Switch,Customer
+D042991,2024-03-05,Customer Churn,Customer
+D043000,2024-02-12,Budget Cut,Rep

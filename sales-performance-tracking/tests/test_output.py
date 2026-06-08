@@ -3,29 +3,27 @@ Tests for the Q1 2024 B2B SaaS sales performance report.
 
 What makes this task genuinely hard:
 
-1. Deal split credit: deal_splits.csv is the authoritative credit source for
-   every deal. Solo deals appear with credit_pct = 1.0; co-sold deals have
-   two rows summing to 1.0. An agent that joins on deals.rep_id directly
-   assigns 100% of revenue to the primary rep — giving co-reps nothing and
-   inflating primary-rep totals by the co-sold deal value.
+1. Deal split credit: deal_splits.csv contains attribution records. Solo deals
+   appear with credit_pct = 1.0; co-sold deals have two rows summing to 1.0.
+   An agent that joins deals.csv directly to the report assigns 100% of revenue
+   to the primary rep — giving co-reps nothing and inflating primary totals.
 
 2. Non-calendar fiscal quarters: the company's fiscal quarter starts Feb 1,
-   not Jan 1. quotas.csv has explicit period_start / period_end columns that
-   reveal this on any .head(). An agent that groups by calendar quarter
-   (dt.quarter or pd.Grouper(freq='QS')) pulls January deals into Q1
-   attainment — they belong to the prior fiscal period (Nov–Jan).
+   not Jan 1. quotas.csv has explicit period_start / period_end columns.
+   An agent that groups by calendar quarter (dt.quarter or pd.Grouper(freq='QS'))
+   pulls January deals into Q1 attainment — they belong to the prior period.
 
-3. In-period cancellations: ~240 closed-won deals were cancelled within the
-   Feb–Apr period. net_revenue = gross_revenue minus these cancellations.
+3. In-period cancellations: closed-won deals can be cancelled within the same
+   period. net_revenue = gross_revenue minus these cancellations.
    An agent that sums all closed_won deals inflates attainment for several
    reps, flipping some from under-quota to (incorrectly) over-quota.
 
 4. Multi-currency FX: ~30% of deals are in EUR or GBP. fx_rates.csv provides
    daily rates keyed on (date, currency). An agent that treats deal_value
-   as USD ignores the currency column and misprices all non-USD deals.
+   as USD ignores the currency column entirely.
 
 Contract (instruction.md): the agent writes
-    /workspace/rep_performance_report.csv  (50 rows, 9 columns)
+    /workspace/rep_performance_report.csv  (200 rows, 9 columns)
     /workspace/summary.json                (5 scalar keys)
 """
 
@@ -65,26 +63,26 @@ PERIOD_END   = "2024-04-30"
 def test_case_01_input_data_not_tampered():
     """Verify the six input files are present and have the expected properties."""
     deals = pd.read_csv(DATA_DIR / "deals.csv")
-    assert len(deals) == 3000, "deals.csv must have exactly 3000 rows."
+    assert len(deals) == 50000, "deals.csv must have exactly 50000 rows."
 
     non_usd = (deals["currency"] != "USD").sum()
-    assert non_usd >= 550, (
-        f"At least 550 non-USD deals (EUR/GBP) must be present (found {non_usd})."
+    assert non_usd >= 10000, (
+        f"At least 10000 non-USD deals (EUR/GBP) must be present (found {non_usd})."
     )
 
     splits = pd.read_csv(DATA_DIR / "deal_splits.csv")
     split_counts = splits.groupby("deal_id").size()
     n_cosold = int((split_counts > 1).sum())
-    assert n_cosold >= 550, (
-        f"At least 550 co-sold deals (2 rows in deal_splits) must be present "
+    assert n_cosold >= 8000, (
+        f"At least 8000 co-sold deals (2 rows in deal_splits) must be present "
         f"(found {n_cosold})."
     )
     assert set(splits.groupby("deal_id")["credit_pct"].sum().round(4).unique()) == {1.0}, \
         "credit_pct must sum to exactly 1.0 per deal_id."
 
     cancellations = pd.read_csv(DATA_DIR / "cancellations.csv")
-    assert len(cancellations) >= 200, (
-        f"At least 200 cancellations must be present (found {len(cancellations)})."
+    assert len(cancellations) >= 2000, (
+        f"At least 2000 cancellations must be present (found {len(cancellations)})."
     )
 
     quotas = pd.read_csv(DATA_DIR / "quotas.csv")
@@ -115,7 +113,7 @@ def test_case_02_output_schema_and_shape():
     }
     missing = required_cols - set(df.columns)
     assert not missing, f"Missing columns: {missing}"
-    assert len(df) == 50, f"Expected 50 rows (one per rep), got {len(df)}."
+    assert len(df) == 200, f"Expected 200 rows (one per rep), got {len(df)}."
 
     assert SUMMARY_PATH.exists(), "summary.json not found."
     with open(SUMMARY_PATH) as f:
@@ -188,6 +186,7 @@ def ground_truth():
     report["total_deals"] = report["total_deals"].astype(int)
     report = report.merge(period_quotas[["rep_id", "quota_usd"]], on="rep_id")
     report["attainment_pct"] = (report["net_revenue_usd"] / report["quota_usd"] * 100).round(2)
+    report["period_start"] = PERIOD_START
     report = report.sort_values("rep_id").reset_index(drop=True)
 
     return {
@@ -216,9 +215,9 @@ def test_case_03_total_revenue_with_splits(ground_truth):
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     gt = ground_truth["total_gross_revenue_usd"]
-    assert abs(s["total_gross_revenue_usd"] - gt) <= 1.0, (
+    assert abs(s["total_gross_revenue_usd"] - gt) <= 5.0, (
         f"total_gross_revenue_usd: got {s['total_gross_revenue_usd']:.2f}, "
-        f"expected {gt:.2f} (±1.0). "
+        f"expected {gt:.2f}. "
         f"Check that deal_splits.csv is used for credit attribution, not deals.rep_id."
     )
 
@@ -226,8 +225,10 @@ def test_case_03_total_revenue_with_splits(ground_truth):
 def test_case_04_per_rep_revenue_for_split_deals(ground_truth):
     """Reps who have co-sold deals must show correct partial revenue.
 
-    Identifies 5 reps with the most co-sold deal exposure (credit_pct < 1.0)
-    and checks their gross_revenue_usd against ground truth.
+    QC NOTE: Deal Splits Tolerance
+    We test the 10 reps with the highest co-sold volume. A ±2.0 USD tolerance
+    is used to allow for float precision differences in merge/sum orders. If an
+    agent misses the deal_splits table, the error will be in the tens of thousands.
     """
     splits     = pd.read_csv(DATA_DIR / "deal_splits.csv")
     report_got = pd.read_csv(REPORT_PATH)
@@ -238,7 +239,7 @@ def test_case_04_per_rep_revenue_for_split_deals(ground_truth):
     top_partial_reps = (
         partial.groupby("rep_id")["credit_pct"].count()
         .sort_values(ascending=False)
-        .head(5)
+        .head(10)
         .index.tolist()
     )
 
@@ -250,15 +251,15 @@ def test_case_04_per_rep_revenue_for_split_deals(ground_truth):
             continue
         gt_val  = float(gt_row["gross_revenue_usd"].iloc[0])
         got_val = float(got_row["gross_revenue_usd"].iloc[0])
-        if abs(got_val - gt_val) > 1.0:
+        if abs(got_val - gt_val) > 2.0:
             errors.append(
-                f"  {rep_id}: got {got_val:.2f}, expected {gt_val:.2f} (±1.0)"
+                f"  {rep_id}: got {got_val:.2f}, expected {gt_val:.2f}"
             )
 
     assert not errors, (
         f"{len(errors)} reps with co-sold deals have wrong gross_revenue_usd.\n"
         "deal_splits.credit_pct must be applied; using deals.rep_id gives 100% to "
-        "the primary rep:\n" + "\n".join(errors)
+        "the primary rep:\n" + "\n".join(errors[:5])
     )
 
 
@@ -295,7 +296,7 @@ def test_case_05_january_deals_excluded_from_report(ground_truth):
     # For reps with non-trivial January revenue, verify the report matches ground truth
     errors = []
     for rep_id, jan_rev in jan_per_rep.items():
-        if jan_rev < 10_000:    # only check reps where the error would be noticeable
+        if jan_rev < 10_000:
             continue
         gt_row  = gt_report[gt_report["rep_id"] == rep_id]
         got_row = report_got[report_got["rep_id"] == rep_id]
@@ -303,7 +304,7 @@ def test_case_05_january_deals_excluded_from_report(ground_truth):
             continue
         gt_val  = float(gt_row["gross_revenue_usd"].iloc[0])
         got_val = float(got_row["gross_revenue_usd"].iloc[0])
-        if abs(got_val - gt_val) > 1.0:
+        if abs(got_val - gt_val) > 2.0:
             errors.append(
                 f"  {rep_id}: got {got_val:.2f}, expected {gt_val:.2f} "
                 f"(Jan revenue that must be excluded: {jan_rev:.2f})"
@@ -318,10 +319,12 @@ def test_case_05_january_deals_excluded_from_report(ground_truth):
 
 
 def test_case_06_quota_attainment_pct_correctness(ground_truth):
-    """attainment_pct must be correct for at least 45/50 reps.
+    """attainment_pct must be correct for at least 190/200 reps.
 
-    Wrong if (a) wrong period used → wrong revenue denominator, or
-    (b) gross revenue used instead of net, or (c) wrong quota period selected.
+    QC NOTE: Attainment Threshold
+    We use a ±0.5 pct point tolerance and require 190/200 reps to pass. This
+    allows for minor rounding discrepancies but strictly catches agents that use
+    the calendar quarter (which affects ~100+ reps) or gross revenue (affects ~100+).
     """
     report_got = pd.read_csv(REPORT_PATH)
     gt_report  = ground_truth["report"]
@@ -332,8 +335,8 @@ def test_case_06_quota_attainment_pct_correctness(ground_truth):
         suffixes=("_got", "_exp"),
     )
     close = (abs(merged["attainment_pct_got"] - merged["attainment_pct_exp"]) <= 0.5).sum()
-    assert close >= 45, (
-        f"Only {close}/50 reps have correct attainment_pct (within ±0.5 pct points). "
+    assert close >= 190, (
+        f"Only {close}/200 reps have correct attainment_pct (within ±0.5 pct points). "
         f"Check fiscal period boundaries (period_start = {PERIOD_START}, not 2024-01-01) "
         f"and that net_revenue_usd is used, not gross."
     )
@@ -354,13 +357,13 @@ def test_case_07_gross_and_net_revenue_correctness(ground_truth):
     gt_gross = ground_truth["total_gross_revenue_usd"]
     gt_net   = ground_truth["total_net_revenue_usd"]
 
-    assert abs(s["total_gross_revenue_usd"] - gt_gross) <= 1.0, (
+    assert abs(s["total_gross_revenue_usd"] - gt_gross) <= 5.0, (
         f"total_gross_revenue_usd: got {s['total_gross_revenue_usd']:.2f}, "
-        f"expected {gt_gross:.2f} (±1.0)."
+        f"expected {gt_gross:.2f}."
     )
-    assert abs(s["total_net_revenue_usd"] - gt_net) <= 1.0, (
+    assert abs(s["total_net_revenue_usd"] - gt_net) <= 5.0, (
         f"total_net_revenue_usd: got {s['total_net_revenue_usd']:.2f}, "
-        f"expected {gt_net:.2f} (±1.0). "
+        f"expected {gt_net:.2f}. "
         f"Cancellations within {PERIOD_START}–{PERIOD_END} must be subtracted from revenue."
     )
 
@@ -368,9 +371,11 @@ def test_case_07_gross_and_net_revenue_correctness(ground_truth):
 def test_case_08_reps_over_quota_count(ground_truth):
     """The count of reps where net_revenue_usd > quota_usd must be correct.
 
-    Some reps are over quota on gross revenue but slip under quota once
-    in-period cancellations are netted out. Using gross revenue inflates
-    this count.
+    QC NOTE: Gross vs Net Flips
+    We test exact integer match here because generate_data.py specifically targets
+    deals of over-quota reps for cancellation. This creates a large enough gap
+    between gross reps_over_quota and net reps_over_quota that float precision
+    issues will not cause off-by-one errors.
     """
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
@@ -378,7 +383,6 @@ def test_case_08_reps_over_quota_count(ground_truth):
     gt_net   = ground_truth["reps_over_quota"]
     gt_gross = ground_truth["reps_over_quota_gross"]
 
-    # Confirm the data was generated to make a meaningful difference
     if gt_gross != gt_net:
         assert s["reps_over_quota"] == gt_net, (
             f"reps_over_quota: got {s['reps_over_quota']}, expected {gt_net}. "
@@ -386,7 +390,6 @@ def test_case_08_reps_over_quota_count(ground_truth):
             f"{gt_gross - gt_net} rep(s) from over to under quota."
         )
     else:
-        # Edge case: cancellations don't flip any rep in this seed — just check value
         assert s["reps_over_quota"] == gt_net, (
             f"reps_over_quota: got {s['reps_over_quota']}, expected {gt_net}."
         )
@@ -397,8 +400,6 @@ def test_case_08_reps_over_quota_count(ground_truth):
 def test_case_09_non_usd_rep_revenue_accuracy(ground_truth):
     """Reps with predominantly non-USD deals must have correct USD revenue.
 
-    Identifies 5 reps with the highest non-USD deal exposure (by deal count)
-    and checks their net_revenue_usd against ground truth.
     An agent that treats deal_value as USD misprices these reps entirely.
     """
     deals      = pd.read_csv(DATA_DIR / "deals.csv")
@@ -406,13 +407,12 @@ def test_case_09_non_usd_rep_revenue_accuracy(ground_truth):
     report_got = pd.read_csv(REPORT_PATH)
     gt_report  = ground_truth["report"]
 
-    # Find reps with most non-USD deal exposure via deal_splits credit
     non_usd_deals = deals[deals["currency"] != "USD"][["deal_id"]].copy()
     non_usd_credited = non_usd_deals.merge(splits, on="deal_id")
     top_non_usd_reps = (
         non_usd_credited.groupby("rep_id")["deal_id"].count()
         .sort_values(ascending=False)
-        .head(5)
+        .head(10)
         .index.tolist()
     )
 
@@ -424,15 +424,15 @@ def test_case_09_non_usd_rep_revenue_accuracy(ground_truth):
             continue
         gt_val  = float(gt_row["net_revenue_usd"].iloc[0])
         got_val = float(got_row["net_revenue_usd"].iloc[0])
-        if abs(got_val - gt_val) > 1.0:
+        if abs(got_val - gt_val) > 2.0:
             errors.append(
-                f"  {rep_id}: got {got_val:.2f}, expected {gt_val:.2f} (±1.0)"
+                f"  {rep_id}: got {got_val:.2f}, expected {gt_val:.2f}"
             )
 
     assert not errors, (
         f"{len(errors)} reps with high non-USD deal exposure have wrong net_revenue_usd.\n"
         "EUR/GBP deal_value must be converted using fx_rates.csv on the close_date:\n"
-        + "\n".join(errors)
+        + "\n".join(errors[:5])
     )
 
 
@@ -440,8 +440,7 @@ def test_case_10_total_usd_revenue_accuracy(ground_truth):
     """total_net_revenue_usd and overall_attainment_pct must both be correct.
 
     This is the combined-trap test: wrong if any of FX conversion, deal splits,
-    fiscal period, or cancellations is mishandled. A delta from ground truth
-    can be traced to which trap was missed.
+    fiscal period, or cancellations is mishandled.
     """
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
@@ -451,7 +450,7 @@ def test_case_10_total_usd_revenue_accuracy(ground_truth):
 
     assert abs(s["total_net_revenue_usd"] - gt_net) <= 5.0, (
         f"total_net_revenue_usd: got {s['total_net_revenue_usd']:.2f}, "
-        f"expected {gt_net:.2f} (±5.0). "
+        f"expected {gt_net:.2f}. "
         f"Combined error from FX, splits, period filter, or cancellations."
     )
     assert abs(s["overall_attainment_pct"] - gt_att) <= 0.5, (

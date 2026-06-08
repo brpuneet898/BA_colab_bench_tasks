@@ -51,7 +51,13 @@ def load_data():
 
 
 def convert_to_usd(deals, fx_rates):
-    """Trap 4: attach correct FX rate for each deal on its close_date."""
+    """Trap 4: attach correct FX rate for each deal on its close_date.
+    
+    BOTTLENECK: FX Conversion
+    ~30% of deals are in EUR or GBP. If an agent assumes all deal_value is USD,
+    or uses an average rate instead of the close_date rate, it will fail
+    accuracy checks for EMEA/APAC reps.
+    """
     fx = fx_rates.rename(columns={"date": "close_date"})
     # USD deals are not in fx_rates; give them rate = 1.0
     usd_rates = deals[deals["currency"] == "USD"][["deal_id", "close_date"]].copy()
@@ -71,7 +77,13 @@ def convert_to_usd(deals, fx_rates):
 
 
 def apply_splits(deals, deal_splits):
-    """Trap 1: multiply each deal's USD value by each rep's credit_pct."""
+    """Trap 1: multiply each deal's USD value by each rep's credit_pct.
+    
+    BOTTLENECK: Split Attribution
+    ~20% of deals are co-sold (two rows in deal_splits). If the agent joins
+    deals → rep_id directly, it assigns 100% of the deal value to the primary
+    rep, massively inflating some reps' revenue and giving co-reps $0.
+    """
     # Drop deals.rep_id — deal_splits is authoritative for attribution
     merged = deals[["deal_id", "deal_value_usd", "close_date"]].merge(
         deal_splits, on="deal_id"
@@ -81,12 +93,24 @@ def apply_splits(deals, deal_splits):
 
 
 def filter_period(df, date_col):
-    """Trap 2: keep only deals within the fiscal period (Feb 1 – Apr 30)."""
+    """Trap 2: keep only deals within the fiscal period (Feb 1 – Apr 30).
+    
+    BOTTLENECK: Fiscal Quarter Boundary
+    quotas.csv specifies Q1 2024 is Feb 1 – Apr 30. If the agent groups by
+    calendar quarter (Jan 1 – Mar 31), it includes thousands of prior-period
+    deals from January, inflating Q1 revenue.
+    """
     return df[(df[date_col] >= PERIOD_START) & (df[date_col] <= PERIOD_END)].copy()
 
 
 def net_cancellations(credited, cancellations):
-    """Trap 3: subtract revenue of deals cancelled within the same period."""
+    """Trap 3: subtract revenue of deals cancelled within the same period.
+    
+    BOTTLENECK: In-Period Cancellations
+    ~3,000 deals were cancelled in the period. If the agent sums closed_won
+    without netting cancellations, revenue is inflated and the 'reps_over_quota'
+    metric will be completely wrong.
+    """
     in_period_cancels = filter_period(cancellations, "cancelled_date")
     cancelled_ids = set(in_period_cancels["deal_id"])
     credited["is_cancelled"] = credited["deal_id"].isin(cancelled_ids)
