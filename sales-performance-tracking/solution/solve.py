@@ -4,7 +4,7 @@ Q1 2024 B2B SaaS sales performance report.
 Key observations and traps in the data:
 
 1. Region-Scoped Primary Keys (Composite Key Trap)
-   deal_id resets per region. deal_id=100 exists in NA, EMEA, and APAC.
+   deal_id resets per region. deal_id=100 exists in AMER, EMEA, and APAC.
    An agent that merges deals with deal_splits on just deal_id will trigger
    a massive Cartesian cross-join, duplicating revenue and assigning wrong regions.
    Must merge on ['region', 'deal_id'].
@@ -52,6 +52,8 @@ def load_data():
 
 
 def convert_to_arr_usd(deals, fx_rates):
+    # Trap 5: deals contains closed_lost and prospecting rows. Already filtered to
+    # closed_won before this call.
     # Trap 3: ARR = TCV / months * 12
     deals["arr_local"] = deals["total_contract_value"] / deals["contract_months"] * 12.0
 
@@ -151,6 +153,9 @@ def build_report(credited_period, reps_quotas):
 
 def main():
     deals, reps, deal_splits, quotas, cancellations, fx_rates = load_data()
+
+    # Trap 5: filter to only closed_won deals before any revenue calculation
+    deals = deals[deals["stage"] == "closed_won"].copy()
 
     deals = convert_to_arr_usd(deals, fx_rates)
     credited = apply_splits(deals, deal_splits)

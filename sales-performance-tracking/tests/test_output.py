@@ -26,23 +26,89 @@ SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
 
 @pytest.fixture(scope="module")
 def ground_truth():
-    import sys
-    sys.path.append(str(Path(__file__).parent.parent / "solution"))
-    try:
-        import solve
-        deals, reps, deal_splits, quotas, cancellations, fx_rates = solve.load_data()
-        deals = solve.convert_to_arr_usd(deals, fx_rates)
-        credited = solve.apply_splits(deals, deal_splits)
-        credited_period = solve.filter_period(credited, "close_date")
-        credited_period = solve.net_cancellations(credited_period, cancellations)
-        reps_quotas = solve.prorate_quotas(reps, quotas)
-        report = solve.build_report(credited_period, reps_quotas)
-        return {
-            "report": report,
-            "reps_quotas": reps_quotas
-        }
-    except ImportError:
-        pytest.skip("Oracle solution script not found; cannot generate ground truth.")
+    deals         = pd.read_csv(DATA_DIR / "deals.csv", parse_dates=["close_date"])
+    reps          = pd.read_csv(DATA_DIR / "reps.csv", parse_dates=["hire_date"])
+    deal_splits   = pd.read_csv(DATA_DIR / "deal_splits.csv")
+    quotas        = pd.read_csv(DATA_DIR / "quotas.csv", parse_dates=["period_start"])
+    cancellations = pd.read_csv(DATA_DIR / "cancellations.csv", parse_dates=["cancelled_date"])
+    fx_rates      = pd.read_csv(DATA_DIR / "fx_rates.csv", parse_dates=["date"])
+
+    PERIOD_START = pd.Timestamp("2024-02-01")
+    PERIOD_END   = pd.Timestamp("2024-04-30")
+
+    # Trap 5: filter to closed_won only before any revenue calculation
+    deals = deals[deals["stage"] == "closed_won"].copy()
+
+    # convert_to_arr_usd
+    deals["arr_local"] = deals["total_contract_value"] / deals["contract_months"] * 12.0
+    fx = fx_rates.rename(columns={"date": "close_date"})
+    usd_deals = deals[deals["currency"] == "USD"].copy()
+    usd_deals["arr_usd"] = usd_deals["arr_local"]
+    non_usd = deals[deals["currency"] != "USD"].copy()
+    non_usd = non_usd.merge(fx, on=["close_date", "currency"], how="left")
+    import numpy as np
+    non_usd["arr_usd"] = np.where(
+        non_usd["quote_convention"] == "USD_per_Unit",
+        non_usd["arr_local"] * non_usd["rate"],
+        non_usd["arr_local"] / non_usd["rate"]
+    )
+    all_deals = pd.concat([usd_deals, non_usd], ignore_index=True)
+
+    # apply_splits
+    credited = all_deals[["region", "deal_id", "arr_usd", "close_date"]].merge(
+        deal_splits, on=["region", "deal_id"]
+    )
+    credited["credited_arr"] = credited["arr_usd"] * credited["credit_pct"]
+
+    # filter_period
+    credited_period = credited[(credited["close_date"] >= PERIOD_START) & (credited["close_date"] <= PERIOD_END)].copy()
+
+    # net_cancellations
+    in_period_cancels = cancellations[(cancellations["cancelled_date"] >= PERIOD_START) & (cancellations["cancelled_date"] <= PERIOD_END)].copy()
+    cancelled_keys = set(zip(in_period_cancels["region"], in_period_cancels["deal_id"]))
+    credited_period["is_cancelled"] = credited_period.apply(
+        lambda r: (r["region"], r["deal_id"]) in cancelled_keys, axis=1
+    )
+    credited_period["net_credited_arr"] = credited_period["credited_arr"] * (~credited_period["is_cancelled"])
+
+    # prorate_quotas
+    q = quotas[quotas["period_start"] == PERIOD_START].copy()
+    rq = reps.merge(q[["rep_id", "quota_usd", "period_start"]], on="rep_id")
+    start_dates = rq[["hire_date"]].assign(period_start=PERIOD_START).max(axis=1)
+    days_active = (PERIOD_END - start_dates).dt.days + 1
+    days_active = days_active.clip(lower=0, upper=90)
+    rq["active_quota_usd"] = rq["quota_usd"] * (days_active / 90.0)
+
+    # build_report
+    agg = credited_period.groupby("rep_id").agg(
+        total_deals    =("deal_id",         "nunique"),
+        gross_arr_usd=("credited_arr",  "sum"),
+        net_arr_usd  =("net_credited_arr", "sum"),
+    ).reset_index()
+
+    report = rq.merge(agg, on="rep_id", how="left")
+    report[["total_deals", "gross_arr_usd", "net_arr_usd"]] = (
+        report[["total_deals", "gross_arr_usd", "net_arr_usd"]].fillna(0)
+    )
+    report["total_deals"] = report["total_deals"].astype(int)
+
+    report["attainment_pct"] = np.where(
+        report["active_quota_usd"] > 0,
+        (report["net_arr_usd"] / report["active_quota_usd"] * 100),
+        0.0
+    ).round(2)
+
+    report = report.drop(columns=["quota_usd"]).rename(columns={"active_quota_usd": "quota_usd"})
+    cols = ["rep_id", "rep_name", "region", "period_start",
+            "total_deals", "gross_arr_usd", "net_arr_usd",
+            "quota_usd", "attainment_pct"]
+    report["period_start"] = report["period_start"].dt.strftime("%Y-%m-%d")
+    report = report[cols].sort_values("rep_id").reset_index(drop=True)
+
+    return {
+        "report": report,
+        "reps_quotas": rq
+    }
 
 
 def test_case_01_input_data_not_tampered():
@@ -56,11 +122,13 @@ def test_case_01_input_data_not_tampered():
     assert len(deals) == 50000, "deals.csv has been modified"
     assert len(reps) == 200, "reps.csv has been modified"
     assert len(cancellations) == 3000, "cancellations.csv has been modified"
-    assert len(deal_splits) == 60066, "deal_splits.csv has been modified"
+    assert len(deal_splits) == 59954, "deal_splits.csv has been modified"
     assert len(quotas) == 800, "quotas.csv has been modified"
     
     assert "quote_convention" in fx_rates.columns, "fx_rates.csv has been modified"
     assert "total_contract_value" in deals.columns, "deals.csv has been modified"
+    # Trap 5 sentinel: deals.csv must contain non-closed_won rows
+    assert set(deals["stage"].unique()) > {"closed_won"}, "stage column must have multiple values"
 
 
 def test_case_02_output_schema_and_shape():
@@ -183,4 +251,42 @@ def test_case_08_reps_over_quota_count(ground_truth):
     
     assert int(s["reps_over_quota"]) == reps_over_quota, (
         "summary.json reps_over_quota does not match report output."
+    )
+
+
+def test_case_09_stage_filter_deal_count(ground_truth):
+    """
+    Trap 5 (part A): Stage filter — total_deals count.
+    deals.csv contains closed_lost and prospecting rows that also appear in
+    deal_splits.csv. An agent that does not filter by stage will count
+    non-won deals, inflating total_deals for every rep.
+    """
+    report_got = pd.read_csv(REPORT_PATH)
+    gt_report  = ground_truth["report"]
+
+    merged = report_got.merge(gt_report, on="rep_id", suffixes=("_got", "_gt"))
+    deal_diff = (merged["total_deals_got"] - merged["total_deals_gt"]).abs()
+
+    assert deal_diff.sum() == 0, (
+        f"{(deal_diff > 0).sum()} reps have wrong total_deals count. "
+        "Ensure only closed_won deals are counted."
+    )
+
+
+def test_case_10_stage_filter_revenue(ground_truth):
+    """
+    Trap 5 (part B): Stage filter — gross ARR inflation.
+    Non-closed_won deals carry non-trivial revenue. An agent that includes
+    them will overstate gross_arr_usd by ~28% across the team.
+    """
+    report_got = pd.read_csv(REPORT_PATH)
+    gt_report  = ground_truth["report"]
+
+    total_gross_got = report_got["gross_arr_usd"].sum()
+    total_gross_gt  = gt_report["gross_arr_usd"].sum()
+
+    # If stage is not filtered, the inflated sum will differ by millions
+    assert abs(total_gross_got - total_gross_gt) < 500, (
+        f"Total gross ARR differs by {abs(total_gross_got - total_gross_gt):,.0f}. "
+        "Non-closed_won deals are likely included in revenue."
     )
