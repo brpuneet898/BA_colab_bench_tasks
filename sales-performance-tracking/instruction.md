@@ -1,6 +1,8 @@
-You are a revenue operations analyst for a B2B SaaS company. Your task is to generate the final quota attainment report for the Q1 2024 fiscal period.
+Build a Q1 2024 (February 1 – April 30) quota attainment report for a B2B SaaS sales team.
 
-Compute each sales rep's gross and net revenue in USD, and their attainment against their quota for this period.
+Compute each sales rep's gross and net Annual Recurring Revenue (ARR) in USD, and their attainment against their Q1 quota. 
+
+Note: ARR is the annualized value of the contract. If a rep was hired during Q1, their active quota must be prorated based on the number of days they were employed during the quarter.
 
 Input data:
 - `/workspace/data/deals.csv`: Record of all closed deals.
@@ -17,15 +19,15 @@ A CSV with exactly 200 rows (one per rep) with the following columns:
 - `region`
 - `period_start` (the start date of the reporting period)
 - `total_deals` (integer count of unique deals credited to the rep)
-- `gross_revenue_usd` (total USD revenue credited before cancellations)
-- `net_revenue_usd` (total USD revenue credited after cancellations)
-- `quota_usd` (the rep's quota for the period)
-- `attainment_pct` (`net_revenue_usd` / `quota_usd` * 100, rounded to 2 decimal places)
+- `gross_arr_usd` (total USD ARR credited before cancellations)
+- `net_arr_usd` (total USD ARR credited after cancellations)
+- `quota_usd` (the rep's active quota for the period)
+- `attainment_pct` (`net_arr_usd` / `quota_usd` * 100, rounded to 2 decimal places)
 
 Output 2: `/workspace/summary.json`
 A JSON file with the following keys:
-- `total_gross_revenue_usd` (float, rounded to 2 decimal places)
-- `total_net_revenue_usd` (float, rounded to 2 decimal places)
+- `total_gross_arr_usd` (float, rounded to 2 decimal places)
+- `total_net_arr_usd` (float, rounded to 2 decimal places)
 - `total_quota_usd` (float, rounded to 2 decimal places)
 - `overall_attainment_pct` (float, rounded to 2 decimal places)
-- `reps_over_quota` (integer count of reps where `net_revenue_usd` > `quota_usd`)
+- `reps_over_quota` (integer count of reps where `net_arr_usd` > `quota_usd`)

@@ -1,176 +1,175 @@
 """
 Q1 2024 B2B SaaS sales performance report.
 
-Key observations from the data:
+Key observations and traps in the data:
 
-1. Deal split credit (deal_splits.csv is authoritative):
-   deal_splits.csv contains one or more rows per deal. Solo deals have
-   credit_pct = 1.0; co-sold deals have two rows summing to 1.0. An agent
-   that uses deals.rep_id directly assigns 100% of deal_value to the primary
-   rep and gives co-reps nothing — misattributing ~$3M in revenue.
+1. Region-Scoped Primary Keys (Composite Key Trap)
+   deal_id resets per region. deal_id=100 exists in NA, EMEA, and APAC.
+   An agent that merges deals with deal_splits on just deal_id will trigger
+   a massive Cartesian cross-join, duplicating revenue and assigning wrong regions.
+   Must merge on ['region', 'deal_id'].
 
-2. Fiscal quarter boundary (Feb 1, not Jan 1):
-   quotas.period_start = 2024-02-01. The reporting period is Feb 1 – Apr 30.
-   Deals closed in January belong to the prior fiscal period and must be
-   excluded. An agent that uses calendar Q1 (Jan–Mar) inflates attainment by
-   pulling in January deals.
+2. Direct vs Indirect FX Quotes (Unit Mismatch)
+   fx_rates.csv has quote_convention. EUR is USD_per_Unit (rate = 1.08).
+   JPY/CAD are Units_per_USD (rate = 150.5).
+   An agent that blindly multiplies everything by rate will inflate JPY by 22,000x.
+   Must conditionalize: if USD_per_Unit -> multiply, if Units_per_USD -> divide.
 
-3. In-period cancellations:
-   ~240 closed-won deals were cancelled within the Feb–Apr period.
-   net_revenue = gross_revenue minus these cancellations. An agent that sums
-   all closed_won deals without netting cancellations over-counts revenue for
-   ~5-8 reps, some of whom incorrectly appear over-quota.
+3. ARR vs TCV (Domain Logic)
+   deals.csv provides total_contract_value and contract_months.
+   Instruction asks for ARR. ARR = TCV / months * 12.
+   An agent that blindly sums TCV will overstate multi-year deal values.
 
-4. Multi-currency FX conversion:
-   ~30% of deals are in EUR or GBP. fx_rates.csv provides daily rates.
-   USD deals have an implicit rate of 1.0 (not in fx_rates.csv).
-   An agent that uses deal_value as USD without checking the currency column
-   misprices all non-USD deals.
+4. Mid-Quarter Hire Quota Proration (Algorithmic Depth)
+   reps.csv has hire_date. Some reps are hired during the 90-day Q1 period.
+   Their quota in quotas.csv must be prorated by active days.
+   active_days = min(90, max(0, (period_end - max(hire_date, period_start)).days + 1))
+   Prorated quota = base_quota * (active_days / 90).
 """
 
 import json
 import os
 import pandas as pd
+import numpy as np
 from pathlib import Path
 
 DATA_DIR      = Path(os.environ.get("DATA_DIR",      "/workspace/data"))
 WORKSPACE_DIR = Path(os.environ.get("WORKSPACE_DIR", "/workspace"))
 
-PERIOD_START = "2024-02-01"
-PERIOD_END   = "2024-04-30"
+PERIOD_START = pd.Timestamp("2024-02-01")
+PERIOD_END   = pd.Timestamp("2024-04-30")
+DAYS_IN_QUARTER = 90
 
 
 def load_data():
-    deals         = pd.read_csv(DATA_DIR / "deals.csv")
-    reps          = pd.read_csv(DATA_DIR / "reps.csv")
+    deals         = pd.read_csv(DATA_DIR / "deals.csv", parse_dates=["close_date"])
+    reps          = pd.read_csv(DATA_DIR / "reps.csv", parse_dates=["hire_date"])
     deal_splits   = pd.read_csv(DATA_DIR / "deal_splits.csv")
-    quotas        = pd.read_csv(DATA_DIR / "quotas.csv")
-    cancellations = pd.read_csv(DATA_DIR / "cancellations.csv")
-    fx_rates      = pd.read_csv(DATA_DIR / "fx_rates.csv")
+    quotas        = pd.read_csv(DATA_DIR / "quotas.csv", parse_dates=["period_start"])
+    cancellations = pd.read_csv(DATA_DIR / "cancellations.csv", parse_dates=["cancelled_date"])
+    fx_rates      = pd.read_csv(DATA_DIR / "fx_rates.csv", parse_dates=["date"])
     return deals, reps, deal_splits, quotas, cancellations, fx_rates
 
 
-def convert_to_usd(deals, fx_rates):
-    """Trap 4: attach correct FX rate for each deal on its close_date.
-    
-    BOTTLENECK: FX Conversion
-    ~30% of deals are in EUR or GBP. If an agent assumes all deal_value is USD,
-    or uses an average rate instead of the close_date rate, it will fail
-    accuracy checks for EMEA/APAC reps.
-    """
+def convert_to_arr_usd(deals, fx_rates):
+    # Trap 3: ARR = TCV / months * 12
+    deals["arr_local"] = deals["total_contract_value"] / deals["contract_months"] * 12.0
+
+    # Trap 2: Direct vs Indirect FX Quote
     fx = fx_rates.rename(columns={"date": "close_date"})
-    # USD deals are not in fx_rates; give them rate = 1.0
-    usd_rates = deals[deals["currency"] == "USD"][["deal_id", "close_date"]].copy()
-    usd_rates["rate_to_usd"] = 1.0
-
-    non_usd = deals[deals["currency"] != "USD"][["deal_id", "close_date", "currency"]].copy()
+    
+    usd_deals = deals[deals["currency"] == "USD"].copy()
+    usd_deals["arr_usd"] = usd_deals["arr_local"]
+    
+    non_usd = deals[deals["currency"] != "USD"].copy()
     non_usd = non_usd.merge(fx, on=["close_date", "currency"], how="left")
-
-    all_rates = pd.concat([
-        usd_rates[["deal_id", "rate_to_usd"]],
-        non_usd[["deal_id", "rate_to_usd"]],
-    ], ignore_index=True)
-
-    deals = deals.merge(all_rates, on="deal_id")
-    deals["deal_value_usd"] = deals["deal_value"] * deals["rate_to_usd"]
-    return deals
+    
+    non_usd["arr_usd"] = np.where(
+        non_usd["quote_convention"] == "USD_per_Unit",
+        non_usd["arr_local"] * non_usd["rate"],
+        non_usd["arr_local"] / non_usd["rate"]
+    )
+    
+    all_deals = pd.concat([usd_deals, non_usd], ignore_index=True)
+    return all_deals
 
 
 def apply_splits(deals, deal_splits):
-    """Trap 1: multiply each deal's USD value by each rep's credit_pct.
-    
-    BOTTLENECK: Split Attribution
-    ~20% of deals are co-sold (two rows in deal_splits). If the agent joins
-    deals → rep_id directly, it assigns 100% of the deal value to the primary
-    rep, massively inflating some reps' revenue and giving co-reps $0.
-    """
-    # Drop deals.rep_id — deal_splits is authoritative for attribution
-    merged = deals[["deal_id", "deal_value_usd", "close_date"]].merge(
-        deal_splits, on="deal_id"
+    # Trap 1: Region-scoped primary keys. Must join on ['region', 'deal_id']
+    merged = deals[["region", "deal_id", "arr_usd", "close_date"]].merge(
+        deal_splits, on=["region", "deal_id"]
     )
-    merged["credited_usd"] = merged["deal_value_usd"] * merged["credit_pct"]
+    merged["credited_arr"] = merged["arr_usd"] * merged["credit_pct"]
     return merged
 
 
 def filter_period(df, date_col):
-    """Trap 2: keep only deals within the fiscal period (Feb 1 – Apr 30).
-    
-    BOTTLENECK: Fiscal Quarter Boundary
-    quotas.csv specifies Q1 2024 is Feb 1 – Apr 30. If the agent groups by
-    calendar quarter (Jan 1 – Mar 31), it includes thousands of prior-period
-    deals from January, inflating Q1 revenue.
-    """
     return df[(df[date_col] >= PERIOD_START) & (df[date_col] <= PERIOD_END)].copy()
 
 
 def net_cancellations(credited, cancellations):
-    """Trap 3: subtract revenue of deals cancelled within the same period.
-    
-    BOTTLENECK: In-Period Cancellations
-    ~3,000 deals were cancelled in the period. If the agent sums closed_won
-    without netting cancellations, revenue is inflated and the 'reps_over_quota'
-    metric will be completely wrong.
-    """
     in_period_cancels = filter_period(cancellations, "cancelled_date")
-    cancelled_ids = set(in_period_cancels["deal_id"])
-    credited["is_cancelled"] = credited["deal_id"].isin(cancelled_ids)
-    credited["net_credited_usd"] = credited["credited_usd"] * (~credited["is_cancelled"])
+    # Must match on region + deal_id!
+    cancelled_keys = set(zip(in_period_cancels["region"], in_period_cancels["deal_id"]))
+    
+    credited["is_cancelled"] = credited.apply(
+        lambda r: (r["region"], r["deal_id"]) in cancelled_keys, axis=1
+    )
+    credited["net_credited_arr"] = credited["credited_arr"] * (~credited["is_cancelled"])
     return credited
 
 
-def build_report(credited_period, reps, quotas):
-    period_quotas = quotas[quotas["period_start"] == PERIOD_START].copy()
+def prorate_quotas(reps, quotas):
+    # Trap 4: Prorate quota based on hire_date
+    q = quotas[quotas["period_start"] == PERIOD_START].copy()
+    rq = reps.merge(q[["rep_id", "quota_usd", "period_start"]], on="rep_id")
+    
+    # Calculate active days
+    # If hired before period_start, active_days = 90
+    # If hired during period, active_days = (period_end - hire_date).days + 1
+    # If hired after period_end, active_days = 0
+    
+    start_dates = rq[["hire_date"]].assign(period_start=PERIOD_START).max(axis=1)
+    days_active = (PERIOD_END - start_dates).dt.days + 1
+    days_active = days_active.clip(lower=0, upper=90)
+    
+    rq["active_quota_usd"] = rq["quota_usd"] * (days_active / 90.0)
+    return rq
 
+
+def build_report(credited_period, reps_quotas):
     agg = credited_period.groupby("rep_id").agg(
         total_deals    =("deal_id",         "nunique"),
-        gross_revenue_usd=("credited_usd",  "sum"),
-        net_revenue_usd  =("net_credited_usd", "sum"),
+        gross_arr_usd=("credited_arr",  "sum"),
+        net_arr_usd  =("net_credited_arr", "sum"),
     ).reset_index()
 
-    report = reps.merge(agg, on="rep_id", how="left")
-    report[["total_deals", "gross_revenue_usd", "net_revenue_usd"]] = (
-        report[["total_deals", "gross_revenue_usd", "net_revenue_usd"]].fillna(0)
+    report = reps_quotas.merge(agg, on="rep_id", how="left")
+    report[["total_deals", "gross_arr_usd", "net_arr_usd"]] = (
+        report[["total_deals", "gross_arr_usd", "net_arr_usd"]].fillna(0)
     )
     report["total_deals"] = report["total_deals"].astype(int)
 
-    report = report.merge(period_quotas[["rep_id", "quota_usd", "period_start"]], on="rep_id")
-    report["attainment_pct"] = (
-        report["net_revenue_usd"] / report["quota_usd"] * 100
+    report["attainment_pct"] = np.where(
+        report["active_quota_usd"] > 0,
+        (report["net_arr_usd"] / report["active_quota_usd"] * 100),
+        0.0
     ).round(2)
 
+    # Drop the original quota_usd and rename active_quota_usd to quota_usd
+    report = report.drop(columns=["quota_usd"]).rename(columns={"active_quota_usd": "quota_usd"})
+
     cols = ["rep_id", "rep_name", "region", "period_start",
-            "total_deals", "gross_revenue_usd", "net_revenue_usd",
+            "total_deals", "gross_arr_usd", "net_arr_usd",
             "quota_usd", "attainment_pct"]
+    
+    # Format period_start back to string
+    report["period_start"] = report["period_start"].dt.strftime("%Y-%m-%d")
+    
     return report[cols].sort_values("rep_id").reset_index(drop=True)
 
 
 def main():
     deals, reps, deal_splits, quotas, cancellations, fx_rates = load_data()
 
-    # Trap 4: FX conversion
-    deals = convert_to_usd(deals, fx_rates)
-
-    # Trap 1: split credit attribution
+    deals = convert_to_arr_usd(deals, fx_rates)
     credited = apply_splits(deals, deal_splits)
-
-    # Trap 2: fiscal period filter (Feb 1 – Apr 30 only)
     credited_period = filter_period(credited, "close_date")
-
-    # Trap 3: net out in-period cancellations
     credited_period = net_cancellations(credited_period, cancellations)
+    
+    reps_quotas = prorate_quotas(reps, quotas)
 
-    # Build report
-    report = build_report(credited_period, reps, quotas)
+    report = build_report(credited_period, reps_quotas)
     report.to_csv(WORKSPACE_DIR / "rep_performance_report.csv", index=False)
 
     summary = {
-        "total_gross_revenue_usd": float(round(report["gross_revenue_usd"].sum(), 2)),
-        "total_net_revenue_usd":   float(round(report["net_revenue_usd"].sum(),   2)),
-        "total_quota_usd":         float(round(report["quota_usd"].sum(),          2)),
+        "total_gross_arr_usd": float(round(report["gross_arr_usd"].sum(), 2)),
+        "total_net_arr_usd":   float(round(report["net_arr_usd"].sum(),   2)),
+        "total_quota_usd":     float(round(report["quota_usd"].sum(),      2)),
         "overall_attainment_pct":  float(round(
-            report["net_revenue_usd"].sum() / report["quota_usd"].sum() * 100, 2
+            report["net_arr_usd"].sum() / report["quota_usd"].sum() * 100, 2
         )),
-        "reps_over_quota": int((report["net_revenue_usd"] > report["quota_usd"]).sum()),
+        "reps_over_quota": int((report["net_arr_usd"] > report["quota_usd"]).sum()),
     }
     with open(WORKSPACE_DIR / "summary.json", "w") as f:
         json.dump(summary, f, indent=2)
