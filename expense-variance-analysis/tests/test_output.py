@@ -41,10 +41,17 @@ def truth():
     shifts["shift_end"] = pd.to_datetime(shifts["shift_end"])
     shifts["duration_h"] = (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
     
+    # AT Bug 2 Fix: drop initial outliers BEFORE applying corrections
+    shifts = shifts[(shifts["duration_h"] >= 6.0) & (shifts["duration_h"] <= 14.0)].copy()
+    
     shifts = pd.merge(shifts, corrs_latest[["shift_id", "corrected_hours"]], on="shift_id", how="left")
+    # Store ratio for boundary splitting (AT Bug 1 Fix)
+    shifts["ratio"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"] / shifts["duration_h"], 1.0)
+    
     shifts["duration_h"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"], shifts["duration_h"])
     
-    shifts = shifts[(shifts["duration_h"] >= 6.0) & (shifts["duration_h"] <= 14.0)].copy()
+    # Rule 4: Exclude if corrected duration < 6
+    shifts = shifts[shifts["duration_h"] >= 6.0].copy()
 
     # 5. Split across midnight (Sunday/Monday boundary)
     split_shifts = []
@@ -53,8 +60,12 @@ def truth():
         en = row["shift_end"]
         if st.weekday() == 6 and en.weekday() == 0:
             mid = en.normalize()
-            durA = (mid - st).total_seconds() / 3600
-            durB = (en - mid).total_seconds() / 3600
+            raw_durA = (mid - st).total_seconds() / 3600
+            raw_durB = (en - mid).total_seconds() / 3600
+            
+            # AT Bug 1 Fix: Scale by ratio to preserve corrected hours
+            durA = raw_durA * row["ratio"]
+            durB = raw_durB * row["ratio"]
             
             rowA = row.copy()
             rowA["duration_h"] = durA

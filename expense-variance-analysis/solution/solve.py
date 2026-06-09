@@ -36,10 +36,13 @@ def main():
     shifts["shift_end"] = pd.to_datetime(shifts["shift_end"])
     shifts["duration_h"] = (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
     
+    shifts = shifts[(shifts["duration_h"] >= 6.0) & (shifts["duration_h"] <= 14.0)].copy()
+    
     shifts = pd.merge(shifts, corrs_latest[["shift_id", "corrected_hours"]], on="shift_id", how="left")
+    shifts["ratio"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"] / shifts["duration_h"], 1.0)
     shifts["duration_h"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"], shifts["duration_h"])
     
-    shifts = shifts[(shifts["duration_h"] >= 6.0) & (shifts["duration_h"] <= 14.0)].copy()
+    shifts = shifts[shifts["duration_h"] >= 6.0].copy()
 
     split_shifts = []
     for _, row in shifts.iterrows():
@@ -47,8 +50,11 @@ def main():
         en = row["shift_end"]
         if st.weekday() == 6 and en.weekday() == 0:
             mid = en.normalize()
-            durA = (mid - st).total_seconds() / 3600
-            durB = (en - mid).total_seconds() / 3600
+            raw_durA = (mid - st).total_seconds() / 3600
+            raw_durB = (en - mid).total_seconds() / 3600
+            
+            durA = raw_durA * row["ratio"]
+            durB = raw_durB * row["ratio"]
             
             rowA = row.copy()
             rowA["duration_h"] = durA
