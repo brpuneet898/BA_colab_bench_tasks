@@ -6,7 +6,6 @@ Shifts starting at or after 21:00 are classified as night shifts and earn a 1.3�
 IMPORTANT: Premiums are mutually exclusive. Only the highest applicable premium applies to a shift (they are never stacked or added). The highest premium applies to all hours of the qualifying shift.
 
 Overtime is assessed on total weekly hours. The overtime premium is 0.5× the shift's applicable rate. The weekly overtime threshold resets each Monday. Weeks run Monday through Sunday. Shifts spanning the Sunday/Monday midnight boundary contribute hours to each respective week. When a corrected shift spans this boundary, distribute the corrected hours across the two weeks proportionally to the original (pre-correction) pre-midnight and post-midnight hour split.
-
 Shifts are attributed to the department the employee was assigned to at the time of the shift. When an employee is temporarily reassigned to another department, the receiving department is charged for those hours at the employee's base hourly rate. Overtime is calculated on the employee's total weekly hours and the overtime premium stays with the home department.
 
 `weekly_budget.csv` provides the base budgeted_hours and avg_hourly_rate per department per week. Base budgeted cost = budgeted_hours × avg_hourly_rate.
@@ -27,11 +26,13 @@ Four rules govern corrections:
 
 `/workspace/data/departments.csv` — department_id, department_name
 
-`/workspace/data/ot_policy.csv` — department_id, weekly_ot_threshold (hours)
+`/workspace/data/ot_policy.csv` — department_id, weekly_ot_threshold (hours), applies_cross_dept (boolean). When true, the department's overtime threshold applies to all employees working in that department, including those temporarily reassigned there.
 
 `/workspace/data/reassignments.csv` — employee_id, week_start (YYYY-MM-DD, always a Monday), to_dept_id, reassigned_hours
 
 `/workspace/data/weekly_budget.csv` — department_id, week_start (date, always a Monday), budgeted_hours, avg_hourly_rate
+
+`/workspace/data/budget_amendments.csv` — amendment_id, department_id, week_start, amount, type (addition or reallocation), from_dept_id (populated only for reallocation type), approved_date. Budget amendments retroactively adjust the base budgeted cost. Only amendments with approved_date on or before 2024-04-05 apply. Use the amended base budgeted cost in all effective budget and carryover calculations.
 
 `/workspace/data/transfers.csv` — employee_id, from_dept_id, to_dept_id, effective_date
 

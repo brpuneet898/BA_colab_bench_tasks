@@ -1,3 +1,17 @@
+"""
+Tests for expense-variance-analysis.
+
+Reasoning challenges: (1) budget amendments require a post-cutoff date filter
+(parallel to corrections cutoff) and a bidirectional reallocation type where one
+row adjusts two departments; (2) the reallocation deduction from the source
+department cascades through that department's carryover chain for all subsequent
+weeks; (3) contractor rates in cents, premium exclusivity, non-uniform OT thresholds,
+and correction cutoff rules must all interact correctly with the amended base budgets.
+
+Tests verify: output existence and shape (00–03), overtime hours (04), effective
+budget totals and row-level accuracy (05, 09, 10), actual cost (06), variance (07),
+over-budget week count (08), and anti-cheat sentinels anchoring input data integrity (01).
+"""
 import pytest
 import pandas as pd
 import numpy as np
@@ -113,6 +127,23 @@ def truth():
 
     # 8. Base Cost and OT
     df = pd.merge(df, ot, on="department_id", how="left")
+
+    # Trap IV: applies_cross_dept flag drives receiving-dept threshold override
+    cross_ot = ot[ot["applies_cross_dept"] == True][["department_id", "weekly_ot_threshold"]].copy()
+    cross_ot = cross_ot.rename(columns={"department_id": "to_dept_id", "weekly_ot_threshold": "recv_thresh"})
+    ot_recv = reassigns[["employee_id", "week_start", "to_dept_id"]].drop_duplicates().copy()
+    ot_recv = pd.merge(ot_recv, cross_ot, on="to_dept_id", how="inner")
+    ot_recv_min = ot_recv.groupby(["employee_id", "week_start"])["recv_thresh"].min().reset_index()
+    ot_recv_min.rename(columns={"week_start": "week_start_str"}, inplace=True)
+    df["week_start_str"] = df["week_start"].dt.strftime("%Y-%m-%d")
+    df = pd.merge(df, ot_recv_min, on=["employee_id", "week_start_str"], how="left")
+    df["weekly_ot_threshold"] = np.where(
+        df["recv_thresh"].notna(),
+        np.minimum(df["weekly_ot_threshold"], df["recv_thresh"]),
+        df["weekly_ot_threshold"]
+    )
+    df.drop(columns=["recv_thresh", "week_start_str"], inplace=True)
+
     df["base_cost"] = df["duration_h"] * df["hourly_rate"] * df["mult"]
     
     df = df.sort_values(["employee_id", "week_start", "shift_start"])
@@ -163,7 +194,18 @@ def truth():
     budgets = pd.merge(budgets, actuals[["department_id", "week_start", "actual_cost"]], on=["department_id", "week_start"], how="left")
     budgets["actual_cost"] = budgets["actual_cost"].fillna(0.0)
     budgets["base_budgeted_cost"] = budgets["budgeted_hours"] * budgets["avg_hourly_rate"]
-    
+
+    # Budget amendments
+    amendments = pd.read_csv(DATA_DIR / "budget_amendments.csv")
+    AMEND_CUTOFF = "2024-04-05"
+    amendments = amendments[amendments["approved_date"] <= AMEND_CUTOFF].copy()
+    for _, a in amendments.iterrows():
+        mask = (budgets["department_id"] == a["department_id"]) & (budgets["week_start"] == a["week_start"])
+        budgets.loc[mask, "base_budgeted_cost"] += a["amount"]
+        if a["type"] == "reallocation":
+            src_mask = (budgets["department_id"] == a["from_dept_id"]) & (budgets["week_start"] == a["week_start"])
+            budgets.loc[src_mask, "base_budgeted_cost"] -= a["amount"]
+
     effective_budgets = []
     for dept, grp in budgets.groupby("department_id"):
         carryover = 0.0
@@ -239,6 +281,20 @@ def test_case_01_sentinels():
     c90 = emps[emps["employee_id"] == "C0090"]
     assert len(c90) == 1 and c90.iloc[0]["hourly_rate"] > 1000, \
         "employees.csv contractor rate data changed"
+
+    amends = pd.read_csv(DATA_DIR / "budget_amendments.csv")
+    assert len(amends) == 9, "budget_amendments.csv row count changed"
+    assert int((amends["type"] == "reallocation").sum()) == 1, \
+        "budget_amendments.csv reallocation record changed"
+    assert int((amends["approved_date"] > "2024-04-05").sum()) == 3, \
+        "budget_amendments.csv post-cutoff records changed"
+
+    ot_pol = pd.read_csv(DATA_DIR / "ot_policy.csv")
+    assert "applies_cross_dept" in ot_pol.columns, "ot_policy.csv missing applies_cross_dept column"
+    assert int(ot_pol["applies_cross_dept"].astype(str).str.lower().eq("true").sum()) == 1, \
+        "ot_policy.csv cross-dept flag count changed"
+    assert ot_pol.loc[ot_pol["department_id"] == "D05", "weekly_ot_threshold"].values[0] == 36.0, \
+        "ot_policy.csv D05 threshold changed"
 
 # --- Test 02: Output Shape ---
 def test_case_02_shape(agent_report):

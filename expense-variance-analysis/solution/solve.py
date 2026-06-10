@@ -1,3 +1,15 @@
+"""
+Q1 2024 payroll variance report for a warehouse operation.
+
+The data has several layers that naive implementations miss: contractor rates are
+stored in US cents (not dollars), premium types are mutually exclusive (max applies,
+not sum), overtime thresholds differ by department (D05=36h, D08=44h vs 40h default),
+corrections have a payroll cutoff date and can void a shift entirely if they push
+duration below 6h, shifts spanning the Sunday/Monday midnight boundary must be split
+proportionally, and budget amendments retroactively adjust base budgets — with a
+post-cutoff filter and a bidirectional reallocation type that most implementations
+apply only one-directionally.
+"""
 import pandas as pd
 import numpy as np
 import json
@@ -91,6 +103,23 @@ def main():
         df.loc[mask, "department_id"] = t["from_dept_id"]
 
     df = pd.merge(df, ot, on="department_id", how="left")
+
+    # applies_cross_dept: receiving dept threshold overrides when flagged (Trap IV)
+    cross_ot = ot[ot["applies_cross_dept"] == True][["department_id", "weekly_ot_threshold"]].copy()
+    cross_ot = cross_ot.rename(columns={"department_id": "to_dept_id", "weekly_ot_threshold": "recv_thresh"})
+    ot_recv = reassigns[["employee_id", "week_start", "to_dept_id"]].drop_duplicates().copy()
+    ot_recv = pd.merge(ot_recv, cross_ot, on="to_dept_id", how="inner")
+    ot_recv_min = ot_recv.groupby(["employee_id", "week_start"])["recv_thresh"].min().reset_index()
+    ot_recv_min.rename(columns={"week_start": "week_start_str"}, inplace=True)
+    df["week_start_str"] = df["week_start"].dt.strftime("%Y-%m-%d")
+    df = pd.merge(df, ot_recv_min, on=["employee_id", "week_start_str"], how="left")
+    df["weekly_ot_threshold"] = np.where(
+        df["recv_thresh"].notna(),
+        np.minimum(df["weekly_ot_threshold"], df["recv_thresh"]),
+        df["weekly_ot_threshold"]
+    )
+    df.drop(columns=["recv_thresh", "week_start_str"], inplace=True)
+
     df["base_cost"] = df["duration_h"] * df["hourly_rate"] * df["mult"]
     
     df = df.sort_values(["employee_id", "week_start", "shift_start"])
@@ -138,7 +167,18 @@ def main():
     budgets = pd.merge(budgets, actuals[["department_id", "week_start", "actual_cost"]], on=["department_id", "week_start"], how="left")
     budgets["actual_cost"] = budgets["actual_cost"].fillna(0.0)
     budgets["base_budgeted_cost"] = budgets["budgeted_hours"] * budgets["avg_hourly_rate"]
-    
+
+    # Budget amendments
+    amendments = pd.read_csv(DATA_DIR / "budget_amendments.csv")
+    AMEND_CUTOFF = "2024-04-05"
+    amendments = amendments[amendments["approved_date"] <= AMEND_CUTOFF].copy()
+    for _, a in amendments.iterrows():
+        mask = (budgets["department_id"] == a["department_id"]) & (budgets["week_start"] == a["week_start"])
+        budgets.loc[mask, "base_budgeted_cost"] += a["amount"]
+        if a["type"] == "reallocation":
+            src_mask = (budgets["department_id"] == a["from_dept_id"]) & (budgets["week_start"] == a["week_start"])
+            budgets.loc[src_mask, "base_budgeted_cost"] -= a["amount"]
+
     effective_budgets = []
     for dept, grp in budgets.groupby("department_id"):
         carryover = 0.0

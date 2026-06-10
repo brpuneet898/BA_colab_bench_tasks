@@ -1,0 +1,10 @@
+amendment_id,department_id,week_start,amount,type,from_dept_id,approved_date
+A001,D02,2024-01-15,800,addition,,2024-01-20
+A002,D04,2024-02-05,1200,addition,,2024-02-08
+A003,D06,2024-01-22,-600,addition,,2024-01-25
+A004,D03,2024-03-04,500,addition,,2024-03-06
+A005,D07,2024-02-12,400,addition,,2024-02-15
+A006,D05,2024-02-19,1800,reallocation,D02,2024-02-22
+A007,D04,2024-03-11,3500,addition,,2024-04-10
+A008,D01,2024-03-04,2200,addition,,2024-04-07
+A009,D06,2024-02-26,900,addition,,2024-04-15
