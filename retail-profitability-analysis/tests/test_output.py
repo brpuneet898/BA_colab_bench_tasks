@@ -101,7 +101,7 @@ def test_case_03_channel_report_schema():
 
 def test_case_04_category_report_schema():
     df = pd.read_csv(CAT_PATH)
-    required = {"category_id", "net_profit"}
+    required = {"category_id", "contribution_margin"}
     missing  = required - set(df.columns)
     assert not missing, f"category_profitability.csv missing columns: {missing}"
     assert len(df) == 5, f"Expected 5 rows (one per category), got {len(df)}."
@@ -332,8 +332,8 @@ def test_case_10_margin_months(ground_truth):
 
 # ── Hard test 6: category net profit values (Trap 2 support) ─────────────────
 
-def test_case_11_category_net_profit_values(ground_truth):
-    """All five category net_profit values must be within ±10% of ground truth.
+def test_case_11_category_contribution_margin_values(ground_truth):
+    """All five category contribution_margin values must be within ±10% of ground truth.
     Revenue-based allocation over-charges high-revenue/low-order categories
     (Electronics) and under-charges high-order/low-revenue ones (Apparel)."""
     if not CAT_PATH.exists():
@@ -345,11 +345,11 @@ def test_case_11_category_net_profit_values(ground_truth):
         if cat_id not in df.index:
             errors.append(f"  {cat_id}: missing from report")
             continue
-        got = float(df.loc[cat_id, "net_profit"])
+        got = float(df.loc[cat_id, "contribution_margin"])
         tol = max(abs(exp) * 0.10, 2_000.0)
         if abs(got - exp) > tol:
             errors.append(f"  {cat_id}: got ${got:,.0f}, expected ${exp:,.0f} (±10%)")
-    assert not errors, "Category net profit values outside ±10% tolerance:\n" + "\n".join(errors)
+    assert not errors, "Category contribution_margin values outside ±10% tolerance:\n" + "\n".join(errors)
 
 
 # ── Hard test 7: monthly net profit values (Trap 3 support) ──────────────────

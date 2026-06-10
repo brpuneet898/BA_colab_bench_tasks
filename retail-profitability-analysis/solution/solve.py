@@ -97,10 +97,10 @@ cat_net = cat_gp - cat_alloc
 
 cat_report = (
     pd.DataFrame({
-        "category_id": cat_net.index,
-        "net_profit":  cat_net.round(2).values,
+        "category_id":        cat_net.index,
+        "contribution_margin": cat_net.round(2).values,
     })
-    .sort_values("net_profit", ascending=False)
+    .sort_values("contribution_margin", ascending=False)
     .reset_index(drop=True)
 )
 cat_report.to_csv(WORKSPACE_DIR / "category_profitability.csv", index=False)

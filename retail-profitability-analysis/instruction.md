@@ -1,8 +1,8 @@
-Build a 2024 annual profitability report for a multi-channel retailer that sells across five sales channels and five product categories. Compute net profit by channel, by product category, and by calendar month, then identify the top and bottom performer in each dimension.
+Build a 2024 annual profitability report for a multi-channel retailer that sells across five sales channels and five product categories. Compute net profit by channel, contribution margin by product category, and net profit by calendar month, then identify the top and bottom performer in each dimension.
 
-Sales returns are processed through the originating sales channel; channel profitability must reflect the net profit earned after accounting for customer refunds and return-handling costs. Shared operational overhead must be allocated to product categories according to the rules defined in `cost_allocation_rules.csv`; category profitability must reflect each category's assigned share of these costs. Promotional cashback obligations apply to revenue earned during a campaign's active dates; monthly profitability must reflect all obligations recorded in `promotions.csv`.
+Each report covers only the costs directly attributable to its dimension. Channel net profit deducts return losses only — sales returns are processed through the originating sales channel, so channel profitability reflects the net retained after customer refunds and return-handling costs. Category contribution margin deducts allocated shared overhead only — shared operational costs must be allocated to product categories according to the rules defined in `cost_allocation_rules.csv`. Monthly net profit deducts promotional cashback only — cashback obligations apply to revenue earned during a campaign's active dates and are recorded in `promotions.csv`. These three reports are independent analytical views and are not intended to sum to `total_net_profit`.
 
-The company's total net profit is total gross profit minus all return losses, minus all allocated shared overhead, minus all promotional cashback obligations.
+The company's total net profit, reported in `summary.json`, is total gross profit minus all return losses, minus all allocated shared overhead, minus all promotional cashback obligations.
 
 **Input data**
 
@@ -25,8 +25,8 @@ Save `/workspace/channel_profitability.csv` with columns:
 One row per channel, sorted by `net_profit` descending.
 
 Save `/workspace/category_profitability.csv` with columns:
-`category_id`, `net_profit` (float, 2 decimal places).
-One row per category, sorted by `net_profit` descending.
+`category_id`, `contribution_margin` (float, 2 decimal places).
+One row per category, sorted by `contribution_margin` descending.
 
 Save `/workspace/monthly_profitability.csv` with columns:
 `month` (YYYY-MM), `net_profit` (float, 2 decimal places).
@@ -35,8 +35,8 @@ One row per calendar month (January–December 2024), sorted by `month` ascendin
 Save `/workspace/summary.json` with the following keys:
 - `most_profitable_channel` (str) — channel_id with the highest net profit
 - `least_profitable_channel` (str) — channel_id with the lowest net profit
-- `most_profitable_category` (str) — category_id with the highest net profit
-- `least_profitable_category` (str) — category_id with the lowest net profit
+- `most_profitable_category` (str) — category_id with the highest contribution margin
+- `least_profitable_category` (str) — category_id with the lowest contribution margin
 - `best_margin_month` (str, YYYY-MM) — month with the highest net profit
 - `worst_margin_month` (str, YYYY-MM) — month with the lowest net profit
 - `total_net_profit` (float, rounded to 2 decimal places) — total gross profit minus all return losses, all allocated shared overhead, and all promotional cashback obligations
