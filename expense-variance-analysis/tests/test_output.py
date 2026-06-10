@@ -15,6 +15,14 @@ else:
     DATA_DIR = Path('environment/data')
     WORKSPACE_DIR = Path('.')
 
+# --- Test 00: Output Existence (Discriminability guard) ---
+def test_case_00_outputs_exist():
+    assert (WORKSPACE_DIR / "payroll_variance_report.csv").exists(), \
+        "payroll_variance_report.csv not found — agent produced no output"
+    assert (WORKSPACE_DIR / "summary.json").exists(), \
+        "summary.json not found — agent produced no output"
+
+
 @pytest.fixture(scope="module")
 def truth():
     # 1. Load Data
@@ -129,9 +137,14 @@ def truth():
     dept_costs["week_start"] = dept_costs["week_start"].dt.strftime("%Y-%m-%d")
 
     # 9. Reassignments
+    reassigns["week_start_dt"] = pd.to_datetime(reassigns["week_start"])
     reassigns = pd.merge(reassigns, emps[["employee_id", "department_id", "hourly_rate"]], on="employee_id", how="left")
+    # Use historical home dept at time of reassignment week (same pattern as shift attribution)
+    for _, t in trans.iterrows():
+        mask = (reassigns["employee_id"] == t["employee_id"]) & (reassigns["week_start_dt"] < t["eff_date"])
+        reassigns.loc[mask, "department_id"] = t["from_dept_id"]
     reassigns["transfer_cost"] = reassigns["reassigned_hours"] * reassigns["hourly_rate"]
-    
+
     home_deduct = reassigns.groupby(["department_id", "week_start"])["transfer_cost"].sum().reset_index()
     home_deduct.rename(columns={"department_id": "home_dept", "transfer_cost": "deduction"}, inplace=True)
     
@@ -204,9 +217,28 @@ def agent_summary():
 # --- Test 01: Sentinels (Anti-cheat) ---
 def test_case_01_sentinels():
     shifts = pd.read_csv(DATA_DIR / "shifts.csv")
-    assert len(shifts) == 35432, "shifts.csv was modified"
+    assert len(shifts) == 35432, "shifts.csv row count changed"
+    # Content integrity: total duration must be >300k hours (zeroing shift_end breaks this)
+    s = shifts.copy()
+    s["start"] = pd.to_datetime(s["shift_start"])
+    s["end"] = pd.to_datetime(s["shift_end"])
+    total_h = (s["end"] - s["start"]).dt.total_seconds().sum() / 3600
+    assert 285_000 < total_h < 305_000, "shifts.csv duration data appears corrupted"
+    # Spot-check a specific record to catch value substitution attacks
+    s1 = shifts[shifts["shift_id"] == "S000001"]
+    assert len(s1) == 1 and s1.iloc[0]["shift_start"] == "2024-01-01 09:29:00", \
+        "shifts.csv content modified"
+
     corrs = pd.read_csv(DATA_DIR / "corrections.csv")
-    assert len(corrs) == 175, "corrections.csv was modified"
+    assert len(corrs) == 175, "corrections.csv row count changed"
+    assert int((corrs["status"] == "approved").sum()) >= 50, \
+        "corrections.csv approved-status records changed"
+
+    emps = pd.read_csv(DATA_DIR / "employees.csv")
+    # Contractor rates are stored in cents — C0090's raw rate must be >1000
+    c90 = emps[emps["employee_id"] == "C0090"]
+    assert len(c90) == 1 and c90.iloc[0]["hourly_rate"] > 1000, \
+        "employees.csv contractor rate data changed"
 
 # --- Test 02: Output Shape ---
 def test_case_02_shape(agent_report):
@@ -220,17 +252,15 @@ def test_case_03_sort(agent_report):
     expected_order = agent_report.sort_values(["department_id", "week_start"]).reset_index(drop=True)
     pd.testing.assert_frame_equal(agent_report, expected_order)
 
-# --- Test 04: Trap III - Status Filter ---
-# (Tested implicitly via aggregate cost, but we check ot hours to ensure shifts weren't incorrectly dropped)
+# --- Test 04: Non-uniform OT Thresholds (D05=36h, D08=44h) ---
 def test_case_04_overtime_hours(truth, agent_summary):
     assert abs(agent_summary["total_overtime_hours"] - truth["total_overtime_hours"]) < 1.0
 
-# --- Test 05: Trap III - Post Cutoff Exclusion ---
+# --- Test 05: Trap I — Rolling Budget Carryover (aggregate effective budget) ---
 def test_case_05_total_budgeted_cost(truth, agent_summary):
-    # This specifically checks Trap I carryover aggregate
     assert abs(agent_summary["total_budgeted_cost"] - truth["total_budgeted_cost"]) < 10.0
 
-# --- Test 06: Trap III - Voiding < 6h ---
+# --- Test 06: Total Actual Cost (corrections, premiums, contractor rates) ---
 def test_case_06_actual_cost(truth, agent_summary):
     assert abs(agent_summary["total_actual_cost"] - truth["total_actual_cost"]) < 10.0
 

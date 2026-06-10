@@ -114,7 +114,11 @@ def main():
     dept_costs.rename(columns={"total_cost": "actual_cost"}, inplace=True)
     dept_costs["week_start"] = dept_costs["week_start"].dt.strftime("%Y-%m-%d")
 
+    reassigns["week_start_dt"] = pd.to_datetime(reassigns["week_start"])
     reassigns = pd.merge(reassigns, emps[["employee_id", "department_id", "hourly_rate"]], on="employee_id", how="left")
+    for _, t in trans.iterrows():
+        mask = (reassigns["employee_id"] == t["employee_id"]) & (reassigns["week_start_dt"] < t["eff_date"])
+        reassigns.loc[mask, "department_id"] = t["from_dept_id"]
     reassigns["transfer_cost"] = reassigns["reassigned_hours"] * reassigns["hourly_rate"]
     
     home_deduct = reassigns.groupby(["department_id", "week_start"])["transfer_cost"].sum().reset_index()

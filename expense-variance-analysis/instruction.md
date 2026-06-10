@@ -5,7 +5,7 @@ Shifts starting on a Saturday or Sunday earn a 1.15× weekend premium.
 Shifts starting at or after 21:00 are classified as night shifts and earn a 1.3× night premium.
 IMPORTANT: Premiums are mutually exclusive. Only the highest applicable premium applies to a shift (they are never stacked or added). The highest premium applies to all hours of the qualifying shift.
 
-Overtime is assessed on total weekly hours. The overtime premium is 0.5× the shift's applicable rate. The weekly overtime threshold resets each Monday. Weeks run Monday through Sunday. Shifts spanning the Sunday/Monday midnight boundary contribute hours to each respective week.
+Overtime is assessed on total weekly hours. The overtime premium is 0.5× the shift's applicable rate. The weekly overtime threshold resets each Monday. Weeks run Monday through Sunday. Shifts spanning the Sunday/Monday midnight boundary contribute hours to each respective week. When a corrected shift spans this boundary, distribute the corrected hours across the two weeks proportionally to the original (pre-correction) pre-midnight and post-midnight hour split.
 
 Shifts are attributed to the department the employee was assigned to at the time of the shift. When an employee is temporarily reassigned to another department, the receiving department is charged for those hours at the employee's base hourly rate. Overtime is calculated on the employee's total weekly hours and the overtime premium stays with the home department.
 
