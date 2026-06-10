@@ -1,309 +1,349 @@
 import os
 import json
-import numpy as np
 import pandas as pd
 from pathlib import Path
-import networkx as nx
+from collections import defaultdict, deque
 
 DATA_DIR      = Path(os.environ.get("DATA_DIR",      "/workspace/data"))
 WORKSPACE_DIR = Path(os.environ.get("WORKSPACE_DIR", "/workspace"))
 
-REPORT_PERIOD_START = pd.Timestamp("2024-02-01")
-REPORT_PERIOD_END   = pd.Timestamp("2024-04-30")
+Q1_MONTHS   = [2, 3, 4]
+CUTOFF_DATE = pd.Timestamp("2024-04-05")
+GLOBAL_VP   = "R999"
+
 
 def load_data():
-    deals         = pd.read_csv(DATA_DIR / "deals.csv", parse_dates=["close_date"])
-    reps          = pd.read_csv(DATA_DIR / "reps.csv", parse_dates=["hire_date"])
+    deals         = pd.read_csv(DATA_DIR / "deals.csv",         parse_dates=["close_date"])
+    reps          = pd.read_csv(DATA_DIR / "reps.csv",          parse_dates=["hire_date"])
     account_teams = pd.read_csv(DATA_DIR / "account_teams.csv")
-    quotas        = pd.read_csv(DATA_DIR / "quotas.csv", parse_dates=["period_start"])
+    quotas        = pd.read_csv(DATA_DIR / "quotas.csv",        parse_dates=["period_start", "period_end"])
     cancellations = pd.read_csv(DATA_DIR / "cancellations.csv", parse_dates=["filed_date", "cancelled_date"])
-    fx_rates      = pd.read_csv(DATA_DIR / "fx_rates.csv", parse_dates=["date"])
+    fx_rates      = pd.read_csv(DATA_DIR / "fx_rates.csv",      parse_dates=["date"])
     return deals, reps, account_teams, quotas, cancellations, fx_rates
 
-def compute_fx_rates_graph(fx_rates, dates, currencies):
-    # Trap 1: FX Triangulation
-    # Build graph per day to find rate to USD
-    # fx_rates has: date, base_currency, quote_currency, rate (quote/base)
-    # We want: USD value of 1 unit of foreign currency. So USD/Foreign.
-    
-    fx_dict = {}
-    for d in dates:
-        day_rates = fx_rates[fx_rates["date"] == d]
-        G = nx.DiGraph()
-        for _, row in day_rates.iterrows():
-            G.add_edge(row["base_currency"], row["quote_currency"], weight=row["rate"])
-            G.add_edge(row["quote_currency"], row["base_currency"], weight=1.0 / row["rate"])
-            
-        for c in set(currencies) - {"USD"}:
-            if c not in G or "USD" not in G:
-                fx_dict[(d, c)] = 1.0
-                continue
-                
-            try:
-                # Find path from the foreign currency to USD
-                path = nx.shortest_path(G, source=c, target="USD")
-                multiplier = 1.0
-                for i in range(len(path) - 1):
-                    multiplier *= G[path[i]][path[i+1]]["weight"]
-                fx_dict[(d, c)] = multiplier
-            except nx.NetworkXNoPath:
-                fx_dict[(d, c)] = 1.0 # Fallback
-                
-    return fx_dict
+
+# ─── FX ───────────────────────────────────────────────────────────────────────
+
+def _build_graph(fx_rows):
+    g = defaultdict(dict)
+    for _, row in fx_rows.iterrows():
+        g[row["base_currency"]][row["quote_currency"]] = float(row["rate"])
+        g[row["quote_currency"]][row["base_currency"]] = 1.0 / float(row["rate"])
+    return g
+
+
+def _bfs_to_usd(graph, currency):
+    if currency == "USD":
+        return 1.0
+    visited = {currency}
+    q = deque([(currency, 1.0)])
+    while q:
+        curr, rate = q.popleft()
+        for nxt, edge in graph.get(curr, {}).items():
+            new_rate = rate * edge
+            if nxt == "USD":
+                return new_rate
+            if nxt not in visited:
+                visited.add(nxt)
+                q.append((nxt, new_rate))
+    return None
+
+
+def build_fx_lookup(fx_rates, close_dates, currencies):
+    """Return {(close_date, currency): usd_rate} using as-of-date lookup.
+
+    FX rates are published on the 1st of each month.  For a deal closing on
+    any other day, use the most recent published rate on or before close_date.
+    """
+    # All available rate dates, sorted ascending
+    available_dates = sorted(fx_rates["date"].unique())
+
+    def as_of(close_date):
+        """Return the latest available rate date that is <= close_date."""
+        result = None
+        for d in available_dates:
+            if d <= close_date:
+                result = d
+            else:
+                break
+        return result
+
+    # Cache graphs per rate date (not per close date)
+    graph_cache = {}
+
+    lookup = {}
+    for cd in close_dates:
+        rate_date = as_of(cd)
+        if rate_date is None:
+            for c in currencies:
+                lookup[(cd, c)] = 1.0
+            continue
+        if rate_date not in graph_cache:
+            graph_cache[rate_date] = _build_graph(fx_rates[fx_rates["date"] == rate_date])
+        g = graph_cache[rate_date]
+        for c in currencies:
+            if c == "USD":
+                lookup[(cd, c)] = 1.0
+            else:
+                val = _bfs_to_usd(g, c)
+                lookup[(cd, c)] = val if val is not None else 1.0
+    return lookup
+
+
+# ─── Deals ────────────────────────────────────────────────────────────────────
 
 def process_deals(deals, fx_rates):
-    # Trap 5: Filter closed_won
     deals = deals[deals["stage"] == "closed_won"].copy()
-    
-    dates = deals["close_date"].unique()
-    currencies = deals["currency"].unique()
-    fx_dict = compute_fx_rates_graph(fx_rates, dates, currencies)
-    
-    def get_usd_rate(row):
-        if row["currency"] == "USD": return 1.0
-        return fx_dict.get((row["close_date"], row["currency"]), 1.0)
-        
-    deals["fx_to_usd"] = deals.apply(get_usd_rate, axis=1)
-    
-    # Base ARR USD
+
+    fx_lookup = build_fx_lookup(fx_rates, deals["close_date"].unique(), deals["currency"].unique())
+
+    deals["fx_to_usd"]    = deals.apply(lambda r: fx_lookup[(r["close_date"], r["currency"])], axis=1)
     deals["base_arr_usd"] = (deals["total_contract_value"] / deals["contract_months"] * 12.0) * deals["fx_to_usd"]
-    
-    # Trap 2: Mutually Exclusive Accelerators
-    def get_multiplier(row):
+
+    def best_multiplier(row):
         m = 1.0
-        if row["product_line"] == "Enterprise Suite": m = max(m, 1.5)
-        if row["contract_months"] >= 24: m = max(m, 1.3)
-        if row["deal_source"] == "Outbound": m = max(m, 1.2)
+        if row["product_line"] == "Enterprise Suite":
+            m = max(m, 1.5)
+        if row["contract_months"] >= 24:
+            m = max(m, 1.3)
+        if row["deal_source"] == "Outbound":
+            m = max(m, 1.2)
         return m
-        
-    deals["multiplier"] = deals.apply(get_multiplier, axis=1)
-    deals["arr_usd"] = deals["base_arr_usd"] * deals["multiplier"]
-    
+
+    deals["multiplier"] = deals.apply(best_multiplier, axis=1)
+    deals["arr_usd"]    = deals["base_arr_usd"] * deals["multiplier"]
     return deals
 
-def resolve_attribution(deals, account_teams):
-    # Trap 2: Hierarchical Rules Engine
-    credited_records = []
-    
-    # Map Primary_AE regions
-    primary_reps = account_teams[account_teams["role"] == "Primary_AE"][["account_id", "rep_id"]]
-    
-    # Pre-index teams by account_id
-    teams_dict = {}
-    for _, row in account_teams.iterrows():
-        teams_dict.setdefault(row["account_id"], []).append(row)
-        
-    for _, deal in deals.iterrows():
-        acc_id = deal["account_id"]
-        team_rows = teams_dict.get(acc_id, [])
-        
-        primary_ae = None
-        sdr = None
-        overlay = None
-        
-        for r in team_rows:
-            if r["role"] == "Primary_AE": primary_ae = r["rep_id"]
-            elif r["role"] == "SDR": sdr = r["rep_id"]
-            elif r["role"] == "Overlay_Specialist": overlay = r["rep_id"]
-        
-        if not primary_ae: continue
 
-        
-        shares = {primary_ae: 1.0}
-        
+# ─── Attribution ──────────────────────────────────────────────────────────────
+
+def resolve_attribution(deals, account_teams, reps):
+    # Build rep-region lookup to decide EMEA Global_VP cut.
+    # The cut applies when the *Primary_AE's home region* (from reps.csv) is EMEA,
+    # regardless of which region's CRM recorded the deal.
+    rep_region = reps.set_index("rep_id")["region"].to_dict()
+
+    teams = defaultdict(lambda: {"Primary_AE": None, "SDR": None, "Overlay_Specialist": None})
+    for _, row in account_teams.iterrows():
+        role = row["role"]
+        if role in ("Primary_AE", "SDR", "Overlay_Specialist"):
+            teams[row["account_id"]][role] = row["rep_id"]
+
+    records = []
+    for _, deal in deals.iterrows():
+        team = teams[deal["account_id"]]
+        ae  = team["Primary_AE"]
+        sdr = team["SDR"]
+        ov  = team["Overlay_Specialist"]
+        if not ae:
+            continue
+
+        # Compute base shares
+        shares = {ae: 1.0}
         if sdr:
-            shares[sdr] = 0.20
-            shares[primary_ae] = 0.80
-            
-        if deal["product_line"] == "Enterprise Suite" and overlay:
-            shares[overlay] = 0.15
-            if sdr:
-                shares[sdr] = 0.15
-                shares[primary_ae] = 0.70
-            else:
-                shares[primary_ae] = 0.85
-                
-        # Global VP cut if Primary_AE is EMEA. Wait, the deal region is the Primary_AE region.
-        if deal["region"] == "EMEA":
-            new_shares = {"R999": 0.05}
+            shares[sdr]  = 0.20
+            shares[ae]   = 0.80
+        if deal["product_line"] == "Enterprise Suite" and ov:
+            shares[ov]  = 0.15
+            shares[sdr] = 0.15 if sdr else 0.0
+            shares[ae]  = 0.70 if sdr else 0.85
+
+        # Global_VP cut: triggered by Primary_AE's home region, not deal region
+        if rep_region.get(ae) == "EMEA":
+            new_shares = {GLOBAL_VP: 0.05}
             for rep, share in shares.items():
                 new_shares[rep] = share * 0.95
             shares = new_shares
-            
+
         for rep, share in shares.items():
             if share > 0:
-                credited_records.append({
-                    "deal_id": deal["deal_id"],
-                    "region": deal["region"],
-                    "close_date": deal["close_date"],
-                    "rep_id": rep,
-                    "credited_arr": deal["arr_usd"] * share
+                records.append({
+                    "deal_id":      deal["deal_id"],
+                    "region":       deal["region"],
+                    "close_date":   deal["close_date"],
+                    "rep_id":       rep,
+                    "credited_arr": deal["arr_usd"] * share,
                 })
-                
-    return pd.DataFrame(credited_records)
 
-def process_cancellations(cancellations):
-    # Trap 3: Deduplication and Cutoffs
-    # Only approved, filed <= 2024-04-05
-    cancellations = cancellations[cancellations["status"] == "approved"].copy()
-    
-    # Find latest approved pre-cutoff
-    cutoff = pd.Timestamp("2024-04-05")
-    pre_cutoff = cancellations[cancellations["filed_date"] <= cutoff]
-    
-    # Sort by filed_date to get the latest
-    pre_cutoff = pre_cutoff.sort_values("filed_date", ascending=True)
-    valid_cancels = pre_cutoff.drop_duplicates(["region", "deal_id"], keep="last")
-    return valid_cancels
+    return pd.DataFrame(records)
 
-def build_monthly_ledger(credited, valid_cancels):
-    # Recognition: 1/3 per month for 3 months
+
+# ─── Cancellations ────────────────────────────────────────────────────────────
+
+def resolve_cancellations(cancellations):
+    """Return valid cancellation dict: {(region, deal_id): cancelled_date}.
+
+    Rules:
+    - Only approved cancellations.
+    - Pre-cutoff: filed_date <= 2024-04-05.
+    - Per (region, deal_id), the record with the latest filed_date wins.
+    - Post-cutoff: if no pre-cutoff approved record exists, the deal is not cancelled.
+    """
+    approved = cancellations[cancellations["status"] == "approved"].copy()
+    pre      = approved[approved["filed_date"] <= CUTOFF_DATE]
+    pre      = pre.sort_values("filed_date", ascending=True)
+    valid    = pre.drop_duplicates(["region", "deal_id"], keep="last")
+    return valid.set_index(["region", "deal_id"])["cancelled_date"].to_dict()
+
+
+# ─── Monthly ledger ───────────────────────────────────────────────────────────
+
+def build_monthly_ledger(credited, cancel_map):
+    """Spread credited ARR over the 3-month recognition window.
+
+    Month 1: exactly 1/3 of credited_arr.
+    Month 2: exactly 1/3.
+    Month 3: remainder (credited_arr - 2 * first_third), avoiding float drift.
+
+    Cancellation clawback is recorded in the *cancelled_date* month.
+    All previously recognised tranches are clawed back in that month.
+    """
     ledger = []
-    
-    # Make lookup for cancellations
-    cancels_dict = valid_cancels.set_index(["region", "deal_id"])["cancelled_date"].to_dict()
-    
+
     for _, row in credited.iterrows():
-        close_month = row["close_date"].month
-        arr = row["credited_arr"]
-        
-        cancel_date = cancels_dict.get((row["region"], row["deal_id"]))
-        cancel_month = cancel_date.month if cancel_date else 99
-        
-        # Month 1
-        m1 = close_month
-        if m1 >= 2 and m1 <= 4:
-            if cancel_month <= m1:
-                # Cancelled before or during month 1
-                pass
+        close_m = row["close_date"].month
+        arr     = row["credited_arr"]
+        third   = arr / 3.0
+        key     = (row["region"], row["deal_id"])
+
+        cancel_date = cancel_map.get(key)
+        cancel_m    = cancel_date.month if cancel_date else 99
+
+        tranche_months = [close_m, close_m + 1, close_m + 2]
+
+        for i, m in enumerate(tranche_months):
+            if m < 2 or m > 4:
+                continue
+
+            tranche_val = third if i < 2 else (arr - 2 * third)
+            months_recognised_before = sum(1 for j in range(i) if 2 <= tranche_months[j] <= 4)
+
+            if cancel_m < m:
+                # Cancelled before this month — nothing earned, nothing to clawback here
+                continue
+            elif cancel_m == m:
+                # Cancelled this month: void this tranche; clawback all previously
+                # recognised Q1 tranches (those that landed in months 2–4 before this one)
+                clawback = 0.0
+                for j in range(i):
+                    if 2 <= tranche_months[j] <= 4:
+                        clawback += third if j < 2 else (arr - 2 * third)
+                if clawback > 0:
+                    ledger.append({"rep_id": row["rep_id"], "month": m,
+                                   "net_arr_usd": -clawback})
             else:
-                ledger.append({"rep_id": row["rep_id"], "month": m1, "recognized_arr": arr / 3.0, "clawback_arr": 0.0})
-                
-        # Month 2
-        m2 = close_month + 1
-        if m2 >= 2 and m2 <= 4:
-            if cancel_month <= m1:
-                pass # Already dead
-            elif cancel_month == m2:
-                # Cancelled in m2. Clawback m1.
-                ledger.append({"rep_id": row["rep_id"], "month": m2, "recognized_arr": 0.0, "clawback_arr": arr / 3.0})
-            else:
-                # Still alive
-                ledger.append({"rep_id": row["rep_id"], "month": m2, "recognized_arr": arr / 3.0, "clawback_arr": 0.0})
-                
-        # Month 3
-        m3 = close_month + 2
-        if m3 >= 2 and m3 <= 4:
-            if cancel_month <= m2:
-                pass # Dead
-            elif cancel_month == m3:
-                # Cancelled in m3. Clawback m1 and m2.
-                ledger.append({"rep_id": row["rep_id"], "month": m3, "recognized_arr": 0.0, "clawback_arr": (arr / 3.0) * 2.0})
-            else:
-                # Alive
-                ledger.append({"rep_id": row["rep_id"], "month": m3, "recognized_arr": arr - (arr / 3.0) * 2.0, "clawback_arr": 0.0})
-                
+                # Deal alive in this month
+                ledger.append({"rep_id": row["rep_id"], "month": m,
+                               "net_arr_usd": tranche_val})
+
     if not ledger:
         return pd.DataFrame(columns=["rep_id", "month", "net_arr_usd"])
-        
-    ledger_df = pd.DataFrame(ledger)
-    grouped = ledger_df.groupby(["rep_id", "month"])[["recognized_arr", "clawback_arr"]].sum().reset_index()
-    grouped["net_arr_usd"] = grouped["recognized_arr"] - grouped["clawback_arr"]
-    return grouped
+
+    df = pd.DataFrame(ledger)
+    return df.groupby(["rep_id", "month"])["net_arr_usd"].sum().reset_index()
+
+
+# ─── Quota proration ─────────────────────────────────────────────────────────
+
+MONTH_BOUNDS = {
+    2: (pd.Timestamp("2024-02-01"), pd.Timestamp("2024-02-29")),
+    3: (pd.Timestamp("2024-03-01"), pd.Timestamp("2024-03-31")),
+    4: (pd.Timestamp("2024-04-01"), pd.Timestamp("2024-04-30")),
+}
+
 
 def prorate_quotas(reps, quotas):
-    # Q1 target is 2024-02-01
-    q1_quotas = quotas[quotas["period_start"] == "2024-02-01"]
-    df = reps.merge(q1_quotas, on="rep_id", how="left")
-    
-    # Base monthly is quota / 3
-    df["base_monthly_quota"] = df["quota_usd"] / 3.0
-    
+    """Return one row per (rep, month) with base_quota.
+
+    Base = quota_usd / 3, prorated by active days for reps hired during Q1.
+    Active days = inclusive count from max(hire_date, month_start) to month_end.
+    """
+    q1 = quotas[quotas["period_start"] == pd.Timestamp("2024-02-01")].copy()
+    df = reps.merge(q1[["rep_id", "quota_usd"]], on="rep_id", how="left")
+    df["quota_usd"] = df["quota_usd"].fillna(0.0)
+
     records = []
     for _, row in df.iterrows():
-        hire = row["hire_date"]
-        
-        for m, start, end in [(2, pd.Timestamp("2024-02-01"), pd.Timestamp("2024-02-29")),
-                              (3, pd.Timestamp("2024-03-01"), pd.Timestamp("2024-03-31")),
-                              (4, pd.Timestamp("2024-04-01"), pd.Timestamp("2024-04-30"))]:
+        hire   = row["hire_date"]
+        base_m = row["quota_usd"] / 3.0
+        for m, (start, end) in MONTH_BOUNDS.items():
             days_in_month = (end - start).days + 1
             if hire > end:
                 active = 0
-            elif hire > start:
-                active = (end - hire).days + 1
-            else:
+            elif hire <= start:
                 active = days_in_month
-                
-            q = row["base_monthly_quota"] * (active / days_in_month)
+            else:
+                active = (end - hire).days + 1
+            quota = base_m * (active / days_in_month)
             records.append({
-                "rep_id": row["rep_id"],
-                "rep_name": row["rep_name"],
-                "region": row["region"],
-                "month": m,
-                "base_quota": q
+                "rep_id":    row["rep_id"],
+                "rep_name":  row["rep_name"],
+                "region":    row["region"],
+                "month":     m,
+                "base_quota": quota,
             })
-            
+
     return pd.DataFrame(records)
 
-def build_report(ledger, monthly_quotas):
-    # Merge and calculate effective quota with rollover
-    df = monthly_quotas.merge(ledger[["rep_id", "month", "net_arr_usd"]], on=["rep_id", "month"], how="left")
+
+# ─── Report assembly ─────────────────────────────────────────────────────────
+
+def build_report(ledger, monthly_quotas, rep_ids_in_scope):
+    df = monthly_quotas.merge(
+        ledger[["rep_id", "month", "net_arr_usd"]], on=["rep_id", "month"], how="left"
+    )
     df["net_arr_usd"] = df["net_arr_usd"].fillna(0.0)
-    
-    # Sort carefully for rollover
     df = df.sort_values(["rep_id", "month"])
-    
+
     results = []
     for rep_id, group in df.groupby("rep_id"):
         shortfall = 0.0
         for _, row in group.iterrows():
-            eff_q = row["base_quota"] + shortfall
-            net = row["net_arr_usd"]
+            eff_q     = row["base_quota"] + shortfall
+            net       = row["net_arr_usd"]
             shortfall = max(0.0, eff_q - net)
-            
-            att_pct = (net / eff_q * 100) if eff_q > 0 else 0.0
-            
+            att_pct   = round(net / eff_q * 100, 2) if eff_q > 0 else 0.0
             results.append({
-                "rep_id": row["rep_id"],
-                "rep_name": row["rep_name"],
-                "region": row["region"],
-                "month": row["month"],
-                "base_quota": round(row["base_quota"], 2),
+                "rep_id":          row["rep_id"],
+                "rep_name":        row["rep_name"],
+                "region":          row["region"],
+                "month":           row["month"],
+                "base_quota":      round(row["base_quota"], 2),
                 "effective_quota": round(eff_q, 2),
-                "net_arr_usd": round(net, 2),
-                "attainment_pct": round(att_pct, 2)
+                "net_arr_usd":     round(net, 2),
+                "attainment_pct":  att_pct,
             })
-            
-    return pd.DataFrame(results)
+
+    report = pd.DataFrame(results)
+    # Only report on reps in reps.csv scope (Global_VP R999 is excluded)
+    report = report[report["rep_id"].isin(rep_ids_in_scope)]
+    return report.sort_values(["rep_id", "month"]).reset_index(drop=True)
+
+
+# ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
     deals, reps, account_teams, quotas, cancellations, fx_rates = load_data()
 
-    deals = process_deals(deals, fx_rates)
-    credited = resolve_attribution(deals, account_teams)
-    
-    valid_cancels = process_cancellations(cancellations)
-    ledger = build_monthly_ledger(credited, valid_cancels)
-    
-    monthly_quotas = prorate_quotas(reps, quotas)
+    deals      = process_deals(deals, fx_rates)
+    credited   = resolve_attribution(deals, account_teams, reps)
+    cancel_map = resolve_cancellations(cancellations)
+    ledger     = build_monthly_ledger(credited, cancel_map)
 
-    report = build_report(ledger, monthly_quotas)
-    # Ensure R999 is in the report if they got revenue, but they don't have a quota.
-    # Instruction says: Include one row per rep per month. R999 isn't in reps.csv, so they won't be here.
-    # Actually, the Global_VP is not in reps.csv. We only report on reps in reps.csv.
-    
-    # Only keep reps that are in reps.csv
-    rep_ids = set(reps["rep_id"])
-    report = report[report["rep_id"].isin(rep_ids)]
-    
+    monthly_quotas = prorate_quotas(reps, quotas)
+    rep_ids        = set(reps["rep_id"])
+
+    report = build_report(ledger, monthly_quotas, rep_ids)
+
     report.to_csv(WORKSPACE_DIR / "monthly_rep_performance.csv", index=False)
 
     summary = {
-        "total_net_arr_usd":   float(round(report["net_arr_usd"].sum(),   2)),
-        "total_base_quota_usd":     float(round(report["base_quota"].sum(),      2)),
+        "total_net_arr_usd":    float(round(report["net_arr_usd"].sum(),    2)),
+        "total_base_quota_usd": float(round(report["base_quota"].sum(),     2)),
     }
     with open(WORKSPACE_DIR / "summary.json", "w") as f:
         json.dump(summary, f, indent=2)
+
 
 if __name__ == "__main__":
     main()
