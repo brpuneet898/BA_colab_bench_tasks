@@ -188,6 +188,15 @@ def resolve_cancellations(cancellations):
 
 # ─── Monthly ledger ───────────────────────────────────────────────────────────
 
+_Q1_YMS = {(2024, 2), (2024, 3), (2024, 4)}
+
+
+def _ym_add(d, n):
+    """Return (year, month) of date d + n calendar months."""
+    m0 = d.month - 1 + n
+    return (d.year + m0 // 12, m0 % 12 + 1)
+
+
 def build_monthly_ledger(credited, cancel_map):
     """Spread credited ARR over the 3-month recognition window.
 
@@ -195,46 +204,58 @@ def build_monthly_ledger(credited, cancel_map):
     Month 2: exactly 1/3.
     Month 3: remainder (credited_arr - 2 * first_third), avoiding float drift.
 
+    Uses year-month arithmetic so deals closing in December of the prior year
+    correctly contribute their February tranche to Q1.
+
     Cancellation clawback is recorded in the *cancelled_date* month.
-    All previously recognised tranches are clawed back in that month.
+    All previously recognised Q1 tranches are clawed back in that month.
     """
     ledger = []
 
     for _, row in credited.iterrows():
-        close_m = row["close_date"].month
-        arr     = row["credited_arr"]
-        third   = arr / 3.0
-        key     = (row["region"], row["deal_id"])
+        close_date = row["close_date"]
+        arr        = row["credited_arr"]
+        third      = arr / 3.0
+        key        = (row["region"], row["deal_id"])
 
         cancel_date = cancel_map.get(key)
-        cancel_m    = cancel_date.month if cancel_date else 99
+        cancel_ym   = (cancel_date.year, cancel_date.month) if cancel_date else (9999, 99)
 
-        tranche_months = [close_m, close_m + 1, close_m + 2]
+        tranche_yms = [_ym_add(close_date, i) for i in range(3)]
 
-        for i, m in enumerate(tranche_months):
-            if m < 2 or m > 4:
+        for i, ym in enumerate(tranche_yms):
+            if ym not in _Q1_YMS:
                 continue
 
+            m           = ym[1]
             tranche_val = third if i < 2 else (arr - 2 * third)
-            months_recognised_before = sum(1 for j in range(i) if 2 <= tranche_months[j] <= 4)
 
-            if cancel_m < m:
-                # Cancelled before this month — nothing earned, nothing to clawback here
+            if cancel_ym < ym:
                 continue
-            elif cancel_m == m:
-                # Cancelled this month: void this tranche; clawback all previously
-                # recognised Q1 tranches (those that landed in months 2–4 before this one)
-                clawback = 0.0
-                for j in range(i):
-                    if 2 <= tranche_months[j] <= 4:
-                        clawback += third if j < 2 else (arr - 2 * third)
+            elif cancel_ym == ym:
+                clawback = sum(
+                    (third if j < 2 else arr - 2 * third)
+                    for j in range(i) if tranche_yms[j] in _Q1_YMS
+                )
                 if clawback > 0:
                     ledger.append({"rep_id": row["rep_id"], "month": m,
                                    "net_arr_usd": -clawback})
             else:
-                # Deal alive in this month
                 ledger.append({"rep_id": row["rep_id"], "month": m,
                                "net_arr_usd": tranche_val})
+
+        # Handle the case where cancel_ym falls in Q1 but no tranche lands in that month
+        # (e.g. deal closes in Dec — tranches are Dec/Jan/Feb — cancel is in March or April).
+        # The Q1-recognised tranches must still be clawed back in the cancel month.
+        if cancel_ym in _Q1_YMS and cancel_ym not in set(tranche_yms):
+            recognized = sum(
+                (third if i < 2 else arr - 2 * third)
+                for i, ym in enumerate(tranche_yms)
+                if ym in _Q1_YMS and ym < cancel_ym
+            )
+            if recognized > 0:
+                ledger.append({"rep_id": row["rep_id"], "month": cancel_ym[1],
+                               "net_arr_usd": -recognized})
 
     if not ledger:
         return pd.DataFrame(columns=["rep_id", "month", "net_arr_usd"])
@@ -295,11 +316,21 @@ def build_report(ledger, monthly_quotas, rep_ids_in_scope):
     df["net_arr_usd"] = df["net_arr_usd"].fillna(0.0)
     df = df.sort_values(["rep_id", "month"])
 
+    # Identify reps who hit ≥150% in Feb (effective_quota = base_quota since no prior shortfall).
+    # These reps receive a 20% March base_quota uplift.
+    boost_reps = set()
+    feb = df[df["month"] == 2]
+    for _, row in feb.iterrows():
+        bq = row["base_quota"]
+        if bq > 0 and row["net_arr_usd"] >= bq * 1.5:
+            boost_reps.add(row["rep_id"])
+
     results = []
     for rep_id, group in df.groupby("rep_id"):
         shortfall = 0.0
         for _, row in group.iterrows():
-            eff_q     = row["base_quota"] + shortfall
+            bq        = row["base_quota"] * (1.2 if row["month"] == 3 and rep_id in boost_reps else 1.0)
+            eff_q     = bq + shortfall
             net       = row["net_arr_usd"]
             shortfall = max(0.0, eff_q - net)
             att_pct   = round(net / eff_q * 100, 2) if eff_q > 0 else 0.0
@@ -308,7 +339,7 @@ def build_report(ledger, monthly_quotas, rep_ids_in_scope):
                 "rep_name":        row["rep_name"],
                 "region":          row["region"],
                 "month":           row["month"],
-                "base_quota":      round(row["base_quota"], 2),
+                "base_quota":      round(bq, 2),
                 "effective_quota": round(eff_q, 2),
                 "net_arr_usd":     round(net, 2),
                 "attainment_pct":  att_pct,

@@ -96,25 +96,48 @@ def _resolve_attribution(deal_row, team, rep_region):
     return shares
 
 
-def _monthly_tranches(arr, close_month, cancel_month):
-    third  = arr / 3.0
-    months = [close_month, close_month + 1, close_month + 2]
+_Q1_YMS = {(2024, 2), (2024, 3), (2024, 4)}
+
+
+def _ym_add(d, n):
+    """Return (year, month) of date d + n calendar months."""
+    m0 = d.month - 1 + n
+    return (d.year + m0 // 12, m0 % 12 + 1)
+
+
+def _monthly_tranches(arr, close_date, cancel_date):
+    """Spread arr over 3 tranches starting at close_date; return [(month_int, amount)] for Q1 only."""
+    third      = arr / 3.0
+    tranche_yms = [_ym_add(close_date, i) for i in range(3)]
+    cancel_ym   = (cancel_date.year, cancel_date.month) if cancel_date is not None else (9999, 99)
     result = []
-    for i, m in enumerate(months):
-        if m < 2 or m > 4:
+    for i, ym in enumerate(tranche_yms):
+        if ym not in _Q1_YMS:
             continue
+        m       = ym[1]
         tranche = third if i < 2 else (arr - 2 * third)
-        if cancel_month < m:
+        if cancel_ym < ym:
             pass
-        elif cancel_month == m:
+        elif cancel_ym == ym:
             clawback = sum(
                 (third if j < 2 else (arr - 2 * third))
-                for j in range(i) if 2 <= months[j] <= 4
+                for j in range(i) if tranche_yms[j] in _Q1_YMS
             )
             if clawback > 0:
                 result.append((m, -clawback))
         else:
             result.append((m, tranche))
+
+    # Handle cancel_ym in Q1 with no matching tranche month (e.g. Dec close, March cancel).
+    if cancel_ym in _Q1_YMS and cancel_ym not in set(tranche_yms):
+        recognized = sum(
+            (third if i < 2 else (arr - 2 * third))
+            for i, ym in enumerate(tranche_yms)
+            if ym in _Q1_YMS and ym < cancel_ym
+        )
+        if recognized > 0:
+            result.append((cancel_ym[1], -recognized))
+
     return result
 
 
@@ -170,13 +193,12 @@ def expected_report(raw_data):
 
     ledger = defaultdict(float)
     for _, deal in won.iterrows():
-        shares = _resolve_attribution(deal, teams[deal["account_id"]], rep_region)
-        cd     = deal["close_date"].month
-        cdate  = cancel_map.get((deal["region"], deal["deal_id"]))
-        cm     = cdate.month if cdate else 99
+        shares     = _resolve_attribution(deal, teams[deal["account_id"]], rep_region)
+        close_date = deal["close_date"]
+        cdate      = cancel_map.get((deal["region"], deal["deal_id"]))
         for rep, share in shares.items():
             if share > 0:
-                for m, net in _monthly_tranches(deal["arr_usd"] * share, cd, cm):
+                for m, net in _monthly_tranches(deal["arr_usd"] * share, close_date, cdate):
                     ledger[(rep, m)] += net
 
     q1        = quotas[quotas["period_start"] == pd.Timestamp("2024-02-01")]
@@ -195,17 +217,29 @@ def expected_report(raw_data):
 
     monthly_q = pd.DataFrame(records)
     rep_ids   = set(reps["rep_id"])
+
+    # Identify reps at ≥150% Feb attainment (effective_quota = base_quota in Feb).
+    boost_reps = set()
+    for rep_id, group in monthly_q.groupby("rep_id"):
+        feb_rows = group[group["month"] == 2]
+        if not feb_rows.empty:
+            bq_feb  = feb_rows.iloc[0]["base_quota"]
+            net_feb = ledger.get((rep_id, 2), 0.0)
+            if bq_feb > 0 and net_feb >= bq_feb * 1.5:
+                boost_reps.add(rep_id)
+
     results   = []
     for rep_id, group in monthly_q.groupby("rep_id"):
         shortfall = 0.0
         for _, row in group.sort_values("month").iterrows():
-            net   = ledger.get((rep_id, row["month"]), 0.0)
-            eff_q = row["base_quota"] + shortfall
+            net = ledger.get((rep_id, row["month"]), 0.0)
+            bq  = row["base_quota"] * (1.2 if row["month"] == 3 and rep_id in boost_reps else 1.0)
+            eff_q = bq + shortfall
             shortfall = max(0.0, eff_q - net)
             att   = round(net / eff_q * 100, 2) if eff_q > 0 else 0.0
             results.append({"rep_id": rep_id, "rep_name": row["rep_name"],
                              "region": row["region"], "month": row["month"],
-                             "base_quota": round(row["base_quota"], 2),
+                             "base_quota": round(bq, 2),
                              "effective_quota": round(eff_q, 2),
                              "net_arr_usd": round(net, 2), "attainment_pct": att})
 
@@ -247,6 +281,13 @@ def test_03_sentinel_input_data():
     fx = pd.read_csv(DATA_DIR / "fx_rates.csv", parse_dates=["date"])
     assert (fx["date"].dt.day == 1).all(), \
         "fx_rates.csv modified — rates must be monthly (1st of each month) only"
+
+    cancels = pd.read_csv(DATA_DIR / "cancellations.csv")
+    assert any(
+        (cancels["region"] == "EMEA") &
+        (cancels["deal_id"] == 201) &
+        (cancels["status"] == "approved")
+    ), "cancellations.csv modified — approved cancellation for (EMEA, 201) must be present"
 
 
 def test_04_summary_totals(summary_json, expected_report):
@@ -402,3 +443,52 @@ def test_10_fx_as_of_date_and_triangulation(report_df, expected_report, raw_data
         f"R013 month 2: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
         "Check that deal (AMER, 1509) uses the 2024-02-01 CAD→EUR→USD rate, " \
         "not a 1.0 fallback from a missing 2024-02-16 rate."
+
+
+def test_12_clawback_when_cancel_month_has_no_tranche(report_df, expected_report):
+    """Trap 6 — clawback must be recorded in cancelled_date month even when no deal tranche
+    falls in that month.
+
+    Deal (EMEA, 201) closes 2023-12-04; its three tranches land in Dec 2023, Jan 2024,
+    Feb 2024. The deal is cancelled (cancelled_date 2024-03-15) after all tranches are past.
+    The Q1-recognised Feb tranche must be clawed back in March. A model that only generates
+    clawbacks when the cancel month coincides with a tranche will silently drop it; a model
+    that sweeps all pre-cancel tranches (including non-Q1 Dec/Jan) will over-claw by ~2x.
+    """
+    assert report_df is not None
+    for month, label in [(2, "Feb"), (3, "March")]:
+        exp = expected_report.loc[
+            (expected_report["rep_id"] == "R147") & (expected_report["month"] == month),
+            "net_arr_usd"].iloc[0]
+        act = report_df.loc[
+            (report_df["rep_id"] == "R147") & (report_df["month"] == month),
+            "net_arr_usd"].iloc[0]
+        assert abs(act - exp) <= 1.0, \
+            f"R147 {label}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
+            "Clawback must equal only Q1-recognised tranches, recorded in cancelled_date month."
+
+def test_11_march_quota_uplift(report_df):
+    """Trap 5 — Reps reaching ≥150% Feb attainment receive a 20% March base_quota boost.
+
+    The uplift applies to March base_quota only; April base_quota is the original
+    prorated value. Anchored on three reps with unambiguous Feb over-attainment.
+    """
+    if report_df is None:
+        pytest.skip("monthly_rep_performance.csv not found")
+    anchors = [
+        # (rep_id, expected_mar_base_quota_boosted, expected_apr_base_quota_original)
+        ("R061", 138252.256,  115210.213333),
+        ("R057", 138283.604,  115236.336667),
+        ("R167", 341575.916,  284646.596667),
+    ]
+    for rep_id, boosted_mar, orig_apr in anchors:
+        mar = report_df[(report_df["rep_id"] == rep_id) & (report_df["month"] == 3)]
+        apr = report_df[(report_df["rep_id"] == rep_id) & (report_df["month"] == 4)]
+        assert not mar.empty, f"{rep_id} month 3 missing from report"
+        assert not apr.empty, f"{rep_id} month 4 missing from report"
+        assert abs(mar["base_quota"].values[0] - boosted_mar) < 0.02, \
+            f"{rep_id} March base_quota {mar['base_quota'].values[0]:.2f} != {boosted_mar:.3f}. " \
+            "Reps at ≥150% Feb attainment must have March base_quota increased by 20%."
+        assert abs(apr["base_quota"].values[0] - orig_apr) < 0.02, \
+            f"{rep_id} April base_quota {apr['base_quota'].values[0]:.2f} != {orig_apr:.6f}. " \
+            "The 20% uplift applies to March only; April base_quota must be unmodified."
