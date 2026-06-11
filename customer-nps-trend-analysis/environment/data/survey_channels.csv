@@ -1,0 +1,4 @@
+channel,description,score_scale
+email,Email survey invitation,0-10
+in_app,In-app survey prompt,0-10
+phone_ivr,Automated phone IVR satisfaction survey,1-5
