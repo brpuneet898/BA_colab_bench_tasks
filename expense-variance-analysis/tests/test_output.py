@@ -52,6 +52,10 @@ def truth():
     # 2. Contractor rates
     emps.loc[emps["employee_type"] == "contractor", "hourly_rate"] /= 100
 
+    # Normalize mixed-casing from raw system exports
+    corrs["status"] = corrs["status"].str.strip().str.lower()
+    ot["applies_cross_dept"] = ot["applies_cross_dept"].astype(str).str.lower() == "true"
+
     # 3. Corrections (Trap III)
     corrs = corrs[corrs["status"] == "approved"].copy()
     PAYROLL_CUTOFF = "2024-04-05"
@@ -62,16 +66,14 @@ def truth():
     shifts["shift_start"] = pd.to_datetime(shifts["shift_start"])
     shifts["shift_end"] = pd.to_datetime(shifts["shift_end"])
     shifts["duration_h"] = (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
-    
-    # AT Bug 2 Fix: drop initial outliers BEFORE applying corrections
+
     shifts = shifts[(shifts["duration_h"] >= 6.0) & (shifts["duration_h"] <= 14.0)].copy()
-    
+
     shifts = pd.merge(shifts, corrs_latest[["shift_id", "corrected_hours"]], on="shift_id", how="left")
-    # Store ratio for boundary splitting (AT Bug 1 Fix)
     shifts["ratio"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"] / shifts["duration_h"], 1.0)
-    
+
     shifts["duration_h"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"], shifts["duration_h"])
-    
+
     # Rule 4: Exclude if corrected duration < 6
     shifts = shifts[shifts["duration_h"] >= 6.0].copy()
 
@@ -84,8 +86,8 @@ def truth():
             mid = en.normalize()
             raw_durA = (mid - st).total_seconds() / 3600
             raw_durB = (en - mid).total_seconds() / 3600
-            
-            # AT Bug 1 Fix: Scale by ratio to preserve corrected hours
+
+            # Distribute corrected hours proportionally to original pre/post-midnight split
             durA = raw_durA * row["ratio"]
             durB = raw_durB * row["ratio"]
             
@@ -129,7 +131,7 @@ def truth():
     df = pd.merge(df, ot, on="department_id", how="left")
 
     # Trap IV: applies_cross_dept flag drives receiving-dept threshold override
-    cross_ot = ot[ot["applies_cross_dept"] == True][["department_id", "weekly_ot_threshold"]].copy()
+    cross_ot = ot[ot["applies_cross_dept"]][["department_id", "weekly_ot_threshold"]].copy()
     cross_ot = cross_ot.rename(columns={"department_id": "to_dept_id", "weekly_ot_threshold": "recv_thresh"})
     ot_recv = reassigns[["employee_id", "week_start", "to_dept_id"]].drop_duplicates().copy()
     ot_recv = pd.merge(ot_recv, cross_ot, on="to_dept_id", how="inner")
@@ -320,11 +322,11 @@ def test_case_05_total_budgeted_cost(truth, agent_summary):
 def test_case_06_actual_cost(truth, agent_summary):
     assert abs(agent_summary["total_actual_cost"] - truth["total_actual_cost"]) < 10.0
 
-# --- Test 07: Trap II - Premium Exclusivity ---
+# --- Test 07: Total Variance (actual_cost minus effective_budgeted_cost) ---
 def test_case_07_variance(truth, agent_summary):
     assert abs(agent_summary["total_variance"] - truth["total_variance"]) < 10.0
 
-# --- Test 08: Trap II - Over Budget Weeks ---
+# --- Test 08: Over-Budget Department-Week Count ---
 def test_case_08_over_budget_weeks(truth, agent_summary):
     assert agent_summary["over_budget_week_count"] == truth["over_budget_week_count"]
 

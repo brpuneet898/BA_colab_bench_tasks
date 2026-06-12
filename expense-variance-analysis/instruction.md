@@ -11,6 +11,8 @@ Shifts are attributed to the department the employee was assigned to at the time
 `weekly_budget.csv` provides the base budgeted_hours and avg_hourly_rate per department per week. Base budgeted cost = budgeted_hours × avg_hourly_rate.
 However, unused budget rolls over: if a department's actual cost for week N is below its effective budget, 80% of the surplus carries forward and increases the department's budget for week N+1. This carryover addition is capped at 12% of the base budget for week N+1. The effective budget for week 1 equals the base budget. Variance is calculated against the effective budget.
 
+Input data files are raw exports from operational systems; column values may use varied conventions for the same logical type.
+
 Input data:
 
 `/workspace/data/shifts.csv` — shift_id, employee_id, shift_start, shift_end. Warehouse shifts run 6–14 hours; records with durations outside this range are data-entry errors and must be excluded before analysis.
@@ -40,4 +42,4 @@ Required outputs:
 
 Save `/workspace/payroll_variance_report.csv` with columns: department_id, department_name, week_start, base_budgeted_cost, effective_budgeted_cost, actual_cost, variance (actual_cost − effective_budgeted_cost). Include one row per department per week (10 departments × 13 weeks = 130 rows), sorted by department_id then week_start.
 
-Save `/workspace/summary.json` with keys total_budgeted_cost (sum of effective budgets), total_actual_cost, total_variance, total_overtime_hours (float, rounded to 2 decimal places) and over_budget_week_count (integer).
+Save `/workspace/summary.json` with keys total_budgeted_cost (sum of effective budgets), total_actual_cost, total_variance, total_overtime_hours (float, rounded to 2 decimal places) and over_budget_week_count (integer, count of department-week pairs where actual_cost exceeds effective_budgeted_cost).

@@ -39,6 +39,11 @@ def main():
 
     emps.loc[emps["employee_type"] == "contractor", "hourly_rate"] /= 100
 
+    # BOTTLENECK: source files export booleans and enum values with mixed casing;
+    # string comparison without normalization silently drops records.
+    corrs["status"] = corrs["status"].str.strip().str.lower()
+    ot["applies_cross_dept"] = ot["applies_cross_dept"].astype(str).str.lower() == "true"
+
     corrs = corrs[corrs["status"] == "approved"].copy()
     PAYROLL_CUTOFF = "2024-04-05"
     corrs_pre = corrs[corrs["correction_date"] <= PAYROLL_CUTOFF].copy()
@@ -105,7 +110,7 @@ def main():
     df = pd.merge(df, ot, on="department_id", how="left")
 
     # applies_cross_dept: receiving dept threshold overrides when flagged (Trap IV)
-    cross_ot = ot[ot["applies_cross_dept"] == True][["department_id", "weekly_ot_threshold"]].copy()
+    cross_ot = ot[ot["applies_cross_dept"]][["department_id", "weekly_ot_threshold"]].copy()
     cross_ot = cross_ot.rename(columns={"department_id": "to_dept_id", "weekly_ot_threshold": "recv_thresh"})
     ot_recv = reassigns[["employee_id", "week_start", "to_dept_id"]].drop_duplicates().copy()
     ot_recv = pd.merge(ot_recv, cross_ot, on="to_dept_id", how="inner")
