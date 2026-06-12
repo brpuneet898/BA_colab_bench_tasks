@@ -11,7 +11,7 @@ Premiums are mutually exclusive. Only the highest applicable premium applies to 
 
 Job classifications affect pay through job_code_rates.csv.
 
-Overtime is assessed weekly. Weeks run Monday through Sunday and overtime thresholds reset each Monday. Overtime eligibility may depend on department policies, pay groups, reassignment policies, and job classifications. Employees working multiple job classifications within a week receive blended-rate overtime treatment.
+Overtime is assessed weekly. Weeks run Monday through Sunday and overtime thresholds reset each Monday. Shifts spanning the Sunday/Monday midnight boundary contribute hours to each respective week. Overtime eligibility may depend on department policies, pay groups, reassignment policies, and job classifications. Employees working multiple job classifications within a week receive blended-rate overtime treatment. When an employee is temporarily reassigned, their effective weekly overtime threshold for that week is the lower of their home department's threshold and the receiving department's threshold.
 
 Departmental labour cost attribution must reflect employee assignments, transfers, reassignments, work-order allocations, overtime ownership rules, and eligible payroll corrections.
 

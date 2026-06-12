@@ -159,18 +159,30 @@ def main():
     )
 
     # ── 11. APPLY RATE HISTORY (SCD) ──────────────────────────────────────────
-    # BOTTLENECK: employees.csv is the April-1 snapshot. For employees in rate_history,
-    # shifts before 2024-02-05 must use the 2024-01-01 opening rate. Using the snapshot
-    # rate for all shifts overcounts cost for these 30 employees' Jan 1 – Feb 4 shifts.
-    rh_opening = (
-        rate_hist[rate_hist["effective_date"] == "2024-01-01"]
-        [["employee_id", "hourly_rate"]]
-        .rename(columns={"hourly_rate": "old_rate"})
+    # BOTTLENECK: employees.csv is the April-1 snapshot. rate_history.csv carries
+    # historical rates. For each shift, the rate in effect on the shift date
+    # (nearest effective_date not after shift_start) takes precedence over the
+    # snapshot rate. Using the snapshot rate for all shifts overcounts cost for
+    # the 30 employees whose rate changed during Q1.
+    rate_hist["effective_date"] = pd.to_datetime(rate_hist["effective_date"])
+    df["shift_start"] = pd.to_datetime(df["shift_start"])
+    df = df.reset_index(drop=True)
+    df["_row"] = df.index
+    rh_exp = pd.merge(
+        df[["_row", "employee_id", "shift_start"]],
+        rate_hist[["employee_id", "effective_date", "hourly_rate"]],
+        on="employee_id",
     )
-    df = pd.merge(df, rh_opening, on="employee_id", how="left")
-    pre_raise = (df["shift_start"] < pd.Timestamp("2024-02-05")) & df["old_rate"].notna()
-    df.loc[pre_raise, "hourly_rate"] = df.loc[pre_raise, "old_rate"]
-    df.drop(columns=["old_rate"], inplace=True)
+    rh_exp = rh_exp[rh_exp["effective_date"] <= rh_exp["shift_start"]]
+    rh_best = (
+        rh_exp.sort_values("effective_date")
+        .groupby("_row")["hourly_rate"].last()
+        .rename("hist_rate")
+    )
+    df = df.join(rh_best, on="_row")
+    has_hist = df["hist_rate"].notna()
+    df.loc[has_hist, "hourly_rate"] = df.loc[has_hist, "hist_rate"]
+    df.drop(columns=["hist_rate", "_row"], inplace=True)
 
     # ── 12. APPLY RATE CORRECTIONS (correction_type='rate') ───────────────────
     # BOTTLENECK: corrected_rate is generated from the same source rate (cents for
