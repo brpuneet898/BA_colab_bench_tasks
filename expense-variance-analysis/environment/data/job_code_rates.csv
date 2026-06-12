@@ -1,0 +1,11 @@
+job_code,rate_multiplier
+picker,1.0
+loader,1.05
+forklift,1.1
+packer,1.0
+scanner,1.02
+sorter,1.0
+auditor,1.08
+trainer,1.12
+supervisor,1.18
+driver,1.1

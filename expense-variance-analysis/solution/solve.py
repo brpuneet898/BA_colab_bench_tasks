@@ -1,14 +1,34 @@
 """
 Q1 2024 payroll variance report for a warehouse operation.
 
-The data has several layers that naive implementations miss: contractor rates are
-stored in US cents (not dollars), premium types are mutually exclusive (max applies,
-not sum), overtime thresholds differ by department (D05=36h, D08=44h vs 40h default),
-corrections have a payroll cutoff date and can void a shift entirely if they push
-duration below 6h, shifts spanning the Sunday/Monday midnight boundary must be split
-proportionally, and budget amendments retroactively adjust base budgets — with a
-post-cutoff filter and a bidirectional reallocation type that most implementations
-apply only one-directionally.
+Layers discovered in the data:
+- Contractor rates are in US cents; must be divided by 100 before any cost calculation.
+- Thirty employees received pay-rate increases on 2024-02-05 (annual review).
+  rate_history.csv carries both the 2024-01-01 opening rate and the post-raise rate.
+  employees.csv is the April-1 snapshot and overstates cost for Jan 1 – Feb 4 shifts
+  for those employees. The discrepancy is only visible by cross-referencing rate_history
+  against employees.csv and sampling shift-level costs for affected employee-dates.
+- job_code in shifts.csv appears in messy variants: PICKER, picker, Pick-er, pick_er.
+  Normalisation (lower-case, strip hyphens/underscores/spaces) is required before
+  joining to job_code_rates.csv for the rate_multiplier. When an employee works shifts
+  under multiple job codes in one week, FLSA requires a blended overtime rate:
+  total_straight_time_earnings / total_hours × 0.5 per OT hour — not the per-shift rate.
+- Forty employees have pay_group_id in employees.csv that links to pay_groups.csv, whose
+  ot_threshold (38 h) overrides the department's weekly_ot_threshold (40 h) for those
+  employees. Neither file's schema documents the override relationship.
+- Eight work orders in work_order_splits.csv carry a secondary department attribution:
+  secondary_pct of each qualifying shift's cost goes to secondary_dept_id; the remainder
+  stays with the employee's home department. Agents that join shifts → work_orders but
+  skip work_order_splits.csv produce correct totals but wrong per-department breakdowns —
+  a plausible-looking answer that fails every per-row test.
+- Shifts assigned within call_in_window_hours (per department in ot_policy.csv) of their
+  start earn a 1.4× call-in premium competing under the same mutual-exclusivity rule as
+  night, weekend, and holiday premiums. The window is 6 h for D05 and D08, 12 h elsewhere;
+  a flat 12 h window misclassifies ~51 short-notice shifts in those two departments.
+- corrections.csv carries a correction_type column: 'hours' adjusts shift duration,
+  'rate' substitutes the employee's base rate with corrected_rate, 'dept' reroutes cost
+  attribution to corrected_dept_id. Treating every correction as an hours adjustment
+  silently mishandles the ~28% that are rate or dept type with no error raised.
 """
 import pandas as pd
 import numpy as np
@@ -26,201 +46,351 @@ else:
     DATA_DIR = Path('environment/data')
     WORKSPACE_DIR = Path('.')
 
+
 def main():
-    # 1. Load Data
-    shifts = pd.read_csv(DATA_DIR / "shifts.csv")
-    corrs = pd.read_csv(DATA_DIR / "corrections.csv")
-    emps = pd.read_csv(DATA_DIR / "employees.csv")
-    depts = pd.read_csv(DATA_DIR / "departments.csv")
-    ot = pd.read_csv(DATA_DIR / "ot_policy.csv")
-    trans = pd.read_csv(DATA_DIR / "transfers.csv")
-    reassigns = pd.read_csv(DATA_DIR / "reassignments.csv")
-    budgets = pd.read_csv(DATA_DIR / "weekly_budget.csv")
+    # ── 1. LOAD ───────────────────────────────────────────────────────────────
+    shifts      = pd.read_csv(DATA_DIR / "shifts.csv")
+    corrs       = pd.read_csv(DATA_DIR / "corrections.csv")
+    emps        = pd.read_csv(DATA_DIR / "employees.csv")
+    depts       = pd.read_csv(DATA_DIR / "departments.csv")
+    ot          = pd.read_csv(DATA_DIR / "ot_policy.csv")
+    trans       = pd.read_csv(DATA_DIR / "transfers.csv")
+    reassigns   = pd.read_csv(DATA_DIR / "reassignments.csv")
+    budgets     = pd.read_csv(DATA_DIR / "weekly_budget.csv")
+    amendments  = pd.read_csv(DATA_DIR / "budget_amendments.csv")
+    pay_groups  = pd.read_csv(DATA_DIR / "pay_groups.csv")
+    jcr         = pd.read_csv(DATA_DIR / "job_code_rates.csv")
+    wo_splits   = pd.read_csv(DATA_DIR / "work_order_splits.csv")
+    rate_hist   = pd.read_csv(DATA_DIR / "rate_history.csv")
 
+    # ── 2. NORMALIZE UNITS ────────────────────────────────────────────────────
+    # BOTTLENECK: contractor hourly_rate is stored in US cents by the HR export.
     emps.loc[emps["employee_type"] == "contractor", "hourly_rate"] /= 100
+    # rate_history carries pre-change rates in the same cent-denominated scale.
+    contractor_ids = set(emps.loc[emps["employee_type"] == "contractor", "employee_id"])
+    rate_hist.loc[rate_hist["employee_id"].isin(contractor_ids), "hourly_rate"] /= 100
 
-    # BOTTLENECK: source files export booleans and enum values with mixed casing;
-    # string comparison without normalization silently drops records.
+    # ── 3. NORMALIZE MIXED-FORMAT STRINGS ─────────────────────────────────────
+    # BOTTLENECK: source exports use inconsistent boolean/status representations.
     corrs["status"] = corrs["status"].str.strip().str.lower()
-    ot["applies_cross_dept"] = ot["applies_cross_dept"].astype(str).str.lower() == "true"
+    ot["applies_cross_dept"] = (
+        ot["applies_cross_dept"].astype(str).str.lower().isin({"true", "yes", "1"})
+    )
 
-    corrs = corrs[corrs["status"] == "approved"].copy()
+    # ── 4. RESOLVE CORRECTIONS ────────────────────────────────────────────────
     PAYROLL_CUTOFF = "2024-04-05"
-    corrs_pre = corrs[corrs["correction_date"] <= PAYROLL_CUTOFF].copy()
-    corrs_latest = corrs_pre.sort_values("correction_date").groupby("shift_id").last().reset_index()
+    corrs_ok = corrs[corrs["status"] == "approved"].copy()
+    corrs_ok = corrs_ok[corrs_ok["correction_date"] <= PAYROLL_CUTOFF]
+    corrs_latest = (
+        corrs_ok.sort_values("correction_date")
+        .groupby("shift_id").last().reset_index()
+    )[["shift_id", "corrected_hours", "correction_type", "corrected_rate", "corrected_dept_id"]]
 
+    # ── 5. JOB CODE NORMALISATION → RATE MULTIPLIER ───────────────────────────
+    # BOTTLENECK: PICKER/picker/Pick-er/pick_er all map to rate_multiplier 1.00;
+    # FORKLIFT/Fork-Lift/fork_lift map to 1.10. Without normalisation the join
+    # produces NaN multipliers for the messy variants.
+    jcr["jc_norm"]    = jcr["job_code"].str.lower()
+    shifts["jc_norm"] = shifts["job_code"].str.lower().str.replace(r"[-_\s]", "", regex=True)
+    shifts = pd.merge(shifts, jcr[["jc_norm", "rate_multiplier"]], on="jc_norm", how="left")
+    shifts["rate_multiplier"] = shifts["rate_multiplier"].fillna(1.0)
+    shifts.drop(columns=["jc_norm"], inplace=True)
+
+    # ── 6. PARSE TIMESTAMPS & OUTLIER FILTER ──────────────────────────────────
     shifts["shift_start"] = pd.to_datetime(shifts["shift_start"])
-    shifts["shift_end"] = pd.to_datetime(shifts["shift_end"])
-    shifts["duration_h"] = (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
-    
+    shifts["shift_end"]   = pd.to_datetime(shifts["shift_end"])
+    shifts["duration_h"]  = (
+        (shifts["shift_end"] - shifts["shift_start"]).dt.total_seconds() / 3600
+    )
     shifts = shifts[(shifts["duration_h"] >= 6.0) & (shifts["duration_h"] <= 14.0)].copy()
-    
-    shifts = pd.merge(shifts, corrs_latest[["shift_id", "corrected_hours"]], on="shift_id", how="left")
-    shifts["ratio"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"] / shifts["duration_h"], 1.0)
-    shifts["duration_h"] = np.where(shifts["corrected_hours"].notna(), shifts["corrected_hours"], shifts["duration_h"])
-    
+
+    # ── 7. MERGE CORRECTIONS & APPLY HOURS ADJUSTMENTS ────────────────────────
+    shifts = pd.merge(shifts, corrs_latest, on="shift_id", how="left")
+
+    # BOTTLENECK: only 'hours' corrections change duration; 'rate' and 'dept'
+    # corrections leave duration unchanged. Treating all corrections as hours
+    # adjustments silently mishandles ~28% of corrections.
+    hours_mask = shifts["corrected_hours"].notna() & (shifts["correction_type"] == "hours")
+    shifts["ratio"] = 1.0
+    shifts.loc[hours_mask, "ratio"] = (
+        shifts.loc[hours_mask, "corrected_hours"] / shifts.loc[hours_mask, "duration_h"]
+    )
+    shifts.loc[hours_mask, "duration_h"] = shifts.loc[hours_mask, "corrected_hours"]
+
     shifts = shifts[shifts["duration_h"] >= 6.0].copy()
 
-    split_shifts = []
+    # ── 8. CROSS-MIDNIGHT SPLIT (Sunday → Monday) ─────────────────────────────
+    split_rows = []
     for _, row in shifts.iterrows():
-        st = row["shift_start"]
-        en = row["shift_end"]
+        st, en = row["shift_start"], row["shift_end"]
         if st.weekday() == 6 and en.weekday() == 0:
-            mid = en.normalize()
-            raw_durA = (mid - st).total_seconds() / 3600
-            raw_durB = (en - mid).total_seconds() / 3600
-            
-            durA = raw_durA * row["ratio"]
-            durB = raw_durB * row["ratio"]
-            
-            rowA = row.copy()
-            rowA["duration_h"] = durA
+            mid  = en.normalize()
+            rawA = (mid - st).total_seconds() / 3600
+            rawB = (en - mid).total_seconds() / 3600
+            rowA, rowB = row.copy(), row.copy()
+            rowA["duration_h"] = rawA * row["ratio"]
+            rowB["duration_h"] = rawB * row["ratio"]
             rowA["week_start"] = (st - pd.Timedelta(days=st.weekday())).normalize()
-            
-            rowB = row.copy()
-            rowB["duration_h"] = durB
             rowB["week_start"] = (en - pd.Timedelta(days=en.weekday())).normalize()
-            
-            split_shifts.extend([rowA, rowB])
+            split_rows.extend([rowA, rowB])
         else:
-            rowA = row.copy()
-            rowA["week_start"] = (st - pd.Timedelta(days=st.weekday())).normalize()
-            split_shifts.append(rowA)
-            
-    df = pd.DataFrame(split_shifts)
+            row = row.copy()
+            row["week_start"] = (st - pd.Timedelta(days=st.weekday())).normalize()
+            split_rows.append(row)
+    df = pd.DataFrame(split_rows)
 
-    HOLIDAYS = ["2024-01-15", "2024-02-19", "2024-03-10"]
-    df["date_str"] = df["shift_start"].dt.strftime("%Y-%m-%d")
+    # ── 9. BASE PREMIUMS (night / weekend / holiday) ───────────────────────────
+    HOLIDAYS = {"2024-01-15", "2024-02-19", "2024-03-10"}
+    df["date_str"]   = df["shift_start"].dt.strftime("%Y-%m-%d")
     df["is_holiday"] = df["date_str"].isin(HOLIDAYS)
     df["is_weekend"] = df["shift_start"].dt.weekday.isin([5, 6])
-    df["is_night"] = df["shift_start"].dt.hour >= 21
-    
+    df["is_night"]   = df["shift_start"].dt.hour >= 21
     df["mult"] = 1.0
-    df["mult"] = np.where(df["is_night"], 1.3, df["mult"])
-    df["mult"] = np.where(df["is_weekend"], np.maximum(df["mult"], 1.15), df["mult"])
-    df["mult"] = np.where(df["is_holiday"], np.maximum(df["mult"], 1.5), df["mult"])
+    df["mult"] = np.where(df["is_night"],    1.3,                          df["mult"])
+    df["mult"] = np.where(df["is_weekend"],  np.maximum(df["mult"], 1.15), df["mult"])
+    df["mult"] = np.where(df["is_holiday"],  np.maximum(df["mult"], 1.5),  df["mult"])
 
+    # ── 10. MERGE EMPLOYEE ATTRIBUTES ─────────────────────────────────────────
+    df = pd.merge(
+        df,
+        emps[["employee_id", "department_id", "hourly_rate",
+              "employee_type", "pay_group_id"]],
+        on="employee_id", how="left"
+    )
+
+    # ── 11. APPLY RATE HISTORY (SCD) ──────────────────────────────────────────
+    # BOTTLENECK: employees.csv is the April-1 snapshot. For employees in rate_history,
+    # shifts before 2024-02-05 must use the 2024-01-01 opening rate. Using the snapshot
+    # rate for all shifts overcounts cost for these 30 employees' Jan 1 – Feb 4 shifts.
+    rh_opening = (
+        rate_hist[rate_hist["effective_date"] == "2024-01-01"]
+        [["employee_id", "hourly_rate"]]
+        .rename(columns={"hourly_rate": "old_rate"})
+    )
+    df = pd.merge(df, rh_opening, on="employee_id", how="left")
+    pre_raise = (df["shift_start"] < pd.Timestamp("2024-02-05")) & df["old_rate"].notna()
+    df.loc[pre_raise, "hourly_rate"] = df.loc[pre_raise, "old_rate"]
+    df.drop(columns=["old_rate"], inplace=True)
+
+    # ── 12. APPLY RATE CORRECTIONS (correction_type='rate') ───────────────────
+    # BOTTLENECK: corrected_rate is generated from the same source rate (cents for
+    # contractors) and requires the same /100 normalisation as the base rate.
+    rate_mask = (df["correction_type"] == "rate") & df["corrected_rate"].notna()
+    df.loc[rate_mask, "hourly_rate"] = df.loc[rate_mask, "corrected_rate"]
+    ct_rate   = rate_mask & (df["employee_type"] == "contractor")
+    df.loc[ct_rate, "hourly_rate"] /= 100
+
+    # ── 13. APPLY TRANSFERS (retroactive dept fix) ─────────────────────────────
     trans["eff_date"] = pd.to_datetime(trans["effective_date"])
-    df = pd.merge(df, emps[["employee_id", "department_id", "hourly_rate"]], on="employee_id", how="left")
-    
     for _, t in trans.iterrows():
         mask = (df["employee_id"] == t["employee_id"]) & (df["shift_start"] < t["eff_date"])
         df.loc[mask, "department_id"] = t["from_dept_id"]
 
+    # ── 14. APPLY DEPT CORRECTIONS (correction_type='dept') ───────────────────
+    dept_mask = (
+        (df["correction_type"] == "dept")
+        & df["corrected_dept_id"].notna()
+        & (df["corrected_dept_id"].astype(str).str.strip() != "")
+    )
+    df.loc[dept_mask, "department_id"] = df.loc[dept_mask, "corrected_dept_id"]
+
+    # ── 15. MERGE OT POLICY (threshold + call_in_window_hours) ────────────────
     df = pd.merge(df, ot, on="department_id", how="left")
 
-    # applies_cross_dept: receiving dept threshold overrides when flagged (Trap IV)
-    cross_ot = ot[ot["applies_cross_dept"]][["department_id", "weekly_ot_threshold"]].copy()
-    cross_ot = cross_ot.rename(columns={"department_id": "to_dept_id", "weekly_ot_threshold": "recv_thresh"})
-    ot_recv = reassigns[["employee_id", "week_start", "to_dept_id"]].drop_duplicates().copy()
-    ot_recv = pd.merge(ot_recv, cross_ot, on="to_dept_id", how="inner")
-    ot_recv_min = ot_recv.groupby(["employee_id", "week_start"])["recv_thresh"].min().reset_index()
-    ot_recv_min.rename(columns={"week_start": "week_start_str"}, inplace=True)
+    # ── 16. CALL-IN PREMIUM ───────────────────────────────────────────────────
+    # BOTTLENECK: the call-in window differs by department (6 h for D05/D08,
+    # 12 h elsewhere). A flat 12 h window mis-triggers for those two departments.
+    assigned_at = pd.to_datetime(df["assigned_at"])
+    lead_h      = (df["shift_start"] - assigned_at).dt.total_seconds() / 3600
+    is_callin   = lead_h < df["call_in_window_hours"]
+    df["mult"]  = np.where(is_callin, np.maximum(df["mult"], 1.4), df["mult"])
+
+    # ── 17. EFFECTIVE OT THRESHOLD ────────────────────────────────────────────
+    # Three sources override in priority order:
+    #   (a) department threshold from ot_policy
+    #   (b) pay_group override replaces dept threshold for PG employees
+    #   (c) cross-dept receiving-dept threshold (min) for reassigned employees
+
+    df["effective_thresh"] = df["weekly_ot_threshold"]
+
+    # (b) BOTTLENECK: pay_group_id links to pay_groups.ot_threshold with no schema
+    # annotation in either file. PG02 employees have a 38 h threshold instead of 40 h.
+    pg_thresh = pay_groups.set_index("pay_group_id")["ot_threshold"].to_dict()
+    pg_mask   = df["pay_group_id"].notna() & (df["pay_group_id"].astype(str) != "")
+    df.loc[pg_mask, "effective_thresh"] = df.loc[pg_mask, "pay_group_id"].map(pg_thresh)
+
+    # (c) cross-dept: if reassigned to a dept with applies_cross_dept=True this week,
+    # effective threshold = min(home/pay-group threshold, receiving dept threshold).
+    cross_ot = (
+        ot[ot["applies_cross_dept"]]
+        [["department_id", "weekly_ot_threshold"]]
+        .rename(columns={"department_id": "to_dept_id", "weekly_ot_threshold": "recv_thresh"})
+    )
+    ot_recv = (
+        reassigns[["employee_id", "week_start", "to_dept_id"]].drop_duplicates()
+        .pipe(lambda x: pd.merge(x, cross_ot, on="to_dept_id", how="inner"))
+        .groupby(["employee_id", "week_start"])["recv_thresh"].min()
+        .reset_index()
+    )
     df["week_start_str"] = df["week_start"].dt.strftime("%Y-%m-%d")
-    df = pd.merge(df, ot_recv_min, on=["employee_id", "week_start_str"], how="left")
-    df["weekly_ot_threshold"] = np.where(
+    df = pd.merge(
+        df,
+        ot_recv.rename(columns={"week_start": "week_start_str"}),
+        on=["employee_id", "week_start_str"], how="left"
+    )
+    df["effective_thresh"] = np.where(
         df["recv_thresh"].notna(),
-        np.minimum(df["weekly_ot_threshold"], df["recv_thresh"]),
-        df["weekly_ot_threshold"]
+        np.minimum(df["effective_thresh"], df["recv_thresh"]),
+        df["effective_thresh"]
     )
     df.drop(columns=["recv_thresh", "week_start_str"], inplace=True)
 
-    df["base_cost"] = df["duration_h"] * df["hourly_rate"] * df["mult"]
-    
+    # ── 18. FLSA BLENDED OT ───────────────────────────────────────────────────
+    # BOTTLENECK: when an employee works multiple job classifications in a week the
+    # per-shift rate varies. FLSA regular rate = total_straight_time / total_hours;
+    # OT premium = regular_rate × 0.5 × OT_hours (not the shift-specific rate).
+    df["effective_rate"] = df["hourly_rate"] * df["rate_multiplier"]
+    df["straight_time"]  = df["duration_h"] * df["effective_rate"] * df["mult"]
+
     df = df.sort_values(["employee_id", "week_start", "shift_start"])
-    df["cum_hrs"] = df.groupby(["employee_id", "week_start"])["duration_h"].cumsum()
-    df["prev_cum"] = df["cum_hrs"] - df["duration_h"]
-    
-    def calc_ot(row):
-        thresh = row["weekly_ot_threshold"]
-        if row["cum_hrs"] <= thresh:
-            return 0.0
-        elif row["prev_cum"] >= thresh:
-            return row["duration_h"] * row["hourly_rate"] * row["mult"] * 0.5
-        else:
-            ot_hrs = row["cum_hrs"] - thresh
-            return ot_hrs * row["hourly_rate"] * row["mult"] * 0.5
-            
-    df["ot_premium"] = df.apply(calc_ot, axis=1)
-    df["total_cost"] = df["base_cost"] + df["ot_premium"]
-    
-    dept_costs = df.groupby(["department_id", "week_start"])["total_cost"].sum().reset_index()
-    dept_costs.rename(columns={"total_cost": "actual_cost"}, inplace=True)
+
+    wk = (
+        df.groupby(["employee_id", "week_start"])
+        .agg(
+            total_hours    = ("duration_h",       "sum"),
+            total_earnings = ("straight_time",    "sum"),
+            threshold      = ("effective_thresh", "min"),
+        )
+        .reset_index()
+    )
+    wk["blended_rate"] = wk["total_earnings"] / wk["total_hours"].replace(0, np.nan)
+    wk["ot_hours"]     = (wk["total_hours"] - wk["threshold"]).clip(lower=0)
+    wk["ot_premium"]   = wk["ot_hours"] * wk["blended_rate"] * 0.5
+
+    df = pd.merge(
+        df,
+        wk[["employee_id", "week_start", "total_earnings", "ot_premium"]],
+        on=["employee_id", "week_start"], how="left"
+    )
+    safe_total        = df["total_earnings"].replace(0, np.nan)
+    df["ot_alloc"]    = (df["straight_time"] / safe_total * df["ot_premium"].fillna(0)).fillna(0)
+    df["total_cost"]  = df["straight_time"] + df["ot_alloc"]
+
+    # ── 19. WORK ORDER SECONDARY ATTRIBUTION ───────────────────────────────────
+    # BOTTLENECK: work_order_splits.csv is an undocumented bridge table. Agents that
+    # join shifts → work_orders but stop there attribute 100% of each split shift's
+    # cost to the employee's dept — correct total, wrong per-dept breakdown.
+    df = pd.merge(
+        df,
+        wo_splits[["work_order_id", "secondary_dept_id", "secondary_pct"]],
+        on="work_order_id", how="left"
+    )
+    split_mask = df["secondary_dept_id"].notna()
+
+    primary_df = df.copy()
+    primary_df.loc[split_mask, "total_cost"] = (
+        df.loc[split_mask, "total_cost"] * (1 - df.loc[split_mask, "secondary_pct"] / 100)
+    )
+    secondary_df = df[split_mask].copy()
+    secondary_df["department_id"] = secondary_df["secondary_dept_id"]
+    secondary_df["total_cost"]    = secondary_df["total_cost"] * secondary_df["secondary_pct"] / 100
+
+    df_attr = pd.concat([primary_df, secondary_df], ignore_index=True)
+
+    # ── 20. DEPT COSTS ────────────────────────────────────────────────────────
+    dept_costs = (
+        df_attr.groupby(["department_id", "week_start"])["total_cost"].sum()
+        .reset_index()
+        .rename(columns={"total_cost": "actual_cost"})
+    )
     dept_costs["week_start"] = dept_costs["week_start"].dt.strftime("%Y-%m-%d")
 
+    # ── 21. REASSIGNMENT ADJUSTMENTS ──────────────────────────────────────────
     reassigns["week_start_dt"] = pd.to_datetime(reassigns["week_start"])
-    reassigns = pd.merge(reassigns, emps[["employee_id", "department_id", "hourly_rate"]], on="employee_id", how="left")
+    reassigns = pd.merge(
+        reassigns, emps[["employee_id", "department_id", "hourly_rate"]],
+        on="employee_id", how="left"
+    )
     for _, t in trans.iterrows():
         mask = (reassigns["employee_id"] == t["employee_id"]) & (reassigns["week_start_dt"] < t["eff_date"])
         reassigns.loc[mask, "department_id"] = t["from_dept_id"]
     reassigns["transfer_cost"] = reassigns["reassigned_hours"] * reassigns["hourly_rate"]
-    
-    home_deduct = reassigns.groupby(["department_id", "week_start"])["transfer_cost"].sum().reset_index()
-    home_deduct.rename(columns={"department_id": "home_dept", "transfer_cost": "deduction"}, inplace=True)
-    
-    recv_add = reassigns.groupby(["to_dept_id", "week_start"])["transfer_cost"].sum().reset_index()
-    recv_add.rename(columns={"to_dept_id": "department_id", "transfer_cost": "addition"}, inplace=True)
-    
-    actuals = pd.merge(dept_costs, home_deduct, left_on=["department_id", "week_start"], right_on=["home_dept", "week_start"], how="left")
+
+    home_deduct = (
+        reassigns.groupby(["department_id", "week_start"])["transfer_cost"].sum()
+        .reset_index()
+        .rename(columns={"department_id": "home_dept", "transfer_cost": "deduction"})
+    )
+    recv_add = (
+        reassigns.groupby(["to_dept_id", "week_start"])["transfer_cost"].sum()
+        .reset_index()
+        .rename(columns={"to_dept_id": "department_id", "transfer_cost": "addition"})
+    )
+    actuals = pd.merge(dept_costs, home_deduct,
+                       left_on=["department_id", "week_start"],
+                       right_on=["home_dept", "week_start"], how="left")
     actuals["deduction"] = actuals["deduction"].fillna(0.0)
     actuals = pd.merge(actuals, recv_add, on=["department_id", "week_start"], how="left")
-    actuals["addition"] = actuals["addition"].fillna(0.0)
-    
+    actuals["addition"]  = actuals["addition"].fillna(0.0)
     actuals["actual_cost"] = actuals["actual_cost"] - actuals["deduction"] + actuals["addition"]
-    
+
+    # ── 22. BUDGETS, AMENDMENTS, CARRYOVER ────────────────────────────────────
     budgets = budgets.sort_values(["department_id", "week_start"])
-    budgets = pd.merge(budgets, actuals[["department_id", "week_start", "actual_cost"]], on=["department_id", "week_start"], how="left")
-    budgets["actual_cost"] = budgets["actual_cost"].fillna(0.0)
+    budgets = pd.merge(
+        budgets, actuals[["department_id", "week_start", "actual_cost"]],
+        on=["department_id", "week_start"], how="left"
+    )
+    budgets["actual_cost"]       = budgets["actual_cost"].fillna(0.0)
     budgets["base_budgeted_cost"] = budgets["budgeted_hours"] * budgets["avg_hourly_rate"]
 
-    # Budget amendments
-    amendments = pd.read_csv(DATA_DIR / "budget_amendments.csv")
     AMEND_CUTOFF = "2024-04-05"
     amendments = amendments[amendments["approved_date"] <= AMEND_CUTOFF].copy()
     for _, a in amendments.iterrows():
-        mask = (budgets["department_id"] == a["department_id"]) & (budgets["week_start"] == a["week_start"])
+        mask = ((budgets["department_id"] == a["department_id"]) &
+                (budgets["week_start"]    == a["week_start"]))
         budgets.loc[mask, "base_budgeted_cost"] += a["amount"]
         if a["type"] == "reallocation":
-            src_mask = (budgets["department_id"] == a["from_dept_id"]) & (budgets["week_start"] == a["week_start"])
-            budgets.loc[src_mask, "base_budgeted_cost"] -= a["amount"]
+            src = ((budgets["department_id"] == a["from_dept_id"]) &
+                   (budgets["week_start"]    == a["week_start"]))
+            budgets.loc[src, "base_budgeted_cost"] -= a["amount"]
 
     effective_budgets = []
     for dept, grp in budgets.groupby("department_id"):
         carryover = 0.0
         for _, row in grp.iterrows():
-            base = row["base_budgeted_cost"]
-            added = min(carryover, base * 0.12)
-            eff = base + added
-            surplus = eff - row["actual_cost"]
-            if surplus > 0:
-                carryover = surplus * 0.8
-            else:
-                carryover = 0.0
-            
-            row_out = row.copy()
+            base      = row["base_budgeted_cost"]
+            added     = min(carryover, base * 0.12)
+            eff       = base + added
+            surplus   = eff - row["actual_cost"]
+            carryover = surplus * 0.8 if surplus > 0 else 0.0
+            row_out   = row.copy()
             row_out["effective_budgeted_cost"] = eff
             row_out["variance"] = row["actual_cost"] - eff
             effective_budgets.append(row_out)
-            
+
     final_df = pd.DataFrame(effective_budgets)
     final_df = pd.merge(final_df, depts, on="department_id", how="left")
-    
-    cols = ["department_id", "department_name", "week_start", "base_budgeted_cost", "effective_budgeted_cost", "actual_cost", "variance"]
-    final_df = final_df[cols].sort_values(["department_id", "week_start"]).reset_index(drop=True)
-    
-    df["ot_hrs"] = df.apply(lambda x: min(max(0, x['cum_hrs'] - x['weekly_ot_threshold']), x['duration_h']), axis=1)
+
+    cols = ["department_id", "department_name", "week_start",
+            "base_budgeted_cost", "effective_budgeted_cost", "actual_cost", "variance"]
+    final_df = (
+        final_df[cols]
+        .sort_values(["department_id", "week_start"])
+        .reset_index(drop=True)
+    )
 
     final_df.to_csv(WORKSPACE_DIR / "payroll_variance_report.csv", index=False)
-    
+
     summary = {
-        "total_budgeted_cost": final_df["effective_budgeted_cost"].sum(),
-        "total_actual_cost": final_df["actual_cost"].sum(),
-        "total_variance": final_df["variance"].sum(),
-        "total_overtime_hours": round(float(df["ot_hrs"].sum()), 2),
-        "over_budget_week_count": int((final_df["variance"] > 0).sum())
+        "total_budgeted_cost":    float(round(final_df["effective_budgeted_cost"].sum(), 2)),
+        "total_actual_cost":      float(round(final_df["actual_cost"].sum(), 2)),
+        "total_variance":         float(round(final_df["variance"].sum(), 2)),
+        "total_overtime_hours":   round(float(wk["ot_hours"].sum()), 2),
+        "over_budget_week_count": int((final_df["variance"] > 0).sum()),
     }
     with open(WORKSPACE_DIR / "summary.json", "w") as f:
         json.dump(summary, f, indent=4)
+
 
 if __name__ == "__main__":
     main()
