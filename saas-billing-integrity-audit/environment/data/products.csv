@@ -1,0 +1,16 @@
+sku,product_name,product_line,pricing_model,base_price,overage_rate,included_units_monthly,included_units_rollover,unit_type,enterprise_only,effective_date,term_date,billing_frequency,recognition_period_months,is_recurring,is_one_time,deprecated_flag
+PRD-PLAT-ENT,Enterprise Platform,Core,flat,5000.0,0.0,0,False,none,True,2022-01-01,,monthly,1,True,False,False
+PRD-PLAT-MM,Professional Platform,Core,flat,2000.0,0.0,0,False,none,False,2022-01-01,,monthly,1,True,False,False
+PRD-PLAT-SMB,Starter Platform,Core,flat,500.0,0.0,0,False,none,False,2022-01-01,,monthly,1,True,False,False
+PRD-API-GW,API Gateway,Add-ons,usage_based,0.0,0.01,100000,False,api_calls,False,2022-01-01,,monthly,1,True,False,False
+PRD-SEATS-CRM,CRM Seats,Add-ons,per_seat,50.0,55.0,0,False,seats,False,2022-01-01,,monthly,1,True,False,False
+PRD-ANALYTICS,Analytics Plus,Analytics,flat,1500.0,0.0,0,False,none,False,2022-01-01,,monthly,1,True,False,False
+PRD-STORAGE,Cloud Storage,Infrastructure,usage_based,0.0,0.05,500,False,gb,False,2022-01-01,,monthly,1,True,False,False
+PRD-SUP-ENT,Enterprise Support,Support,flat,2000.0,0.0,0,False,none,True,2022-01-01,,monthly,1,True,False,False
+PRD-SUP-STD,Standard Support,Support,flat,500.0,0.0,0,False,none,False,2022-01-01,,monthly,1,True,False,False
+PRD-IMPL-STD,Standard Implementation,Prof Services,flat,10000.0,0.0,0,False,none,False,2022-01-01,,one_time,3,False,True,False
+PRD-IMPL-PREM,Premium Implementation,Prof Services,flat,25000.0,0.0,0,False,none,True,2022-01-01,,one_time,6,False,True,False
+PRD-SSO,Single Sign-On,Security,flat,500.0,0.0,0,False,none,False,2022-01-01,,monthly,1,True,False,False
+PRD-COMPLIANCE,Compliance Pack,Security,flat,1000.0,0.0,0,False,none,True,2022-01-01,,monthly,1,True,False,False
+PRD-DATA-EXP,Data Export API,Add-ons,flat,300.0,0.0,0,False,none,False,2022-01-01,,monthly,1,True,False,False
+PRD-LEGACY,Legacy Basic Plan,Core,flat,199.0,0.0,0,False,none,False,2020-01-01,2024-12-31,monthly,1,True,False,True
