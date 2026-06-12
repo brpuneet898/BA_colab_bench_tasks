@@ -298,14 +298,15 @@ def main():
     total        = float(round(amd_gap + sla_over + res_over + use_over, 2))
     accts_w_disc = int(audit["account_id"].nunique())
 
+    # Canonical bucket order: amendment, usage, reseller, sla
     summary = {
-        "amendment_credit_gap_usd":           float(round(amd_gap, 2)),
-        "sla_credit_overcount_usd":           float(round(sla_over, 2)),
-        "reseller_revenue_overstatement_usd": float(round(res_over, 2)),
-        "unbilled_usage_overage_usd":         float(round(use_over, 2)),
-        "total_discrepancy_usd":              float(round(total, 2)),
-        "accounts_with_discrepancies":        int(accts_w_disc),
-        "valid_invoice_count":                int(valid_count),
+        "discrepancy_bucket_1_usd": float(round(amd_gap, 2)),
+        "discrepancy_bucket_2_usd": float(round(use_over, 2)),
+        "discrepancy_bucket_3_usd": float(round(res_over, 2)),
+        "discrepancy_bucket_4_usd": float(round(sla_over, 2)),
+        "total_discrepancy_usd":    float(round(total, 2)),
+        "accounts_with_discrepancies": int(accts_w_disc),
+        "valid_invoice_count":         int(valid_count),
     }
 
     with open(WORKSPACE / "summary.json", "w") as f:
