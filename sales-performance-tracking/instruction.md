@@ -28,7 +28,7 @@ ARR is recognised in equal thirds over three consecutive months beginning in the
 - Only cancellations with `status` = "approved" are valid.
 - The accounting cutoff is `2024-04-05`. Cancellations with `filed_date` after this date are ignored entirely.
 - If multiple valid (approved, pre-cutoff) cancellation records exist for the same deal, the one with the latest `filed_date` takes precedence.
-- When a cancellation applies, any unrecognised future tranches are voided and all previously recognised tranches are clawed back. The clawback is recorded as a negative amount in the month of the `cancelled_date`.
+- When a cancellation applies, any unrecognised future tranches are voided and all tranches previously recognised within Q1 are clawed back. The clawback is recorded as a negative amount in the month of the `cancelled_date`.
 
 
 Each rep's Q1 quota is the row in `quotas.csv` with `period_start` = `2024-02-01`. The base monthly quota is `quota_usd / 3`.
