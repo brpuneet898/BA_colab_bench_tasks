@@ -1,0 +1,501 @@
+account_id,account_name,billing_entity_name,billing_country,billing_currency,billing_address,industry,segment,employee_count,parent_account_id,is_subsidiary,csm_id,ae_id,arr,mrr,contract_count,active_users,health_score,renewal_date,days_to_renewal,nps_score,support_tier,data_processing_region,is_reseller,reseller_margin_pct,created_date,status,is_test_account
+ACC0001,Envoy Inc,,GB,GBP,"758 Main St, Suite 767",Logistics,enterprise,41273,,False,CSM01,AE07,419316.0,34943.0,1,17071,80,2025-10-10,102,63,enterprise,us-west-2,False,,2020-01-08,active,False
+ACC0002,Clarity Corp,,US,USD,"9954 Main St, Suite 481",Healthcare,enterprise,30441,,False,CSM16,AE11,187932.0,15661.0,1,2194,80,2025-09-15,77,51,enterprise,us-west-2,False,,2022-02-15,active,False
+ACC0003,Nexus Inc,,US,USD,"9210 Main St, Suite 989",Logistics,enterprise,34073,,False,CSM12,AE04,100116.0,8343.0,1,14296,86,2025-09-05,67,79,enterprise,eu-west-1,False,,2020-10-15,active,False
+ACC0004,Comet Group,,US,USD,"4745 Main St, Suite 375",Financial Services,enterprise,20236,,False,CSM05,AE14,419688.0,34974.0,1,9520,33,2025-11-02,125,36,enterprise,us-east-1,False,,2021-01-24,active,False
+ACC0005,Quantum Ltd,,US,USD,"8554 Main St, Suite 673",Manufacturing,enterprise,49785,,False,CSM13,AE07,284232.0,23686.0,2,16684,86,2025-07-03,3,52,enterprise,eu-west-1,False,,2022-09-14,active,False
+ACC0006,Harbor Solutions,,US,USD,"7708 Main St, Suite 432",Manufacturing,enterprise,27437,,False,CSM09,AE14,381564.0,31797.0,1,4185,71,2025-12-10,163,-26,enterprise,ap-southeast-1,False,,2023-05-27,active,False
+ACC0007,Dune Technologies,,NL,EUR,"6344 Main St, Suite 107",Healthcare,enterprise,27039,,False,CSM07,AE03,421620.0,35135.0,2,3505,31,2025-09-28,90,33,enterprise,ap-southeast-1,False,,2022-02-01,active,False
+ACC0008,Talon Enterprises,,US,USD,"7162 Main St, Suite 982",Education,enterprise,7978,,False,CSM13,AE14,214092.0,17841.0,1,1906,99,2025-09-08,70,52,enterprise,eu-west-1,False,,2022-07-01,active,False
+ACC0009,Delta Solutions,,GB,GBP,"7350 Main St, Suite 684",Manufacturing,enterprise,48198,,False,CSM20,AE10,205332.0,17111.0,2,10047,98,2025-12-03,156,-28,enterprise,ap-southeast-1,False,,2022-10-13,active,False
+ACC0010,Falcon Corp,,GB,GBP,"9635 Main St, Suite 540",Logistics,enterprise,48548,,False,CSM20,AE13,377760.0,31480.0,2,11288,53,2025-07-04,4,78,enterprise,us-east-1,False,,2022-08-10,active,False
+ACC0011,Relic Group,Noble Corp,US,USD,"3789 Main St, Suite 956",Technology,enterprise,5156,,False,CSM08,AE02,345528.0,28794.0,1,2403,77,2025-11-08,131,52,enterprise,eu-west-1,False,,2020-07-16,active,False
+ACC0012,Kestrel Technologies,,US,USD,"4492 Main St, Suite 104",Logistics,enterprise,37254,,False,CSM11,AE04,428328.0,35694.0,3,12617,67,2025-09-02,64,-37,enterprise,ap-southeast-1,False,,2022-05-23,active,False
+ACC0013,Mast Services,,US,USD,"3059 Main St, Suite 503",Retail,enterprise,33909,,False,CSM03,AE05,330468.0,27539.0,2,9321,92,2025-12-15,168,64,enterprise,us-east-1,False,,2021-03-12,active,False
+ACC0014,Falcon Solutions,,FR,EUR,"1454 Main St, Suite 267",Logistics,enterprise,36165,,False,CSM18,AE11,268740.0,22395.0,2,13286,72,2025-12-18,171,-33,enterprise,us-west-2,False,,2021-10-15,at_risk,False
+ACC0015,Meridian Corp,,US,USD,"9634 Main St, Suite 670",Logistics,enterprise,17859,,False,CSM07,AE07,286812.0,23901.0,1,3755,93,2025-07-02,2,76,enterprise,ap-southeast-1,False,,2020-02-11,active,False
+ACC0016,Gale Systems,,GB,GBP,"5341 Main St, Suite 293",Manufacturing,enterprise,14942,,False,CSM13,AE10,472512.0,39376.0,1,188,51,2025-08-16,47,63,enterprise,us-east-1,False,,2021-11-11,active,False
+ACC0017,Unity Enterprises,,US,USD,"8622 Main St, Suite 528",Logistics,enterprise,18004,,False,CSM20,AE09,155688.0,12974.0,2,6074,48,2025-07-16,16,58,enterprise,eu-west-1,True,0.36,2023-01-08,active,False
+ACC0018,Clarity Services,Comet Services,GB,GBP,"9600 Main St, Suite 764",Technology,enterprise,28546,,False,CSM06,AE01,161736.0,13478.0,1,733,47,2025-10-09,101,29,enterprise,us-east-1,False,,2021-02-12,active,False
+ACC0019,Pearl Corp,,US,USD,"4547 Main St, Suite 286",Logistics,enterprise,39718,,False,CSM07,AE08,294168.0,24514.0,2,7828,46,2025-12-04,157,10,enterprise,us-east-1,False,,2021-01-02,active,False
+ACC0020,Envoy Group,,US,USD,"4369 Main St, Suite 520",Education,enterprise,43276,,False,CSM11,AE04,255264.0,21272.0,3,4957,52,2025-10-08,100,32,enterprise,us-east-1,False,,2020-01-04,active,False
+ACC0021,Amber Partners,,GB,GBP,"7143 Main St, Suite 642",Technology,enterprise,17334,ACC0010,True,CSM07,AE03,358368.0,29864.0,3,180,95,2025-08-27,58,-30,enterprise,us-east-1,False,,2020-09-10,active,False
+ACC0022,Sienna Solutions,,GB,GBP,"4989 Main St, Suite 104",Healthcare,enterprise,8524,,False,CSM18,AE08,108012.0,9001.0,3,2640,62,2025-09-07,69,-21,enterprise,ap-southeast-1,False,,2020-09-18,active,False
+ACC0023,Atlas Corp,,GB,GBP,"3678 Main St, Suite 233",Healthcare,enterprise,13459,,False,CSM11,AE12,207792.0,17316.0,3,762,72,2025-09-28,90,-5,enterprise,us-east-1,False,,2020-12-16,active,False
+ACC0024,Ursa Technologies,,FR,EUR,"7278 Main St, Suite 371",Media,enterprise,4827,,False,CSM17,AE05,412128.0,34344.0,1,301,93,2025-09-11,73,-23,enterprise,eu-west-1,False,,2023-01-21,active,False
+ACC0025,Quantum Corp,Jolt Services,GB,GBP,"5819 Main St, Suite 625",Retail,enterprise,33841,,False,CSM03,AE09,151176.0,12598.0,2,15184,36,2025-11-15,138,66,enterprise,us-west-2,False,,2022-01-05,active,False
+ACC0026,Lumina Partners,Keystone Solutions,DE,EUR,"1646 Main St, Suite 307",Education,enterprise,36359,,False,CSM18,AE13,200892.0,16741.0,3,4613,73,2025-07-09,9,33,enterprise,us-east-1,False,,2020-06-17,active,False
+ACC0027,Lumen Group,,ES,EUR,"9431 Main St, Suite 111",Technology,enterprise,27100,,False,CSM16,AE06,356196.0,29683.0,1,7051,60,2025-08-22,53,9,enterprise,ap-southeast-1,False,,2022-10-16,active,False
+ACC0028,Astro Technologies,,US,USD,"2075 Main St, Suite 984",Logistics,enterprise,20355,,False,CSM05,AE04,348444.0,29037.0,3,3489,63,2025-07-11,11,66,enterprise,eu-west-1,False,,2020-09-14,active,False
+ACC0029,Pearl Group,,FR,EUR,"1135 Main St, Suite 728",Education,enterprise,26334,,False,CSM18,AE12,254592.0,21216.0,1,6623,37,2025-11-15,138,-40,enterprise,us-east-1,False,,2020-09-19,active,False
+ACC0030,Topaz Systems,,US,USD,"3545 Main St, Suite 647",Manufacturing,enterprise,11307,,False,CSM12,AE06,104880.0,8740.0,2,2314,30,2025-11-21,144,32,enterprise,eu-west-1,False,,2023-12-11,active,False
+ACC0031,Granite Systems,,GB,GBP,"6876 Main St, Suite 121",Logistics,enterprise,10640,,False,CSM15,AE04,121980.0,10165.0,1,1056,37,2025-09-22,84,17,enterprise,ap-southeast-1,False,,2021-05-11,active,False
+ACC0032,Ridge Ltd,Ferrous Group,US,USD,"989 Main St, Suite 962",Financial Services,enterprise,24425,,False,CSM14,AE11,202788.0,16899.0,2,6053,92,2025-09-15,77,-27,enterprise,us-east-1,False,,2020-12-06,active,False
+ACC0033,Zeal Systems,Clarity Group,US,USD,"1464 Main St, Suite 946",Healthcare,enterprise,38476,,False,CSM05,AE09,216060.0,18005.0,2,8181,36,2025-12-03,156,58,enterprise,ap-southeast-1,False,,2021-11-22,active,False
+ACC0034,Helios Solutions,,US,USD,"7423 Main St, Suite 366",Education,enterprise,26529,,False,CSM08,AE13,304260.0,25355.0,1,5371,37,2025-09-05,67,51,enterprise,us-east-1,False,,2020-01-08,active,False
+ACC0035,Kestrel Inc,,GB,GBP,"8479 Main St, Suite 684",Retail,enterprise,47136,,False,CSM02,AE07,327684.0,27307.0,2,4367,47,2025-12-21,174,66,enterprise,eu-west-1,False,,2021-02-07,active,False
+ACC0036,Cipher Corp,,IT,EUR,"9405 Main St, Suite 102",Education,enterprise,17627,,False,CSM07,AE08,382872.0,31906.0,1,2489,64,2025-08-10,41,14,enterprise,eu-west-1,False,,2022-07-21,active,False
+ACC0037,Zephyr Services,,GB,GBP,"3788 Main St, Suite 598",Logistics,enterprise,18707,,False,CSM05,AE03,262872.0,21906.0,2,2370,92,2025-08-27,58,-37,enterprise,us-west-2,False,,2020-05-04,at_risk,False
+ACC0038,Beacon Technologies,,US,USD,"1953 Main St, Suite 228",Education,enterprise,16755,,False,CSM17,AE12,96636.0,8053.0,2,3108,63,2025-09-28,90,61,enterprise,us-east-1,False,,2023-08-03,at_risk,False
+ACC0039,Topaz Technologies,,FR,EUR,"7956 Main St, Suite 289",Logistics,enterprise,3455,,False,CSM11,AE07,310704.0,25892.0,1,497,75,2025-11-19,142,51,enterprise,us-east-1,False,,2023-05-02,churned,False
+ACC0040,Flare Technologies,,US,USD,"1616 Main St, Suite 928",Media,enterprise,44029,,False,CSM07,AE07,203856.0,16988.0,2,15988,81,2025-11-04,127,15,enterprise,us-west-2,False,,2020-05-13,active,False
+ACC0041,Zeal Partners,Zeal Group,DE,EUR,"2967 Main St, Suite 902",Media,enterprise,31082,,False,CSM15,AE05,277548.0,23129.0,2,15415,62,2025-10-05,97,24,enterprise,ap-southeast-1,False,,2023-07-10,active,False
+ACC0042,Lumen Enterprises,,FR,EUR,"7277 Main St, Suite 915",Healthcare,enterprise,36011,,False,CSM09,AE03,459852.0,38321.0,2,11652,58,2025-09-12,74,1,enterprise,eu-west-1,True,0.29,2021-09-21,active,False
+ACC0043,Zenith Systems,,US,USD,"1707 Main St, Suite 799",Logistics,enterprise,5494,ACC0028,True,CSM18,AE12,413652.0,34471.0,3,679,94,2025-10-21,113,40,enterprise,us-east-1,False,,2021-09-04,active,False
+ACC0044,Onyx Services,,US,USD,"5466 Main St, Suite 791",Logistics,enterprise,7794,,False,CSM12,AE10,390096.0,32508.0,3,2907,48,2025-11-26,149,-3,enterprise,eu-west-1,False,,2021-04-08,active,False
+ACC0045,Beacon Services,,IT,EUR,"6140 Main St, Suite 258",Logistics,enterprise,20584,,False,CSM17,AE13,295476.0,24623.0,2,3379,52,2025-07-16,16,63,enterprise,eu-west-1,True,0.3,2021-09-16,active,False
+ACC0046,Razor Services,,GB,GBP,"9966 Main St, Suite 787",Financial Services,enterprise,40648,,False,CSM16,AE02,224292.0,18691.0,2,9769,74,2025-12-26,179,15,enterprise,eu-west-1,False,,2020-05-26,active,False
+ACC0047,Walden Technologies,,US,USD,"8178 Main St, Suite 613",Financial Services,enterprise,15176,,False,CSM08,AE01,339372.0,28281.0,1,299,53,2025-10-11,103,14,enterprise,ap-southeast-1,False,,2021-04-13,active,False
+ACC0048,Xeon Inc,,US,USD,"361 Main St, Suite 480",Retail,enterprise,35295,,False,CSM13,AE14,149112.0,12426.0,3,16464,50,2025-07-11,11,78,enterprise,eu-west-1,False,,2023-08-04,active,False
+ACC0049,Nexus Partners,,US,USD,"1641 Main St, Suite 480",Manufacturing,enterprise,39746,ACC0032,True,CSM12,AE04,322020.0,26835.0,3,9953,50,2025-12-07,160,43,enterprise,ap-southeast-1,False,,2020-04-14,churned,False
+ACC0050,Falcon Group,,DE,EUR,"2178 Main St, Suite 146",Healthcare,enterprise,2556,,False,CSM14,AE12,479772.0,39981.0,3,453,52,2025-11-21,144,55,enterprise,eu-west-1,False,,2022-02-03,active,False
+ACC0051,Ember Ltd,,GB,GBP,"8940 Main St, Suite 612",Logistics,enterprise,21417,,False,CSM19,AE02,455604.0,37967.0,2,3491,40,2025-11-21,144,-3,enterprise,eu-west-1,False,,2021-04-07,active,False
+ACC0052,Fusion Enterprises,,DE,EUR,"8248 Main St, Suite 123",Financial Services,enterprise,1025,,False,CSM02,AE13,183048.0,15254.0,2,139,88,2025-11-03,126,26,enterprise,eu-west-1,False,,2020-06-24,active,False
+ACC0053,Visor Solutions,,US,USD,"7171 Main St, Suite 517",Healthcare,enterprise,21746,,False,CSM08,AE07,131616.0,10968.0,2,2385,74,2025-10-08,100,-15,enterprise,eu-west-1,False,,2021-07-21,active,False
+ACC0054,Noble Technologies,,GB,GBP,"9903 Main St, Suite 987",Media,enterprise,5213,,False,CSM04,AE07,387732.0,32311.0,2,2394,57,2025-08-02,33,-18,enterprise,ap-southeast-1,False,,2021-03-05,churned,False
+ACC0055,Cipher Enterprises,,GB,GBP,"7483 Main St, Suite 595",Retail,enterprise,23270,,False,CSM17,AE06,431172.0,35931.0,3,8269,62,2025-09-19,81,-37,enterprise,eu-west-1,False,,2020-08-07,active,False
+ACC0056,Epoch Systems,,US,USD,"5655 Main St, Suite 778",Healthcare,enterprise,24823,,False,CSM03,AE08,238860.0,19905.0,2,2018,52,2025-09-08,70,14,enterprise,eu-west-1,False,,2022-04-09,active,False
+ACC0057,Pearl Inc,,GB,GBP,"1040 Main St, Suite 522",Education,enterprise,18754,,False,CSM10,AE13,121368.0,10114.0,2,8774,63,2025-10-26,118,-33,enterprise,us-west-2,False,,2020-01-06,active,False
+ACC0058,Raven Solutions,,US,USD,"1843 Main St, Suite 685",Education,enterprise,10579,,False,CSM04,AE05,274128.0,22844.0,3,1820,55,2025-08-25,56,-11,enterprise,us-east-1,False,,2021-09-01,active,False
+ACC0059,Valor Corp,,US,USD,"603 Main St, Suite 203",Retail,enterprise,46538,,False,CSM13,AE07,197676.0,16473.0,2,2840,44,2025-11-25,148,63,enterprise,ap-southeast-1,False,,2022-06-06,active,False
+ACC0060,Beacon Group,,GB,GBP,"9490 Main St, Suite 923",Education,enterprise,26777,,False,CSM19,AE03,361716.0,30143.0,1,10730,99,2025-07-06,6,-1,enterprise,us-west-2,True,0.3,2020-12-13,churned,False
+ACC0061,Orbit Inc,,GB,GBP,"8004 Main St, Suite 878",Technology,enterprise,40460,,False,CSM12,AE09,242196.0,20183.0,1,7257,77,2025-09-04,66,9,enterprise,us-west-2,False,,2021-10-17,active,False
+ACC0062,Gale Services,,US,USD,"5721 Main St, Suite 361",Media,enterprise,46412,,False,CSM08,AE09,241548.0,20129.0,1,8584,52,2025-09-22,84,77,enterprise,us-west-2,False,,2023-12-21,active,False
+ACC0063,Orbit Enterprises,,DE,EUR,"7579 Main St, Suite 573",Education,enterprise,9137,,False,CSM20,AE14,213372.0,17781.0,1,830,72,2025-09-25,87,-28,enterprise,eu-west-1,False,,2022-09-28,active,False
+ACC0064,Razor Technologies,,IT,EUR,"924 Main St, Suite 123",Healthcare,enterprise,20232,ACC0001,True,CSM15,AE03,421308.0,35109.0,1,8622,47,2025-10-28,120,20,enterprise,us-east-1,False,,2020-12-26,active,False
+ACC0065,Helios Corp,,US,USD,"2776 Main St, Suite 490",Education,enterprise,39546,,False,CSM03,AE08,314028.0,26169.0,3,4250,68,2025-12-28,181,-11,enterprise,ap-southeast-1,False,,2023-04-25,at_risk,False
+ACC0066,Zinc Inc,,GB,GBP,"5102 Main St, Suite 533",Financial Services,enterprise,42724,,False,CSM12,AE10,424560.0,35380.0,1,20982,81,2025-12-25,178,33,enterprise,ap-southeast-1,False,,2020-12-17,active,False
+ACC0067,Vector Enterprises,,US,USD,"3107 Main St, Suite 159",Technology,enterprise,21463,,False,CSM19,AE08,145056.0,12088.0,3,5436,62,2025-11-07,130,12,enterprise,eu-west-1,False,,2020-02-25,active,False
+ACC0068,Amber Services,,ES,EUR,"2221 Main St, Suite 616",Financial Services,enterprise,19460,,False,CSM10,AE06,139620.0,11635.0,1,1809,36,2025-07-17,17,21,enterprise,ap-southeast-1,False,,2023-08-04,active,False
+ACC0069,Zenith Technologies,,US,USD,"1423 Main St, Suite 487",Healthcare,enterprise,21330,,False,CSM01,AE04,406644.0,33887.0,2,5703,56,2025-10-19,111,80,enterprise,us-west-2,False,,2023-03-03,active,False
+ACC0070,Glyph Enterprises,,GB,GBP,"8390 Main St, Suite 354",Technology,enterprise,35584,,False,CSM01,AE13,174120.0,14510.0,2,16672,41,2025-12-11,164,47,enterprise,eu-west-1,True,0.38,2022-04-15,active,False
+ACC0071,Wren Solutions,,FR,EUR,"2931 Main St, Suite 279",Technology,enterprise,22806,,False,CSM14,AE14,400440.0,33370.0,3,1455,80,2025-12-09,162,25,enterprise,ap-southeast-1,False,,2023-01-05,churned,False
+ACC0072,Kraft Ltd,,IT,EUR,"9719 Main St, Suite 787",Retail,enterprise,47226,,False,CSM10,AE07,234984.0,19582.0,1,20369,57,2025-11-09,132,-7,enterprise,us-west-2,False,,2022-02-26,active,False
+ACC0073,Vector Technologies,Wilder Inc,US,USD,"8616 Main St, Suite 285",Healthcare,enterprise,36469,,False,CSM20,AE13,130464.0,10872.0,2,3989,57,2025-11-13,136,22,enterprise,eu-west-1,False,,2020-07-22,churned,False
+ACC0074,Cobalt Inc,,GB,GBP,"5728 Main St, Suite 334",Manufacturing,enterprise,12581,,False,CSM14,AE10,111600.0,9300.0,3,5011,44,2025-07-27,27,21,enterprise,ap-southeast-1,False,,2022-01-10,active,False
+ACC0075,Sienna Technologies,,IT,EUR,"9461 Main St, Suite 392",Education,enterprise,47494,,False,CSM03,AE09,335940.0,27995.0,1,10047,42,2025-07-14,14,34,enterprise,us-west-2,False,,2020-05-04,active,False
+ACC0076,Nexus Services,,US,USD,"8238 Main St, Suite 196",Manufacturing,enterprise,8942,,False,CSM10,AE08,354372.0,29531.0,1,2324,32,2025-11-21,144,21,enterprise,ap-southeast-1,False,,2021-10-07,churned,False
+ACC0077,Cobalt Ltd,,US,USD,"2356 Main St, Suite 649",Technology,enterprise,24828,,False,CSM12,AE15,134004.0,11167.0,1,217,63,2025-09-28,90,19,enterprise,ap-southeast-1,False,,2022-06-26,active,False
+ACC0078,Comet Inc,,DE,EUR,"8575 Main St, Suite 371",Healthcare,enterprise,41289,,False,CSM09,AE10,403608.0,33634.0,2,16063,77,2025-11-26,149,72,enterprise,ap-southeast-1,False,,2022-08-21,active,False
+ACC0079,Amber Solutions,,NL,EUR,"7476 Main St, Suite 447",Financial Services,enterprise,40794,,False,CSM08,AE10,337572.0,28131.0,3,2314,83,2025-11-14,137,-13,enterprise,ap-southeast-1,False,,2021-07-02,active,False
+ACC0080,Falcon Inc,,DE,EUR,"8839 Main St, Suite 252",Media,enterprise,47847,,False,CSM17,AE03,134292.0,11191.0,1,17974,55,2025-08-12,43,55,enterprise,us-west-2,False,,2023-02-08,active,False
+ACC0081,Lumen Corp,,US,USD,"2478 Main St, Suite 803",Manufacturing,enterprise,13170,,False,CSM15,AE02,200988.0,16749.0,3,5369,44,2025-11-16,139,14,enterprise,us-west-2,False,,2021-05-04,active,False
+ACC0082,York Services,,GB,GBP,"7541 Main St, Suite 265",Healthcare,enterprise,18680,,False,CSM08,AE02,226416.0,18868.0,2,136,61,2025-09-10,72,44,enterprise,us-west-2,False,,2020-03-07,active,False
+ACC0083,Iridium Partners,,GB,GBP,"4767 Main St, Suite 651",Retail,enterprise,27427,,False,CSM18,AE13,186612.0,15551.0,2,12461,65,2025-09-14,76,55,enterprise,us-west-2,False,,2023-01-27,active,False
+ACC0084,Beacon Enterprises,,US,USD,"5565 Main St, Suite 989",Technology,enterprise,1774,,False,CSM15,AE04,368820.0,30735.0,1,176,86,2025-09-14,76,-32,enterprise,ap-southeast-1,False,,2022-06-14,churned,False
+ACC0085,Quantum Technologies,,IT,EUR,"9393 Main St, Suite 994",Manufacturing,enterprise,44605,,False,CSM13,AE05,141516.0,11793.0,2,4806,42,2025-09-21,83,-13,enterprise,us-east-1,False,,2020-04-04,active,False
+ACC0086,Nadir Ltd,,IT,EUR,"8137 Main St, Suite 928",Logistics,enterprise,20741,,False,CSM16,AE03,389964.0,32497.0,2,3106,78,2025-11-19,142,80,enterprise,ap-southeast-1,False,,2020-11-01,active,False
+ACC0087,Valor Ltd,,GB,GBP,"6121 Main St, Suite 793",Manufacturing,enterprise,17769,,False,CSM08,AE12,202056.0,16838.0,2,7421,89,2025-07-13,13,-15,enterprise,eu-west-1,False,,2023-07-08,active,False
+ACC0088,Blaze Enterprises,,US,USD,"981 Main St, Suite 404",Media,enterprise,49710,,False,CSM04,AE06,235572.0,19631.0,1,5882,43,2025-08-26,57,-20,enterprise,us-east-1,False,,2023-01-06,active,False
+ACC0089,Indigo Group,,US,USD,"2506 Main St, Suite 930",Technology,enterprise,37312,,False,CSM05,AE15,280092.0,23341.0,2,13617,36,2025-11-20,143,51,enterprise,ap-southeast-1,False,,2023-07-18,active,False
+ACC0090,Xeon Ltd,,US,USD,"9084 Main St, Suite 672",Healthcare,enterprise,10827,,False,CSM13,AE05,146304.0,12192.0,1,643,48,2025-09-07,69,-7,enterprise,us-east-1,False,,2020-03-12,at_risk,False
+ACC0091,Opal Group,,NL,EUR,"7849 Main St, Suite 453",Logistics,enterprise,12010,,False,CSM13,AE13,453096.0,37758.0,3,1492,90,2025-09-08,70,-32,enterprise,us-east-1,False,,2021-11-18,active,False
+ACC0092,Zinc Enterprises,,GB,GBP,"1148 Main St, Suite 754",Logistics,enterprise,27532,,False,CSM09,AE01,429084.0,35757.0,2,12070,43,2025-10-22,114,23,enterprise,ap-southeast-1,False,,2021-02-18,active,False
+ACC0093,Yoke Solutions,,DE,EUR,"8590 Main St, Suite 455",Education,enterprise,31427,,False,CSM16,AE15,383748.0,31979.0,1,14350,86,2025-12-07,160,-11,enterprise,ap-southeast-1,False,,2021-06-04,active,False
+ACC0094,Echo Services,,FR,EUR,"3983 Main St, Suite 416",Healthcare,enterprise,40041,,False,CSM13,AE10,296856.0,24738.0,2,9490,35,2025-09-27,89,79,enterprise,us-east-1,False,,2020-05-23,active,False
+ACC0095,Maple Group,,US,USD,"8846 Main St, Suite 324",Education,enterprise,43902,,False,CSM05,AE06,332376.0,27698.0,1,5169,73,2025-11-17,140,-5,enterprise,eu-west-1,False,,2020-04-15,active,False
+ACC0096,Thorpe Corp,,GB,GBP,"8199 Main St, Suite 877",Education,enterprise,23317,,False,CSM01,AE13,105384.0,8782.0,2,4623,59,2025-08-16,47,74,enterprise,ap-southeast-1,False,,2020-12-20,active,False
+ACC0097,Zenith Solutions,,US,USD,"5359 Main St, Suite 818",Financial Services,enterprise,13623,,False,CSM16,AE04,302916.0,25243.0,1,2778,31,2025-11-21,144,1,enterprise,ap-southeast-1,False,,2022-11-07,active,False
+ACC0098,Cobalt Technologies,,US,USD,"271 Main St, Suite 898",Education,enterprise,19207,,False,CSM17,AE01,340044.0,28337.0,2,3358,98,2025-07-14,14,30,enterprise,us-east-1,False,,2022-12-15,churned,False
+ACC0099,Talon Inc,,US,USD,"990 Main St, Suite 442",Technology,enterprise,45242,,False,CSM02,AE15,161124.0,13427.0,2,1985,35,2025-08-24,55,-37,enterprise,us-east-1,False,,2022-12-24,active,False
+ACC0100,Opal Services,,NL,EUR,"7155 Main St, Suite 733",Healthcare,enterprise,38947,,False,CSM04,AE08,128640.0,10720.0,1,1330,42,2025-12-09,162,10,enterprise,ap-southeast-1,True,0.25,2020-08-12,active,False
+ACC0101,Drake Partners,,FR,EUR,"869 Main St, Suite 285",Healthcare,mid_market,857,,False,CSM16,AE04,80352.0,6696.0,1,195,78,2025-11-19,142,38,professional,ap-southeast-1,False,,2022-04-27,active,False
+ACC0102,Atlas Inc,,NL,EUR,"6272 Main St, Suite 394",Media,mid_market,360,,False,CSM13,AE11,37392.0,3116.0,1,102,78,2025-10-13,105,33,professional,us-east-1,False,,2021-07-08,active,False
+ACC0103,Zephyr Enterprises,,US,USD,"8468 Main St, Suite 845",Retail,mid_market,491,,False,CSM11,AE01,49896.0,4158.0,2,188,98,2025-08-13,44,17,professional,eu-west-1,False,,2020-12-07,active,False
+ACC0104,Atlas Services,Global Group,US,USD,"5204 Main St, Suite 701",Retail,mid_market,935,,False,CSM11,AE14,74268.0,6189.0,1,158,65,2025-10-18,110,27,professional,us-west-2,False,,2023-06-27,at_risk,False
+ACC0105,Unity Corp,,US,USD,"3727 Main St, Suite 791",Manufacturing,mid_market,630,,False,CSM15,AE11,53136.0,4428.0,1,12,45,2025-07-03,3,28,professional,ap-southeast-1,False,,2020-06-07,at_risk,False
+ACC0106,Quartz Systems,,US,USD,"4180 Main St, Suite 237",Financial Services,mid_market,250,,False,CSM05,AE14,93408.0,7784.0,1,120,65,2025-08-12,43,-22,professional,ap-southeast-1,False,,2021-08-06,active,False
+ACC0107,Crimson Ltd,,US,USD,"7532 Main St, Suite 993",Technology,mid_market,826,,False,CSM20,AE02,95904.0,7992.0,2,219,54,2025-09-08,70,37,professional,eu-west-1,True,0.39,2020-09-09,active,False
+ACC0108,Lancer Services,,FR,EUR,"9200 Main St, Suite 914",Manufacturing,mid_market,701,,False,CSM16,AE15,59220.0,4935.0,1,96,32,2025-12-13,166,-2,professional,eu-west-1,False,,2023-03-09,active,False
+ACC0109,Apex Partners,,US,USD,"3401 Main St, Suite 574",Financial Services,mid_market,554,,False,CSM09,AE03,31596.0,2633.0,1,149,90,2025-09-20,82,79,professional,us-west-2,False,,2022-08-12,active,False
+ACC0110,Delta Inc,,US,USD,"8927 Main St, Suite 347",Media,mid_market,986,,False,CSM02,AE01,77220.0,6435.0,1,29,95,2025-12-09,162,30,professional,ap-southeast-1,False,,2022-03-01,active,False
+ACC0111,Insight Systems,,US,USD,"810 Main St, Suite 663",Logistics,mid_market,239,,False,CSM03,AE01,25992.0,2166.0,2,67,42,2025-09-19,81,31,professional,ap-southeast-1,False,,2022-08-07,active,False
+ACC0112,Vapor Group,,US,USD,"9216 Main St, Suite 529",Education,mid_market,907,,False,CSM08,AE12,29700.0,2475.0,1,103,82,2025-07-21,21,-35,professional,us-east-1,False,,2020-10-19,active,False
+ACC0113,Atlas Technologies,,US,USD,"7788 Main St, Suite 299",Media,mid_market,116,,False,CSM01,AE02,45996.0,3833.0,1,52,63,2025-10-07,99,35,professional,eu-west-1,False,,2021-06-16,active,False
+ACC0114,Umbra Inc,,US,USD,"5716 Main St, Suite 932",Retail,mid_market,878,,False,CSM05,AE10,21312.0,1776.0,2,410,67,2025-07-12,12,-38,professional,us-west-2,False,,2020-07-13,at_risk,False
+ACC0115,Sienna Services,,NL,EUR,"7913 Main St, Suite 170",Technology,mid_market,885,,False,CSM17,AE01,18936.0,1578.0,2,273,96,2025-08-26,57,34,professional,us-west-2,False,,2023-09-28,active,False
+ACC0116,Global Inc,,US,USD,"8504 Main St, Suite 749",Manufacturing,mid_market,238,,False,CSM11,AE05,57132.0,4761.0,2,112,98,2025-07-20,20,-25,professional,eu-west-1,False,,2022-09-20,active,False
+ACC0117,Global Corp,,DE,EUR,"2230 Main St, Suite 690",Retail,mid_market,297,,False,CSM04,AE13,47400.0,3950.0,2,118,47,2025-12-15,168,31,professional,eu-west-1,False,,2022-06-17,at_risk,False
+ACC0118,Ridge Corp,,US,USD,"8589 Main St, Suite 405",Healthcare,mid_market,185,,False,CSM02,AE07,38112.0,3176.0,1,45,83,2025-10-05,97,51,professional,us-east-1,False,,2022-08-28,active,False
+ACC0119,Insight Partners,,US,USD,"9533 Main St, Suite 270",Technology,mid_market,861,,False,CSM08,AE14,19992.0,1666.0,2,298,64,2025-12-01,154,-6,professional,us-east-1,False,,2022-07-09,active,False
+ACC0120,Vertex Group,,US,USD,"5462 Main St, Suite 569",Healthcare,mid_market,219,,False,CSM06,AE07,71616.0,5968.0,2,5,78,2025-09-04,66,34,professional,us-west-2,False,,2020-07-09,active,False
+ACC0121,Amber Systems,,US,USD,"4000 Main St, Suite 105",Retail,mid_market,197,,False,CSM17,AE08,77256.0,6438.0,1,22,72,2025-08-10,41,-23,professional,us-east-1,False,,2021-01-13,active,False
+ACC0122,Sapphire Systems,,FR,EUR,"320 Main St, Suite 322",Education,mid_market,479,,False,CSM19,AE05,84624.0,7052.0,1,185,85,2025-11-24,147,20,professional,eu-west-1,False,,2022-02-03,at_risk,False
+ACC0123,Ivory Corp,Zeal Corp,IT,EUR,"4579 Main St, Suite 192",Education,mid_market,138,,False,CSM11,AE05,75492.0,6291.0,2,2,64,2025-10-16,108,-22,professional,ap-southeast-1,False,,2021-06-27,active,False
+ACC0124,Flare Solutions,Jolt Group,US,USD,"182 Main St, Suite 936",Media,mid_market,286,,False,CSM11,AE15,28200.0,2350.0,1,140,99,2025-12-08,161,-9,professional,ap-southeast-1,True,0.37,2020-09-27,active,False
+ACC0125,Lyric Services,,US,USD,"9766 Main St, Suite 735",Healthcare,mid_market,351,,False,CSM04,AE01,28044.0,2337.0,1,72,57,2025-09-10,72,28,professional,us-east-1,False,,2021-11-25,active,False
+ACC0126,Beacon Systems,,US,USD,"4655 Main St, Suite 519",Media,mid_market,556,,False,CSM08,AE02,32136.0,2678.0,1,239,33,2025-10-10,102,29,professional,us-west-2,False,,2022-05-08,at_risk,False
+ACC0127,Zinc Services,,US,USD,"2460 Main St, Suite 409",Financial Services,mid_market,408,,False,CSM06,AE13,51468.0,4289.0,2,186,96,2025-09-16,78,-13,professional,eu-west-1,False,,2022-01-16,active,False
+ACC0128,Zephyr Solutions,,US,USD,"4548 Main St, Suite 651",Healthcare,mid_market,716,,False,CSM01,AE02,73656.0,6138.0,2,334,72,2025-10-05,97,-8,professional,us-west-2,False,,2023-06-10,active,False
+ACC0129,Paladin Ltd,,US,USD,"2009 Main St, Suite 475",Retail,mid_market,316,,False,CSM20,AE06,77232.0,6436.0,2,55,53,2025-07-10,10,-1,professional,us-east-1,False,,2021-04-24,active,False
+ACC0130,Glyph Solutions,,US,USD,"9338 Main St, Suite 382",Technology,mid_market,362,,False,CSM16,AE02,33756.0,2813.0,2,140,82,2025-09-26,88,62,professional,us-west-2,False,,2023-08-28,active,False
+ACC0131,Envoy Corp,,DE,EUR,"4509 Main St, Suite 792",Technology,mid_market,742,,False,CSM02,AE05,77808.0,6484.0,1,245,39,2025-07-27,27,-36,professional,eu-west-1,False,,2023-10-09,active,False
+ACC0132,Lumina Group,Spectrum Group,IT,EUR,"4679 Main St, Suite 338",Logistics,mid_market,567,,False,CSM08,AE13,64980.0,5415.0,2,122,33,2025-11-08,131,66,professional,us-east-1,False,,2023-05-03,active,False
+ACC0133,Raven Group,,US,USD,"2647 Main St, Suite 144",Financial Services,mid_market,483,,False,CSM16,AE06,89496.0,7458.0,2,148,70,2025-10-02,94,26,professional,us-west-2,False,,2023-04-21,active,False
+ACC0134,Vector Inc,,FR,EUR,"1506 Main St, Suite 601",Financial Services,mid_market,972,,False,CSM05,AE13,70212.0,5851.0,2,149,71,2025-12-17,170,-2,professional,us-west-2,False,,2020-10-14,at_risk,False
+ACC0135,Forge Inc,Noble Solutions,DE,EUR,"5170 Main St, Suite 365",Healthcare,mid_market,607,,False,CSM02,AE10,45552.0,3796.0,1,116,38,2025-07-10,10,8,professional,ap-southeast-1,False,,2021-09-08,active,False
+ACC0136,Thorpe Inc,,US,USD,"7242 Main St, Suite 998",Education,mid_market,334,,False,CSM10,AE05,32496.0,2708.0,1,147,48,2025-09-21,83,18,professional,ap-southeast-1,False,,2021-02-17,active,False
+ACC0137,Crimson Group,,IT,EUR,"3146 Main St, Suite 270",Manufacturing,mid_market,626,,False,CSM18,AE13,26892.0,2241.0,1,81,63,2025-09-09,71,45,professional,eu-west-1,True,0.21,2023-08-27,active,False
+ACC0138,Sapphire Partners,,US,USD,"7509 Main St, Suite 538",Financial Services,mid_market,405,,False,CSM18,AE05,25992.0,2166.0,2,191,56,2025-07-23,23,65,professional,eu-west-1,False,,2022-08-13,active,False
+ACC0139,Visor Technologies,,DE,EUR,"2692 Main St, Suite 396",Retail,mid_market,431,,False,CSM05,AE06,54564.0,4547.0,1,150,67,2025-09-06,68,80,professional,ap-southeast-1,False,,2022-04-19,active,False
+ACC0140,Onyx Enterprises,Nexus Group,US,USD,"9903 Main St, Suite 727",Manufacturing,mid_market,339,,False,CSM20,AE13,63816.0,5318.0,2,79,31,2025-07-26,26,-29,professional,us-west-2,True,0.23,2023-04-15,active,False
+ACC0141,Topaz Services,,US,USD,"6162 Main St, Suite 631",Education,mid_market,556,,False,CSM11,AE14,20316.0,1693.0,1,14,32,2025-12-17,170,-29,professional,eu-west-1,False,,2020-09-24,active,False
+ACC0142,Kraft Systems,,US,USD,"3162 Main St, Suite 283",Media,mid_market,775,,False,CSM02,AE08,85104.0,7092.0,1,345,80,2025-07-06,6,52,professional,us-east-1,False,,2022-06-12,active,False
+ACC0143,Wren Technologies,Global Technologies,US,USD,"527 Main St, Suite 908",Technology,mid_market,974,,False,CSM20,AE11,33132.0,2761.0,1,483,97,2025-10-07,99,-3,professional,ap-southeast-1,False,,2020-09-17,active,False
+ACC0144,Meridian Group,,US,USD,"6366 Main St, Suite 907",Manufacturing,mid_market,885,,False,CSM20,AE13,55908.0,4659.0,2,36,57,2025-11-15,138,6,professional,us-east-1,False,,2021-02-10,active,False
+ACC0145,Ulrich Technologies,Dune Services,US,USD,"763 Main St, Suite 123",Retail,mid_market,358,,False,CSM15,AE02,29532.0,2461.0,1,54,48,2025-11-24,147,8,professional,ap-southeast-1,False,,2021-03-03,active,False
+ACC0146,Lumen Systems,,US,USD,"3139 Main St, Suite 224",Media,mid_market,219,,False,CSM09,AE02,33444.0,2787.0,2,77,44,2025-11-17,140,65,professional,ap-southeast-1,False,,2022-06-14,active,False
+ACC0147,Titan Services,,US,USD,"2951 Main St, Suite 101",Technology,mid_market,162,,False,CSM20,AE13,68964.0,5747.0,2,59,89,2025-07-15,15,-31,professional,us-east-1,True,0.2,2021-03-20,active,False
+ACC0148,Xeon Enterprises,,US,USD,"377 Main St, Suite 550",Logistics,mid_market,761,,False,CSM20,AE07,84576.0,7048.0,1,59,70,2025-11-12,135,60,professional,ap-southeast-1,False,,2020-06-16,active,False
+ACC0149,Quantum Partners,,US,USD,"4243 Main St, Suite 414",Manufacturing,mid_market,897,,False,CSM06,AE07,25656.0,2138.0,1,193,53,2025-11-22,145,44,professional,us-west-2,False,,2020-08-26,active,False
+ACC0150,Granite Group,,FR,EUR,"6968 Main St, Suite 187",Financial Services,mid_market,234,,False,CSM09,AE03,21168.0,1764.0,1,68,30,2025-10-17,109,-27,professional,us-east-1,False,,2023-11-06,active,False
+ACC0151,Vanguard Solutions,,US,USD,"8457 Main St, Suite 422",Manufacturing,mid_market,342,,False,CSM01,AE05,94992.0,7916.0,2,103,43,2025-07-03,3,79,professional,ap-southeast-1,False,,2020-05-21,active,False
+ACC0152,Apex Group,,US,USD,"8935 Main St, Suite 282",Financial Services,mid_market,211,,False,CSM11,AE09,57300.0,4775.0,1,80,51,2025-10-07,99,65,professional,us-west-2,False,,2021-07-18,at_risk,False
+ACC0153,Dune Group,,US,USD,"3957 Main St, Suite 312",Logistics,mid_market,917,,False,CSM11,AE03,71184.0,5932.0,2,32,90,2025-08-16,47,72,professional,ap-southeast-1,False,,2023-06-12,active,False
+ACC0154,Titan Inc,,US,USD,"779 Main St, Suite 860",Media,mid_market,788,,False,CSM06,AE12,76584.0,6382.0,1,25,88,2025-12-27,180,67,professional,eu-west-1,False,,2023-02-05,active,False
+ACC0155,Nadir Technologies,,US,USD,"6747 Main St, Suite 779",Retail,mid_market,929,,False,CSM20,AE08,43152.0,3596.0,1,76,30,2025-07-17,17,-16,professional,eu-west-1,False,,2022-03-27,active,False
+ACC0156,Unity Systems,,US,USD,"6606 Main St, Suite 270",Media,mid_market,614,,False,CSM06,AE12,83364.0,6947.0,2,247,74,2025-09-24,86,74,professional,eu-west-1,False,,2020-01-14,active,False
+ACC0157,Yoke Systems,,DE,EUR,"994 Main St, Suite 263",Financial Services,mid_market,345,,False,CSM01,AE12,26148.0,2179.0,1,156,88,2025-12-16,169,5,professional,eu-west-1,False,,2023-07-28,active,False
+ACC0158,Quantum Systems,Helios Inc,US,USD,"1689 Main St, Suite 435",Logistics,mid_market,754,,False,CSM19,AE06,44400.0,3700.0,1,192,99,2025-07-21,21,-12,professional,ap-southeast-1,False,,2021-11-25,active,False
+ACC0159,Ember Solutions,,US,USD,"1197 Main St, Suite 910",Logistics,mid_market,834,,False,CSM04,AE07,20892.0,1741.0,1,82,33,2025-11-23,146,76,professional,ap-southeast-1,False,,2023-05-24,active,False
+ACC0160,Yoke Group,Delphi Services,US,USD,"5023 Main St, Suite 845",Media,mid_market,992,,False,CSM06,AE13,58716.0,4893.0,1,28,72,2025-11-23,146,73,professional,eu-west-1,False,,2022-08-06,active,False
+ACC0161,Prism Corp,,ES,EUR,"3239 Main St, Suite 852",Healthcare,mid_market,892,,False,CSM03,AE01,68100.0,5675.0,1,103,94,2025-12-04,157,26,professional,ap-southeast-1,False,,2021-09-12,active,False
+ACC0162,Onyx Group,,US,USD,"1594 Main St, Suite 144",Logistics,mid_market,606,,False,CSM19,AE13,49068.0,4089.0,2,79,74,2025-10-09,101,25,professional,eu-west-1,False,,2023-05-22,active,False
+ACC0163,Horizon Systems,Echo Solutions,US,USD,"3230 Main St, Suite 555",Technology,mid_market,573,,False,CSM09,AE08,71856.0,5988.0,1,99,88,2025-12-17,170,-10,professional,us-east-1,False,,2020-01-27,active,False
+ACC0164,Jasper Ltd,,US,USD,"5042 Main St, Suite 781",Logistics,mid_market,972,,False,CSM07,AE05,21636.0,1803.0,1,268,79,2025-08-27,58,80,professional,us-east-1,False,,2021-03-18,active,False
+ACC0165,Delta Enterprises,,US,USD,"6800 Main St, Suite 642",Healthcare,mid_market,885,,False,CSM08,AE08,54168.0,4514.0,2,20,81,2025-10-19,111,-28,professional,us-west-2,False,,2020-10-18,churned,False
+ACC0166,Zephyr Systems,,US,USD,"5496 Main St, Suite 335",Media,mid_market,114,,False,CSM17,AE13,47412.0,3951.0,2,54,38,2025-11-14,137,-24,professional,ap-southeast-1,False,,2022-07-18,active,False
+ACC0167,Atlas Group,,US,USD,"2125 Main St, Suite 249",Financial Services,mid_market,419,,False,CSM10,AE02,83220.0,6935.0,1,86,90,2025-09-01,63,52,professional,eu-west-1,True,0.33,2020-09-06,active,False
+ACC0168,Obsidian Services,,IT,EUR,"8380 Main St, Suite 699",Manufacturing,mid_market,759,,False,CSM10,AE11,41040.0,3420.0,1,287,64,2025-09-12,74,-37,professional,us-east-1,False,,2023-06-03,active,False
+ACC0169,Zenith Services,,US,USD,"8209 Main St, Suite 380",Education,mid_market,309,,False,CSM02,AE05,80688.0,6724.0,2,22,65,2025-09-09,71,-4,professional,us-east-1,False,,2023-08-02,active,False
+ACC0170,Xara Ltd,,US,USD,"9015 Main St, Suite 613",Financial Services,mid_market,922,,False,CSM09,AE11,82188.0,6849.0,1,260,54,2025-12-27,180,1,professional,us-east-1,False,,2023-05-25,active,False
+ACC0171,Blaze Inc,,US,USD,"4342 Main St, Suite 653",Financial Services,mid_market,174,,False,CSM05,AE13,95484.0,7957.0,2,34,44,2025-12-16,169,46,professional,eu-west-1,False,,2022-06-24,active,False
+ACC0172,Global Services,,NL,EUR,"8006 Main St, Suite 252",Education,mid_market,876,,False,CSM02,AE15,40368.0,3364.0,1,79,59,2025-12-10,163,-12,professional,ap-southeast-1,False,,2021-04-24,active,False
+ACC0173,Jasper Inc,,US,USD,"3217 Main St, Suite 855",Media,mid_market,919,,False,CSM08,AE14,53316.0,4443.0,2,182,70,2025-09-16,78,-11,professional,us-east-1,False,,2023-03-12,active,False
+ACC0174,Thorpe Systems,,US,USD,"6180 Main St, Suite 356",Retail,mid_market,905,,False,CSM10,AE08,48480.0,4040.0,2,141,71,2025-10-11,103,-13,professional,eu-west-1,False,,2022-01-21,active,False
+ACC0175,Vanguard Ltd,,IT,EUR,"1619 Main St, Suite 698",Healthcare,mid_market,771,,False,CSM16,AE12,72180.0,6015.0,2,140,46,2025-11-17,140,49,professional,eu-west-1,False,,2020-05-19,active,False
+ACC0176,Ulrich Partners,,US,USD,"8030 Main St, Suite 836",Manufacturing,mid_market,249,,False,CSM01,AE15,57864.0,4822.0,1,50,96,2025-07-25,25,65,professional,ap-southeast-1,False,,2023-05-11,active,False
+ACC0177,Thorpe Solutions,,US,USD,"8934 Main St, Suite 416",Financial Services,mid_market,449,,False,CSM12,AE10,19932.0,1661.0,2,181,99,2025-11-01,124,-32,professional,us-east-1,False,,2022-10-16,active,False
+ACC0178,Nether Group,,DE,EUR,"220 Main St, Suite 564",Manufacturing,mid_market,874,,False,CSM19,AE13,20316.0,1693.0,2,111,55,2025-10-15,107,40,professional,us-west-2,False,,2023-03-10,active,False
+ACC0179,Blaze Partners,Fusion Systems,US,USD,"5566 Main St, Suite 344",Manufacturing,mid_market,858,,False,CSM10,AE12,75780.0,6315.0,1,79,34,2025-07-12,12,24,professional,us-west-2,False,,2023-04-04,active,False
+ACC0180,Epoch Partners,,US,USD,"3669 Main St, Suite 259",Financial Services,mid_market,183,,False,CSM16,AE03,95196.0,7933.0,1,72,65,2025-08-06,37,79,professional,us-east-1,False,,2021-11-15,active,False
+ACC0181,Onyx Partners,,US,USD,"5303 Main St, Suite 706",Manufacturing,mid_market,579,,False,CSM11,AE07,74472.0,6206.0,1,190,83,2025-10-25,117,71,professional,eu-west-1,False,,2023-02-03,active,False
+ACC0182,Yoke Corp,,US,USD,"8426 Main St, Suite 355",Financial Services,mid_market,165,,False,CSM06,AE12,20088.0,1674.0,1,19,93,2025-09-03,65,-22,professional,us-east-1,True,0.35,2022-12-15,active,False
+ACC0183,Harbor Inc,,US,USD,"1016 Main St, Suite 673",Financial Services,mid_market,599,,False,CSM08,AE05,68580.0,5715.0,1,66,84,2025-10-04,96,43,professional,us-east-1,False,,2022-02-08,active,False
+ACC0184,Pinnacle Group,,US,USD,"7423 Main St, Suite 826",Education,mid_market,941,,False,CSM02,AE09,63108.0,5259.0,2,250,74,2025-12-20,173,62,professional,us-west-2,False,,2021-05-16,active,False
+ACC0185,Forge Technologies,,ES,EUR,"1278 Main St, Suite 675",Healthcare,mid_market,998,,False,CSM12,AE11,44280.0,3690.0,1,399,43,2025-07-13,13,69,professional,us-east-1,False,,2020-06-18,active,False
+ACC0186,Blaze Ltd,,US,USD,"2622 Main St, Suite 490",Technology,mid_market,287,,False,CSM19,AE12,86112.0,7176.0,1,43,77,2025-09-01,63,42,professional,eu-west-1,False,,2022-06-02,at_risk,False
+ACC0187,Orbit Partners,,US,USD,"8143 Main St, Suite 216",Financial Services,mid_market,982,,False,CSM18,AE07,93972.0,7831.0,1,270,62,2025-09-07,69,-16,professional,ap-southeast-1,True,0.34,2023-09-02,active,False
+ACC0188,Flare Systems,,ES,EUR,"4386 Main St, Suite 782",Financial Services,mid_market,343,,False,CSM16,AE04,56544.0,4712.0,1,65,71,2025-07-06,6,67,professional,us-east-1,True,0.21,2022-05-18,active,False
+ACC0189,Walden Systems,,US,USD,"2809 Main St, Suite 944",Retail,mid_market,660,,False,CSM14,AE15,47364.0,3947.0,1,144,44,2025-08-23,54,50,professional,us-east-1,False,,2021-04-13,active,False
+ACC0190,Walden Partners,,US,USD,"1326 Main St, Suite 685",Manufacturing,mid_market,572,,False,CSM06,AE14,71352.0,5946.0,1,66,32,2025-07-12,12,50,professional,eu-west-1,False,,2020-04-15,active,False
+ACC0191,Zinc Ltd,,US,USD,"3371 Main St, Suite 575",Manufacturing,mid_market,489,,False,CSM01,AE02,19572.0,1631.0,1,41,43,2025-12-07,160,-29,professional,us-west-2,False,,2020-12-04,active,False
+ACC0192,Razor Systems,,US,USD,"1172 Main St, Suite 274",Financial Services,mid_market,593,,False,CSM18,AE15,54624.0,4552.0,2,170,73,2025-07-14,14,38,professional,eu-west-1,False,,2021-03-12,churned,False
+ACC0193,Zinc Systems,,US,USD,"3141 Main St, Suite 234",Retail,mid_market,452,,False,CSM20,AE08,24888.0,2074.0,1,87,77,2025-12-18,171,38,professional,us-west-2,True,0.21,2023-05-06,at_risk,False
+ACC0194,Lumen Technologies,,FR,EUR,"3369 Main St, Suite 239",Education,mid_market,651,,False,CSM05,AE04,62280.0,5190.0,1,279,92,2025-10-15,107,-36,professional,us-west-2,False,,2022-11-05,churned,False
+ACC0195,Unity Ltd,,US,USD,"6870 Main St, Suite 526",Healthcare,mid_market,106,,False,CSM07,AE11,61260.0,5105.0,2,29,72,2025-11-17,140,29,professional,us-east-1,False,,2023-02-04,active,False
+ACC0196,Nexus Corp,,US,USD,"6599 Main St, Suite 110",Financial Services,mid_market,932,,False,CSM20,AE13,86784.0,7232.0,1,105,39,2025-11-10,133,58,professional,ap-southeast-1,True,0.26,2022-10-14,active,False
+ACC0197,Summit Services,,US,USD,"1620 Main St, Suite 268",Financial Services,mid_market,391,,False,CSM10,AE14,27768.0,2314.0,1,157,66,2025-12-19,172,-17,professional,us-west-2,False,,2022-10-01,active,False
+ACC0198,Spectrum Services,,US,USD,"7457 Main St, Suite 632",Technology,mid_market,392,,False,CSM06,AE14,18912.0,1576.0,1,108,54,2025-07-23,23,-2,professional,ap-southeast-1,False,,2020-09-26,active,False
+ACC0199,Granite Ltd,,US,USD,"9311 Main St, Suite 460",Education,mid_market,264,,False,CSM04,AE10,95412.0,7951.0,1,91,80,2025-10-08,100,-14,professional,eu-west-1,False,,2021-06-06,active,False
+ACC0200,Nadir Corp,,US,USD,"5024 Main St, Suite 154",Logistics,mid_market,846,,False,CSM11,AE14,65856.0,5488.0,2,69,44,2025-11-17,140,33,professional,eu-west-1,False,,2021-09-03,active,False
+ACC0201,Drake Services,Quest Partners,DE,EUR,"6437 Main St, Suite 634",Retail,mid_market,922,,False,CSM05,AE05,42144.0,3512.0,1,345,34,2025-07-14,14,-30,professional,us-west-2,False,,2022-11-16,active,False
+ACC0202,Wilder Partners,,NL,EUR,"4542 Main St, Suite 727",Manufacturing,mid_market,398,,False,CSM06,AE14,26628.0,2219.0,2,143,84,2025-08-09,40,74,professional,us-east-1,False,,2020-10-22,active,False
+ACC0203,Obsidian Inc,,US,USD,"3209 Main St, Suite 450",Healthcare,mid_market,311,,False,CSM17,AE13,51984.0,4332.0,1,2,72,2025-11-17,140,37,professional,us-west-2,False,,2021-05-10,active,False
+ACC0204,Granite Enterprises,,US,USD,"9122 Main St, Suite 104",Healthcare,mid_market,435,,False,CSM04,AE09,23016.0,1918.0,1,139,93,2025-07-28,28,5,professional,us-east-1,False,,2021-05-07,active,False
+ACC0205,Wilder Technologies,,NL,EUR,"7912 Main St, Suite 323",Financial Services,mid_market,450,,False,CSM18,AE08,52884.0,4407.0,1,23,88,2025-08-13,44,38,professional,us-east-1,False,,2022-03-28,active,False
+ACC0206,Ulrich Ltd,,IT,EUR,"8042 Main St, Suite 497",Financial Services,mid_market,515,,False,CSM05,AE03,56640.0,4720.0,1,228,52,2025-12-07,160,5,professional,us-east-1,False,,2022-03-05,active,False
+ACC0207,Ursa Solutions,,US,USD,"9642 Main St, Suite 584",Media,mid_market,263,,False,CSM02,AE14,68796.0,5733.0,2,3,94,2025-09-09,71,39,professional,us-west-2,False,,2020-09-02,active,False
+ACC0208,Cipher Technologies,,US,USD,"8210 Main St, Suite 784",Manufacturing,mid_market,795,,False,CSM07,AE14,65484.0,5457.0,1,83,62,2025-08-04,35,14,professional,eu-west-1,False,,2021-03-07,at_risk,False
+ACC0209,Astro Inc,Amber Ltd,US,USD,"927 Main St, Suite 388",Retail,mid_market,887,,False,CSM13,AE04,48468.0,4039.0,2,72,42,2025-12-11,164,73,professional,ap-southeast-1,False,,2020-11-05,active,False
+ACC0210,Shore Systems,,US,USD,"4445 Main St, Suite 267",Technology,mid_market,735,,False,CSM19,AE05,92820.0,7735.0,1,112,78,2025-07-19,19,-10,professional,us-west-2,False,,2023-04-18,active,False
+ACC0211,Yoke Partners,,US,USD,"2778 Main St, Suite 685",Financial Services,mid_market,506,,False,CSM19,AE05,18360.0,1530.0,2,205,53,2025-07-22,22,55,professional,us-west-2,False,,2021-08-05,active,False
+ACC0212,Zinc Group,,US,USD,"5443 Main St, Suite 188",Media,mid_market,347,,False,CSM01,AE05,33048.0,2754.0,1,126,65,2025-10-20,112,52,professional,eu-west-1,False,,2022-04-04,active,False
+ACC0213,Thorpe Services,Cobalt Enterprises,DE,EUR,"1564 Main St, Suite 871",Healthcare,mid_market,134,,False,CSM04,AE06,78588.0,6549.0,1,2,41,2025-10-05,97,32,professional,us-west-2,False,,2021-01-09,active,False
+ACC0214,Keystone Enterprises,,US,USD,"9167 Main St, Suite 797",Logistics,mid_market,267,,False,CSM03,AE15,48876.0,4073.0,1,127,40,2025-07-24,24,-34,professional,eu-west-1,False,,2021-04-02,active,False
+ACC0215,Ember Technologies,,US,USD,"6618 Main St, Suite 704",Financial Services,mid_market,308,,False,CSM15,AE09,71868.0,5989.0,2,153,63,2025-10-03,95,42,professional,us-west-2,False,,2020-01-06,active,False
+ACC0216,Razor Enterprises,,US,USD,"2647 Main St, Suite 842",Financial Services,mid_market,428,,False,CSM01,AE01,75564.0,6297.0,1,214,35,2025-10-18,110,73,professional,eu-west-1,False,,2022-01-02,active,False
+ACC0217,Cipher Solutions,,US,USD,"2240 Main St, Suite 682",Education,mid_market,617,,False,CSM08,AE04,29172.0,2431.0,1,172,71,2025-10-01,93,-29,professional,eu-west-1,False,,2021-04-06,at_risk,False
+ACC0218,Quartz Solutions,,US,USD,"9288 Main St, Suite 177",Technology,mid_market,785,,False,CSM05,AE01,59880.0,4990.0,2,84,37,2025-12-21,174,78,professional,us-east-1,False,,2021-12-23,active,False
+ACC0219,Vanguard Enterprises,,US,USD,"6147 Main St, Suite 111",Education,mid_market,973,,False,CSM06,AE02,72696.0,6058.0,1,162,89,2025-11-05,128,-7,professional,eu-west-1,False,,2023-12-17,active,False
+ACC0220,Amber Inc,,FR,EUR,"3526 Main St, Suite 534",Financial Services,mid_market,269,,False,CSM09,AE04,72252.0,6021.0,1,17,39,2025-12-19,172,22,professional,us-west-2,False,,2020-10-23,active,False
+ACC0221,Xara Enterprises,,US,USD,"3288 Main St, Suite 950",Manufacturing,mid_market,219,,False,CSM15,AE14,19200.0,1600.0,2,87,51,2025-08-07,38,-25,professional,us-east-1,False,,2021-12-07,active,False
+ACC0222,Vista Solutions,,US,USD,"9488 Main St, Suite 539",Media,mid_market,353,,False,CSM01,AE05,44940.0,3745.0,1,143,36,2025-08-14,45,-28,professional,ap-southeast-1,False,,2023-08-25,active,False
+ACC0223,Pinnacle Corp,,US,USD,"4822 Main St, Suite 157",Financial Services,mid_market,138,,False,CSM10,AE03,33192.0,2766.0,1,69,84,2025-11-09,132,1,professional,ap-southeast-1,True,0.23,2020-01-05,at_risk,False
+ACC0224,Meridian Partners,,US,USD,"4221 Main St, Suite 579",Financial Services,mid_market,255,,False,CSM07,AE15,64380.0,5365.0,2,15,75,2025-10-20,112,40,professional,us-west-2,True,0.26,2022-09-20,active,False
+ACC0225,Raven Corp,,US,USD,"992 Main St, Suite 516",Healthcare,mid_market,271,,False,CSM13,AE11,30480.0,2540.0,1,100,71,2025-10-04,96,26,professional,us-west-2,False,,2023-08-01,active,False
+ACC0226,Granite Corp,,US,USD,"4803 Main St, Suite 386",Retail,mid_market,433,,False,CSM06,AE14,93360.0,7780.0,1,217,36,2025-12-14,167,46,professional,us-west-2,False,,2023-12-14,active,False
+ACC0227,Razor Partners,,US,USD,"9374 Main St, Suite 806",Manufacturing,mid_market,122,,False,CSM09,AE05,34056.0,2838.0,2,31,34,2025-07-04,4,-17,professional,eu-west-1,False,,2021-08-09,active,False
+ACC0228,Ember Enterprises,,US,USD,"5547 Main St, Suite 643",Financial Services,mid_market,812,,False,CSM17,AE14,24672.0,2056.0,1,167,36,2025-12-13,166,62,professional,ap-southeast-1,False,,2021-04-01,active,False
+ACC0229,Lancer Group,,US,USD,"3729 Main St, Suite 400",Manufacturing,mid_market,949,,False,CSM12,AE14,23256.0,1938.0,2,384,50,2025-07-03,3,69,professional,eu-west-1,False,,2021-04-20,active,False
+ACC0230,Ridge Technologies,,US,USD,"1457 Main St, Suite 630",Logistics,mid_market,436,,False,CSM16,AE05,82092.0,6841.0,1,87,93,2025-11-15,138,-37,professional,eu-west-1,False,,2020-03-03,active,False
+ACC0231,Meridian Services,,US,USD,"4857 Main St, Suite 256",Media,mid_market,396,,False,CSM18,AE05,19824.0,1652.0,1,37,54,2025-09-16,78,-7,professional,eu-west-1,False,,2020-06-09,active,False
+ACC0232,Beacon Inc,,US,USD,"123 Main St, Suite 902",Manufacturing,mid_market,720,,False,CSM01,AE14,42540.0,3545.0,2,309,30,2025-08-19,50,-21,professional,us-west-2,False,,2021-08-20,active,False
+ACC0233,Relic Technologies,,US,USD,"5612 Main St, Suite 605",Media,mid_market,109,,False,CSM20,AE09,65712.0,5476.0,1,52,97,2025-09-09,71,23,professional,us-west-2,False,,2022-11-15,active,False
+ACC0234,Heath Partners,Relic Enterprises,DE,EUR,"1190 Main St, Suite 168",Media,mid_market,728,,False,CSM10,AE10,48960.0,4080.0,2,311,34,2025-07-07,7,23,professional,ap-southeast-1,False,,2020-12-19,active,False
+ACC0235,Helios Ltd,,US,USD,"7260 Main St, Suite 190",Education,mid_market,144,,False,CSM14,AE15,88752.0,7396.0,1,11,68,2025-09-15,77,21,professional,eu-west-1,False,,2023-10-23,active,False
+ACC0236,Keystone Corp,,US,USD,"8516 Main St, Suite 548",Healthcare,mid_market,308,,False,CSM06,AE10,66144.0,5512.0,2,18,58,2025-11-21,144,1,professional,us-east-1,False,,2021-08-02,active,False
+ACC0237,Titan Solutions,,US,USD,"9022 Main St, Suite 985",Retail,mid_market,885,,False,CSM05,AE12,24732.0,2061.0,1,35,40,2025-09-24,86,27,professional,ap-southeast-1,False,,2023-09-26,active,False
+ACC0238,Glyph Partners,,US,USD,"3706 Main St, Suite 233",Healthcare,mid_market,106,,False,CSM01,AE11,52356.0,4363.0,2,39,83,2025-08-22,53,-9,professional,us-west-2,False,,2022-08-09,active,False
+ACC0239,Indigo Services,,US,USD,"3025 Main St, Suite 942",Financial Services,mid_market,831,,False,CSM19,AE01,71964.0,5997.0,2,10,35,2025-07-01,1,55,professional,us-west-2,False,,2022-08-01,active,False
+ACC0240,Flare Corp,,US,USD,"6234 Main St, Suite 534",Healthcare,mid_market,106,,False,CSM16,AE15,45192.0,3766.0,2,45,61,2025-11-03,126,20,professional,us-west-2,False,,2021-04-21,active,False
+ACC0241,Talon Services,,US,USD,"2907 Main St, Suite 497",Healthcare,mid_market,437,,False,CSM15,AE02,49932.0,4161.0,2,184,94,2025-11-24,147,28,professional,eu-west-1,False,,2022-09-13,active,False
+ACC0242,Unity Services,,US,USD,"124 Main St, Suite 575",Manufacturing,mid_market,708,,False,CSM08,AE02,35052.0,2921.0,2,204,87,2025-08-18,49,-13,professional,eu-west-1,False,,2021-09-23,active,False
+ACC0243,Maple Corp,,US,USD,"9686 Main St, Suite 745",Technology,mid_market,474,,False,CSM12,AE12,48576.0,4048.0,2,119,60,2025-12-16,169,58,professional,eu-west-1,False,,2023-11-12,active,False
+ACC0244,Dune Partners,,US,USD,"7577 Main St, Suite 863",Financial Services,mid_market,963,,False,CSM02,AE09,58488.0,4874.0,2,391,84,2025-12-07,160,23,professional,eu-west-1,False,,2022-09-04,active,False
+ACC0245,Delta Services,,DE,EUR,"1619 Main St, Suite 969",Retail,mid_market,442,,False,CSM10,AE01,64464.0,5372.0,1,218,31,2025-09-20,82,-37,professional,us-west-2,False,,2023-07-28,active,False
+ACC0246,Echo Inc,,US,USD,"3479 Main St, Suite 899",Media,mid_market,368,,False,CSM11,AE09,72996.0,6083.0,2,165,61,2025-11-17,140,-13,professional,us-east-1,False,,2023-08-07,active,False
+ACC0247,Vanguard Group,,US,USD,"8649 Main St, Suite 353",Healthcare,mid_market,532,,False,CSM03,AE08,50892.0,4241.0,1,76,50,2025-07-07,7,-36,professional,ap-southeast-1,False,,2023-12-05,active,False
+ACC0248,Atlas Solutions,,US,USD,"8893 Main St, Suite 265",Healthcare,mid_market,560,,False,CSM20,AE05,90204.0,7517.0,2,229,85,2025-10-20,112,64,professional,us-east-1,False,,2022-06-15,active,False
+ACC0249,Wren Partners,,US,USD,"4512 Main St, Suite 637",Retail,mid_market,376,,False,CSM03,AE13,35508.0,2959.0,1,81,48,2025-07-07,7,48,professional,eu-west-1,False,,2020-10-28,active,False
+ACC0250,Kraft Partners,,US,USD,"1229 Main St, Suite 535",Media,mid_market,663,,False,CSM16,AE06,77724.0,6477.0,2,98,61,2025-10-21,113,57,professional,us-east-1,False,,2023-08-12,active,False
+ACC0251,Vapor Enterprises,,US,USD,"8839 Main St, Suite 314",Retail,mid_market,178,,False,CSM14,AE05,54624.0,4552.0,1,25,39,2025-12-16,169,-40,professional,eu-west-1,False,,2021-01-14,active,False
+ACC0252,Quest Inc,,US,USD,"3632 Main St, Suite 689",Retail,mid_market,795,,False,CSM07,AE08,90972.0,7581.0,2,246,31,2025-08-07,38,67,professional,ap-southeast-1,False,,2020-07-05,active,False
+ACC0253,Astro Solutions,,US,USD,"6255 Main St, Suite 754",Retail,mid_market,428,,False,CSM03,AE13,52380.0,4365.0,2,88,77,2025-08-08,39,1,professional,eu-west-1,False,,2021-02-24,active,False
+ACC0254,Apex Services,,US,USD,"7758 Main St, Suite 473",Retail,mid_market,923,,False,CSM12,AE05,70440.0,5870.0,1,30,70,2025-08-03,34,59,professional,us-east-1,False,,2022-02-06,active,False
+ACC0255,Maven Group,,US,USD,"612 Main St, Suite 350",Healthcare,mid_market,580,,False,CSM05,AE06,57348.0,4779.0,2,80,47,2025-07-04,4,12,professional,ap-southeast-1,False,,2022-04-20,active,False
+ACC0256,Umbra Solutions,,FR,EUR,"1669 Main St, Suite 706",Logistics,mid_market,378,,False,CSM11,AE01,89028.0,7419.0,2,43,45,2025-08-25,56,70,professional,ap-southeast-1,False,,2022-03-22,active,False
+ACC0257,Ivory Inc,,US,USD,"1162 Main St, Suite 617",Logistics,mid_market,452,,False,CSM08,AE13,70992.0,5916.0,2,140,82,2025-09-06,68,-5,professional,us-east-1,False,,2020-04-12,active,False
+ACC0258,Paladin Partners,,US,USD,"627 Main St, Suite 101",Financial Services,mid_market,890,,False,CSM20,AE07,79164.0,6597.0,2,325,64,2025-10-09,101,-30,professional,us-east-1,False,,2021-04-26,active,False
+ACC0259,Crimson Corp,,US,USD,"6272 Main St, Suite 182",Education,mid_market,433,,False,CSM11,AE04,45144.0,3762.0,2,164,100,2025-09-11,73,11,professional,us-west-2,False,,2023-08-18,active,False
+ACC0260,Cipher Group,,US,USD,"5782 Main St, Suite 583",Technology,mid_market,122,,False,CSM02,AE03,55704.0,4642.0,1,42,53,2025-12-03,156,-11,professional,eu-west-1,False,,2020-06-21,active,False
+ACC0261,Vanguard Partners,,ES,EUR,"8339 Main St, Suite 468",Education,mid_market,880,,False,CSM17,AE15,73860.0,6155.0,2,260,63,2025-12-17,170,-20,professional,eu-west-1,False,,2020-10-27,active,False
+ACC0262,Atlas Ltd,,US,USD,"1096 Main St, Suite 780",Manufacturing,mid_market,233,,False,CSM19,AE04,84372.0,7031.0,1,107,61,2025-11-23,146,29,professional,eu-west-1,True,0.23,2021-09-23,churned,False
+ACC0263,Insight Technologies,,US,USD,"2190 Main St, Suite 124",Education,mid_market,329,,False,CSM17,AE08,35160.0,2930.0,2,4,36,2025-11-23,146,-27,professional,eu-west-1,False,,2021-09-27,active,False
+ACC0264,Vista Enterprises,,IT,EUR,"4561 Main St, Suite 667",Retail,mid_market,378,,False,CSM08,AE06,77508.0,6459.0,2,92,48,2025-07-21,21,-6,professional,us-west-2,False,,2022-03-25,at_risk,False
+ACC0265,Wilder Ltd,Raven Enterprises,US,USD,"8351 Main St, Suite 560",Financial Services,mid_market,236,,False,CSM07,AE04,30876.0,2573.0,1,80,50,2025-09-03,65,36,professional,eu-west-1,False,,2023-06-10,at_risk,False
+ACC0266,Ulrich Enterprises,Echo Enterprises,NL,EUR,"1134 Main St, Suite 964",Media,mid_market,695,,False,CSM02,AE08,71088.0,5924.0,1,292,49,2025-09-14,76,72,professional,us-west-2,False,,2023-06-23,active,False
+ACC0267,Mast Technologies,,US,USD,"7010 Main St, Suite 717",Healthcare,mid_market,935,,False,CSM01,AE01,71664.0,5972.0,1,387,40,2025-07-26,26,-28,professional,eu-west-1,False,,2020-12-15,active,False
+ACC0268,Pinnacle Systems,,US,USD,"2803 Main St, Suite 118",Technology,mid_market,542,,False,CSM04,AE07,68604.0,5717.0,2,182,85,2025-07-08,8,36,professional,eu-west-1,False,,2023-08-12,active,False
+ACC0269,Titan Group,,IT,EUR,"9910 Main St, Suite 484",Technology,mid_market,856,,False,CSM06,AE03,62280.0,5190.0,2,295,86,2025-08-02,33,61,professional,eu-west-1,True,0.33,2020-11-16,active,False
+ACC0270,Ember Services,,NL,EUR,"6176 Main St, Suite 527",Retail,mid_market,593,,False,CSM13,AE12,20424.0,1702.0,2,124,70,2025-08-08,39,16,professional,us-west-2,False,,2022-05-16,active,False
+ACC0271,Xeon Systems,,US,USD,"6856 Main St, Suite 562",Media,mid_market,717,,False,CSM02,AE10,73560.0,6130.0,1,17,98,2025-11-13,136,67,professional,eu-west-1,True,0.35,2023-01-22,active,False
+ACC0272,Vanguard Systems,,US,USD,"2704 Main St, Suite 297",Retail,mid_market,165,,False,CSM17,AE03,36420.0,3035.0,2,37,77,2025-10-08,100,45,professional,us-west-2,True,0.29,2021-07-12,active,False
+ACC0273,Gale Ltd,,US,USD,"5681 Main St, Suite 248",Manufacturing,mid_market,708,,False,CSM14,AE08,87216.0,7268.0,1,51,56,2025-12-16,169,61,professional,us-east-1,False,,2020-05-07,active,False
+ACC0274,Clarity Inc,,DE,EUR,"297 Main St, Suite 420",Media,mid_market,999,,False,CSM11,AE14,63360.0,5280.0,2,235,80,2025-07-05,5,66,professional,us-west-2,False,,2022-05-06,churned,False
+ACC0275,Raven Ltd,,US,USD,"8443 Main St, Suite 696",Retail,mid_market,620,,False,CSM11,AE11,21060.0,1755.0,1,164,89,2025-11-27,150,71,professional,ap-southeast-1,False,,2023-02-24,active,False
+ACC0276,Horizon Enterprises,,US,USD,"8121 Main St, Suite 311",Manufacturing,mid_market,460,,False,CSM03,AE06,20964.0,1747.0,1,118,77,2025-08-13,44,-29,professional,ap-southeast-1,True,0.38,2023-02-16,active,False
+ACC0277,Jolt Systems,,US,USD,"4099 Main St, Suite 566",Logistics,mid_market,241,,False,CSM11,AE06,81948.0,6829.0,2,81,84,2025-11-25,148,12,professional,us-west-2,False,,2022-01-14,active,False
+ACC0278,Meridian Ltd,,US,USD,"5411 Main St, Suite 189",Financial Services,mid_market,411,,False,CSM02,AE14,31632.0,2636.0,1,135,67,2025-08-09,40,55,professional,eu-west-1,True,0.3,2021-12-02,active,False
+ACC0279,Ember Corp,Relic Inc,US,USD,"8215 Main St, Suite 271",Healthcare,mid_market,162,,False,CSM13,AE13,56772.0,4731.0,1,16,45,2025-08-19,50,66,professional,us-west-2,False,,2021-06-10,active,False
+ACC0280,Clarity Technologies,,US,USD,"9448 Main St, Suite 200",Technology,mid_market,888,,False,CSM01,AE09,85620.0,7135.0,2,91,100,2025-09-10,72,-24,professional,ap-southeast-1,False,,2023-04-04,active,False
+ACC0281,Nether Ltd,,US,USD,"3424 Main St, Suite 181",Retail,mid_market,405,,False,CSM10,AE10,48876.0,4073.0,1,33,43,2025-07-20,20,12,professional,us-east-1,True,0.39,2021-07-04,active,False
+ACC0282,Visor Services,,US,USD,"642 Main St, Suite 717",Retail,mid_market,569,,False,CSM20,AE10,95292.0,7941.0,2,107,36,2025-07-18,18,32,professional,us-west-2,True,0.32,2022-03-17,active,False
+ACC0283,Cobalt Services,,US,USD,"8824 Main St, Suite 980",Manufacturing,mid_market,296,,False,CSM09,AE11,47016.0,3918.0,1,13,89,2025-07-14,14,-1,professional,us-east-1,False,,2020-06-07,active,False
+ACC0284,Maven Technologies,,US,USD,"7188 Main St, Suite 949",Education,mid_market,185,,False,CSM09,AE04,70140.0,5845.0,2,29,68,2025-09-04,66,28,professional,us-east-1,False,,2023-06-21,active,False
+ACC0285,Relic Solutions,,DE,EUR,"525 Main St, Suite 327",Manufacturing,mid_market,245,,False,CSM13,AE04,49848.0,4154.0,2,101,62,2025-08-28,59,76,professional,us-east-1,False,,2020-08-09,active,False
+ACC0286,Sapphire Group,,FR,EUR,"6553 Main St, Suite 641",Retail,mid_market,274,,False,CSM13,AE14,94452.0,7871.0,2,55,66,2025-12-21,174,-19,professional,us-west-2,False,,2021-04-12,active,False
+ACC0287,Noble Partners,,US,USD,"512 Main St, Suite 838",Logistics,mid_market,830,,False,CSM09,AE08,60588.0,5049.0,1,314,79,2025-10-09,101,-24,professional,eu-west-1,False,,2020-01-11,active,False
+ACC0288,Umbra Enterprises,,NL,EUR,"1890 Main St, Suite 701",Financial Services,mid_market,694,,False,CSM11,AE08,38256.0,3188.0,1,157,76,2025-09-11,73,60,professional,us-west-2,True,0.26,2020-05-08,at_risk,False
+ACC0289,Apex Inc,,DE,EUR,"2163 Main St, Suite 206",Financial Services,mid_market,481,,False,CSM16,AE10,48816.0,4068.0,1,69,82,2025-11-20,143,44,professional,ap-southeast-1,False,,2023-06-28,active,False
+ACC0290,Koda Corp,,ES,EUR,"4429 Main St, Suite 683",Retail,mid_market,462,,False,CSM12,AE01,48636.0,4053.0,2,38,96,2025-12-05,158,14,professional,us-east-1,False,,2022-08-12,active,False
+ACC0291,Relic Ltd,,US,USD,"5438 Main St, Suite 237",Technology,mid_market,756,,False,CSM14,AE03,40896.0,3408.0,2,182,37,2025-10-25,117,50,professional,ap-southeast-1,False,,2020-04-14,active,False
+ACC0292,Ivory Technologies,,US,USD,"4454 Main St, Suite 365",Manufacturing,mid_market,236,,False,CSM14,AE07,32532.0,2711.0,2,68,63,2025-08-17,48,-3,professional,us-west-2,False,,2020-03-10,active,False
+ACC0293,Wilder Systems,,IT,EUR,"8916 Main St, Suite 792",Manufacturing,mid_market,145,,False,CSM11,AE06,73536.0,6128.0,1,57,52,2025-09-15,77,-8,professional,ap-southeast-1,False,,2022-08-26,active,False
+ACC0294,Zenith Group,,US,USD,"3913 Main St, Suite 649",Financial Services,mid_market,386,,False,CSM01,AE08,93084.0,7757.0,2,157,64,2025-12-16,169,27,professional,ap-southeast-1,False,,2022-06-20,at_risk,False
+ACC0295,Horizon Solutions,Zinc Solutions,US,USD,"880 Main St, Suite 869",Education,mid_market,803,,False,CSM15,AE03,75024.0,6252.0,2,321,75,2025-07-15,15,7,professional,us-east-1,False,,2022-01-12,active,False
+ACC0296,Fusion Corp,,US,USD,"6934 Main St, Suite 169",Retail,mid_market,444,,False,CSM20,AE04,22104.0,1842.0,2,111,68,2025-08-02,33,-1,professional,us-west-2,False,,2022-06-12,active,False
+ACC0297,Sienna Ltd,,US,USD,"6417 Main St, Suite 351",Manufacturing,mid_market,148,,False,CSM18,AE05,63300.0,5275.0,1,31,41,2025-07-02,2,37,professional,us-east-1,False,,2020-05-26,active,False
+ACC0298,Astro Ltd,,US,USD,"7097 Main St, Suite 327",Healthcare,mid_market,463,,False,CSM15,AE12,95148.0,7929.0,1,31,69,2025-09-25,87,1,professional,eu-west-1,False,,2021-07-18,churned,False
+ACC0299,Valor Systems,,ES,EUR,"4894 Main St, Suite 971",Education,mid_market,908,,False,CSM14,AE02,70992.0,5916.0,2,417,39,2025-07-25,25,-20,professional,us-east-1,False,,2020-09-22,active,False
+ACC0300,Nether Solutions,,US,USD,"1064 Main St, Suite 895",Media,mid_market,470,,False,CSM04,AE14,24300.0,2025.0,1,26,78,2025-10-24,116,-16,professional,us-east-1,False,,2022-12-16,active,False
+ACC0301,Sienna Inc,Jasper Group,US,USD,"7470 Main St, Suite 282",Education,smb,13,,False,CSM14,AE04,15204.0,1267.0,1,4,34,2025-12-22,175,14,standard,us-west-2,False,,2022-01-21,active,False
+ACC0302,Nadir Services,,US,USD,"4737 Main St, Suite 263",Healthcare,smb,13,,False,CSM01,AE12,5232.0,436.0,1,4,65,2025-09-02,64,-22,standard,ap-southeast-1,False,,2020-01-20,active,False
+ACC0303,Walden Ltd,,US,USD,"6931 Main St, Suite 129",Retail,smb,72,,False,CSM15,AE06,6744.0,562.0,1,29,80,2025-12-16,169,-32,standard,eu-west-1,False,,2022-11-05,active,False
+ACC0304,Opal Enterprises,,US,USD,"1433 Main St, Suite 528",Retail,smb,81,,False,CSM11,AE08,6072.0,506.0,1,30,59,2025-10-19,111,-9,standard,us-west-2,False,,2023-06-16,active,False
+ACC0305,Paladin Inc,,US,USD,"4634 Main St, Suite 577",Technology,smb,97,,False,CSM17,AE11,15900.0,1325.0,1,5,89,2025-08-10,41,-37,standard,eu-west-1,False,,2020-08-23,at_risk,False
+ACC0306,Comet Ltd,,US,USD,"9294 Main St, Suite 716",Media,smb,93,,False,CSM11,AE05,10296.0,858.0,1,21,65,2025-11-25,148,58,standard,eu-west-1,False,,2021-07-27,active,False
+ACC0307,Valor Partners,,US,USD,"8781 Main St, Suite 137",Manufacturing,smb,53,,False,CSM09,AE15,15012.0,1251.0,1,24,93,2025-07-23,23,-6,standard,eu-west-1,False,,2023-06-14,active,False
+ACC0308,Razor Inc,,US,USD,"9973 Main St, Suite 294",Manufacturing,smb,97,,False,CSM20,AE14,13680.0,1140.0,1,31,43,2025-11-04,127,-30,standard,us-west-2,False,,2021-02-18,active,False
+ACC0309,Talon Solutions,,US,USD,"3060 Main St, Suite 718",Education,smb,77,,False,CSM10,AE04,4536.0,378.0,1,29,43,2025-09-12,74,80,standard,us-west-2,False,,2022-07-23,active,False
+ACC0310,Iridium Solutions,,US,USD,"2403 Main St, Suite 332",Education,smb,24,,False,CSM17,AE05,8640.0,720.0,1,2,61,2025-08-10,41,34,standard,us-west-2,False,,2020-05-16,active,False
+ACC0311,Onyx Solutions,,US,USD,"6831 Main St, Suite 152",Education,smb,6,,False,CSM05,AE14,17052.0,1421.0,1,3,52,2025-10-24,116,-33,standard,us-east-1,True,0.37,2023-10-12,at_risk,False
+ACC0312,Summit Group,,US,USD,"6820 Main St, Suite 163",Healthcare,smb,94,,False,CSM01,AE15,14268.0,1189.0,1,3,86,2025-08-02,33,21,standard,eu-west-1,False,,2020-08-27,active,False
+ACC0313,Jasper Enterprises,,US,USD,"9922 Main St, Suite 788",Retail,smb,6,,False,CSM18,AE11,15276.0,1273.0,1,3,61,2025-07-07,7,60,standard,eu-west-1,False,,2020-09-16,active,False
+ACC0314,Lancer Technologies,,US,USD,"5209 Main St, Suite 382",Media,smb,71,,False,CSM10,AE10,6228.0,519.0,1,27,80,2025-09-25,87,-11,standard,ap-southeast-1,False,,2022-08-02,active,False
+ACC0315,Pearl Solutions,,US,USD,"7185 Main St, Suite 488",Technology,smb,89,,False,CSM06,AE14,11400.0,950.0,1,7,58,2025-10-04,96,21,standard,us-east-1,False,,2023-12-21,active,False
+ACC0316,Titan Partners,Clarity Solutions,US,USD,"7786 Main St, Suite 387",Healthcare,smb,24,,False,CSM05,AE04,5976.0,498.0,1,7,37,2025-11-06,129,61,standard,eu-west-1,False,,2020-06-21,active,False
+ACC0317,Quantum Solutions,,US,USD,"584 Main St, Suite 423",Manufacturing,smb,53,,False,CSM09,AE10,16776.0,1398.0,1,6,61,2025-07-17,17,51,standard,us-west-2,False,,2020-10-21,active,False
+ACC0318,Forge Ltd,,US,USD,"9061 Main St, Suite 635",Manufacturing,smb,69,,False,CSM19,AE08,5856.0,488.0,1,14,56,2025-10-01,93,65,standard,ap-southeast-1,False,,2023-10-21,active,False
+ACC0319,Topaz Ltd,,US,USD,"9553 Main St, Suite 580",Logistics,smb,66,,False,CSM01,AE05,5952.0,496.0,1,2,78,2025-08-05,36,21,standard,us-west-2,False,,2020-09-21,active,False
+ACC0320,Prism Systems,,US,USD,"5731 Main St, Suite 224",Financial Services,smb,53,,False,CSM05,AE05,7980.0,665.0,1,2,98,2025-09-17,79,-3,standard,ap-southeast-1,False,,2022-03-07,active,False
+ACC0321,Ember Partners,,US,USD,"3164 Main St, Suite 366",Healthcare,smb,14,,False,CSM07,AE07,16584.0,1382.0,1,2,49,2025-07-16,16,-2,standard,us-east-1,False,,2021-09-17,at_risk,False
+ACC0322,Xeon Solutions,Granite Partners,US,USD,"5738 Main St, Suite 975",Manufacturing,smb,58,,False,CSM14,AE14,16236.0,1353.0,1,21,53,2025-11-11,134,23,standard,us-east-1,False,,2020-11-13,active,False
+ACC0323,Xara Systems,,US,USD,"6694 Main St, Suite 257",Education,smb,68,,False,CSM04,AE09,8412.0,701.0,1,7,55,2025-11-24,147,39,standard,ap-southeast-1,False,,2022-04-02,active,False
+ACC0324,Razor Group,,US,USD,"3754 Main St, Suite 582",Logistics,smb,13,,False,CSM05,AE10,17880.0,1490.0,1,6,60,2025-07-19,19,77,standard,us-west-2,False,,2023-12-08,active,False
+ACC0325,Quest Ltd,,US,USD,"1863 Main St, Suite 200",Education,smb,87,,False,CSM06,AE12,10212.0,851.0,1,24,100,2025-09-25,87,23,standard,ap-southeast-1,False,,2023-09-07,churned,False
+ACC0326,Iridium Group,,US,USD,"996 Main St, Suite 792",Retail,smb,75,,False,CSM01,AE11,15840.0,1320.0,1,18,84,2025-07-11,11,34,standard,ap-southeast-1,False,,2020-01-08,active,False
+ACC0327,Maple Enterprises,,US,USD,"7542 Main St, Suite 629",Education,smb,48,,False,CSM11,AE13,10224.0,852.0,1,23,99,2025-12-06,159,-26,standard,eu-west-1,False,,2021-10-12,active,False
+ACC0328,Lumina Ltd,Clarity Enterprises,US,USD,"9278 Main St, Suite 864",Retail,smb,66,,False,CSM15,AE01,5244.0,437.0,1,20,33,2025-10-22,114,47,standard,ap-southeast-1,False,,2021-11-09,active,False
+ACC0329,Drake Group,,US,USD,"1232 Main St, Suite 180",Technology,smb,99,,False,CSM14,AE07,13404.0,1117.0,1,44,79,2025-10-09,101,-23,standard,us-east-1,False,,2022-09-22,active,False
+ACC0330,Lyric Ltd,,US,USD,"2138 Main St, Suite 326",Financial Services,smb,22,,False,CSM15,AE07,8868.0,739.0,1,5,45,2025-11-14,137,-32,standard,us-west-2,False,,2020-05-28,active,False
+ACC0331,Drake Enterprises,,US,USD,"4029 Main St, Suite 122",Healthcare,smb,49,,False,CSM15,AE10,13428.0,1119.0,1,25,100,2025-07-21,21,-11,standard,us-east-1,False,,2022-05-08,active,False
+ACC0332,Vertex Corp,,US,USD,"9224 Main St, Suite 617",Manufacturing,smb,14,,False,CSM07,AE02,7548.0,629.0,1,8,88,2025-12-22,175,-21,standard,eu-west-1,False,,2020-07-19,active,False
+ACC0333,Zephyr Group,Crimson Technologies,US,USD,"6660 Main St, Suite 810",Logistics,smb,84,,False,CSM17,AE12,8844.0,737.0,1,43,77,2025-12-03,156,41,standard,eu-west-1,False,,2020-04-23,active,False
+ACC0334,Lumina Enterprises,,US,USD,"4095 Main St, Suite 289",Financial Services,smb,45,,False,CSM20,AE14,14664.0,1222.0,1,11,45,2025-08-25,56,-19,standard,ap-southeast-1,False,,2023-01-19,active,False
+ACC0335,Crest Technologies,,US,USD,"7481 Main St, Suite 389",Logistics,smb,48,,False,CSM18,AE14,8364.0,697.0,1,7,80,2025-10-28,120,-28,standard,us-east-1,True,0.37,2022-05-26,active,False
+ACC0336,Jolt Ltd,,US,USD,"4813 Main St, Suite 593",Manufacturing,smb,11,,False,CSM09,AE10,17604.0,1467.0,1,4,50,2025-11-10,133,-14,standard,eu-west-1,False,,2022-09-14,active,False
+ACC0337,Vapor Systems,,US,USD,"1865 Main St, Suite 338",Healthcare,smb,92,,False,CSM06,AE03,17112.0,1426.0,1,22,74,2025-10-18,110,-1,standard,eu-west-1,False,,2023-07-04,active,False
+ACC0338,Zinc Corp,,US,USD,"4396 Main St, Suite 135",Healthcare,smb,96,,False,CSM06,AE09,7500.0,625.0,1,49,79,2025-07-20,20,71,standard,us-east-1,False,,2020-11-10,active,False
+ACC0339,Ridge Inc,,US,USD,"6665 Main St, Suite 474",Education,smb,85,,False,CSM18,AE07,6696.0,558.0,1,39,37,2025-10-23,115,-28,standard,ap-southeast-1,False,,2021-03-24,active,False
+ACC0340,Indigo Corp,,US,USD,"1132 Main St, Suite 467",Media,smb,32,,False,CSM17,AE15,11868.0,989.0,1,7,57,2025-09-13,75,65,standard,eu-west-1,False,,2022-10-26,active,False
+ACC0341,Fusion Technologies,,US,USD,"479 Main St, Suite 200",Retail,smb,47,,False,CSM03,AE11,7536.0,628.0,1,3,86,2025-12-08,161,65,standard,eu-west-1,False,,2021-12-01,active,False
+ACC0342,Iridium Ltd,,US,USD,"4269 Main St, Suite 870",Education,smb,37,,False,CSM15,AE01,17184.0,1432.0,1,10,81,2025-11-28,151,-11,standard,us-west-2,False,,2023-05-21,active,False
+ACC0343,Talon Group,,US,USD,"8896 Main St, Suite 797",Retail,smb,45,,False,CSM20,AE15,14064.0,1172.0,1,11,84,2025-09-12,74,1,standard,ap-southeast-1,False,,2021-05-19,active,False
+ACC0344,Insight Inc,,US,USD,"4754 Main St, Suite 813",Retail,smb,85,,False,CSM05,AE04,8976.0,748.0,1,27,60,2025-10-12,104,69,standard,us-west-2,False,,2021-10-03,active,False
+ACC0345,Mast Inc,,US,USD,"1944 Main St, Suite 588",Media,smb,85,,False,CSM06,AE15,11760.0,980.0,1,27,84,2025-07-15,15,-32,standard,ap-southeast-1,False,,2021-06-17,active,False
+ACC0346,Indigo Systems,,US,USD,"1327 Main St, Suite 408",Media,smb,28,,False,CSM05,AE14,8436.0,703.0,1,14,56,2025-11-12,135,50,standard,ap-southeast-1,False,,2021-01-17,active,False
+ACC0347,Ursa Ltd,,US,USD,"3714 Main St, Suite 357",Manufacturing,smb,37,,False,CSM02,AE04,13416.0,1118.0,1,2,67,2025-10-06,98,13,standard,eu-west-1,False,,2020-04-18,active,False
+ACC0348,Visor Group,,US,USD,"2200 Main St, Suite 589",Retail,smb,92,,False,CSM09,AE10,12480.0,1040.0,1,47,58,2025-08-15,46,-33,standard,ap-southeast-1,False,,2020-12-06,active,False
+ACC0349,Yoke Ltd,,US,USD,"941 Main St, Suite 612",Media,smb,86,,False,CSM05,AE09,17016.0,1418.0,1,32,33,2025-11-15,138,37,standard,us-west-2,False,,2022-06-26,active,False
+ACC0350,Apex Ltd,,US,USD,"5557 Main St, Suite 377",Media,smb,6,,False,CSM20,AE14,9312.0,776.0,1,4,45,2025-11-03,126,30,standard,us-west-2,False,,2021-12-01,active,False
+ACC0351,Horizon Technologies,,US,USD,"8171 Main St, Suite 115",Education,smb,20,,False,CSM06,AE14,17520.0,1460.0,1,11,65,2025-09-04,66,-2,standard,us-east-1,False,,2021-09-21,active,False
+ACC0352,Obsidian Group,,US,USD,"4380 Main St, Suite 141",Healthcare,smb,47,,False,CSM10,AE08,6204.0,517.0,1,20,98,2025-10-22,114,48,standard,us-east-1,False,,2021-09-24,active,False
+ACC0353,Vertex Technologies,,US,USD,"3936 Main St, Suite 945",Media,smb,48,,False,CSM09,AE01,9480.0,790.0,1,2,45,2025-08-15,46,-12,standard,eu-west-1,False,,2021-05-17,active,False
+ACC0354,Thorpe Technologies,,US,USD,"9808 Main St, Suite 469",Healthcare,smb,90,,False,CSM09,AE13,10800.0,900.0,1,10,99,2025-09-08,70,10,standard,ap-southeast-1,True,0.38,2022-05-21,active,False
+ACC0355,Maven Systems,,US,USD,"8867 Main St, Suite 166",Retail,smb,14,,False,CSM01,AE13,14928.0,1244.0,1,2,88,2025-10-21,113,-22,standard,us-east-1,False,,2021-01-20,active,False
+ACC0356,Ferrous Systems,,US,USD,"1273 Main St, Suite 689",Retail,smb,66,,False,CSM03,AE12,16248.0,1354.0,1,27,32,2025-08-12,43,-16,standard,us-west-2,False,,2021-09-13,active,False
+ACC0357,Blaze Group,,US,USD,"6173 Main St, Suite 120",Manufacturing,smb,35,,False,CSM06,AE13,14124.0,1177.0,1,10,38,2025-07-27,27,67,standard,us-west-2,False,,2020-11-03,active,False
+ACC0358,Beacon Ltd,,US,USD,"9190 Main St, Suite 671",Healthcare,smb,86,,False,CSM09,AE08,7500.0,625.0,1,12,67,2025-10-09,101,44,standard,us-east-1,False,,2022-11-04,active,False
+ACC0359,Epoch Technologies,,US,USD,"7041 Main St, Suite 873",Financial Services,smb,32,,False,CSM17,AE13,12012.0,1001.0,1,3,37,2025-10-20,112,44,standard,ap-southeast-1,False,,2022-10-07,churned,False
+ACC0360,Yoke Technologies,,US,USD,"667 Main St, Suite 298",Logistics,smb,35,,False,CSM11,AE10,9264.0,772.0,1,17,80,2025-09-13,75,55,standard,eu-west-1,False,,2020-12-08,active,False
+ACC0361,Zeal Solutions,,US,USD,"5173 Main St, Suite 209",Financial Services,smb,89,,False,CSM14,AE07,10776.0,898.0,1,11,86,2025-07-20,20,-26,standard,us-east-1,False,,2020-11-25,active,False
+ACC0362,Helios Enterprises,,US,USD,"5904 Main St, Suite 927",Technology,smb,91,,False,CSM09,AE15,10296.0,858.0,1,19,76,2025-07-23,23,-21,standard,eu-west-1,False,,2023-11-10,active,False
+ACC0363,Gale Enterprises,,US,USD,"5339 Main St, Suite 781",Education,smb,67,,False,CSM13,AE10,7560.0,630.0,1,27,49,2025-12-07,160,-10,standard,us-west-2,False,,2021-03-10,active,False
+ACC0364,Lyric Inc,,US,USD,"3881 Main St, Suite 147",Financial Services,smb,79,,False,CSM12,AE10,12684.0,1057.0,1,40,96,2025-12-18,171,24,standard,eu-west-1,False,,2021-11-21,active,False
+ACC0365,Shore Ltd,,US,USD,"6221 Main St, Suite 313",Logistics,smb,50,,False,CSM20,AE10,15120.0,1260.0,1,7,96,2025-10-20,112,-12,standard,us-west-2,False,,2023-10-19,active,False
+ACC0366,Valor Inc,,US,USD,"5751 Main St, Suite 319",Financial Services,smb,12,,False,CSM05,AE06,15960.0,1330.0,1,2,30,2025-08-05,36,4,standard,us-east-1,False,,2021-09-21,active,False
+ACC0367,Talon Systems,,US,USD,"9193 Main St, Suite 623",Retail,smb,63,,False,CSM09,AE01,8172.0,681.0,1,16,66,2025-11-02,125,-15,standard,ap-southeast-1,False,,2022-07-18,at_risk,False
+ACC0368,Ember Inc,,US,USD,"2076 Main St, Suite 399",Manufacturing,smb,15,,False,CSM13,AE09,15288.0,1274.0,1,3,44,2025-10-09,101,71,standard,us-west-2,False,,2023-10-07,active,False
+ACC0369,Juniper Solutions,,US,USD,"9175 Main St, Suite 251",Logistics,smb,37,,False,CSM10,AE15,5076.0,423.0,1,8,70,2025-09-10,72,34,standard,us-west-2,False,,2023-04-20,active,False
+ACC0370,Spectrum Enterprises,,US,USD,"8423 Main St, Suite 730",Education,smb,29,,False,CSM09,AE04,6732.0,561.0,1,5,73,2025-12-02,155,24,standard,us-east-1,False,,2023-08-05,active,False
+ACC0371,Envoy Technologies,,US,USD,"5997 Main St, Suite 926",Healthcare,smb,76,,False,CSM17,AE09,6540.0,545.0,1,35,63,2025-12-15,168,36,standard,us-west-2,False,,2020-01-09,active,False
+ACC0372,Blaze Corp,Cobalt Corp,US,USD,"7835 Main St, Suite 571",Healthcare,smb,79,,False,CSM13,AE04,12744.0,1062.0,1,9,56,2025-11-17,140,68,standard,ap-southeast-1,False,,2021-06-10,active,False
+ACC0373,Meridian Systems,,US,USD,"1595 Main St, Suite 998",Manufacturing,smb,95,,False,CSM05,AE13,6336.0,528.0,1,41,98,2025-08-05,36,-21,standard,eu-west-1,False,,2023-02-07,active,False
+ACC0374,Jasper Partners,,US,USD,"657 Main St, Suite 593",Media,smb,89,,False,CSM11,AE15,17712.0,1476.0,1,28,66,2025-11-04,127,-34,standard,eu-west-1,False,,2021-06-16,active,False
+ACC0375,Zeal Technologies,,US,USD,"3929 Main St, Suite 348",Financial Services,smb,91,,False,CSM11,AE06,6024.0,502.0,1,15,59,2025-08-26,57,1,standard,us-east-1,False,,2021-06-05,active,False
+ACC0376,Kestrel Systems,,US,USD,"8432 Main St, Suite 256",Retail,smb,61,,False,CSM12,AE07,10116.0,843.0,1,14,55,2025-09-14,76,-34,standard,ap-southeast-1,False,,2023-08-07,active,False
+ACC0377,Zephyr Ltd,,US,USD,"273 Main St, Suite 782",Education,smb,54,,False,CSM07,AE07,17028.0,1419.0,1,11,38,2025-11-27,150,80,standard,us-east-1,False,,2023-12-12,active,False
+ACC0378,Noble Ltd,Summit Technologies,US,USD,"7456 Main St, Suite 842",Financial Services,smb,90,,False,CSM10,AE13,11592.0,966.0,1,9,88,2025-12-25,178,-6,standard,eu-west-1,False,,2022-08-24,active,False
+ACC0379,Iridium Services,,US,USD,"8147 Main St, Suite 789",Logistics,smb,38,,False,CSM02,AE07,10932.0,911.0,1,11,79,2025-11-22,145,35,standard,eu-west-1,False,,2020-06-18,active,False
+ACC0380,Quartz Group,,US,USD,"7828 Main St, Suite 924",Manufacturing,smb,29,,False,CSM20,AE03,8016.0,668.0,1,6,96,2025-10-02,94,-19,standard,eu-west-1,False,,2022-10-16,active,False
+ACC0381,Lancer Corp,,US,USD,"3471 Main St, Suite 857",Media,smb,39,,False,CSM13,AE01,6756.0,563.0,1,12,69,2025-10-02,94,-2,standard,eu-west-1,False,,2023-12-15,active,False
+ACC0382,Unity Partners,,US,USD,"598 Main St, Suite 691",Financial Services,smb,35,,False,CSM02,AE15,16980.0,1415.0,1,10,76,2025-11-14,137,-14,standard,us-east-1,False,,2023-01-26,active,False
+ACC0383,Umbra Systems,,US,USD,"4909 Main St, Suite 944",Manufacturing,smb,44,,False,CSM03,AE14,4500.0,375.0,1,11,73,2025-08-13,44,38,standard,us-west-2,False,,2021-07-17,active,False
+ACC0384,Quartz Enterprises,,US,USD,"7107 Main St, Suite 852",Logistics,smb,33,,False,CSM01,AE12,14160.0,1180.0,1,4,93,2025-12-10,163,-35,standard,us-east-1,False,,2022-03-04,active,False
+ACC0385,Mast Corp,,US,USD,"3362 Main St, Suite 120",Media,smb,6,,False,CSM11,AE07,6360.0,530.0,1,4,52,2025-09-19,81,29,standard,eu-west-1,True,0.34,2022-12-15,active,False
+ACC0386,Apex Enterprises,,US,USD,"9929 Main St, Suite 331",Media,smb,20,,False,CSM04,AE13,12360.0,1030.0,1,3,51,2025-07-28,28,15,standard,us-west-2,False,,2022-02-25,active,False
+ACC0387,Heath Corp,,US,USD,"8705 Main St, Suite 320",Financial Services,smb,98,,False,CSM20,AE12,6048.0,504.0,1,46,52,2025-07-03,3,8,standard,eu-west-1,False,,2020-05-27,active,False
+ACC0388,Ulrich Inc,,US,USD,"8750 Main St, Suite 188",Retail,smb,62,,False,CSM03,AE07,10056.0,838.0,1,16,86,2025-07-04,4,13,standard,ap-southeast-1,False,,2020-05-09,active,False
+ACC0389,Ursa Services,,US,USD,"3343 Main St, Suite 464",Education,smb,38,,False,CSM15,AE09,5580.0,465.0,1,13,81,2025-12-23,176,-18,standard,us-west-2,False,,2020-02-07,active,False
+ACC0390,Delta Systems,,US,USD,"9868 Main St, Suite 514",Education,smb,65,,False,CSM14,AE01,5148.0,429.0,1,18,59,2025-12-09,162,-16,standard,eu-west-1,False,,2022-04-04,active,False
+ACC0391,Insight Enterprises,,US,USD,"9969 Main St, Suite 641",Healthcare,smb,13,,False,CSM09,AE13,5076.0,423.0,1,4,66,2025-09-08,70,-17,standard,ap-southeast-1,False,,2021-08-02,active,False
+ACC0392,Global Systems,,US,USD,"1368 Main St, Suite 924",Financial Services,smb,43,,False,CSM10,AE08,12960.0,1080.0,1,22,76,2025-12-11,164,65,standard,eu-west-1,False,,2020-11-25,active,False
+ACC0393,Heath Inc,,US,USD,"7633 Main St, Suite 960",Healthcare,smb,44,,False,CSM07,AE15,15480.0,1290.0,1,23,42,2025-12-17,170,5,standard,ap-southeast-1,False,,2021-12-22,active,False
+ACC0394,Heath Systems,,US,USD,"5464 Main St, Suite 875",Retail,smb,21,,False,CSM14,AE15,6468.0,539.0,1,9,100,2025-12-09,162,30,standard,us-west-2,False,,2023-08-16,active,False
+ACC0395,Pinnacle Technologies,,US,USD,"5331 Main St, Suite 401",Financial Services,smb,35,,False,CSM01,AE06,17868.0,1489.0,1,12,32,2025-11-16,139,80,standard,eu-west-1,False,,2021-11-03,active,False
+ACC0396,Lumina Systems,,US,USD,"6967 Main St, Suite 410",Financial Services,smb,95,,False,CSM08,AE09,7836.0,653.0,1,3,35,2025-12-08,161,71,standard,us-east-1,False,,2021-05-12,active,False
+ACC0397,Xara Corp,,US,USD,"5379 Main St, Suite 231",Logistics,smb,52,,False,CSM13,AE04,9456.0,788.0,1,25,84,2025-12-25,178,12,standard,us-east-1,False,,2020-10-18,active,False
+ACC0398,Paladin Enterprises,,US,USD,"7230 Main St, Suite 698",Healthcare,smb,29,,False,CSM17,AE04,8544.0,712.0,1,5,92,2025-09-05,67,1,standard,eu-west-1,False,,2022-04-07,active,False
+ACC0399,Bastion Enterprises,,US,USD,"1360 Main St, Suite 698",Education,smb,72,,False,CSM05,AE08,4200.0,350.0,1,34,59,2025-09-02,64,51,standard,eu-west-1,False,,2022-11-09,active,False
+ACC0400,Gale Group,,US,USD,"2943 Main St, Suite 836",Retail,smb,79,,False,CSM13,AE01,13068.0,1089.0,1,5,90,2025-10-17,109,-23,standard,ap-southeast-1,False,,2023-04-26,active,False
+ACC0401,Iridium Systems,,US,USD,"4951 Main St, Suite 996",Education,smb,45,,False,CSM01,AE09,16560.0,1380.0,1,15,34,2025-09-22,84,38,standard,eu-west-1,False,,2023-03-12,active,False
+ACC0402,Visor Ltd,,US,USD,"9031 Main St, Suite 804",Logistics,smb,74,,False,CSM04,AE05,13416.0,1118.0,1,10,33,2025-10-24,116,54,standard,eu-west-1,False,,2022-02-07,active,False
+ACC0403,Quest Group,,US,USD,"3068 Main St, Suite 392",Healthcare,smb,43,,False,CSM14,AE02,4836.0,403.0,1,2,66,2025-08-16,47,42,standard,us-west-2,False,,2021-04-27,active,False
+ACC0404,Vista Systems,,US,USD,"7582 Main St, Suite 303",Manufacturing,smb,74,,False,CSM17,AE14,6492.0,541.0,1,11,37,2025-09-21,83,53,standard,eu-west-1,False,,2020-02-16,active,False
+ACC0405,Granite Services,,US,USD,"538 Main St, Suite 417",Logistics,smb,71,,False,CSM08,AE15,8364.0,697.0,1,19,84,2025-09-01,63,55,standard,us-east-1,False,,2022-04-14,at_risk,False
+ACC0406,Quartz Services,,US,USD,"342 Main St, Suite 421",Technology,smb,17,,False,CSM09,AE13,3684.0,307.0,1,7,52,2025-08-23,54,11,standard,us-west-2,False,,2022-12-27,active,False
+ACC0407,Epoch Inc,,US,USD,"3827 Main St, Suite 829",Financial Services,smb,53,,False,CSM17,AE01,14136.0,1178.0,1,21,50,2025-07-27,27,76,standard,us-west-2,False,,2023-06-06,active,False
+ACC0408,Kraft Inc,,US,USD,"6197 Main St, Suite 576",Financial Services,smb,43,,False,CSM04,AE01,7488.0,624.0,1,15,60,2025-10-13,105,-17,standard,us-east-1,False,,2021-09-16,active,False
+ACC0409,Razor Solutions,Helios Technologies,US,USD,"6488 Main St, Suite 156",Manufacturing,smb,65,,False,CSM19,AE12,4512.0,376.0,1,8,94,2025-11-21,144,42,standard,us-east-1,False,,2020-01-03,active,False
+ACC0410,Epoch Corp,York Systems,US,USD,"9341 Main St, Suite 429",Technology,smb,14,,False,CSM18,AE04,5436.0,453.0,1,8,84,2025-10-28,120,66,standard,ap-southeast-1,False,,2021-07-17,active,False
+ACC0411,Zenith Ltd,,US,USD,"4658 Main St, Suite 873",Healthcare,smb,64,,False,CSM06,AE14,5652.0,471.0,1,32,52,2025-12-19,172,-3,standard,us-east-1,False,,2022-07-09,active,False
+ACC0412,Mast Partners,,US,USD,"405 Main St, Suite 251",Retail,smb,85,,False,CSM09,AE14,3936.0,328.0,1,35,41,2025-10-04,96,31,standard,us-west-2,False,,2020-08-15,active,False
+ACC0413,Vertex Services,,US,USD,"4878 Main St, Suite 273",Retail,smb,13,,False,CSM03,AE10,5052.0,421.0,1,5,74,2025-09-04,66,13,standard,us-west-2,False,,2021-09-10,active,False
+ACC0414,Relic Systems,,US,USD,"1405 Main St, Suite 958",Logistics,smb,47,,False,CSM17,AE11,7188.0,599.0,1,9,63,2025-12-26,179,61,standard,ap-southeast-1,False,,2022-01-08,active,False
+ACC0415,Orbit Technologies,,US,USD,"7456 Main St, Suite 100",Technology,smb,44,,False,CSM20,AE10,11064.0,922.0,1,14,31,2025-09-09,71,32,standard,us-west-2,False,,2023-05-22,active,False
+ACC0416,Delphi Technologies,,US,USD,"8896 Main St, Suite 358",Logistics,smb,59,,False,CSM02,AE05,12228.0,1019.0,1,12,73,2025-11-18,141,-19,standard,us-east-1,False,,2021-01-28,active,False
+ACC0417,Prism Services,,US,USD,"6324 Main St, Suite 190",Healthcare,smb,87,,False,CSM04,AE14,13128.0,1094.0,1,42,83,2025-09-19,81,-11,standard,eu-west-1,False,,2021-07-10,active,False
+ACC0418,Echo Corp,,US,USD,"3531 Main St, Suite 875",Education,smb,74,,False,CSM07,AE01,13128.0,1094.0,1,6,37,2025-07-05,5,78,standard,eu-west-1,False,,2020-07-25,active,False
+ACC0419,Forge Systems,,US,USD,"7415 Main St, Suite 744",Retail,smb,73,,False,CSM20,AE04,13344.0,1112.0,1,22,34,2025-10-11,103,-5,standard,eu-west-1,False,,2023-06-20,active,False
+ACC0420,Shore Corp,,US,USD,"2496 Main St, Suite 669",Media,smb,44,,False,CSM19,AE01,10644.0,887.0,1,11,42,2025-08-17,48,29,standard,eu-west-1,False,,2021-08-23,active,False
+ACC0421,Lyric Solutions,,US,USD,"760 Main St, Suite 151",Retail,smb,44,,False,CSM12,AE09,10428.0,869.0,1,11,50,2025-09-26,88,45,standard,eu-west-1,True,0.34,2020-04-26,active,False
+ACC0422,Umbra Partners,,US,USD,"9799 Main St, Suite 161",Media,smb,92,,False,CSM09,AE05,4272.0,356.0,1,16,68,2025-12-07,160,37,standard,us-east-1,False,,2022-06-18,active,False
+ACC0423,Umbra Corp,,US,USD,"2458 Main St, Suite 478",Media,smb,88,,False,CSM04,AE15,12444.0,1037.0,1,20,40,2025-10-22,114,-32,standard,ap-southeast-1,False,,2022-05-21,active,False
+ACC0424,Maven Solutions,,US,USD,"1332 Main St, Suite 816",Media,smb,53,,False,CSM16,AE01,5220.0,435.0,1,11,49,2025-09-02,64,35,standard,ap-southeast-1,False,,2021-02-20,active,False
+ACC0425,Global Solutions,,US,USD,"3744 Main St, Suite 359",Logistics,smb,83,,False,CSM05,AE11,6876.0,573.0,1,39,86,2025-08-06,37,56,standard,us-east-1,False,,2020-12-13,active,False
+ACC0426,Glyph Ltd,,US,USD,"9486 Main St, Suite 331",Manufacturing,smb,75,,False,CSM18,AE06,5508.0,459.0,1,26,79,2025-08-15,46,60,standard,ap-southeast-1,False,,2021-07-01,active,False
+ACC0427,Shore Inc,,US,USD,"2942 Main St, Suite 778",Retail,smb,70,,False,CSM08,AE13,12456.0,1038.0,1,32,67,2025-08-15,46,5,standard,ap-southeast-1,False,,2021-08-16,active,False
+ACC0428,Quartz Inc,,US,USD,"1135 Main St, Suite 901",Healthcare,smb,86,,False,CSM11,AE02,6084.0,507.0,1,6,47,2025-11-02,125,24,standard,eu-west-1,True,0.35,2021-10-01,active,False
+ACC0429,Glyph Corp,Koda Group,US,USD,"8095 Main St, Suite 912",Retail,smb,21,,False,CSM17,AE12,15912.0,1326.0,1,2,74,2025-11-24,147,34,standard,eu-west-1,False,,2020-08-26,active,False
+ACC0430,Lumina Inc,,US,USD,"3367 Main St, Suite 157",Healthcare,smb,35,,False,CSM02,AE11,14712.0,1226.0,1,17,100,2025-10-03,95,56,standard,ap-southeast-1,False,,2023-12-20,active,False
+ACC0431,Lumen Ltd,,US,USD,"1448 Main St, Suite 712",Education,smb,99,,False,CSM18,AE12,16284.0,1357.0,1,9,64,2025-08-09,40,75,standard,ap-southeast-1,False,,2021-05-26,active,False
+ACC0432,Vista Corp,,US,USD,"9352 Main St, Suite 957",Retail,smb,11,,False,CSM20,AE01,12420.0,1035.0,1,6,46,2025-08-21,52,-36,standard,ap-southeast-1,False,,2023-03-11,active,False
+ACC0433,Ursa Corp,Cipher Services,US,USD,"3505 Main St, Suite 769",Healthcare,smb,36,,False,CSM19,AE13,9096.0,758.0,1,10,78,2025-08-18,49,10,standard,ap-southeast-1,False,,2023-03-03,active,False
+ACC0434,Indigo Partners,,US,USD,"9817 Main St, Suite 573",Healthcare,smb,66,,False,CSM05,AE06,8760.0,730.0,1,3,79,2025-11-23,146,45,standard,eu-west-1,False,,2021-10-21,active,False
+ACC0435,Koda Enterprises,,US,USD,"9715 Main St, Suite 832",Education,smb,87,,False,CSM17,AE15,11496.0,958.0,1,21,83,2025-12-28,181,59,standard,us-east-1,False,,2020-05-28,active,False
+ACC0436,Blaze Technologies,,US,USD,"8918 Main St, Suite 472",Education,smb,21,,False,CSM13,AE11,13536.0,1128.0,1,9,82,2025-07-18,18,28,standard,eu-west-1,False,,2020-11-22,active,False
+ACC0437,Ivory Enterprises,,US,USD,"7807 Main St, Suite 167",Media,smb,88,,False,CSM14,AE08,10920.0,910.0,1,33,64,2025-09-02,64,23,standard,eu-west-1,True,0.26,2022-10-24,active,False
+ACC0438,Harbor Enterprises,,US,USD,"4589 Main St, Suite 429",Retail,smb,36,,False,CSM04,AE08,15024.0,1252.0,1,14,81,2025-10-20,112,-10,standard,us-west-2,False,,2021-04-12,active,False
+ACC0439,Topaz Solutions,Pinnacle Inc,US,USD,"2798 Main St, Suite 438",Logistics,smb,42,,False,CSM07,AE10,11160.0,930.0,1,7,75,2025-11-10,133,28,standard,us-east-1,False,,2022-11-09,active,False
+ACC0440,Crimson Services,,US,USD,"1091 Main St, Suite 121",Logistics,smb,71,,False,CSM06,AE07,10248.0,854.0,1,3,74,2025-11-03,126,59,standard,ap-southeast-1,False,,2023-11-07,active,False
+ACC0441,Obsidian Corp,,US,USD,"6970 Main St, Suite 760",Logistics,smb,47,,False,CSM14,AE09,11964.0,997.0,1,9,56,2025-09-17,79,59,standard,us-west-2,False,,2022-12-08,active,False
+ACC0442,Delta Group,,US,USD,"4452 Main St, Suite 258",Technology,smb,25,,False,CSM15,AE15,13896.0,1158.0,1,5,44,2025-10-09,101,-3,standard,us-east-1,True,0.36,2020-08-18,at_risk,False
+ACC0443,Gale Solutions,,US,USD,"5340 Main St, Suite 124",Media,smb,38,,False,CSM16,AE05,6816.0,568.0,1,4,40,2025-09-08,70,61,standard,us-west-2,False,,2021-05-02,active,False
+ACC0444,Pearl Enterprises,,US,USD,"2751 Main St, Suite 892",Manufacturing,smb,24,,False,CSM13,AE03,11220.0,935.0,1,9,71,2025-11-04,127,-5,standard,ap-southeast-1,False,,2023-07-01,at_risk,False
+ACC0445,Meridian Solutions,,US,USD,"8836 Main St, Suite 798",Education,smb,58,,False,CSM18,AE04,5520.0,460.0,1,10,67,2025-10-08,100,16,standard,eu-west-1,False,,2020-07-15,active,False
+ACC0446,Global Partners,,US,USD,"2572 Main St, Suite 141",Technology,smb,83,,False,CSM20,AE10,3732.0,311.0,1,12,90,2025-09-05,67,-3,standard,eu-west-1,False,,2021-04-16,active,False
+ACC0447,Opal Technologies,,US,USD,"2359 Main St, Suite 722",Media,smb,26,,False,CSM12,AE12,7188.0,599.0,1,3,56,2025-10-12,104,58,standard,ap-southeast-1,False,,2022-01-07,active,False
+ACC0448,Onyx Systems,,US,USD,"5117 Main St, Suite 511",Education,smb,20,,False,CSM01,AE08,4128.0,344.0,1,6,44,2025-10-11,103,37,standard,ap-southeast-1,False,,2020-07-19,active,False
+ACC0449,Pinnacle Enterprises,,US,USD,"3548 Main St, Suite 658",Manufacturing,smb,45,,False,CSM16,AE05,11460.0,955.0,1,10,57,2025-12-01,154,-35,standard,eu-west-1,False,,2022-04-09,churned,False
+ACC0450,Crest Systems,,US,USD,"232 Main St, Suite 698",Logistics,smb,21,,False,CSM11,AE03,11304.0,942.0,1,7,47,2025-11-22,145,60,standard,eu-west-1,False,,2023-09-07,active,False
+ACC0451,Jasper Services,,US,USD,"6496 Main St, Suite 197",Retail,smb,69,,False,CSM14,AE11,8436.0,703.0,1,34,63,2025-09-11,73,69,standard,ap-southeast-1,True,0.28,2021-07-02,active,False
+ACC0452,Vista Group,,US,USD,"5992 Main St, Suite 611",Manufacturing,smb,93,,False,CSM04,AE08,11832.0,986.0,1,4,40,2025-09-23,85,20,standard,eu-west-1,False,,2023-01-25,active,False
+ACC0453,Astro Enterprises,Talon Technologies,US,USD,"5451 Main St, Suite 208",Media,smb,41,,False,CSM02,AE15,13032.0,1086.0,1,5,61,2025-09-22,84,59,standard,eu-west-1,False,,2023-02-25,at_risk,False
+ACC0454,Quartz Partners,,US,USD,"1143 Main St, Suite 883",Education,smb,49,,False,CSM04,AE11,14304.0,1192.0,1,4,70,2025-11-04,127,71,standard,us-east-1,False,,2023-07-26,active,False
+ACC0455,Crest Partners,,US,USD,"1813 Main St, Suite 355",Media,smb,9,,False,CSM05,AE13,6096.0,508.0,1,3,58,2025-08-01,32,14,standard,ap-southeast-1,False,,2021-04-04,active,False
+ACC0456,Comet Solutions,,US,USD,"1588 Main St, Suite 589",Technology,smb,83,,False,CSM17,AE12,3672.0,306.0,1,11,48,2025-09-11,73,-37,standard,us-west-2,False,,2023-10-15,active,False
+ACC0457,Heath Technologies,,US,USD,"2887 Main St, Suite 238",Logistics,smb,67,,False,CSM09,AE13,4140.0,345.0,1,12,97,2025-07-25,25,65,standard,us-west-2,False,,2022-03-23,active,False
+ACC0458,Iridium Inc,,US,USD,"1314 Main St, Suite 570",Media,smb,7,,False,CSM13,AE10,10608.0,884.0,1,3,93,2025-09-26,88,-32,standard,us-east-1,False,,2021-08-04,active,False
+ACC0459,Sapphire Corp,,US,USD,"5255 Main St, Suite 541",Technology,smb,21,,False,CSM05,AE13,15924.0,1327.0,1,5,32,2025-10-03,95,48,standard,eu-west-1,False,,2020-02-17,active,False
+ACC0460,Titan Systems,Iridium Technologies,US,USD,"3885 Main St, Suite 225",Manufacturing,smb,9,,False,CSM12,AE12,4548.0,379.0,1,2,68,2025-08-28,59,62,standard,us-west-2,False,,2022-02-17,active,False
+ACC0461,Glyph Systems,,US,USD,"6203 Main St, Suite 176",Manufacturing,smb,88,,False,CSM08,AE08,15624.0,1302.0,1,13,44,2025-07-04,4,75,standard,eu-west-1,False,,2023-03-28,active,False
+ACC0462,Amber Corp,Ulrich Systems,US,USD,"1410 Main St, Suite 717",Financial Services,smb,49,,False,CSM07,AE15,9516.0,793.0,1,3,47,2025-10-25,117,-2,standard,eu-west-1,False,,2021-09-04,active,False
+ACC0463,Wilder Enterprises,,US,USD,"2825 Main St, Suite 395",Education,smb,95,,False,CSM05,AE05,7116.0,593.0,1,46,76,2025-07-09,9,-17,standard,ap-southeast-1,False,,2022-01-04,active,False
+ACC0464,Amber Technologies,,US,USD,"6916 Main St, Suite 684",Retail,smb,70,,False,CSM16,AE11,6228.0,519.0,1,13,82,2025-11-03,126,71,standard,ap-southeast-1,False,,2020-10-05,active,False
+ACC0465,Vector Group,Wren Services,US,USD,"1607 Main St, Suite 719",Technology,smb,32,,False,CSM12,AE14,14148.0,1179.0,1,7,43,2025-12-08,161,29,standard,us-west-2,False,,2022-03-11,active,False
+ACC0466,Ferrous Technologies,,US,USD,"4013 Main St, Suite 481",Manufacturing,smb,65,,False,CSM08,AE12,16428.0,1369.0,1,15,85,2025-12-10,163,11,standard,us-east-1,False,,2022-09-13,active,False
+ACC0467,Iridium Corp,,US,USD,"3937 Main St, Suite 829",Manufacturing,smb,61,,False,CSM14,AE11,17856.0,1488.0,1,7,36,2025-12-13,166,48,standard,us-east-1,False,,2021-12-11,active,False
+ACC0468,Summit Inc,,US,USD,"7717 Main St, Suite 139",Technology,smb,72,,False,CSM09,AE08,13956.0,1163.0,1,30,73,2025-07-24,24,-23,standard,ap-southeast-1,False,,2022-10-18,churned,False
+ACC0469,Maple Systems,,US,USD,"9250 Main St, Suite 128",Financial Services,smb,9,,False,CSM17,AE08,10212.0,851.0,1,2,64,2025-08-16,47,50,standard,us-west-2,False,,2022-06-14,active,False
+ACC0470,Dune Ltd,,US,USD,"562 Main St, Suite 231",Manufacturing,smb,90,,False,CSM11,AE10,9096.0,758.0,1,7,90,2025-10-15,107,18,standard,us-east-1,True,0.29,2020-04-05,active,False
+ACC0471,Topaz Group,,US,USD,"943 Main St, Suite 853",Retail,smb,48,,False,CSM12,AE15,8076.0,673.0,1,17,31,2025-12-23,176,-19,standard,us-west-2,False,,2023-12-14,active,False
+ACC0472,Xara Technologies,,US,USD,"1828 Main St, Suite 849",Financial Services,smb,18,,False,CSM05,AE07,4128.0,344.0,1,5,52,2025-08-27,58,3,standard,us-west-2,False,,2020-07-03,at_risk,False
+ACC0473,Nexus Ltd,,US,USD,"4549 Main St, Suite 224",Media,smb,98,,False,CSM02,AE07,16740.0,1395.0,1,36,81,2025-12-14,167,14,standard,us-west-2,False,,2022-10-04,active,False
+ACC0474,Echo Group,,US,USD,"6202 Main St, Suite 633",Education,smb,19,,False,CSM01,AE02,15672.0,1306.0,1,2,57,2025-08-01,32,47,standard,eu-west-1,False,,2023-06-02,active,False
+ACC0475,Bastion Ltd,,US,USD,"4655 Main St, Suite 177",Logistics,smb,23,,False,CSM17,AE03,6624.0,552.0,1,8,85,2025-09-22,84,21,standard,us-east-1,False,,2022-06-02,active,False
+ACC0476,Sapphire Services,,US,USD,"1221 Main St, Suite 815",Healthcare,smb,40,,False,CSM17,AE15,17544.0,1462.0,1,14,84,2025-12-26,179,-7,standard,us-west-2,False,,2023-07-21,active,False
+ACC0477,Vector Corp,,US,USD,"4525 Main St, Suite 862",Technology,smb,93,,False,CSM07,AE01,17496.0,1458.0,1,34,90,2025-10-05,97,-22,standard,us-west-2,False,,2021-11-15,at_risk,False
+ACC0478,Cobalt Solutions,,US,USD,"8818 Main St, Suite 539",Media,smb,89,,False,CSM13,AE15,15780.0,1315.0,1,12,46,2025-07-15,15,5,standard,eu-west-1,False,,2020-02-20,active,False
+ACC0479,Heath Solutions,,US,USD,"777 Main St, Suite 324",Retail,smb,62,,False,CSM09,AE02,16056.0,1338.0,1,31,49,2025-12-24,177,21,standard,us-west-2,False,,2022-05-06,active,False
+ACC0480,Lyric Partners,,US,USD,"1020 Main St, Suite 891",Healthcare,smb,87,,False,CSM10,AE07,10356.0,863.0,1,14,92,2025-10-10,102,37,standard,ap-southeast-1,False,,2021-04-12,active,False
+ACC0481,Dune Inc,,US,USD,"7655 Main St, Suite 802",Healthcare,smb,52,,False,CSM18,AE08,10824.0,902.0,1,11,53,2025-11-18,141,10,standard,ap-southeast-1,False,,2022-09-26,active,True
+ACC0482,Lancer Ltd,,US,USD,"1307 Main St, Suite 731",Retail,smb,58,,False,CSM18,AE05,10392.0,866.0,1,3,52,2025-12-15,168,77,standard,us-west-2,False,,2021-02-18,active,True
+ACC0483,Falcon Partners,,US,USD,"4681 Main St, Suite 223",Education,smb,24,,False,CSM08,AE10,12852.0,1071.0,1,7,83,2025-12-08,161,34,standard,us-east-1,False,,2021-04-19,active,True
+ACC0484,Forge Corp,,US,USD,"7613 Main St, Suite 516",Financial Services,mid_market,215,,False,CSM01,AE09,29172.0,2431.0,1,59,87,2025-08-12,43,66,professional,us-east-1,False,,2023-12-12,active,True
+ACC0485,Astro Group,,US,USD,"6525 Main St, Suite 478",Technology,enterprise,26707,,False,CSM08,AE12,127596.0,10633.0,1,7034,60,2025-11-18,141,19,enterprise,ap-southeast-1,False,,2020-03-04,active,True
+ACC0486,Quest Technologies,,US,USD,"6245 Main St, Suite 574",Media,smb,14,,False,CSM14,AE07,5856.0,488.0,1,7,48,2025-07-25,25,-31,standard,ap-southeast-1,False,,2021-04-06,active,True
+ACC0487,Forge Services,,US,USD,"6472 Main St, Suite 449",Technology,enterprise,7350,,False,CSM11,AE14,247668.0,20639.0,1,1156,91,2025-12-12,165,63,enterprise,us-east-1,False,,2021-12-04,active,True
+ACC0488,Ursa Inc,,US,USD,"5147 Main St, Suite 521",Technology,mid_market,664,,False,CSM14,AE06,89040.0,7420.0,1,254,38,2025-12-07,160,-5,professional,us-east-1,False,,2023-10-23,active,True
+ACC0489,Indigo Enterprises,,US,USD,"7060 Main St, Suite 339",Technology,enterprise,13978,,False,CSM12,AE07,201036.0,16753.0,3,5979,55,2025-11-14,137,-10,enterprise,ap-southeast-1,False,,2022-12-21,at_risk,True
+ACC0490,Nether Technologies,,US,USD,"5726 Main St, Suite 106",Technology,smb,87,,False,CSM19,AE12,14868.0,1239.0,1,13,60,2025-10-22,114,18,standard,us-east-1,False,,2023-05-02,active,True
+ACC0491,Ferrous Services,,US,USD,"9097 Main St, Suite 328",Technology,smb,14,,False,CSM14,AE07,14496.0,1208.0,1,2,49,2025-11-21,144,79,standard,us-west-2,False,,2021-12-25,active,True
+ACC0492,Prism Group,,US,USD,"2415 Main St, Suite 627",Media,enterprise,29435,,False,CSM19,AE02,422064.0,35172.0,3,4814,48,2025-07-01,1,30,enterprise,eu-west-1,False,,2020-04-24,active,True
+ACC0493,Shore Enterprises,,US,USD,"7884 Main St, Suite 801",Financial Services,smb,8,,False,CSM05,AE12,6456.0,538.0,1,2,40,2025-07-20,20,-39,standard,us-west-2,False,,2023-12-08,active,True
+ACC0494,Onyx Ltd,,US,USD,"1523 Main St, Suite 998",Financial Services,smb,76,,False,CSM07,AE05,12972.0,1081.0,1,3,30,2025-07-28,28,22,standard,us-east-1,False,,2020-05-09,active,True
+ACC0495,Sapphire Solutions,,US,USD,"9269 Main St, Suite 767",Healthcare,enterprise,16037,,False,CSM18,AE03,477072.0,39756.0,2,1979,41,2025-10-13,105,71,enterprise,eu-west-1,False,,2022-10-02,active,True
+ACC0496,Sapphire Ltd,,US,USD,"3625 Main St, Suite 316",Technology,mid_market,967,,False,CSM17,AE14,83964.0,6997.0,1,39,87,2025-07-21,21,-21,professional,us-east-1,False,,2020-01-16,active,True
+ACC0497,Forge Group,,US,USD,"7206 Main St, Suite 617",Education,mid_market,625,,False,CSM11,AE10,29268.0,2439.0,1,194,83,2025-07-13,13,68,professional,us-west-2,False,,2023-08-07,active,True
+ACC0498,Topaz Inc,,US,USD,"4490 Main St, Suite 472",Logistics,smb,66,,False,CSM01,AE15,16536.0,1378.0,1,13,88,2025-09-07,69,74,standard,eu-west-1,False,,2021-08-11,active,True
+ACC0499,Astro Systems,,US,USD,"5185 Main St, Suite 769",Media,enterprise,24472,,False,CSM09,AE07,227964.0,18997.0,2,3762,87,2025-07-01,1,79,enterprise,ap-southeast-1,False,,2022-04-16,active,True
+ACC0500,Jolt Corp,,US,USD,"9983 Main St, Suite 344",Retail,smb,90,,False,CSM04,AE13,7116.0,593.0,1,34,35,2025-07-12,12,-28,standard,eu-west-1,False,,2021-05-03,active,True
