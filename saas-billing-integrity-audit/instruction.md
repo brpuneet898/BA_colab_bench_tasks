@@ -12,12 +12,12 @@ Exclude:
 
 Business policies:
 
-* Reduction amendments may generate contractual credits.
+* Reduction amendments may generate contractual credits for the billing period in which the amendment takes effect, not for the remainder of the contract term.
 * Usage overages are subject to contractual billing.
 * Recognised revenue for reseller accounts equals the gross invoice amount multiplied by `reseller_margin_pct`.
 * When multiple SLA metrics breach in the same billing period for the same account, only the highest-severity breach generates a credit.
 * Billing periods are contract-dependent.
-* Historical FX rates govern currency conversion where required.
+* All monetary amounts in data files are stored in the account's billing currency. `invoices.usd_equivalent` is the sole pre-converted USD field; no further FX conversion is required for this audit.
 * Pricing, discounts, entitlements, amendments, credits, invoices, payments, and revenue recognition must follow contractual and system records.
 
 Input files:
