@@ -12,7 +12,7 @@ Exclude:
 
 Business policies:
 
-* Reduction amendments may generate contractual credits for the billing period in which the amendment takes effect, not for the remainder of the contract term.
+* Reduction amendments may generate contractual credits for the billing period in which the amendment takes effect, not for the remainder of the contract term. For amendments with `credit_method = 'daily_prorate'`, the credit equals the monthly MRR reduction multiplied by the fraction of days remaining in the billing period from the effective date (inclusive).
 * Usage overages are subject to contractual billing.
 * Recognised revenue for reseller accounts equals the gross invoice amount multiplied by `reseller_margin_pct`.
 * When multiple SLA metrics breach in the same billing period for the same account, only the highest-severity breach generates a credit.
