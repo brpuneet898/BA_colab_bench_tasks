@@ -1,45 +1,111 @@
-Build a Q1 2024 (January 1 – March 31) weekly payroll cost variance report for a warehouse operation, comparing actual labour cost to budget by department and week.
+Build a Q1 2024 (January 1–March 31) weekly payroll cost variance report comparing actual labour cost against budget by department and week.
 
-The warehouse observes three company holidays in Q1: January 15, February 19, and March 10. Shifts starting on these dates earn a 1.5× holiday premium.
-Shifts starting on a Saturday or Sunday earn a 1.15× weekend premium.
-Shifts starting at or after 21:00 are classified as night shifts and earn a 1.3× night premium.
-IMPORTANT: Premiums are mutually exclusive. Only the highest applicable premium applies to a shift (they are never stacked or added). The highest premium applies to all hours of the qualifying shift.
+Shift premiums:
 
-Overtime is assessed on total weekly hours. The overtime premium is 0.5× the shift's applicable rate. The weekly overtime threshold resets each Monday. Weeks run Monday through Sunday. Shifts spanning the Sunday/Monday midnight boundary contribute hours to each respective week. When a corrected shift spans this boundary, distribute the corrected hours across the two weeks proportionally to the original (pre-correction) pre-midnight and post-midnight hour split.
-Shifts are attributed to the department the employee was assigned to at the time of the shift. When an employee is temporarily reassigned to another department, the receiving department is charged for those hours at the employee's base hourly rate. Overtime is calculated on the employee's total weekly hours and the overtime premium stays with the home department.
+* Holiday premium: 1.5× for shifts starting on 2024-01-15, 2024-02-19, or 2024-03-10.
+* Call-in premium: 1.4×.
+* Night premium: 1.3× for shifts starting at or after 21:00.
+* Weekend premium: 1.15× for shifts starting on Saturday or Sunday.
 
-`weekly_budget.csv` provides the base budgeted_hours and avg_hourly_rate per department per week. Base budgeted cost = budgeted_hours × avg_hourly_rate.
-However, unused budget rolls over: if a department's actual cost for week N is below its effective budget, 80% of the surplus carries forward and increases the department's budget for week N+1. This carryover addition is capped at 12% of the base budget for week N+1. The effective budget for week 1 equals the base budget. Variance is calculated against the effective budget.
+Premiums are mutually exclusive. Only the highest applicable premium applies to a shift.
 
-Input data files are raw exports from operational systems; column values may use varied conventions for the same logical type.
+Job classifications affect pay through job_code_rates.csv.
 
-Input data:
+Overtime is assessed weekly. Weeks run Monday through Sunday and overtime thresholds reset each Monday. Shifts spanning the Sunday/Monday midnight boundary contribute hours to each respective week. Overtime eligibility may depend on department policies, pay groups, reassignment policies, and job classifications. Employees working multiple job classifications within a week receive blended-rate overtime treatment. When an employee is temporarily reassigned to a department whose overtime policy applies cross-departmentally, their effective weekly overtime threshold for that week is the lower of their home department's threshold and the receiving department's threshold.
 
-`/workspace/data/shifts.csv` — shift_id, employee_id, shift_start, shift_end. Warehouse shifts run 6–14 hours; records with durations outside this range are data-entry errors and must be excluded before analysis.
+Departmental labour cost attribution must reflect employee assignments, transfers, reassignments, work-order allocations, overtime ownership rules, and eligible payroll corrections.
 
-`/workspace/data/corrections.csv` — retroactive timesheet corrections.
-Four rules govern corrections:
-1. Only corrections with status `approved` apply.
-2. If multiple approved corrections exist for the same shift, use the latest one by `correction_date`.
-3. The Q1 payroll cutoff is 2024-04-05. Corrections filed after this date do not apply to Q1. If the latest approved correction is post-cutoff, the latest pre-cutoff approved correction (if any) applies instead.
-4. If an eligible approved correction reduces a shift's total duration below 6 hours, the entire shift is excluded from analysis.
+Work orders may allocate labour cost across multiple departments.
 
-`/workspace/data/employees.csv` — employee_id, department_id (snapshot generated on April 1, 2024), hourly_rate, employee_type (full_time or contractor). Contractor hourly_rate values are stored in US cents by the HR export system.
+Weekly budgets originate from weekly_budget.csv and may be modified by approved budget amendments. Amendment types include additions and reallocations. Only amendments approved on or before 2024-04-05 affect Q1 reporting.
 
-`/workspace/data/departments.csv` — department_id, department_name
+Unused budget carries forward according to company policy:
 
-`/workspace/data/ot_policy.csv` — department_id, weekly_ot_threshold (hours), applies_cross_dept (boolean). When true, the department's overtime threshold applies to all employees working in that department, including those temporarily reassigned there.
+* Carry-forward rate: 80% of unused budget.
+* Carry-forward cap: 12% of the next week's base budget.
 
-`/workspace/data/reassignments.csv` — employee_id, week_start (YYYY-MM-DD, always a Monday), to_dept_id, reassigned_hours
+Variance is calculated against effective budget.
 
-`/workspace/data/weekly_budget.csv` — department_id, week_start (date, always a Monday), budgeted_hours, avg_hourly_rate
+Input data may contain inconsistent representations of equivalent values, undocumented columns, invalid records, and retroactive corrections. Use only documented fields relevant to the analysis.
 
-`/workspace/data/budget_amendments.csv` — amendment_id, department_id, week_start, amount, type (addition or reallocation), from_dept_id (populated only for reallocation type), approved_date. Budget amendments retroactively adjust the base budgeted cost. Only amendments with approved_date on or before 2024-04-05 apply. Use the amended base budgeted cost in all effective budget and carryover calculations.
+Payroll cutoff date for Q1 corrections: 2024-04-05.
 
-`/workspace/data/transfers.csv` — employee_id, from_dept_id, to_dept_id, effective_date
+Warehouse shifts are expected to be between 6 and 14 hours in duration. Invalid shifts do not contribute to the analysis.
 
-Required outputs:
+Corrections may modify shift hours, pay rate, or department attribution. Only eligible approved corrections affect Q1 payroll results. Corrections may invalidate a shift.
 
-Save `/workspace/payroll_variance_report.csv` with columns: department_id, department_name, week_start, base_budgeted_cost, effective_budgeted_cost, actual_cost, variance (actual_cost − effective_budgeted_cost). Include one row per department per week (10 departments × 13 weeks = 130 rows), sorted by department_id then week_start.
+Contractor hourly rates are stored in US cents.
 
-Save `/workspace/summary.json` with keys total_budgeted_cost (sum of effective budgets), total_actual_cost, total_variance, total_overtime_hours (float, rounded to 2 decimal places) and over_budget_week_count (integer, count of department-week pairs where actual_cost exceeds effective_budgeted_cost).
+Historical employee rates are available through rate_history.csv.
+
+Job codes may appear in multiple textual representations while referring to the same logical classification.
+
+Input files:
+
+/workspace/data/shifts.csv
+shift_id, employee_id, shift_start, shift_end, job_code, work_order_id, schedule_type, assigned_at
+
+/workspace/data/corrections.csv
+retroactive timesheet corrections
+
+/workspace/data/employees.csv
+employee_id, department_id, hourly_rate, employee_type, pay_group_id
+
+/workspace/data/rate_history.csv
+employee_id, effective_date, hourly_rate
+
+/workspace/data/pay_groups.csv
+pay_group_id, ot_threshold
+
+/workspace/data/job_code_rates.csv
+job_code, rate_multiplier
+
+/workspace/data/work_orders.csv
+work_order_id, primary_dept_id, project_type
+
+/workspace/data/work_order_splits.csv
+work_order_id, secondary_dept_id, secondary_pct
+
+/workspace/data/departments.csv
+department_id, department_name
+
+/workspace/data/ot_policy.csv
+department_id, weekly_ot_threshold, applies_cross_dept, call_in_window_hours
+
+/workspace/data/reassignments.csv
+employee_id, week_start, to_dept_id, reassigned_hours
+
+/workspace/data/weekly_budget.csv
+department_id, week_start, budgeted_hours, avg_hourly_rate
+
+/workspace/data/budget_amendments.csv
+amendment_id, department_id, week_start, amount, type, from_dept_id, approved_date
+
+/workspace/data/transfers.csv
+employee_id, from_dept_id, to_dept_id, effective_date
+
+Save /workspace/payroll_variance_report.csv with columns:
+
+department_id,
+department_name,
+week_start,
+base_budgeted_cost,
+effective_budgeted_cost,
+actual_cost,
+variance
+
+Include one row per department-week combination in Q1 (130 rows total), sorted by department_id and week_start.
+
+Save /workspace/summary.json with:
+
+total_budgeted_cost,
+total_actual_cost,
+total_variance,
+total_overtime_hours,
+over_budget_week_count
+
+total_budgeted_cost is the sum of effective budgets.
+
+total_overtime_hours must be reported to two decimal places.
+
+over_budget_week_count is the number of department-week combinations where actual_cost exceeds effective_budgeted_cost.
