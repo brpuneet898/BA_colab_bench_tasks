@@ -13,13 +13,15 @@ Each closed deal's ARR may be multiplied by a single accelerator before attribut
 - `deal_source` = "Outbound": 1.2×
 
 
-Attribution starts from `account_teams.csv`. Each account has a `Primary_AE`. Credit is divided as follows:
+Attribution starts from `account_teams.csv`. Each row in `account_teams.csv` includes an `effective_from` date indicating when that team member's assignment became active. Only team members whose `effective_from` date is on or before the deal's `close_date` are included in attribution for that deal.
+
+Each account has a `Primary_AE`. Credit is divided as follows:
 
 1. If the account team includes an `SDR`, the SDR receives 20% and the `Primary_AE` receives 80%.
 2. If the deal's `product_line` is "Enterprise Suite" and the team includes an `Overlay_Specialist`, the Overlay receives 15%, the SDR (if present) receives 15%, and the `Primary_AE` receives the remainder (85% with no SDR, 70% with an SDR).
 3. If the `Primary_AE`'s home region in `reps.csv` is "EMEA", the Global VP (rep_id `R999`) takes 5% of the deal's accelerated ARR off the top. The remaining 95% is then divided among the account team using the rules above.
 
-Only `closed_won` deals count toward attainment.
+Only `closed_won` deals count toward attainment. Where multiple `closed_won` records exist for the same `(region, deal_id)`, use only the record with the latest `close_date`.
 
 ARR is recognised in equal thirds over three consecutive months beginning in the close month. Month 1 and Month 2 each receive exactly `arr / 3`. Month 3 receives the remainder (`arr − 2 × (arr / 3)`).
 
@@ -65,7 +67,7 @@ Input Data:
 
 `/workspace/data/deals.csv` — `region`, `deal_id`, `account_id`, `close_date`, `total_contract_value`, `currency`, `contract_months`, `product_line`, `deal_source`, `stage`. `deal_id` is assigned by each region's CRM and resets independently per region.
 
-`/workspace/data/account_teams.csv` — `account_id`, `rep_id`, `role`. Roles: `Primary_AE`, `SDR`, `Overlay_Specialist`.
+`/workspace/data/account_teams.csv` — `account_id`, `rep_id`, `role`, `effective_from`. Roles: `Primary_AE`, `SDR`, `Overlay_Specialist`.
 
 `/workspace/data/reps.csv` — `rep_id`, `rep_name`, `region`, `territory`, `manager_id`, `hire_date`.
 

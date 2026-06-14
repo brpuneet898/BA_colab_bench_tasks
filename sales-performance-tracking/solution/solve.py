@@ -15,7 +15,7 @@ GLOBAL_VP   = "R999"
 def load_data():
     deals         = pd.read_csv(DATA_DIR / "deals.csv",         parse_dates=["close_date"])
     reps          = pd.read_csv(DATA_DIR / "reps.csv",          parse_dates=["hire_date"])
-    account_teams = pd.read_csv(DATA_DIR / "account_teams.csv")
+    account_teams = pd.read_csv(DATA_DIR / "account_teams.csv", parse_dates=["effective_from"])
     quotas        = pd.read_csv(DATA_DIR / "quotas.csv",        parse_dates=["period_start", "period_end"])
     cancellations = pd.read_csv(DATA_DIR / "cancellations.csv", parse_dates=["filed_date", "cancelled_date"])
     fx_rates      = pd.read_csv(DATA_DIR / "fx_rates.csv",      parse_dates=["date"])
@@ -94,6 +94,9 @@ def build_fx_lookup(fx_rates, close_dates, currencies):
 
 def process_deals(deals, fx_rates):
     deals = deals[deals["stage"] == "closed_won"].copy()
+    # BOTTLENECK: deal_id is region-scoped but some deals were renegotiated — two
+    # closed_won records exist for the same (region, deal_id). Keep only the latest.
+    deals = deals.sort_values("close_date").drop_duplicates(["region", "deal_id"], keep="last")
 
     fx_lookup = build_fx_lookup(fx_rates, deals["close_date"].unique(), deals["currency"].unique())
 
@@ -118,27 +121,33 @@ def process_deals(deals, fx_rates):
 # ─── Attribution ──────────────────────────────────────────────────────────────
 
 def resolve_attribution(deals, account_teams, reps):
-    # Build rep-region lookup to decide EMEA Global_VP cut.
-    # The cut applies when the *Primary_AE's home region* (from reps.csv) is EMEA,
-    # regardless of which region's CRM recorded the deal.
     rep_region = reps.set_index("rep_id")["region"].to_dict()
 
-    teams = defaultdict(lambda: {"Primary_AE": None, "SDR": None, "Overlay_Specialist": None})
-    for _, row in account_teams.iterrows():
-        role = row["role"]
-        if role in ("Primary_AE", "SDR", "Overlay_Specialist"):
-            teams[row["account_id"]][role] = row["rep_id"]
+    at_grouped = account_teams.groupby("account_id")
 
     records = []
     for _, deal in deals.iterrows():
-        team = teams[deal["account_id"]]
+        close_date = deal["close_date"]
+        acct       = deal["account_id"]
+
+        # Only team members active on or before close_date
+        if acct in at_grouped.groups:
+            at_acct  = at_grouped.get_group(acct)
+            at_active = at_acct[at_acct["effective_from"] <= close_date]
+        else:
+            at_active = pd.DataFrame(columns=account_teams.columns)
+
+        team = {"Primary_AE": None, "SDR": None, "Overlay_Specialist": None}
+        for _, row in at_active.iterrows():
+            if row["role"] in ("Primary_AE", "SDR", "Overlay_Specialist"):
+                team[row["role"]] = row["rep_id"]
+
         ae  = team["Primary_AE"]
         sdr = team["SDR"]
         ov  = team["Overlay_Specialist"]
         if not ae:
             continue
 
-        # Compute base shares
         shares = {ae: 1.0}
         if sdr:
             shares[sdr]  = 0.20
@@ -148,7 +157,6 @@ def resolve_attribution(deals, account_teams, reps):
             shares[sdr] = 0.15 if sdr else 0.0
             shares[ae]  = 0.70 if sdr else 0.85
 
-        # Global_VP cut: triggered by Primary_AE's home region, not deal region
         if rep_region.get(ae) == "EMEA":
             new_shares = {GLOBAL_VP: 0.05}
             for rep, share in shares.items():
@@ -160,7 +168,7 @@ def resolve_attribution(deals, account_teams, reps):
                 records.append({
                     "deal_id":      deal["deal_id"],
                     "region":       deal["region"],
-                    "close_date":   deal["close_date"],
+                    "close_date":   close_date,
                     "rep_id":       rep,
                     "credited_arr": deal["arr_usd"] * share,
                 })

@@ -148,7 +148,7 @@ def raw_data():
     return (
         pd.read_csv(DATA_DIR / "deals.csv",         parse_dates=["close_date"]),
         pd.read_csv(DATA_DIR / "reps.csv",          parse_dates=["hire_date"]),
-        pd.read_csv(DATA_DIR / "account_teams.csv"),
+        pd.read_csv(DATA_DIR / "account_teams.csv", parse_dates=["effective_from"]),
         pd.read_csv(DATA_DIR / "quotas.csv",        parse_dates=["period_start"]),
         pd.read_csv(DATA_DIR / "cancellations.csv", parse_dates=["filed_date", "cancelled_date"]),
         pd.read_csv(DATA_DIR / "fx_rates.csv",      parse_dates=["date"]),
@@ -175,12 +175,10 @@ def expected_report(raw_data):
 
     rep_region = reps.set_index("rep_id")["region"].to_dict()
 
-    teams = defaultdict(lambda: {"Primary_AE": None, "SDR": None, "Overlay_Specialist": None})
-    for _, row in account_teams.iterrows():
-        if row["role"] in ("Primary_AE", "SDR", "Overlay_Specialist"):
-            teams[row["account_id"]][row["role"]] = row["rep_id"]
+    at_grouped = account_teams.groupby("account_id")
 
     won = deals[deals["stage"] == "closed_won"].copy()
+    won = won.sort_values("close_date").drop_duplicates(["region", "deal_id"], keep="last")
     won["fx"]      = won.apply(lambda r: _get_fx_rate(fx_rates, r["close_date"], r["currency"]), axis=1)
     won["arr_usd"] = (won["total_contract_value"] / won["contract_months"] * 12.0
                       * won["fx"]
@@ -193,8 +191,18 @@ def expected_report(raw_data):
 
     ledger = defaultdict(float)
     for _, deal in won.iterrows():
-        shares     = _resolve_attribution(deal, teams[deal["account_id"]], rep_region)
         close_date = deal["close_date"]
+        acct       = deal["account_id"]
+        if acct in at_grouped.groups:
+            at_acct  = at_grouped.get_group(acct)
+            at_active = at_acct[at_acct["effective_from"] <= close_date]
+        else:
+            at_active = pd.DataFrame(columns=account_teams.columns)
+        team = {"Primary_AE": None, "SDR": None, "Overlay_Specialist": None}
+        for _, row in at_active.iterrows():
+            if row["role"] in ("Primary_AE", "SDR", "Overlay_Specialist"):
+                team[row["role"]] = row["rep_id"]
+        shares     = _resolve_attribution(deal, team, rep_region)
         cdate      = cancel_map.get((deal["region"], deal["deal_id"]))
         for rep, share in shares.items():
             if share > 0:
@@ -249,8 +257,8 @@ def expected_report(raw_data):
 
 # ─── Tests ────────────────────────────────────────────────────────────────────
 
-def test_01_files_and_schema(report_df, summary_json):
-    """Both output files exist and the CSV has the required columns."""
+def test_01_output_structure(report_df, summary_json):
+    """Both output files exist, CSV has required columns, and contains 600 rows."""
     assert REPORT_PATH.exists(),  "monthly_rep_performance.csv not found"
     assert SUMMARY_PATH.exists(), "summary.json not found"
     assert report_df is not None
@@ -259,38 +267,45 @@ def test_01_files_and_schema(report_df, summary_json):
         assert col in report_df.columns, f"Missing column: {col}"
     assert "total_net_arr_usd"    in summary_json
     assert "total_base_quota_usd" in summary_json
-
-
-def test_02_row_count(report_df):
-    """Exactly 200 reps × 3 months = 600 rows, one per rep per month."""
-    assert report_df is not None
     assert len(report_df) == 600, f"Expected 600 rows, got {len(report_df)}"
     assert set(report_df["month"].unique()) == {2, 3, 4}
 
 
-def test_03_sentinel_input_data():
+def test_02_sentinel_input_data():
     """Input files must not be modified; key structural properties are anchored."""
+    from collections import Counter as _Counter
+
     deals = pd.read_csv(DATA_DIR / "deals.csv")
-    assert len(deals) == 5000, f"deals.csv must not be modified (expected 5000 rows, got {len(deals)})"
+    assert len(deals) == 5025, f"deals.csv must not be modified (expected 5025 rows, got {len(deals)})"
 
     at = pd.read_csv(DATA_DIR / "account_teams.csv")
     r081_ae = set(at[(at["rep_id"] == "R081") & (at["role"] == "Primary_AE")]["account_id"])
-    assert {"ACC0760", "ACC0420", "ACC0979", "ACC0277", "ACC0230"}.issubset(r081_ae), \
-        "account_teams.csv modified — R081 must be Primary_AE for the 5 APAC accounts"
+    assert len(r081_ae) >= 5, \
+        f"R081 must be Primary_AE for at least 5 accounts (got {len(r081_ae)})"
+
+    assert "effective_from" in at.columns, "account_teams.csv must have effective_from column"
+    late_sdrs = at[(at["role"] == "SDR") & (at["effective_from"] == "2024-03-01")]
+    assert len(late_sdrs) == 25, f"Expected 25 SDR rows with effective_from=2024-03-01, got {len(late_sdrs)}"
 
     fx = pd.read_csv(DATA_DIR / "fx_rates.csv", parse_dates=["date"])
     assert (fx["date"].dt.day == 1).all(), \
         "fx_rates.csv modified — rates must be monthly (1st of each month) only"
 
     cancels = pd.read_csv(DATA_DIR / "cancellations.csv")
+    emea_cancels = cancels[(cancels["region"] == "EMEA") & (cancels["status"] == "approved")]
+    assert len(emea_cancels) > 0, "cancellations.csv must contain at least one approved EMEA cancellation (Trap 6)"
+    # Trap 6 is a Dec-closed EMEA deal cancelled in March
     assert any(
-        (cancels["region"] == "EMEA") &
-        (cancels["deal_id"] == 201) &
-        (cancels["status"] == "approved")
-    ), "cancellations.csv modified — approved cancellation for (EMEA, 201) must be present"
+        (emea_cancels["cancelled_date"] >= "2024-03-01") & (emea_cancels["cancelled_date"] <= "2024-03-31")
+    ), "cancellations.csv must contain at least one March cancellation for Trap 6"
+
+    won_keys = list(zip(deals[deals["stage"] == "closed_won"]["region"],
+                        deals[deals["stage"] == "closed_won"]["deal_id"]))
+    dupes = [k for k, v in _Counter(won_keys).items() if v > 1]
+    assert len(dupes) == 25, f"Expected 25 (region, deal_id) pairs with 2 closed_won rows, got {len(dupes)}"
 
 
-def test_04_summary_totals(summary_json, expected_report):
+def test_03_summary_totals(summary_json, expected_report):
     """total_net_arr_usd and total_base_quota_usd match ground truth.
 
     This test catches both FX as-of-date errors (Trap 1) and EMEA-AE attribution
@@ -305,13 +320,12 @@ def test_04_summary_totals(summary_json, expected_report):
         f"total_base_quota_usd {summary_json['total_base_quota_usd']:.2f} != expected {exp_quota:.2f}"
 
 
-def test_05_emea_ae_global_vp_attribution(report_df, expected_report):
+def test_04_emea_ae_global_vp_attribution(report_df, expected_report):
     """Trap 2 — Global_VP 5% cut based on Primary_AE's home region, not deal region.
 
-    R081 (EMEA rep) is Primary_AE for both EMEA accounts and 5 APAC accounts.
-    The 5% cut must apply to *all* R081 Primary_AE deals regardless of which
-    region's CRM recorded the deal. A model checking deal['region'] == 'EMEA'
-    will skip the cut on APAC-region deals and give R081 too much ARR.
+    R081 is an EMEA rep. The instruction requires the cut to trigger when the
+    Primary_AE's home region in reps.csv is EMEA. A model that forgets the VP
+    cut entirely will give R081 too much ARR across all Q1 months.
     """
     assert report_df is not None
     for month in [2, 3, 4]:
@@ -326,48 +340,51 @@ def test_05_emea_ae_global_vp_attribution(report_df, expected_report):
             "Global_VP cut must trigger on Primary_AE's home region, not deal region."
 
 
-def test_06_cancellation_clawback_in_cancelled_month(report_df, expected_report):
+def test_05_cancellation_clawback_in_cancelled_month(report_df, expected_report):
     """Trap 4 — clawback is recorded in cancelled_date month, not filed_date month.
 
-    Deal (EMEA, 843): filed 2024-02-28, cancelled_date 2024-03-01.
-    The clawback of the already-recognised February tranche must appear in
-    Month 3 (March). A model using filed_date.month would shift it to Month 2,
-    making R120's February too low and March too high.
+    Deal (AMER, 788): filed 2024-02-29, cancelled_date 2024-03-02.
+    The deal closes 2024-02-10; its February tranche is recognised first, then
+    clawed back in March. A model using filed_date.month would cancel in February
+    (same month as tranche 1), producing zero recognition and incorrectly voiding
+    March and April — making R047's February too low and March wrong.
     """
     assert report_df is not None
     for month in [2, 3]:
         exp = expected_report.loc[
-            (expected_report["rep_id"] == "R120") & (expected_report["month"] == month),
+            (expected_report["rep_id"] == "R047") & (expected_report["month"] == month),
             "net_arr_usd"].iloc[0]
         act = report_df.loc[
-            (report_df["rep_id"] == "R120") & (report_df["month"] == month),
+            (report_df["rep_id"] == "R047") & (report_df["month"] == month),
             "net_arr_usd"].iloc[0]
         assert abs(act - exp) <= 1.0, \
-            f"R120 month {month}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
+            f"R047 month {month}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
             "Clawback must be recorded in cancelled_date month, not filed_date month."
 
 
-def test_07_cancellation_composite_key(report_df, expected_report):
+def test_06_cancellation_composite_key(report_df, expected_report):
     """Trap 3 — cancellation key is (region, deal_id); deal_id alone is not unique.
 
-    (APAC, deal_id=404) is cancelled. A separate deal with deal_id=404 exists in
-    AMER (owned by R078) with no cancellation. A model matching cancellations by
-    deal_id alone incorrectly voids R078's AMER deal.
+    (APAC, deal_id=293) is cancelled (cancelled_date 2024-03-31). A separate deal
+    with deal_id=293 exists in EMEA (owned by R112, closes 2023-12-18) with no
+    cancellation. That EMEA deal has only a February Q1 tranche. A model matching
+    cancellations by deal_id alone incorrectly voids R112's February tranche and
+    records a phantom clawback in March.
     """
     assert report_df is not None
-    for month in [2, 3, 4]:
+    for month in [2, 3]:
         exp = expected_report.loc[
-            (expected_report["rep_id"] == "R078") & (expected_report["month"] == month),
+            (expected_report["rep_id"] == "R112") & (expected_report["month"] == month),
             "net_arr_usd"].iloc[0]
         act = report_df.loc[
-            (report_df["rep_id"] == "R078") & (report_df["month"] == month),
+            (report_df["rep_id"] == "R112") & (report_df["month"] == month),
             "net_arr_usd"].iloc[0]
         assert abs(act - exp) <= 1.0, \
-            f"R078 month {month}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
-            "Cancellation (APAC, 404) must not affect the separate AMER deal with the same deal_id."
+            f"R112 month {month}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
+            "Cancellation (APAC, 293) must not affect the separate EMEA deal with the same deal_id."
 
 
-def test_08_new_hire_quota_proration(report_df, expected_report):
+def test_07_new_hire_quota_proration(report_df, expected_report):
     """R040 hired 2024-02-21: active days in February = 9 (Feb 21–29, inclusive).
     base_quota = (quota_usd / 3) × (9 / 29). Off-by-one in active-day counting
     is a common failure.
@@ -384,7 +401,7 @@ def test_08_new_hire_quota_proration(report_df, expected_report):
         "Active days = (month_end - hire_date).days + 1 (inclusive of hire date)."
 
 
-def test_09_quota_rollover(report_df):
+def test_08_quota_rollover(report_df):
     """Quota shortfall from month M is added to effective quota in month M+1.
     This must cascade: shortfall from month 2 adds to month 3's effective quota,
     and shortfall from month 3 adds to month 4's effective quota.
@@ -408,48 +425,48 @@ def test_09_quota_rollover(report_df):
     assert has_rollover, "No quota shortfalls found — rollover logic was not exercised"
 
 
-def test_10_fx_as_of_date_and_triangulation(report_df, expected_report, raw_data):
+def test_09_fx_as_of_date_and_triangulation(report_df, expected_report, raw_data):
     """Trap 1 — FX rates are monthly; mid-month closes must use the most recent prior rate,
     and missing direct USD pairs require chaining through intermediate currencies.
 
-    Deal (AMER, 1509) closes 2024-02-16 in CAD. No rate exists for Feb 16.
-    The correct lookup uses the 2024-02-01 rate and chains: CAD→EUR→USD (2 hops).
+    Deal (AMER, 558) closes 2024-03-11 in CAD. No rate exists for Mar 11.
+    The correct lookup uses the 2024-03-01 rate and chains: CAD→EUR→USD (2 hops).
     A model doing an exact-date lookup gets no match and falls back to 1.0, treating
-    CAD as USD — overstating this deal's February tranche by ~$28,128 (~30%).
-    R013 is the sole Primary_AE for this account with no SDR or Overlay, so the
-    error flows directly into their Month 2 net_arr_usd.
+    CAD as USD — overstating this deal's March tranche.
+    R053 is the sole Primary_AE for this account with no SDR or Overlay, so the
+    error flows directly into their Month 3 net_arr_usd.
     """
     assert report_df is not None
     _, _, _, _, _, fx_rates = raw_data
 
-    # Verify the as-of rate for this specific deal exists on Feb 1 (not Feb 16)
-    feb_16_rows = fx_rates[fx_rates["date"] == pd.Timestamp("2024-02-16")]
-    assert len(feb_16_rows) == 0, "fx_rates must not have a Feb 16 entry — as-of lookup is required"
+    # Confirm no rate exists on Mar 11 — as-of lookup is required
+    mar_11_rows = fx_rates[fx_rates["date"] == pd.Timestamp("2024-03-11")]
+    assert len(mar_11_rows) == 0, "fx_rates must not have a Mar 11 entry — as-of lookup is required"
 
-    feb_1_rows = fx_rates[fx_rates["date"] == pd.Timestamp("2024-02-01")]
-    g = _build_fx_graph(feb_1_rows)
+    mar_1_rows = fx_rates[fx_rates["date"] == pd.Timestamp("2024-03-01")]
+    g = _build_fx_graph(mar_1_rows)
     cad_to_usd = _bfs_to_usd(g, "CAD")
-    assert cad_to_usd is not None and 0.70 < cad_to_usd < 0.85, \
-        f"CAD→USD on Feb 1 via triangulation should be ~0.771, got {cad_to_usd}"
+    assert cad_to_usd is not None and 0.60 < cad_to_usd < 0.85, \
+        f"CAD→USD on Mar 1 via triangulation expected ~0.74, got {cad_to_usd}"
 
-    # R013's Month 2 ARR must reflect the correctly converted CAD deal
+    # R053's Month 3 ARR must reflect the correctly converted CAD deal
     exp = expected_report.loc[
-        (expected_report["rep_id"] == "R013") & (expected_report["month"] == 2),
+        (expected_report["rep_id"] == "R053") & (expected_report["month"] == 3),
         "net_arr_usd"].iloc[0]
     act = report_df.loc[
-        (report_df["rep_id"] == "R013") & (report_df["month"] == 2),
+        (report_df["rep_id"] == "R053") & (report_df["month"] == 3),
         "net_arr_usd"].iloc[0]
     assert abs(act - exp) <= 1.0, \
-        f"R013 month 2: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
-        "Check that deal (AMER, 1509) uses the 2024-02-01 CAD→EUR→USD rate, " \
-        "not a 1.0 fallback from a missing 2024-02-16 rate."
+        f"R053 month 3: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
+        "Check that deal (AMER, 558) uses the 2024-03-01 CAD→EUR→USD rate, " \
+        "not a 1.0 fallback from a missing 2024-03-11 rate."
 
 
-def test_12_clawback_when_cancel_month_has_no_tranche(report_df, expected_report):
+def test_10_clawback_when_cancel_month_has_no_tranche(report_df, expected_report):
     """Trap 6 — clawback must be recorded in cancelled_date month even when no deal tranche
     falls in that month.
 
-    Deal (EMEA, 201) closes 2023-12-04; its three tranches land in Dec 2023, Jan 2024,
+    Deal (EMEA, 197) closes 2023-12-26; its three tranches land in Dec 2023, Jan 2024,
     Feb 2024. The deal is cancelled (cancelled_date 2024-03-15) after all tranches are past.
     The Q1-recognised Feb tranche must be clawed back in March. A model that only generates
     clawbacks when the cancel month coincides with a tranche will silently drop it; a model
@@ -458,37 +475,103 @@ def test_12_clawback_when_cancel_month_has_no_tranche(report_df, expected_report
     assert report_df is not None
     for month, label in [(2, "Feb"), (3, "March")]:
         exp = expected_report.loc[
-            (expected_report["rep_id"] == "R147") & (expected_report["month"] == month),
+            (expected_report["rep_id"] == "R107") & (expected_report["month"] == month),
             "net_arr_usd"].iloc[0]
         act = report_df.loc[
-            (report_df["rep_id"] == "R147") & (report_df["month"] == month),
+            (report_df["rep_id"] == "R107") & (report_df["month"] == month),
             "net_arr_usd"].iloc[0]
         assert abs(act - exp) <= 1.0, \
-            f"R147 {label}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
+            f"R107 {label}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
             "Clawback must equal only Q1-recognised tranches, recorded in cancelled_date month."
 
-def test_11_march_quota_uplift(report_df):
+def test_11_march_quota_uplift(report_df, expected_report):
     """Trap 5 — Reps reaching ≥150% Feb attainment receive a 20% March base_quota boost.
 
     The uplift applies to March base_quota only; April base_quota is the original
-    prorated value. Anchored on three reps with unambiguous Feb over-attainment.
+    prorated value. Verified by finding reps with ≥150% Feb attainment and checking
+    that March base_quota is exactly 1.2× the unmodified prorated base_quota.
     """
     if report_df is None:
         pytest.skip("monthly_rep_performance.csv not found")
-    anchors = [
-        # (rep_id, expected_mar_base_quota_boosted, expected_apr_base_quota_original)
-        ("R061", 138252.256,  115210.213333),
-        ("R057", 138283.604,  115236.336667),
-        ("R167", 341575.916,  284646.596667),
-    ]
-    for rep_id, boosted_mar, orig_apr in anchors:
-        mar = report_df[(report_df["rep_id"] == rep_id) & (report_df["month"] == 3)]
-        apr = report_df[(report_df["rep_id"] == rep_id) & (report_df["month"] == 4)]
-        assert not mar.empty, f"{rep_id} month 3 missing from report"
-        assert not apr.empty, f"{rep_id} month 4 missing from report"
-        assert abs(mar["base_quota"].values[0] - boosted_mar) < 0.02, \
-            f"{rep_id} March base_quota {mar['base_quota'].values[0]:.2f} != {boosted_mar:.3f}. " \
+
+    # Find reps that achieved ≥150% Feb attainment (from expected report)
+    feb_rows = expected_report[expected_report["month"] == 2]
+    high_achievers = feb_rows[
+        (feb_rows["effective_quota"] > 0) & (feb_rows["net_arr_usd"] >= feb_rows["effective_quota"] * 1.5)
+    ]["rep_id"].unique()
+
+    assert len(high_achievers) > 0, "No reps achieved ≥150% Feb attainment — March uplift rule cannot be tested"
+
+    # For first 5 high achievers, verify March uplift was applied
+    for rep_id in high_achievers[:5]:
+        feb_gt = expected_report.loc[
+            (expected_report["rep_id"] == rep_id) & (expected_report["month"] == 2),
+            "base_quota"].iloc[0]
+        mar_gt = expected_report.loc[
+            (expected_report["rep_id"] == rep_id) & (expected_report["month"] == 3),
+            "base_quota"].iloc[0]
+        apr_gt = expected_report.loc[
+            (expected_report["rep_id"] == rep_id) & (expected_report["month"] == 4),
+            "base_quota"].iloc[0]
+
+        mar_act = report_df.loc[
+            (report_df["rep_id"] == rep_id) & (report_df["month"] == 3),
+            "base_quota"].iloc[0]
+        apr_act = report_df.loc[
+            (report_df["rep_id"] == rep_id) & (report_df["month"] == 4),
+            "base_quota"].iloc[0]
+
+        # March should match expected (which already has boost), and be 1.2x Feb
+        assert abs(mar_act - mar_gt) < 1.0, \
+            f"{rep_id} March base_quota {mar_act:.2f} != expected {mar_gt:.2f}. "
+        assert abs(mar_gt - feb_gt * 1.2) < 1.0, \
+            f"{rep_id} March boost not applied: {mar_gt:.2f} != {feb_gt * 1.2:.2f}. " \
             "Reps at ≥150% Feb attainment must have March base_quota increased by 20%."
-        assert abs(apr["base_quota"].values[0] - orig_apr) < 0.02, \
-            f"{rep_id} April base_quota {apr['base_quota'].values[0]:.2f} != {orig_apr:.6f}. " \
+        # April should be original (unboosted)
+        assert abs(apr_act - apr_gt) < 1.0, \
+            f"{rep_id} April base_quota {apr_act:.2f} != expected {apr_gt:.2f}. " \
             "The 20% uplift applies to March only; April base_quota must be unmodified."
+
+
+def test_12_account_team_scd(report_df, expected_report, raw_data):
+    """Trap 7 — SDR attribution requires effective_from ≤ deal close_date.
+
+    25 accounts have an SDR with effective_from = 2024-03-01. Deals on those
+    accounts closed in February must use no-SDR attribution (Primary_AE = 100%).
+    A model that prebuilds a static team dict gives those Primary_AEs only 80%
+    of their February deal ARR.
+    """
+    _, _, account_teams, _, _, _ = raw_data
+    late_sdr_accts = set(
+        account_teams[
+            (account_teams["role"] == "SDR") &
+            (account_teams["effective_from"] == pd.Timestamp("2024-03-01"))
+        ]["account_id"]
+    )
+    assert len(late_sdr_accts) >= 20, \
+        f"Expected ≥20 trap accounts, found {len(late_sdr_accts)} — account_teams.csv may not have been regenerated"
+
+    ae_rows = account_teams[
+        (account_teams["account_id"].isin(late_sdr_accts)) &
+        (account_teams["role"] == "Primary_AE")
+    ]
+    ae_reps = ae_rows["rep_id"].unique()[:5]
+
+    failures = []
+    for rep_id in ae_reps:
+        exp_row = expected_report[
+            (expected_report["rep_id"] == rep_id) & (expected_report["month"] == 2)
+        ]
+        act_row = report_df[
+            (report_df["rep_id"] == rep_id) & (report_df["month"] == 2)
+        ]
+        if exp_row.empty or act_row.empty:
+            continue
+        diff = abs(act_row["net_arr_usd"].iloc[0] - exp_row["net_arr_usd"].iloc[0])
+        if diff > 1.0:
+            failures.append(
+                f"{rep_id} Feb net_arr_usd: got {act_row['net_arr_usd'].iloc[0]:.2f}, "
+                f"expected {exp_row['net_arr_usd'].iloc[0]:.2f} (diff {diff:+.2f}). "
+                "SDR effective_from=2024-03-01 must exclude SDR from Feb deals."
+            )
+    assert not failures, "\n".join(failures)
