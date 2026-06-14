@@ -33,7 +33,7 @@ ARR is recognised in equal thirds over three consecutive months beginning in the
 - When a cancellation applies, any unrecognised future tranches are voided and all tranches previously recognised within Q1 are clawed back. The clawback is recorded as a negative amount in the month of the `cancelled_date`.
 
 
-Each rep's Q1 quota is the row in `quotas.csv` with `period_start` = `2024-02-01`. The base monthly quota is `quota_usd / 3`.
+For each month in Q1, use the quota record in `quotas.csv` where `period_start` ≤ the first day of that month ≤ `period_end`. The base monthly quota equals `quota_usd` divided by the number of calendar months spanned by that record's period.
 
 Reps hired during Q1 have their base monthly quota prorated by the number of days they were active in that month.
 

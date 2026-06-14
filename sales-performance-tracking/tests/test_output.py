@@ -80,20 +80,23 @@ def _resolve_attribution(deal_row, team, rep_region):
     ov  = team.get("Overlay_Specialist")
     if not ae:
         return {}
-    shares = {ae: 1.0}
+    shares = defaultdict(float, {ae: 1.0})
     if sdr:
-        shares[sdr] = 0.20
-        shares[ae]  = 0.80
+        shares[sdr] += 0.20
+        shares[ae]   = 0.80
     if deal_row["product_line"] == "Enterprise Suite" and ov:
-        shares[ov]  = 0.15
-        shares[sdr] = 0.15 if sdr else 0.0
-        shares[ae]  = 0.70 if sdr else 0.85
+        shares[ov]  += 0.15
+        if sdr:
+            shares[sdr] += 0.15
+            shares[ae]   = 0.70
+        else:
+            shares[ae]   = 0.85
     if rep_region.get(ae) == "EMEA":
-        scaled = {"R999": 0.05}
+        scaled = defaultdict(float, {"R999": 0.05})
         for rep, s in shares.items():
-            scaled[rep] = s * 0.95
+            scaled[rep] += s * 0.95
         shares = scaled
-    return shares
+    return dict(shares)
 
 
 _Q1_YMS = {(2024, 2), (2024, 3), (2024, 4)}
@@ -149,7 +152,7 @@ def raw_data():
         pd.read_csv(DATA_DIR / "deals.csv",         parse_dates=["close_date"]),
         pd.read_csv(DATA_DIR / "reps.csv",          parse_dates=["hire_date"]),
         pd.read_csv(DATA_DIR / "account_teams.csv", parse_dates=["effective_from"]),
-        pd.read_csv(DATA_DIR / "quotas.csv",        parse_dates=["period_start"]),
+        pd.read_csv(DATA_DIR / "quotas.csv",        parse_dates=["period_start", "period_end"]),
         pd.read_csv(DATA_DIR / "cancellations.csv", parse_dates=["filed_date", "cancelled_date"]),
         pd.read_csv(DATA_DIR / "fx_rates.csv",      parse_dates=["date"]),
     )
@@ -209,16 +212,29 @@ def expected_report(raw_data):
                 for m, net in _monthly_tranches(deal["arr_usd"] * share, close_date, cdate):
                     ledger[(rep, m)] += net
 
-    q1        = quotas[quotas["period_start"] == pd.Timestamp("2024-02-01")]
-    rep_quota = q1.set_index("rep_id")["quota_usd"].to_dict()
+    def _quota_monthly(rep_id, month_start, quotas):
+        applicable = quotas[
+            (quotas["rep_id"]       == rep_id) &
+            (quotas["period_start"] <= month_start) &
+            (quotas["period_end"]   >= month_start)
+        ]
+        if applicable.empty:
+            return 0.0
+        q = applicable.iloc[0]
+        n_months = (
+            (q["period_end"].year  - q["period_start"].year) * 12
+            + q["period_end"].month - q["period_start"].month
+            + 1
+        )
+        return q["quota_usd"] / n_months
 
     records = []
     for _, row in reps.iterrows():
-        hire   = row["hire_date"]
-        base_m = rep_quota.get(row["rep_id"], 0.0) / 3.0
+        hire = row["hire_date"]
         for m, (start, end) in MONTH_BOUNDS.items():
             days_in = (end - start).days + 1
             active  = 0 if hire > end else (days_in if hire <= start else (end - hire).days + 1)
+            base_m  = _quota_monthly(row["rep_id"], start, quotas)
             records.append({"rep_id": row["rep_id"], "rep_name": row["rep_name"],
                              "region": row["region"], "month": m,
                              "base_quota": base_m * (active / days_in)})
@@ -303,6 +319,11 @@ def test_02_sentinel_input_data():
                         deals[deals["stage"] == "closed_won"]["deal_id"]))
     dupes = [k for k, v in _Counter(won_keys).items() if v > 1]
     assert len(dupes) == 25, f"Expected 25 (region, deal_id) pairs with 2 closed_won rows, got {len(dupes)}"
+
+    quotas = pd.read_csv(DATA_DIR / "quotas.csv", parse_dates=["period_start"])
+    mar_revisions = quotas[quotas["period_start"] == pd.Timestamp("2024-03-01")]
+    assert len(mar_revisions) >= 20, \
+        f"Expected ≥20 mid-quarter quota revision rows (period_start=2024-03-01), got {len(mar_revisions)}"
 
 
 def test_03_summary_totals(summary_json, expected_report):
@@ -484,7 +505,7 @@ def test_10_clawback_when_cancel_month_has_no_tranche(report_df, expected_report
             f"R107 {label}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
             "Clawback must equal only Q1-recognised tranches, recorded in cancelled_date month."
 
-def test_11_march_quota_uplift(report_df, expected_report):
+def test_11_march_quota_uplift(report_df, expected_report, raw_data):
     """Trap 5 — Reps reaching ≥150% Feb attainment receive a 20% March base_quota boost.
 
     The uplift applies to March base_quota only; April base_quota is the original
@@ -494,15 +515,20 @@ def test_11_march_quota_uplift(report_df, expected_report):
     if report_df is None:
         pytest.skip("monthly_rep_performance.csv not found")
 
-    # Find reps that achieved ≥150% Feb attainment (from expected report)
+    _, _, _, quotas, _, _ = raw_data
+    # Reps with mid-quarter quota revisions have different March base_quotas;
+    # exclude them from the uplift-invariant check (feb_gt * 1.2 != mar_gt for them).
+    promoted_reps = set(quotas[quotas["period_start"] == pd.Timestamp("2024-03-01")]["rep_id"])
+
     feb_rows = expected_report[expected_report["month"] == 2]
     high_achievers = feb_rows[
-        (feb_rows["effective_quota"] > 0) & (feb_rows["net_arr_usd"] >= feb_rows["effective_quota"] * 1.5)
+        (feb_rows["effective_quota"] > 0) &
+        (feb_rows["net_arr_usd"] >= feb_rows["effective_quota"] * 1.5) &
+        (~feb_rows["rep_id"].isin(promoted_reps))
     ]["rep_id"].unique()
 
-    assert len(high_achievers) > 0, "No reps achieved ≥150% Feb attainment — March uplift rule cannot be tested"
+    assert len(high_achievers) > 0, "No non-promoted reps achieved ≥150% Feb attainment — March uplift rule cannot be tested"
 
-    # For first 5 high achievers, verify March uplift was applied
     for rep_id in high_achievers[:5]:
         feb_gt = expected_report.loc[
             (expected_report["rep_id"] == rep_id) & (expected_report["month"] == 2),
@@ -521,13 +547,11 @@ def test_11_march_quota_uplift(report_df, expected_report):
             (report_df["rep_id"] == rep_id) & (report_df["month"] == 4),
             "base_quota"].iloc[0]
 
-        # March should match expected (which already has boost), and be 1.2x Feb
         assert abs(mar_act - mar_gt) < 1.0, \
-            f"{rep_id} March base_quota {mar_act:.2f} != expected {mar_gt:.2f}. "
+            f"{rep_id} March base_quota {mar_act:.2f} != expected {mar_gt:.2f}."
         assert abs(mar_gt - feb_gt * 1.2) < 1.0, \
             f"{rep_id} March boost not applied: {mar_gt:.2f} != {feb_gt * 1.2:.2f}. " \
             "Reps at ≥150% Feb attainment must have March base_quota increased by 20%."
-        # April should be original (unboosted)
         assert abs(apr_act - apr_gt) < 1.0, \
             f"{rep_id} April base_quota {apr_act:.2f} != expected {apr_gt:.2f}. " \
             "The 20% uplift applies to March only; April base_quota must be unmodified."

@@ -148,14 +148,17 @@ def resolve_attribution(deals, account_teams, reps):
         if not ae:
             continue
 
-        shares = {ae: 1.0}
+        shares = defaultdict(float, {ae: 1.0})
         if sdr:
-            shares[sdr]  = 0.20
+            shares[sdr] += 0.20
             shares[ae]   = 0.80
         if deal["product_line"] == "Enterprise Suite" and ov:
-            shares[ov]  = 0.15
-            shares[sdr] = 0.15 if sdr else 0.0
-            shares[ae]  = 0.70 if sdr else 0.85
+            shares[ov]  += 0.15
+            if sdr:
+                shares[sdr] += 0.15
+                shares[ae]   = 0.70
+            else:
+                shares[ae]   = 0.85
 
         if rep_region.get(ae) == "EMEA":
             new_shares = {GLOBAL_VP: 0.05}
@@ -284,32 +287,39 @@ MONTH_BOUNDS = {
 def prorate_quotas(reps, quotas):
     """Return one row per (rep, month) with base_quota.
 
-    Base = quota_usd / 3, prorated by active days for reps hired during Q1.
-    Active days = inclusive count from max(hire_date, month_start) to month_end.
+    For each month, the applicable quota record is the one where
+    period_start <= month_start <= period_end. Base monthly =
+    quota_usd / number of calendar months in that record's period.
+    Prorated by active days for reps hired during Q1.
     """
-    q1 = quotas[quotas["period_start"] == pd.Timestamp("2024-02-01")].copy()
-    df = reps.merge(q1[["rep_id", "quota_usd"]], on="rep_id", how="left")
-    df["quota_usd"] = df["quota_usd"].fillna(0.0)
-
     records = []
-    for _, row in df.iterrows():
-        hire   = row["hire_date"]
-        base_m = row["quota_usd"] / 3.0
+    for _, row in reps.iterrows():
+        hire = row["hire_date"]
+        rep_quotas = quotas[quotas["rep_id"] == row["rep_id"]]
         for m, (start, end) in MONTH_BOUNDS.items():
-            days_in_month = (end - start).days + 1
-            if hire > end:
-                active = 0
-            elif hire <= start:
-                active = days_in_month
+            applicable = rep_quotas[
+                (rep_quotas["period_start"] <= start) &
+                (rep_quotas["period_end"]   >= start)
+            ]
+            if applicable.empty:
+                quota_monthly = 0.0
             else:
-                active = (end - hire).days + 1
-            quota = base_m * (active / days_in_month)
+                q = applicable.iloc[0]
+                n_months = (
+                    (q["period_end"].year  - q["period_start"].year) * 12
+                    + q["period_end"].month - q["period_start"].month
+                    + 1
+                )
+                quota_monthly = q["quota_usd"] / n_months
+
+            days_in = (end - start).days + 1
+            active   = 0 if hire > end else (days_in if hire <= start else (end - hire).days + 1)
             records.append({
-                "rep_id":    row["rep_id"],
-                "rep_name":  row["rep_name"],
-                "region":    row["region"],
-                "month":     m,
-                "base_quota": quota,
+                "rep_id":     row["rep_id"],
+                "rep_name":   row["rep_name"],
+                "region":     row["region"],
+                "month":      m,
+                "base_quota": quota_monthly * (active / days_in),
             })
 
     return pd.DataFrame(records)
