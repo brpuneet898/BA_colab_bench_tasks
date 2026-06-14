@@ -1,4 +1,4 @@
 cost_type,allocation_basis,effective_from
-warehousing,revenue,2024-01-01
-warehousing,order_count,2024-10-01
+Warehousing,revenue,2024-01-01
+Warehousing,order_count,2024-10-01
 fulfillment,order_count,2024-01-01

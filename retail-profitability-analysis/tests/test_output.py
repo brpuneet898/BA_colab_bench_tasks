@@ -65,6 +65,12 @@ def test_case_01_input_data_not_tampered():
     assert len(excess) >= 50, \
         f"returns.csv must not be modified (expected ≥50 excess-quantity records, got {len(excess)})."
 
+    # Trap 6 anchor: both files use Title Case "Warehousing" — normalization required before join
+    assert "Warehousing" in alloc_rules["cost_type"].values, \
+        "cost_allocation_rules.csv must not be modified (expected 'Warehousing' with Title Case)."
+    assert "Warehousing" in shared_costs["cost_type"].values, \
+        "shared_costs.csv must not be modified (expected 'Warehousing' with Title Case)."
+
     # Trap 3 anchors
     orders["month"] = pd.to_datetime(orders["order_date"]).dt.month
     nov_count = len(orders[orders["month"] == 11])
@@ -162,6 +168,7 @@ def ground_truth():
     # Category net profit (Trap 2 — versioned allocation rules)
     orders["month"] = pd.to_datetime(orders["order_date"]).dt.to_period("M").astype(str)
     alloc_rules["effective_from"] = pd.to_datetime(alloc_rules["effective_from"])
+    alloc_rules["cost_type"] = alloc_rules["cost_type"].str.lower().str.strip()
     alloc_rules_sorted = alloc_rules.sort_values("effective_from")
 
     cat_gp    = orders.groupby("category_id")["gross_profit"].sum()
@@ -169,7 +176,7 @@ def ground_truth():
 
     for _, sc_row in shared_costs.iterrows():
         cost_month_ts = pd.to_datetime(sc_row["month"])
-        ct  = sc_row["cost_type"]
+        ct  = sc_row["cost_type"].lower().strip()
         amt = float(sc_row["total_cost"])
         applicable = alloc_rules_sorted[
             (alloc_rules_sorted["cost_type"] == ct) &
@@ -296,7 +303,7 @@ def test_case_08_channel_net_profit_values(ground_truth):
         tol = max(abs(exp) * 0.03, 500.0)
         if abs(got - exp) > tol:
             errors.append(f"  {ch_id}: got ${got:,.0f}, expected ${exp:,.0f} (±3%)")
-    assert not errors, "Channel net profit values outside ±10% tolerance:\n" + "\n".join(errors)
+    assert not errors, "Channel net profit values outside ±3% tolerance:\n" + "\n".join(errors)
 
 
 # ── Hard test 5: category and monthly values ─────────────────────────────────

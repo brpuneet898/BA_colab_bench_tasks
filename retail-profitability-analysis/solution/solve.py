@@ -50,6 +50,7 @@ orders       = pd.read_csv(DATA_DIR / "orders.csv")
 returns      = pd.read_csv(DATA_DIR / "returns.csv")
 shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
 alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
+alloc_rules["cost_type"] = alloc_rules["cost_type"].str.lower().str.strip()
 promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
 
 orders["gross_profit"] = (orders["unit_price"] - orders["unit_cost"]) * orders["quantity"]
@@ -104,7 +105,7 @@ cat_alloc = pd.Series(0.0, index=cat_gp.index)
 
 for _, sc_row in shared_costs.iterrows():
     cost_month_ts = pd.to_datetime(sc_row["month"])
-    ct  = sc_row["cost_type"]
+    ct  = sc_row["cost_type"].lower().strip()
     amt = float(sc_row["total_cost"])
 
     applicable = alloc_rules_sorted[
