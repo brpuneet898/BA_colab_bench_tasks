@@ -1,8 +1,10 @@
 Build a 2024 annual profitability report for a multi-channel retailer that sells across five sales channels and five product categories. Compute net profit by channel, contribution margin by product category, and net profit by calendar month, then identify the top and bottom performer in each dimension.
 
-Each report covers only the costs directly attributable to its dimension. Channel net profit deducts return losses only — sales returns are processed through the originating sales channel, so channel profitability reflects the net retained after customer refunds and return-handling costs. Category contribution margin deducts allocated shared overhead only — shared operational costs must be allocated to product categories according to the rules defined in `cost_allocation_rules.csv`. Monthly net profit deducts promotional cashback only — cashback obligations apply to revenue earned during a campaign's active dates and are recorded in `promotions.csv`. These three reports are independent analytical views and are not intended to sum to `total_net_profit`.
+Each report covers only the costs directly attributable to its dimension. Channel net profit deducts return losses only — sales returns are processed through the originating sales channel. Category contribution margin deducts allocated shared overhead only — shared operational costs must be allocated to product categories according to the rules defined in `cost_allocation_rules.csv`. Monthly net profit deducts promotional cashback only — cashback obligations apply to revenue earned during a campaign's active dates and are recorded in `promotions.csv`. These three reports are independent analytical views and are not intended to sum to `total_net_profit`.
 
-The company's total net profit, reported in `summary.json`, is total gross profit minus all return losses, minus all allocated shared overhead, minus all promotional cashback obligations.
+Return losses apply consistently to all figures in this report, including `total_net_profit`: for each return with a return_date within calendar year 2024, the loss equals the full customer refund (`unit_price` from the originating order × `quantity_returned`) plus the return-handling fee (`processing_cost_per_unit` × `quantity_returned`). Returned items are not restocked. Returns with a return_date outside 2024 are excluded from all calculations.
+
+The company's total net profit, reported in `summary.json`, is total gross profit minus all return losses (as defined above), minus all allocated shared overhead, minus all promotional cashback obligations.
 
 **Input data**
 
@@ -14,7 +16,7 @@ The company's total net profit, reported in `summary.json`, is total gross profi
 
 `/workspace/data/shared_costs.csv` — month (YYYY-MM), cost_type, total_cost
 
-`/workspace/data/cost_allocation_rules.csv` — cost_type, allocation_basis
+`/workspace/data/cost_allocation_rules.csv` — cost_type, allocation_basis, effective_from (YYYY-MM-DD). Each entry records the allocation basis in effect from that date forward.
 
 `/workspace/data/promotions.csv` — promotion_id, promotion_name, start_date, end_date, cashback_pct
 

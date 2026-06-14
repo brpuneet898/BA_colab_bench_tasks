@@ -1,28 +1,34 @@
 """
 2024 Retail Profitability Report.
 
-Three independent analyses:
+Four assumption-blindness traps:
 
 Channel profitability (Trap 1):
-    Gross profit per channel minus return losses. Return losses =
-    quantity_returned * unit_price (refund) + quantity_returned *
-    processing_cost_per_unit (handling). CH03 (Marketplace) is #1 by
-    gross revenue but has a ~46% return rate; after netting returns it
+    Gross profit per channel minus return losses. CH03 (Marketplace) is #1
+    by gross revenue but has a ~46% return rate; after netting returns it
     drops from first to last in net profit.
+    Sub-trap: order_id resets per channel — the true join key is
+    (channel_id, order_id). Naive merge on order_id alone produces a
+    Cartesian explosion that inflates return losses across all channels.
 
 Category profitability (Trap 2):
     Gross profit per category minus shared-cost allocation. The
-    allocation_basis in cost_allocation_rules.csv specifies order_count
-    (not revenue) for all cost types. Electronics (CAT01) has high
-    revenue per order but few orders; naive revenue-proportional
-    allocation makes Apparel look best. Correct order-count allocation
-    flips Electronics to first.
+    cost_allocation_rules.csv table is versioned: warehousing used a
+    revenue basis for Q1–Q3 2024 and switched to order_count from Q4 2024.
+    Electronics (CAT01) has high revenue per order but few orders. The Q1–Q3
+    revenue-based warehousing allocation charges Electronics heavily, making
+    Apparel (CAT02) the most profitable category on a contribution-margin basis.
+    A model that applies only the latest rule (order_count) to all months
+    under-allocates to Electronics and incorrectly ranks it first.
 
 Monthly profitability (Trap 3):
     Gross profit per month minus cashback obligations from promotions.csv.
     November has a 2x promotional volume spike (highest gross revenue) but
     a 45% cashback obligation — after cashback, November is the worst month
     (negative net profit).
+    Sub-trap: February 2024 has no orders. pandas groupby silently drops
+    empty groups, producing 11 rows. The instruction requires January–December;
+    the solution must reindex to all 12 months.
 """
 
 import json
@@ -54,7 +60,13 @@ orders["revenue"]      = orders["unit_price"] * orders["quantity"]
 
 # ── Channel profitability ─────────────────────────────────────────────────────
 
-ret = returns.merge(orders[["order_id", "unit_price"]], on="order_id")
+# BOTTLENECK: some returns from late-December orders have return_date in January 2025.
+# Instruction scopes return losses to return_date within the reporting calendar year.
+report_year = int(pd.to_datetime(orders["order_date"]).dt.year.mode()[0])
+ret = returns[pd.to_datetime(returns["return_date"]).dt.year == report_year].copy()
+# BOTTLENECK: order_id resets per channel; the true join key is (channel_id, order_id).
+# Naive merge on order_id alone creates a Cartesian explosion that inflates return losses.
+ret = ret.merge(orders[["channel_id", "order_id", "unit_price"]], on=["channel_id", "order_id"])
 ret["return_cost"] = (
     ret["quantity_returned"] * ret["unit_price"]
     + ret["quantity_returned"] * ret["processing_cost_per_unit"]
@@ -77,21 +89,40 @@ ch_report.to_csv(WORKSPACE_DIR / "channel_profitability.csv", index=False)
 
 # ── Category profitability ────────────────────────────────────────────────────
 
-cat_gp     = orders.groupby("category_id")["gross_profit"].sum()
-cat_orders = orders.groupby("category_id")["order_id"].count()
-cat_rev    = orders.groupby("category_id")["revenue"].sum()
-total_ord  = cat_orders.sum()
-total_rev  = cat_rev.sum()
+# BOTTLENECK: cost_allocation_rules.csv is versioned via effective_from. Warehousing
+# switches from revenue to order_count in Q4 2024. Applying a single annual rule
+# misattributes 9 months of revenue-based warehouse costs. Must iterate over each
+# cost month, pick the latest effective rule on or before that month, and allocate.
 
+orders["month"] = pd.to_datetime(orders["order_date"]).dt.to_period("M").astype(str)
+
+alloc_rules["effective_from"] = pd.to_datetime(alloc_rules["effective_from"])
+alloc_rules_sorted = alloc_rules.sort_values("effective_from")
+
+cat_gp    = orders.groupby("category_id")["gross_profit"].sum()
 cat_alloc = pd.Series(0.0, index=cat_gp.index)
-for _, rule in alloc_rules.iterrows():
-    ct    = rule["cost_type"]
-    basis = rule["allocation_basis"]
-    amt   = float(shared_costs[shared_costs["cost_type"] == ct]["total_cost"].sum())
+
+for _, sc_row in shared_costs.iterrows():
+    cost_month_ts = pd.to_datetime(sc_row["month"])
+    ct  = sc_row["cost_type"]
+    amt = float(sc_row["total_cost"])
+
+    applicable = alloc_rules_sorted[
+        (alloc_rules_sorted["cost_type"] == ct) &
+        (alloc_rules_sorted["effective_from"] <= cost_month_ts)
+    ]
+    if applicable.empty:
+        continue
+    basis = applicable.iloc[-1]["allocation_basis"]
+
+    month_orders = orders[orders["month"] == sc_row["month"]]
     if basis == "order_count":
-        cat_alloc = cat_alloc.add((cat_orders / total_ord) * amt, fill_value=0.0)
-    elif basis == "revenue":
-        cat_alloc = cat_alloc.add((cat_rev / total_rev) * amt, fill_value=0.0)
+        shares = month_orders.groupby("category_id")["order_id"].count()
+    else:
+        shares = month_orders.groupby("category_id")["revenue"].sum()
+    total = shares.sum()
+    if total > 0:
+        cat_alloc = cat_alloc.add((shares / total) * amt, fill_value=0.0)
 
 cat_net = cat_gp - cat_alloc
 
@@ -108,9 +139,7 @@ cat_report.to_csv(WORKSPACE_DIR / "category_profitability.csv", index=False)
 
 # ── Monthly profitability ─────────────────────────────────────────────────────
 
-orders["month"] = pd.to_datetime(orders["order_date"]).dt.to_period("M").astype(str)
 mo_gp  = orders.groupby("month")["gross_profit"].sum()
-mo_rev = orders.groupby("month")["revenue"].sum()
 
 cashback_by_month = pd.Series(0.0, index=mo_gp.index)
 for _, promo in promotions.iterrows():
@@ -125,6 +154,11 @@ for _, promo in promotions.iterrows():
         cashback_by_month[mo] = cashback_by_month.get(mo, 0.0) + rev * pct
 
 mo_net = mo_gp - cashback_by_month.reindex(mo_gp.index, fill_value=0.0)
+
+# BOTTLENECK: February 2024 has no orders. pandas groupby silently drops empty groups.
+# Instruction requires one row per calendar month (Jan-Dec 2024).
+all_months = [f"{report_year}-{str(m).zfill(2)}" for m in range(1, 13)]
+mo_net = mo_net.reindex(all_months, fill_value=0.0)
 
 mo_report = (
     pd.DataFrame({

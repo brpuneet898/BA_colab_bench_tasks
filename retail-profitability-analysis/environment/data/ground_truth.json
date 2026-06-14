@@ -1,0 +1,22 @@
+{
+  "channel_net_profit_ranking": [
+    "CH02",
+    "CH01",
+    "CH05",
+    "CH04",
+    "CH03"
+  ],
+  "most_profitable_channel": "CH02",
+  "least_profitable_channel": "CH03",
+  "category_net_profit_ranking_correct": [
+    "CAT02",
+    "CAT01",
+    "CAT03",
+    "CAT04",
+    "CAT05"
+  ],
+  "most_profitable_category": "CAT02",
+  "best_margin_month": "2024-12",
+  "worst_margin_month": "2024-11",
+  "total_net_profit": 360323.24
+}

@@ -1,22 +1,11 @@
 """
 Tests for the 2024 retail profitability report.
 
-Contract (instruction.md): the deliverable is
+Verifies the four required artifacts:
     /workspace/channel_profitability.csv
     /workspace/category_profitability.csv
     /workspace/monthly_profitability.csv
     /workspace/summary.json
-
-Three assumption-blindness traps:
-    1. CH03 (Marketplace) has the highest gross revenue but a ~46% return rate.
-       After netting return losses, CH03 drops from #1 to last place.
-    2. cost_allocation_rules.csv specifies order_count allocation for shared costs.
-       Electronics (CAT01) has few orders but high revenue per order; Apparel (CAT02)
-       has many orders but low revenue per order. Revenue-based allocation makes
-       Apparel appear most profitable; order-count allocation flips Electronics to first.
-    3. November has a 2x order-volume spike from a promotion but also a 45% cashback
-       obligation on all November revenue. Without applying cashback, November looks like
-       the best month; after cashback, November is the worst (negative net profit).
 """
 
 import json
@@ -54,10 +43,10 @@ def test_case_01_input_data_not_tampered():
     promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
 
     # Trap 1 anchors
-    assert len(orders) == 54_894, \
-        f"orders.csv must not be modified (expected 54,894 rows, got {len(orders)})."
-    assert len(returns) == 8_363, \
-        f"returns.csv must not be modified (expected 8,363 rows, got {len(returns)})."
+    assert len(orders) == 50_788, \
+        f"orders.csv must not be modified (expected 50,788 rows, got {len(orders)})."
+    assert len(returns) == 7_824, \
+        f"returns.csv must not be modified (expected 7,824 rows, got {len(returns)})."
     ch03_returns = returns[returns["channel_id"] == "CH03"]
     assert len(ch03_returns) >= 6_000, \
         f"CH03 return rows must not be removed (expected ≥6,000, got {len(ch03_returns)})."
@@ -67,8 +56,12 @@ def test_case_01_input_data_not_tampered():
         f"shared_costs.csv must not be modified (expected 24 rows, got {len(shared_costs)})."
     assert float(shared_costs["total_cost"].sum()) >= 500_000, \
         "shared_costs.csv annual total must not be reduced below $500,000."
-    assert set(alloc_rules["allocation_basis"].unique()) == {"order_count"}, \
+    assert set(alloc_rules["allocation_basis"].unique()) == {"revenue", "order_count"}, \
         "cost_allocation_rules.csv allocation_basis values must not be changed."
+    assert "effective_from" in alloc_rules.columns, \
+        "cost_allocation_rules.csv must contain an effective_from column."
+    assert len(alloc_rules) == 3, \
+        f"cost_allocation_rules.csv must not be modified (expected 3 rows, got {len(alloc_rules)})."
 
     # Trap 3 anchors
     orders["month"] = pd.to_datetime(orders["order_date"]).dt.month
@@ -93,24 +86,30 @@ def test_case_02_outputs_exist():
 
 def test_case_03_csv_schemas_and_sort():
     """Validates columns, row counts, and sort order for all three output CSVs."""
+    orders = pd.read_csv(DATA_DIR / "orders.csv")
+    n_channels   = orders["channel_id"].nunique()
+    n_categories = orders["category_id"].nunique()
+    # instruction.md specifies "One row per calendar month (January–December 2024)"
+    n_months = 12
+
     ch = pd.read_csv(CH_PATH)
     assert {"channel_id", "net_profit"} <= set(ch.columns), \
         "channel_profitability.csv missing required columns."
-    assert len(ch) == 5, f"Expected 5 channel rows, got {len(ch)}."
+    assert len(ch) == n_channels, f"Expected {n_channels} channel rows, got {len(ch)}."
     assert ch["net_profit"].tolist() == sorted(ch["net_profit"].tolist(), reverse=True), \
         "channel_profitability.csv must be sorted by net_profit descending."
 
     cat = pd.read_csv(CAT_PATH)
     assert {"category_id", "contribution_margin"} <= set(cat.columns), \
         "category_profitability.csv missing required columns."
-    assert len(cat) == 5, f"Expected 5 category rows, got {len(cat)}."
+    assert len(cat) == n_categories, f"Expected {n_categories} category rows, got {len(cat)}."
     assert cat["contribution_margin"].tolist() == sorted(cat["contribution_margin"].tolist(), reverse=True), \
         "category_profitability.csv must be sorted by contribution_margin descending."
 
     mo = pd.read_csv(MO_PATH)
     assert {"month", "net_profit"} <= set(mo.columns), \
         "monthly_profitability.csv missing required columns."
-    assert len(mo) == 12, f"Expected 12 monthly rows, got {len(mo)}."
+    assert len(mo) == n_months, f"Expected {n_months} monthly rows (Jan–Dec), got {len(mo)}."
     assert mo["month"].tolist() == sorted(mo["month"].tolist()), \
         "monthly_profitability.csv must be sorted by month ascending."
 
@@ -145,8 +144,10 @@ def ground_truth():
     orders["gross_profit"] = (orders["unit_price"] - orders["unit_cost"]) * orders["quantity"]
     orders["revenue"]      = orders["unit_price"] * orders["quantity"]
 
-    # Channel net profit (Trap 1)
-    ret = returns.merge(orders[["order_id", "unit_price"]], on="order_id")
+    # Channel net profit
+    report_year = int(pd.to_datetime(orders["order_date"]).dt.year.mode()[0])
+    ret = returns[pd.to_datetime(returns["return_date"]).dt.year == report_year].copy()
+    ret = ret.merge(orders[["channel_id", "order_id", "unit_price"]], on=["channel_id", "order_id"])
     ret["return_cost"] = (
         ret["quantity_returned"] * ret["unit_price"]
         + ret["quantity_returned"] * ret["processing_cost_per_unit"]
@@ -155,28 +156,40 @@ def ground_truth():
     ch_ret = ret.groupby("channel_id")["return_cost"].sum()
     ch_net = ch_gp - ch_ret.reindex(ch_gp.index, fill_value=0.0)
 
-    # Category net profit (Trap 2)
-    cat_gp     = orders.groupby("category_id")["gross_profit"].sum()
-    cat_orders = orders.groupby("category_id")["order_id"].count()
-    cat_rev    = orders.groupby("category_id")["revenue"].sum()
-    total_ord  = cat_orders.sum()
-    total_rev  = cat_rev.sum()
+    # Category net profit (Trap 2 — versioned allocation rules)
+    orders["month"] = pd.to_datetime(orders["order_date"]).dt.to_period("M").astype(str)
+    alloc_rules["effective_from"] = pd.to_datetime(alloc_rules["effective_from"])
+    alloc_rules_sorted = alloc_rules.sort_values("effective_from")
 
+    cat_gp    = orders.groupby("category_id")["gross_profit"].sum()
     cat_alloc = pd.Series(0.0, index=cat_gp.index)
-    for _, rule in alloc_rules.iterrows():
-        ct    = rule["cost_type"]
-        basis = rule["allocation_basis"]
-        amt   = float(shared_costs[shared_costs["cost_type"] == ct]["total_cost"].sum())
+
+    for _, sc_row in shared_costs.iterrows():
+        cost_month_ts = pd.to_datetime(sc_row["month"])
+        ct  = sc_row["cost_type"]
+        amt = float(sc_row["total_cost"])
+        applicable = alloc_rules_sorted[
+            (alloc_rules_sorted["cost_type"] == ct) &
+            (alloc_rules_sorted["effective_from"] <= cost_month_ts)
+        ]
+        if applicable.empty:
+            continue
+        basis = applicable.iloc[-1]["allocation_basis"]
+        month_orders = orders[orders["month"] == sc_row["month"]]
         if basis == "order_count":
-            cat_alloc += (cat_orders / total_ord) * amt
+            shares = month_orders.groupby("category_id")["order_id"].count()
         else:
-            cat_alloc += (cat_rev / total_rev) * amt
+            shares = month_orders.groupby("category_id")["revenue"].sum()
+        total = shares.sum()
+        if total > 0:
+            cat_alloc = cat_alloc.add((shares / total) * amt, fill_value=0.0)
 
     cat_net = cat_gp - cat_alloc
 
-    # Monthly net profit (Trap 3)
-    orders["month"] = pd.to_datetime(orders["order_date"]).dt.to_period("M").astype(str)
-    mo_gp  = orders.groupby("month")["gross_profit"].sum()
+    # Monthly net profit
+    mo_gp = orders.groupby("month")["gross_profit"].sum()
+    all_months = [f"{report_year}-{str(m).zfill(2)}" for m in range(1, 13)]
+    mo_gp = mo_gp.reindex(all_months, fill_value=0.0)
 
     cashback_by_month = pd.Series(0.0, index=mo_gp.index)
     for _, promo in promotions.iterrows():
@@ -217,8 +230,7 @@ def ground_truth():
 # ── Hard test 1: top performers across all dimensions ────────────────────────
 
 def test_case_05_top_performers(ground_truth):
-    """Most profitable channel and category must match ground truth.
-    Naive models return CH03 (highest revenue) and CAT02 (revenue allocation)."""
+    """Most profitable channel and category must match ground truth."""
     if not SUM_PATH.exists():
         pytest.skip("summary.json not found")
     with open(SUM_PATH) as f:
@@ -229,16 +241,14 @@ def test_case_05_top_performers(ground_truth):
     )
     assert s.get("most_profitable_category") == ground_truth["most_profitable_category"], (
         f"most_profitable_category: got {s.get('most_profitable_category')!r}, "
-        f"expected {ground_truth['most_profitable_category']!r}. "
-        f"Shared costs must be split by order_count per cost_allocation_rules.csv."
+        f"expected {ground_truth['most_profitable_category']!r}."
     )
 
 
 # ── Hard test 2: margin months (Trap 3) ──────────────────────────────────────
 
 def test_case_06_margin_months(ground_truth):
-    """November has the highest gross revenue but a 45% cashback obligation
-    turns it into the worst net-profit month. Naive model returns November as best."""
+    """Best and worst net-profit months must match ground truth."""
     if not SUM_PATH.exists():
         pytest.skip("summary.json not found")
     with open(SUM_PATH) as f:
@@ -249,33 +259,27 @@ def test_case_06_margin_months(ground_truth):
     )
     assert s.get("worst_margin_month") == ground_truth["worst_margin_month"], (
         f"worst_margin_month: got {s.get('worst_margin_month')!r}, "
-        f"expected {ground_truth['worst_margin_month']!r}. "
-        f"November cashback drives it to negative net profit."
+        f"expected {ground_truth['worst_margin_month']!r}."
     )
 
 
 # ── Hard test 3: least profitable channel (Trap 1) ───────────────────────────
 
 def test_case_07_least_profitable_channel(ground_truth):
-    """CH03's ~46% return rate drives it to negative net profit.
-    Naive model (no returns) predicts a low-volume channel; correct model returns 'CH03'."""
+    """Least profitable channel must match ground truth."""
     if not SUM_PATH.exists():
         pytest.skip("summary.json not found")
     with open(SUM_PATH) as f:
         s = json.load(f)
     exp = ground_truth["least_profitable_channel"]
     got = s.get("least_profitable_channel", "")
-    assert got == exp, (
-        f"least_profitable_channel: got {got!r}, expected {exp!r}. "
-        f"Return losses wipe out the channel's gross profit."
-    )
+    assert got == exp, f"least_profitable_channel: got {got!r}, expected {exp!r}."
 
 
-# ── Hard test 4: channel net profit values (Trap 1 support) ──────────────────
+# ── Hard test 4: channel net profit values (Trap 1 + composite key sub-trap) ─
 
 def test_case_08_channel_net_profit_values(ground_truth):
-    """All five channel net_profit values must be within ±10% of ground truth.
-    A model that ignores returns will report CH03 net profit ~$1.1M instead of -$143K."""
+    """All channel net_profit values must be within ±10% of ground truth."""
     if not CH_PATH.exists():
         pytest.skip("channel_profitability.csv not found")
     df    = pd.read_csv(CH_PATH).set_index("channel_id")
