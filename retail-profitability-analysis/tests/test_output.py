@@ -208,7 +208,7 @@ def ground_truth():
     total_net = float(round(
         float(orders["gross_profit"].sum())
         - float(ret["return_cost"].sum())
-        - float(cat_alloc.sum())
+        - float(shared_costs["total_cost"].sum())
         - float(cashback_by_month.sum()),
         2,
     ))

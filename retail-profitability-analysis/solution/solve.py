@@ -176,7 +176,7 @@ mo_report.to_csv(WORKSPACE_DIR / "monthly_profitability.csv", index=False)
 total_net_profit = float(round(
     float(orders["gross_profit"].sum())
     - float(ret["return_cost"].sum())
-    - float(cat_alloc.sum())
+    - float(shared_costs["total_cost"].sum())
     - float(cashback_by_month.sum()),
     2,
 ))

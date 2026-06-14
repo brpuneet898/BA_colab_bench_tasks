@@ -4,7 +4,7 @@ Each report covers only the costs directly attributable to its dimension. Channe
 
 Return losses apply consistently to all figures in this report, including `total_net_profit`: for each return with a return_date within calendar year 2024, the loss equals the full customer refund (`unit_price` from the originating order × `quantity_returned`) plus the return-handling fee (`processing_cost_per_unit` × `quantity_returned`). Returned items are not restocked. Returns with a return_date outside 2024 are excluded from all calculations.
 
-The company's total net profit, reported in `summary.json`, is total gross profit minus all return losses (as defined above), minus all allocated shared overhead, minus all promotional cashback obligations.
+The company's total net profit, reported in `summary.json`, is total gross profit minus all return losses (as defined above), minus all shared overhead costs incurred during the year, minus all promotional cashback obligations.
 
 **Input data**
 
