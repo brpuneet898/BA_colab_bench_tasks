@@ -36,14 +36,12 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
-if Path("/workspace/data").exists():
+if Path("/.dockerenv").exists():
     DATA_DIR, WORKSPACE_DIR = Path("/workspace/data"), Path("/workspace")
-elif Path("../environment/data").exists():
-    DATA_DIR, WORKSPACE_DIR = Path("../environment/data"), Path("..")
-elif Path("environment/data").exists():
-    DATA_DIR, WORKSPACE_DIR = Path("environment/data"), Path(".")
 else:
-    DATA_DIR, WORKSPACE_DIR = Path("data"), Path(".")
+    _repo = Path(__file__).parent.parent
+    DATA_DIR    = _repo / "environment" / "data"
+    WORKSPACE_DIR = _repo
 
 
 # ── Load ──────────────────────────────────────────────────────────────────────
@@ -66,7 +64,9 @@ report_year = int(pd.to_datetime(orders["order_date"]).dt.year.mode()[0])
 ret = returns[pd.to_datetime(returns["return_date"]).dt.year == report_year].copy()
 # BOTTLENECK: order_id resets per channel; the true join key is (channel_id, order_id).
 # Naive merge on order_id alone creates a Cartesian explosion that inflates return losses.
-ret = ret.merge(orders[["channel_id", "order_id", "unit_price"]], on=["channel_id", "order_id"])
+ret = ret.merge(orders[["channel_id", "order_id", "unit_price", "quantity"]], on=["channel_id", "order_id"])
+# BOTTLENECK: some records have quantity_returned > order quantity (data entry error); cap before computing losses.
+ret["quantity_returned"] = ret[["quantity_returned", "quantity"]].min(axis=1)
 ret["return_cost"] = (
     ret["quantity_returned"] * ret["unit_price"]
     + ret["quantity_returned"] * ret["processing_cost_per_unit"]

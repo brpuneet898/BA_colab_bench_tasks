@@ -14,16 +14,12 @@ import numpy as np
 import pytest
 from pathlib import Path
 
-if Path("/workspace").exists():
+if Path("/.dockerenv").exists():
     WORKSPACE_DIR = Path("/workspace")
+    DATA_DIR = WORKSPACE_DIR / "data"
 else:
     WORKSPACE_DIR = Path(__file__).parent.parent
-
-DATA_DIR = (
-    WORKSPACE_DIR / "data"
-    if (WORKSPACE_DIR / "data").exists()
-    else Path(__file__).parent.parent / "environment" / "data"
-)
+    DATA_DIR = Path(__file__).parent.parent / "environment" / "data"
 
 CH_PATH  = WORKSPACE_DIR / "channel_profitability.csv"
 CAT_PATH = WORKSPACE_DIR / "category_profitability.csv"
@@ -45,8 +41,8 @@ def test_case_01_input_data_not_tampered():
     # Trap 1 anchors
     assert len(orders) == 50_788, \
         f"orders.csv must not be modified (expected 50,788 rows, got {len(orders)})."
-    assert len(returns) == 7_824, \
-        f"returns.csv must not be modified (expected 7,824 rows, got {len(returns)})."
+    assert len(returns) == 7_762, \
+        f"returns.csv must not be modified (expected 7,762 rows, got {len(returns)})."
     ch03_returns = returns[returns["channel_id"] == "CH03"]
     assert len(ch03_returns) >= 6_000, \
         f"CH03 return rows must not be removed (expected ≥6,000, got {len(ch03_returns)})."
@@ -62,6 +58,12 @@ def test_case_01_input_data_not_tampered():
         "cost_allocation_rules.csv must contain an effective_from column."
     assert len(alloc_rules) == 3, \
         f"cost_allocation_rules.csv must not be modified (expected 3 rows, got {len(alloc_rules)})."
+
+    # Dirty data anchor: some returns have quantity_returned > originating order quantity
+    ret_merged = returns.merge(orders[["channel_id", "order_id", "quantity"]], on=["channel_id", "order_id"])
+    excess = ret_merged[ret_merged["quantity_returned"] > ret_merged["quantity"]]
+    assert len(excess) >= 50, \
+        f"returns.csv must not be modified (expected ≥50 excess-quantity records, got {len(excess)})."
 
     # Trap 3 anchors
     orders["month"] = pd.to_datetime(orders["order_date"]).dt.month
@@ -147,7 +149,8 @@ def ground_truth():
     # Channel net profit
     report_year = int(pd.to_datetime(orders["order_date"]).dt.year.mode()[0])
     ret = returns[pd.to_datetime(returns["return_date"]).dt.year == report_year].copy()
-    ret = ret.merge(orders[["channel_id", "order_id", "unit_price"]], on=["channel_id", "order_id"])
+    ret = ret.merge(orders[["channel_id", "order_id", "unit_price", "quantity"]], on=["channel_id", "order_id"])
+    ret["quantity_returned"] = ret[["quantity_returned", "quantity"]].min(axis=1)
     ret["return_cost"] = (
         ret["quantity_returned"] * ret["unit_price"]
         + ret["quantity_returned"] * ret["processing_cost_per_unit"]
@@ -290,9 +293,9 @@ def test_case_08_channel_net_profit_values(ground_truth):
             errors.append(f"  {ch_id}: missing from report")
             continue
         got = float(df.loc[ch_id, "net_profit"])
-        tol = max(abs(exp) * 0.10, 500.0)
+        tol = max(abs(exp) * 0.03, 500.0)
         if abs(got - exp) > tol:
-            errors.append(f"  {ch_id}: got ${got:,.0f}, expected ${exp:,.0f} (±10%)")
+            errors.append(f"  {ch_id}: got ${got:,.0f}, expected ${exp:,.0f} (±3%)")
     assert not errors, "Channel net profit values outside ±10% tolerance:\n" + "\n".join(errors)
 
 
@@ -312,9 +315,9 @@ def test_case_09_profitability_values(ground_truth):
             errors.append(f"  {cat_id}: missing from category report")
             continue
         got = float(cat_df.loc[cat_id, "contribution_margin"])
-        tol = max(abs(exp) * 0.10, 2_000.0)
+        tol = max(abs(exp) * 0.03, 2_000.0)
         if abs(got - exp) > tol:
-            errors.append(f"  {cat_id}: got ${got:,.0f}, expected ${exp:,.0f} (±10%)")
+            errors.append(f"  {cat_id}: got ${got:,.0f}, expected ${exp:,.0f} (±3%)")
 
     mo_df = pd.read_csv(MO_PATH).set_index("month")
     mo_gt = ground_truth["mo_net"]
@@ -327,10 +330,10 @@ def test_case_09_profitability_values(ground_truth):
             continue
         exp = float(mo_gt[mo_id])
         got = float(mo_df.loc[mo_id, "net_profit"])
-        tol = max(abs(exp) * 0.10, 5_000.0)
+        tol = max(abs(exp) * 0.03, 5_000.0)
         if abs(got - exp) > tol:
             errors.append(
-                f"  {label} ({mo_id}): got ${got:,.0f}, expected ${exp:,.0f} (±10%)"
+                f"  {label} ({mo_id}): got ${got:,.0f}, expected ${exp:,.0f} (±3%)"
             )
 
     assert not errors, "Profitability values outside tolerance:\n" + "\n".join(errors)
@@ -348,8 +351,8 @@ def test_case_10_total_net_profit(ground_truth):
         s = json.load(f)
     exp = ground_truth["total_net_profit"]
     got = float(s.get("total_net_profit", 0.0))
-    tol = max(abs(exp) * 0.05, 5_000.0)
+    tol = max(abs(exp) * 0.02, 5_000.0)
     assert abs(got - exp) <= tol, (
-        f"total_net_profit: got ${got:,.2f}, expected ${exp:,.2f} (±5%). "
+        f"total_net_profit: got ${got:,.2f}, expected ${exp:,.2f} (±2%). "
         f"Must equal total gross profit minus return losses, shared overhead, and cashback."
     )
