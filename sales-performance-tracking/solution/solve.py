@@ -300,7 +300,7 @@ def prorate_quotas(reps, quotas):
             applicable = rep_quotas[
                 (rep_quotas["period_start"] <= start) &
                 (rep_quotas["period_end"]   >= start)
-            ]
+            ].sort_values("period_start", ascending=False)
             if applicable.empty:
                 quota_monthly = 0.0
             else:

@@ -3,7 +3,7 @@ version = "1.0"
 [metadata]
 expert_time_estimate_hours = 2.0
 category = "Sales Analytics"
-tags = ["quota-attainment", "multi-currency", "fiscal-quarter", "cancellations", "account-team-scd", "deal-supersession"]
+tags = ["quota-attainment", "multi-currency", "fiscal-quarter", "cancellations", "account-team-scd", "deal-supersession", "quota-revision"]
 
 [verifier]
 timeout_sec = 1200.0

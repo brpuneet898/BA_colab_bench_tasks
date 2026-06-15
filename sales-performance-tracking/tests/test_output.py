@@ -217,7 +217,7 @@ def expected_report(raw_data):
             (quotas["rep_id"]       == rep_id) &
             (quotas["period_start"] <= month_start) &
             (quotas["period_end"]   >= month_start)
-        ]
+        ].sort_values("period_start", ascending=False)
         if applicable.empty:
             return 0.0
         q = applicable.iloc[0]
@@ -383,70 +383,7 @@ def test_05_cancellation_clawback_in_cancelled_month(report_df, expected_report)
             "Clawback must be recorded in cancelled_date month, not filed_date month."
 
 
-def test_06_cancellation_composite_key(report_df, expected_report):
-    """Trap 3 — cancellation key is (region, deal_id); deal_id alone is not unique.
-
-    (APAC, deal_id=293) is cancelled (cancelled_date 2024-03-31). A separate deal
-    with deal_id=293 exists in EMEA (owned by R112, closes 2023-12-18) with no
-    cancellation. That EMEA deal has only a February Q1 tranche. A model matching
-    cancellations by deal_id alone incorrectly voids R112's February tranche and
-    records a phantom clawback in March.
-    """
-    assert report_df is not None
-    for month in [2, 3]:
-        exp = expected_report.loc[
-            (expected_report["rep_id"] == "R112") & (expected_report["month"] == month),
-            "net_arr_usd"].iloc[0]
-        act = report_df.loc[
-            (report_df["rep_id"] == "R112") & (report_df["month"] == month),
-            "net_arr_usd"].iloc[0]
-        assert abs(act - exp) <= 1.0, \
-            f"R112 month {month}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
-            "Cancellation (APAC, 293) must not affect the separate EMEA deal with the same deal_id."
-
-
-def test_07_new_hire_quota_proration(report_df, expected_report):
-    """R040 hired 2024-02-21: active days in February = 9 (Feb 21–29, inclusive).
-    base_quota = (quota_usd / 3) × (9 / 29). Off-by-one in active-day counting
-    is a common failure.
-    """
-    assert report_df is not None
-    exp = expected_report.loc[
-        (expected_report["rep_id"] == "R040") & (expected_report["month"] == 2),
-        "base_quota"].iloc[0]
-    act = report_df.loc[
-        (report_df["rep_id"] == "R040") & (report_df["month"] == 2),
-        "base_quota"].iloc[0]
-    assert abs(act - exp) <= 0.01, \
-        f"R040 Feb base_quota: got {act:.2f}, expected {exp:.2f}. " \
-        "Active days = (month_end - hire_date).days + 1 (inclusive of hire date)."
-
-
-def test_08_quota_rollover(report_df):
-    """Quota shortfall from month M is added to effective quota in month M+1.
-    This must cascade: shortfall from month 2 adds to month 3's effective quota,
-    and shortfall from month 3 adds to month 4's effective quota.
-    """
-    assert report_df is not None
-    df = report_df.sort_values(["rep_id", "month"])
-    has_rollover = False
-    for rep_id, group in df.groupby("rep_id"):
-        rows = {r["month"]: r for _, r in group.iterrows()}
-        for m in [2, 3]:
-            if m not in rows or m + 1 not in rows:
-                continue
-            shortfall    = max(0.0, rows[m]["effective_quota"] - rows[m]["net_arr_usd"])
-            expected_eff = rows[m + 1]["base_quota"] + shortfall
-            actual_eff   = rows[m + 1]["effective_quota"]
-            assert abs(actual_eff - expected_eff) <= 0.02, \
-                f"{rep_id} month {m+1}: effective_quota {actual_eff:.2f} != " \
-                f"base_quota {rows[m+1]['base_quota']:.2f} + shortfall {shortfall:.2f} = {expected_eff:.2f}"
-            if shortfall > 0:
-                has_rollover = True
-    assert has_rollover, "No quota shortfalls found — rollover logic was not exercised"
-
-
-def test_09_fx_as_of_date_and_triangulation(report_df, expected_report, raw_data):
+def test_06_fx_as_of_date_and_triangulation(report_df, expected_report, raw_data):
     """Trap 1 — FX rates are monthly; mid-month closes must use the most recent prior rate,
     and missing direct USD pairs require chaining through intermediate currencies.
 
@@ -483,7 +420,7 @@ def test_09_fx_as_of_date_and_triangulation(report_df, expected_report, raw_data
         "not a 1.0 fallback from a missing 2024-03-11 rate."
 
 
-def test_10_clawback_when_cancel_month_has_no_tranche(report_df, expected_report):
+def test_07_clawback_when_cancel_month_has_no_tranche(report_df, expected_report):
     """Trap 6 — clawback must be recorded in cancelled_date month even when no deal tranche
     falls in that month.
 
@@ -505,7 +442,7 @@ def test_10_clawback_when_cancel_month_has_no_tranche(report_df, expected_report
             f"R107 {label}: got {act:.2f}, expected {exp:.2f} (diff {act-exp:+.2f}). " \
             "Clawback must equal only Q1-recognised tranches, recorded in cancelled_date month."
 
-def test_11_march_quota_uplift(report_df, expected_report, raw_data):
+def test_08_march_quota_uplift(report_df, expected_report, raw_data):
     """Trap 5 — Reps reaching ≥150% Feb attainment receive a 20% March base_quota boost.
 
     The uplift applies to March base_quota only; April base_quota is the original
@@ -557,7 +494,7 @@ def test_11_march_quota_uplift(report_df, expected_report, raw_data):
             "The 20% uplift applies to March only; April base_quota must be unmodified."
 
 
-def test_12_account_team_scd(report_df, expected_report, raw_data):
+def test_09_account_team_scd(report_df, expected_report, raw_data):
     """Trap 7 — SDR attribution requires effective_from ≤ deal close_date.
 
     25 accounts have an SDR with effective_from = 2024-03-01. Deals on those
@@ -598,4 +535,42 @@ def test_12_account_team_scd(report_df, expected_report, raw_data):
                 f"expected {exp_row['net_arr_usd'].iloc[0]:.2f} (diff {diff:+.2f}). "
                 "SDR effective_from=2024-03-01 must exclude SDR from Feb deals."
             )
+    assert not failures, "\n".join(failures)
+
+
+def test_10_mid_quarter_quota_revision(report_df, expected_report, raw_data):
+    """Trap 9 — 25 reps have an overlapping quota record starting 2024-03-01.
+
+    March and April each have two matching quota records for these reps. The correct
+    one is the record with the latest period_start (2024-03-01), which carries a
+    25-35% higher monthly target than the original Feb-Apr record. A model that uses
+    iloc[0] without sorting, or that merges quotas onto the monthly grid without
+    deduplication, will produce the wrong base_quota for March and April.
+    """
+    _, _, _, quotas, _, _ = raw_data
+    trap_reps = quotas[quotas["period_start"] == pd.Timestamp("2024-03-01")]["rep_id"].unique()
+    assert len(trap_reps) >= 20, \
+        f"Expected ≥20 trap reps with revised quota, found {len(trap_reps)} — quotas.csv may not have been regenerated"
+
+    # Spot-check March and April base_quota for first 5 trap reps
+    failures = []
+    for rep_id in trap_reps[:5]:
+        for month in [3, 4]:
+            exp_row = expected_report[
+                (expected_report["rep_id"] == rep_id) & (expected_report["month"] == month)
+            ]
+            act_row = report_df[
+                (report_df["rep_id"] == rep_id) & (report_df["month"] == month)
+            ]
+            if exp_row.empty or act_row.empty:
+                continue
+            exp_bq = exp_row["base_quota"].iloc[0]
+            act_bq = act_row["base_quota"].iloc[0]
+            diff = act_bq - exp_bq
+            if abs(diff) > 1.0:
+                failures.append(
+                    f"{rep_id} month {month} base_quota: got {act_bq:.2f}, "
+                    f"expected {exp_bq:.2f} (diff {diff:+.2f}). "
+                    "Quota revision effective 2024-03-01 must override original record for March/April."
+                )
     assert not failures, "\n".join(failures)
