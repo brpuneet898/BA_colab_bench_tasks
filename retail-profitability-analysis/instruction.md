@@ -8,7 +8,7 @@ The company's total net profit, reported in `summary.json`, is total gross profi
 
 **Input data**
 
-`/workspace/data/orders.csv` — order_id, channel_id, product_id, category_id, order_date (YYYY-MM-DD), quantity, unit_price, unit_cost
+`/workspace/data/orders.csv` — order_id, channel_id, product_id, order_date (YYYY-MM-DD), quantity, unit_price, unit_cost
 
 `/workspace/data/returns.csv` — return_id, order_id, channel_id, quantity_returned, processing_cost_per_unit, return_date
 

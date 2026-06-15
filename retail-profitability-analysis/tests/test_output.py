@@ -34,9 +34,14 @@ def test_case_01_input_data_not_tampered():
     truncating or modifying input files."""
     orders       = pd.read_csv(DATA_DIR / "orders.csv")
     returns      = pd.read_csv(DATA_DIR / "returns.csv")
+    products     = pd.read_csv(DATA_DIR / "products.csv")
     shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
     alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
     promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
+
+    # orders.csv must not contain category_id — category mapping must come from products.csv
+    assert "category_id" not in orders.columns, \
+        "orders.csv must not contain a category_id column."
 
     # Trap 1 anchors
     assert len(orders) == 50_788, \
@@ -58,6 +63,11 @@ def test_case_01_input_data_not_tampered():
         "cost_allocation_rules.csv must contain an effective_from column."
     assert len(alloc_rules) == 3, \
         f"cost_allocation_rules.csv must not be modified (expected 3 rows, got {len(alloc_rules)})."
+
+    assert len(products) == 50, \
+        f"products.csv must not be modified (expected 50 rows, got {len(products)})."
+    assert products["category_id"].nunique() == 5, \
+        "products.csv must contain exactly 5 distinct category IDs."
 
     # Dirty data anchor: some returns have quantity_returned > originating order quantity
     ret_merged = returns.merge(orders[["channel_id", "order_id", "quantity"]], on=["channel_id", "order_id"])
@@ -94,9 +104,10 @@ def test_case_02_outputs_exist():
 
 def test_case_03_csv_schemas_and_sort():
     """Validates columns, row counts, and sort order for all three output CSVs."""
-    orders = pd.read_csv(DATA_DIR / "orders.csv")
+    orders   = pd.read_csv(DATA_DIR / "orders.csv")
+    products = pd.read_csv(DATA_DIR / "products.csv")
     n_channels   = orders["channel_id"].nunique()
-    n_categories = orders["category_id"].nunique()
+    n_categories = products["category_id"].nunique()
     # instruction.md specifies "One row per calendar month (January–December 2024)"
     n_months = 12
 
@@ -145,9 +156,14 @@ def test_case_04_summary_schema():
 def ground_truth():
     orders       = pd.read_csv(DATA_DIR / "orders.csv")
     returns      = pd.read_csv(DATA_DIR / "returns.csv")
+    products     = pd.read_csv(DATA_DIR / "products.csv")
     shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
     alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
     promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
+
+    # Normalize product_id separator and resolve category mapping.
+    products["product_id"] = products["product_id"].str.replace("_", "-")
+    orders = orders.merge(products[["product_id", "category_id"]], on="product_id", how="left")
 
     orders["gross_profit"] = (orders["unit_price"] - orders["unit_cost"]) * orders["quantity"]
     orders["revenue"]      = orders["unit_price"] * orders["quantity"]

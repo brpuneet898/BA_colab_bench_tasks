@@ -11,6 +11,15 @@ Channel profitability (Trap 1):
     (channel_id, order_id). Naive merge on order_id alone produces a
     Cartesian explosion that inflates return losses across all channels.
 
+Category profitability (Trap 7):
+    orders.csv carries no category_id; agents must join with products.csv to
+    resolve it. products.csv stores CAT01 product_ids with an underscore
+    separator (SKU_0001) while orders.csv uses a hyphen (SKU-0001).
+    A naive merge(on='product_id') silently drops all 4,412 CAT01 orders
+    via pandas inner-join default — no NaN, no error. CAT01 disappears from
+    category output and all downstream figures (channel GP, monthly totals,
+    total_net_profit) are wrong because they too derive from the merged frame.
+
 Category profitability (Trap 2):
     Gross profit per category minus shared-cost allocation. The
     cost_allocation_rules.csv table is versioned: warehousing used a
@@ -48,10 +57,15 @@ else:
 
 orders       = pd.read_csv(DATA_DIR / "orders.csv")
 returns      = pd.read_csv(DATA_DIR / "returns.csv")
+products     = pd.read_csv(DATA_DIR / "products.csv")
 shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
 alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
 alloc_rules["cost_type"] = alloc_rules["cost_type"].str.lower().str.strip()
 promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
+
+# Resolve product → category; normalize product_id separator before joining.
+products["product_id"] = products["product_id"].str.replace("_", "-")
+orders = orders.merge(products[["product_id", "category_id"]], on="product_id", how="left")
 
 orders["gross_profit"] = (orders["unit_price"] - orders["unit_cost"]) * orders["quantity"]
 orders["revenue"]      = orders["unit_price"] * orders["quantity"]
