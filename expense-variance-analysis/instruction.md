@@ -30,7 +30,7 @@ Input data may contain inconsistent representations of equivalent values, undocu
 
 Payroll cutoff date for Q1 corrections: `2024-04-05`.
 
-Warehouse shifts are expected to be between 6 and 14 hours in duration. Invalid shifts do not contribute to the analysis.
+Warehouse shifts are expected to be between 6 and 14 hours in duration. Invalid shifts do not contribute to the analysis. Gross shift duration is the payable hours for each shift.
 
 Corrections may modify shift hours, pay rate, or department attribution. Only eligible approved corrections affect Q1 payroll results. Corrections may invalidate a shift.
 

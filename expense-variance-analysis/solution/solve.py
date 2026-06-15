@@ -1,35 +1,4 @@
-"""
-Q1 2024 payroll variance report for a warehouse operation.
-
-Layers discovered in the data:
-- Contractor rates are in US cents; must be divided by 100 before any cost calculation.
-- Thirty employees received pay-rate increases on 2024-02-05 (annual review).
-  rate_history.csv carries both the 2024-01-01 opening rate and the post-raise rate.
-  employees.csv is the April-1 snapshot and overstates cost for Jan 1 – Feb 4 shifts
-  for those employees. The discrepancy is only visible by cross-referencing rate_history
-  against employees.csv and sampling shift-level costs for affected employee-dates.
-- job_code in shifts.csv appears in messy variants: PICKER, picker, Pick-er, pick_er.
-  Normalisation (lower-case, strip hyphens/underscores/spaces) is required before
-  joining to job_code_rates.csv for the rate_multiplier. When an employee works shifts
-  under multiple job codes in one week, FLSA requires a blended overtime rate:
-  total_straight_time_earnings / total_hours × 0.5 per OT hour — not the per-shift rate.
-- Forty employees have pay_group_id in employees.csv that links to pay_groups.csv, whose
-  ot_threshold (38 h) overrides the department's weekly_ot_threshold (40 h) for those
-  employees. Neither file's schema documents the override relationship.
-- Eight work orders in work_order_splits.csv carry a secondary department attribution:
-  secondary_pct of each qualifying shift's cost goes to secondary_dept_id; the remainder
-  stays with the employee's home department. Agents that join shifts → work_orders but
-  skip work_order_splits.csv produce correct totals but wrong per-department breakdowns —
-  a plausible-looking answer that fails every per-row test.
-- Shifts assigned within call_in_window_hours (per department in ot_policy.csv) of their
-  start earn a 1.4× call-in premium competing under the same mutual-exclusivity rule as
-  night, weekend, and holiday premiums. The window is 6 h for D05 and D08, 12 h elsewhere;
-  a flat 12 h window misclassifies ~51 short-notice shifts in those two departments.
-- corrections.csv carries a correction_type column: 'hours' adjusts shift duration,
-  'rate' substitutes the employee's base rate with corrected_rate, 'dept' reroutes cost
-  attribution to corrected_dept_id. Treating every correction as an hours adjustment
-  silently mishandles the ~28% that are rate or dept type with no error raised.
-"""
+"""Q1 2024 weekly payroll cost variance report — warehouse operation."""
 import pandas as pd
 import numpy as np
 import json
@@ -107,9 +76,8 @@ def main():
     # ── 7. MERGE CORRECTIONS & APPLY HOURS ADJUSTMENTS ────────────────────────
     shifts = pd.merge(shifts, corrs_latest, on="shift_id", how="left")
 
-    # BOTTLENECK: only 'hours' corrections change duration; 'rate' and 'dept'
-    # corrections leave duration unchanged. Treating all corrections as hours
-    # adjustments silently mishandles ~28% of corrections.
+    # Only 'hours' corrections change duration; 'rate' and 'dept' corrections
+    # leave duration unchanged and are handled separately in steps 12 and 14.
     hours_mask = shifts["corrected_hours"].notna() & (shifts["correction_type"] == "hours")
     shifts["ratio"] = 1.0
     shifts.loc[hours_mask, "ratio"] = (
