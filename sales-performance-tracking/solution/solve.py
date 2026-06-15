@@ -149,9 +149,6 @@ def resolve_attribution(deals, account_teams, reps):
             continue
 
         shares = defaultdict(float, {ae: 1.0})
-        if sdr:
-            shares[sdr] += 0.20
-            shares[ae]   = 0.80
         if deal["product_line"] == "Enterprise Suite" and ov:
             shares[ov]  += 0.15
             if sdr:
@@ -159,6 +156,9 @@ def resolve_attribution(deals, account_teams, reps):
                 shares[ae]   = 0.70
             else:
                 shares[ae]   = 0.85
+        elif sdr:
+            shares[sdr] += 0.20
+            shares[ae]   = 0.80
 
         if rep_region.get(ae) == "EMEA":
             new_shares = {GLOBAL_VP: 0.05}

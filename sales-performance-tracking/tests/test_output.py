@@ -81,9 +81,6 @@ def _resolve_attribution(deal_row, team, rep_region):
     if not ae:
         return {}
     shares = defaultdict(float, {ae: 1.0})
-    if sdr:
-        shares[sdr] += 0.20
-        shares[ae]   = 0.80
     if deal_row["product_line"] == "Enterprise Suite" and ov:
         shares[ov]  += 0.15
         if sdr:
@@ -91,6 +88,9 @@ def _resolve_attribution(deal_row, team, rep_region):
             shares[ae]   = 0.70
         else:
             shares[ae]   = 0.85
+    elif sdr:
+        shares[sdr] += 0.20
+        shares[ae]   = 0.80
     if rep_region.get(ae) == "EMEA":
         scaled = defaultdict(float, {"R999": 0.05})
         for rep, s in shares.items():
