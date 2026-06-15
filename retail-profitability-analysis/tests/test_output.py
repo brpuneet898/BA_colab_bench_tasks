@@ -39,6 +39,7 @@ def test_case_01_input_data_not_tampered():
     shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
     alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
     promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
+    ch_fees      = pd.read_csv(DATA_DIR / "channel_return_fees.csv")
 
     # orders.csv must not contain category_id — category mapping must come from products.csv
     assert "category_id" not in orders.columns, \
@@ -80,6 +81,14 @@ def test_case_01_input_data_not_tampered():
         "product_cost_history.csv must cover all 50 products."
     assert cost_hist["effective_date"].nunique() == 2, \
         "product_cost_history.csv must contain exactly 2 effective dates."
+
+    # Trap 9 anchor: CH03 has 12 monthly platform fee rows
+    assert len(ch_fees) == 12, \
+        f"channel_return_fees.csv must not be modified (expected 12 rows, got {len(ch_fees)})."
+    assert set(ch_fees["channel_id"].unique()) == {"CH03"}, \
+        "channel_return_fees.csv must contain fees for CH03."
+    assert float(ch_fees["fee_amount"].sum()) > 100_000, \
+        "channel_return_fees.csv total fees must not be reduced below $100,000."
 
     # Dirty data anchor: some returns have quantity_returned > originating order quantity
     ret_merged = returns.merge(orders[["channel_id", "order_id", "quantity"]], on=["channel_id", "order_id"])
@@ -173,6 +182,7 @@ def ground_truth():
     shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
     alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
     promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
+    ch_fees      = pd.read_csv(DATA_DIR / "channel_return_fees.csv")
 
     # Normalize product_id separator and resolve category mapping.
     products["product_id"] = products["product_id"].str.replace("_", "-")
@@ -205,9 +215,14 @@ def ground_truth():
         ret["quantity_returned"] * ret["unit_price"]
         + ret["quantity_returned"] * ret["processing_cost_per_unit"]
     )
-    ch_gp  = orders.groupby("channel_id")["gross_profit"].sum()
-    ch_ret = ret.groupby("channel_id")["return_cost"].sum()
-    ch_net = ch_gp - ch_ret.reindex(ch_gp.index, fill_value=0.0)
+    ch_gp       = orders.groupby("channel_id")["gross_profit"].sum()
+    ch_ret      = ret.groupby("channel_id")["return_cost"].sum()
+    ch_fees_sum = ch_fees.groupby("channel_id")["fee_amount"].sum()
+    ch_net = (
+        ch_gp
+        - ch_ret.reindex(ch_gp.index, fill_value=0.0)
+        - ch_fees_sum.reindex(ch_gp.index, fill_value=0.0)
+    )
 
     # Category net profit (Trap 2 — versioned allocation rules)
     orders["month"] = pd.to_datetime(orders["order_date"]).dt.to_period("M").astype(str)
@@ -262,6 +277,7 @@ def ground_truth():
     total_net = float(round(
         float(orders["gross_profit"].sum())
         - float(ret["return_cost"].sum())
+        - float(ch_fees["fee_amount"].sum())
         - float(shared_costs["total_cost"].sum())
         - float(cashback_by_month.sum()),
         2,

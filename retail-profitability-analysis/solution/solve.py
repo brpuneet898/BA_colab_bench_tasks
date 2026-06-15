@@ -71,6 +71,7 @@ shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
 alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
 alloc_rules["cost_type"] = alloc_rules["cost_type"].str.lower().str.strip()
 promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
+ch_fees_df   = pd.read_csv(DATA_DIR / "channel_return_fees.csv")
 
 # Resolve product → category; normalize product_id separator before joining.
 products["product_id"] = products["product_id"].str.replace("_", "-")
@@ -114,9 +115,14 @@ ret["return_cost"] = (
     + ret["quantity_returned"] * ret["processing_cost_per_unit"]
 )
 
-ch_gp  = orders.groupby("channel_id")["gross_profit"].sum()
-ch_ret = ret.groupby("channel_id")["return_cost"].sum()
-ch_net = ch_gp - ch_ret.reindex(ch_gp.index, fill_value=0.0)
+ch_gp       = orders.groupby("channel_id")["gross_profit"].sum()
+ch_ret      = ret.groupby("channel_id")["return_cost"].sum()
+ch_fees_sum = ch_fees_df.groupby("channel_id")["fee_amount"].sum()
+ch_net = (
+    ch_gp
+    - ch_ret.reindex(ch_gp.index, fill_value=0.0)
+    - ch_fees_sum.reindex(ch_gp.index, fill_value=0.0)
+)
 
 ch_report = (
     pd.DataFrame({
@@ -218,6 +224,7 @@ mo_report.to_csv(WORKSPACE_DIR / "monthly_profitability.csv", index=False)
 total_net_profit = float(round(
     float(orders["gross_profit"].sum())
     - float(ret["return_cost"].sum())
+    - float(ch_fees_df["fee_amount"].sum())
     - float(shared_costs["total_cost"].sum())
     - float(cashback_by_month.sum()),
     2,
