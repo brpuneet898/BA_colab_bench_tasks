@@ -8,11 +8,13 @@ The company's total net profit, reported in `summary.json`, is total gross profi
 
 **Input data**
 
-`/workspace/data/orders.csv` — order_id, channel_id, product_id, order_date (YYYY-MM-DD), quantity, unit_price, unit_cost
+`/workspace/data/orders.csv` — order_id, channel_id, product_id, order_date (YYYY-MM-DD), quantity, unit_price
 
 `/workspace/data/returns.csv` — return_id, order_id, channel_id, quantity_returned, processing_cost_per_unit, return_date
 
 `/workspace/data/products.csv` — product_id, category_id, category_name, base_price, unit_cost
+
+`/workspace/data/product_cost_history.csv` — product_id, effective_date (YYYY-MM-DD), unit_cost. Historical product costs are tracked in this file.
 
 `/workspace/data/shared_costs.csv` — month (YYYY-MM), cost_type, total_cost
 

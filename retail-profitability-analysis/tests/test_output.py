@@ -35,6 +35,7 @@ def test_case_01_input_data_not_tampered():
     orders       = pd.read_csv(DATA_DIR / "orders.csv")
     returns      = pd.read_csv(DATA_DIR / "returns.csv")
     products     = pd.read_csv(DATA_DIR / "products.csv")
+    cost_hist    = pd.read_csv(DATA_DIR / "product_cost_history.csv")
     shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
     alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
     promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
@@ -42,6 +43,9 @@ def test_case_01_input_data_not_tampered():
     # orders.csv must not contain category_id — category mapping must come from products.csv
     assert "category_id" not in orders.columns, \
         "orders.csv must not contain a category_id column."
+    # orders.csv must not contain unit_cost — cost must be derived from product_cost_history.csv
+    assert "unit_cost" not in orders.columns, \
+        "orders.csv must not contain a unit_cost column."
 
     # Trap 1 anchors
     assert len(orders) == 50_788, \
@@ -68,6 +72,14 @@ def test_case_01_input_data_not_tampered():
         f"products.csv must not be modified (expected 50 rows, got {len(products)})."
     assert products["category_id"].nunique() == 5, \
         "products.csv must contain exactly 5 distinct category IDs."
+
+    # SCD trap anchor: 50 initial rows + 10 CAT01 update rows = 60
+    assert len(cost_hist) == 60, \
+        f"product_cost_history.csv must not be modified (expected 60 rows, got {len(cost_hist)})."
+    assert cost_hist["product_id"].nunique() == 50, \
+        "product_cost_history.csv must cover all 50 products."
+    assert cost_hist["effective_date"].nunique() == 2, \
+        "product_cost_history.csv must contain exactly 2 effective dates."
 
     # Dirty data anchor: some returns have quantity_returned > originating order quantity
     ret_merged = returns.merge(orders[["channel_id", "order_id", "quantity"]], on=["channel_id", "order_id"])
@@ -157,6 +169,7 @@ def ground_truth():
     orders       = pd.read_csv(DATA_DIR / "orders.csv")
     returns      = pd.read_csv(DATA_DIR / "returns.csv")
     products     = pd.read_csv(DATA_DIR / "products.csv")
+    cost_hist    = pd.read_csv(DATA_DIR / "product_cost_history.csv")
     shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
     alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
     promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
@@ -164,6 +177,21 @@ def ground_truth():
     # Normalize product_id separator and resolve category mapping.
     products["product_id"] = products["product_id"].str.replace("_", "-")
     orders = orders.merge(products[["product_id", "category_id"]], on="product_id", how="left")
+
+    # SCD cost lookup: for each order, find the unit_cost effective at order_date.
+    cost_hist["effective_date"] = pd.to_datetime(cost_hist["effective_date"])
+    orders["order_date_ts"]     = pd.to_datetime(orders["order_date"])
+    expanded = orders[["channel_id", "order_id", "product_id", "order_date_ts"]].merge(
+        cost_hist, on="product_id", how="left"
+    )
+    expanded = expanded[expanded["effective_date"] <= expanded["order_date_ts"]]
+    latest_cost = (
+        expanded.sort_values("effective_date")
+        .groupby(["channel_id", "order_id"], as_index=False)
+        .last()[["channel_id", "order_id", "unit_cost"]]
+    )
+    orders = orders.merge(latest_cost, on=["channel_id", "order_id"], how="left")
+    orders.drop(columns=["order_date_ts"], inplace=True)
 
     orders["gross_profit"] = (orders["unit_price"] - orders["unit_cost"]) * orders["quantity"]
     orders["revenue"]      = orders["unit_price"] * orders["quantity"]

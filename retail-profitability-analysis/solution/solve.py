@@ -20,6 +20,14 @@ Category profitability (Trap 7):
     category output and all downstream figures (channel GP, monthly totals,
     total_net_profit) are wrong because they too derive from the merged frame.
 
+SCD cost trap:
+    orders.csv carries no unit_cost. products.csv holds the CURRENT unit_cost
+    (post-July snapshot). product_cost_history.csv is the SCD table: all 50
+    SKUs have a base cost from 2024-01-01; CAT01 SKUs have an additional
+    15 % increase effective 2024-07-01. A model that joins products.csv for
+    unit_cost uses the post-July cost for Q1-H1 CAT01 orders, overstating
+    COGS and understating Electronics gross profit and total_net_profit.
+
 Category profitability (Trap 2):
     Gross profit per category minus shared-cost allocation. The
     cost_allocation_rules.csv table is versioned: warehousing used a
@@ -58,6 +66,7 @@ else:
 orders       = pd.read_csv(DATA_DIR / "orders.csv")
 returns      = pd.read_csv(DATA_DIR / "returns.csv")
 products     = pd.read_csv(DATA_DIR / "products.csv")
+cost_hist    = pd.read_csv(DATA_DIR / "product_cost_history.csv")
 shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
 alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
 alloc_rules["cost_type"] = alloc_rules["cost_type"].str.lower().str.strip()
@@ -66,6 +75,24 @@ promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
 # Resolve product → category; normalize product_id separator before joining.
 products["product_id"] = products["product_id"].str.replace("_", "-")
 orders = orders.merge(products[["product_id", "category_id"]], on="product_id", how="left")
+
+# SCD cost lookup: find the unit_cost in effect at each order's date.
+# products.csv carries only the current snapshot; product_cost_history.csv
+# has every effective rate.  Using the snapshot for all orders overstates COGS
+# for Q1-H1 Electronics orders where the lower historical cost applies.
+cost_hist["effective_date"] = pd.to_datetime(cost_hist["effective_date"])
+orders["order_date_ts"]     = pd.to_datetime(orders["order_date"])
+expanded = orders[["channel_id", "order_id", "product_id", "order_date_ts"]].merge(
+    cost_hist, on="product_id", how="left"
+)
+expanded = expanded[expanded["effective_date"] <= expanded["order_date_ts"]]
+latest_cost = (
+    expanded.sort_values("effective_date")
+    .groupby(["channel_id", "order_id"], as_index=False)
+    .last()[["channel_id", "order_id", "unit_cost"]]
+)
+orders = orders.merge(latest_cost, on=["channel_id", "order_id"], how="left")
+orders.drop(columns=["order_date_ts"], inplace=True)
 
 orders["gross_profit"] = (orders["unit_price"] - orders["unit_cost"]) * orders["quantity"]
 orders["revenue"]      = orders["unit_price"] * orders["quantity"]
