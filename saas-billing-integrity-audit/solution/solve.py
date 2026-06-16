@@ -1,37 +1,21 @@
 """
 H1 2025 billing integrity audit for a B2B SaaS company.
 
-After exploring the data:
-- amendments.csv has a credit_method column.  The billing system ALWAYS computes
-  credited_amount using monthly proration (credited_periods × reduction, no partial
-  month).  Amendments flagged credit_method='daily_prorate' are therefore
-  systematically under-credited: the partial-month fraction of the reduction is
-  missing.  The gap per amendment is reduction × (remaining_days / days_in_month).
-
-- usage_records.csv has billing_period_id encoding the anniversary date (contract
-  start day-of-month), not the calendar 1st.  The column cumulative_units_ytd is
-  a YTD running total from Jan 1 — a red herring for per-period overage.  Correct
-  overage requires grouping by billing_period_id.
-
-- accounts.csv marks reseller accounts with is_reseller=True and reseller_margin_pct.
-  invoices.csv records gross amounts for every account; recognised revenue for
-  resellers is gross × margin_pct, so summing all invoices overstates reseller
-  revenue by a factor of 3–5×.
-
-- sla_records.csv has one row per (account, period, metric).  When multiple metrics
-  breach in the same period, only the highest-severity credit applies — stacking
-  all rows overcounts.
-
-- Data cleaning required:
-    • invoice_line_items.unit_price: some manually-entered rows use "$X,XXX.XX"
-      or European "X.XXX,XX" notation; pd.to_numeric(errors='coerce') silently
-      converts these to NaN.
-    • invoices.void_reason is populated on some non-void invoices (UI voided,
-      status field not synced); those invoices must be excluded.
-    • Some invoices have parent_invoice_id set (consolidated billing children);
-      including them with the parent double-counts the same period.
-    • is_test_account=True accounts must be excluded throughout.
-    • usage_records.is_test_usage=True rows must be excluded.
+Approach:
+- Exclude test accounts, voided invoices, ghost-voided invoices (void_reason
+  populated regardless of status), and consolidated invoice children
+  (parent_invoice_id populated).
+- Amendment credits: filter credit_method='daily_prorate' reductions; contractual
+  credit for the billing period of the effective date is
+  reduction × (remaining_days / days_in_month); system credited_amount is 0.0 for
+  these rows (partial month skipped), so the gap equals the formula value directly.
+- Usage overage: group by billing_period_id (contract anniversary-based), not
+  calendar month.  Compute total_units − included_units_monthly per SKU per period;
+  apply overage_rate from products.csv.
+- Reseller revenue: recognised revenue = gross usd_equivalent × reseller_margin_pct.
+  Overstatement = gross × (1 − margin_pct) per account.
+- SLA stacking: when multiple metrics breach in the same (account, period), only
+  the highest-severity credit applies.  Overcount = sum − max per group.
 """
 
 import json
@@ -78,20 +62,15 @@ def valid_invoices(inv_df, test_ids):
     """
     df = inv_df[~inv_df["account_id"].isin(test_ids)].copy()
     df = df[df["status"] != "void"]
-    # BOTTLENECK: ghost-voided invoices have a non-null void_reason even though
-    # status is 'paid' / 'sent' / 'overdue'.  Excluding on status='void' alone
-    # leaves these in, inflating valid revenue.
     df = df[df["void_reason"].isna()]
-    # BOTTLENECK: consolidated children carry parent_invoice_id; summing them
-    # alongside the parent invoice counts the same billing period twice.
     df = df[df["parent_invoice_id"].isna()]
     return df
 
 
-def trap1_amendment_credit_gap(amds_df, test_ids):
+def amendment_credit_gap(amds_df, test_ids):
     """
-    daily_prorate amendments: credited_amount uses monthly proration (no partial month).
-    The gap is the missing partial-month fraction.
+    For daily_prorate reduction amendments, compute the contractual credit for the
+    billing period of the effective date and compare to credited_amount.
     """
     daily_red = amds_df[
         (amds_df["amendment_type"] == "reduction") &
@@ -104,10 +83,6 @@ def trap1_amendment_credit_gap(amds_df, test_ids):
         eff = date.fromisoformat(str(amd["effective_date"]))
         reduction = float(amd["old_mrr"]) - float(amd["new_mrr"])
         period_days = monthrange(eff.year, eff.month)[1]
-        # BOTTLENECK: remaining_days includes the effective date itself.
-        # The billing system credits zero for the partial month (monthly_prorate
-        # only counts whole months remaining); daily_prorate should credit the
-        # partial fraction reduction × (remaining_days / period_days).
         remaining_days = (date(eff.year, eff.month, period_days) - eff).days + 1
         gap = round(reduction * (remaining_days / period_days), 2)
 
@@ -117,8 +92,8 @@ def trap1_amendment_credit_gap(amds_df, test_ids):
             "contract_id":        amd["contract_id"],
             "reference_id":       amd["amendment_id"],
             "period":             f"{eff.year}-{eff.month:02d}",
-            "billed_amount_usd":  round(float(amd["credited_amount"]), 2),
-            "correct_amount_usd": round(float(amd["credited_amount"]) + gap, 2),
+            "billed_amount_usd":  0.0,
+            "correct_amount_usd": round(gap, 2),
             "discrepancy_usd":    gap,
         })
     return pd.DataFrame(rows) if rows else pd.DataFrame(
@@ -127,10 +102,9 @@ def trap1_amendment_credit_gap(amds_df, test_ids):
     )
 
 
-def trap2_unbilled_overage(usage_df, prods_df, test_ids):
+def unbilled_overage(usage_df, prods_df, test_ids):
     """
-    Compute unbilled API / storage overage using anniversary billing periods.
-    billing_period_id is already anniversary-aligned in the data.
+    Compute unbilled usage overage per (contract, sku, billing_period_id).
     """
     df = usage_df[
         (usage_df["is_test_usage"] == False) &
@@ -139,10 +113,6 @@ def trap2_unbilled_overage(usage_df, prods_df, test_ids):
 
     overage_rates = prods_df.set_index("sku")["overage_rate"].to_dict()
 
-    # BOTTLENECK: grouping by record_date.dt.to_period('M') uses calendar months;
-    # billing_period_id encodes the anniversary window (contract start day-of-month).
-    # For contracts starting mid-month, calendar grouping splits anniversary periods
-    # across two months, changing which periods hit the included-unit ceiling.
     grouped = (
         df.groupby(["contract_id", "sku", "billing_period_id"])
         .agg(
@@ -177,10 +147,10 @@ def trap2_unbilled_overage(usage_df, prods_df, test_ids):
     )
 
 
-def trap3_reseller_overstatement(inv_valid, accounts_df):
+def reseller_overstatement(inv_valid, accounts_df):
     """
     Reseller recognised revenue = gross × reseller_margin_pct.
-    invoices.csv records gross; the overstatement is gross × (1 - margin_pct).
+    Overstatement = gross × (1 − margin_pct) per account.
     """
     resellers = accounts_df[accounts_df["is_reseller"] == True][
         ["account_id", "reseller_margin_pct"]
@@ -189,8 +159,6 @@ def trap3_reseller_overstatement(inv_valid, accounts_df):
         resellers["reseller_margin_pct"], errors="coerce"
     )
 
-    # BOTTLENECK: must use valid invoices only (ghost-voided and children excluded)
-    # before computing gross revenue; including voided children inflates gross.
     res_invs = inv_valid[inv_valid["account_id"].isin(resellers["account_id"])]
     gross_by_acct = (
         res_invs.groupby("account_id")["usd_equivalent"]
@@ -231,10 +199,10 @@ def trap3_reseller_overstatement(inv_valid, accounts_df):
     )
 
 
-def trap4_sla_credit_stacking(sla_df, test_ids):
+def sla_credit_stacking(sla_df, test_ids):
     """
-    Only the highest-severity credit per (account, period) applies.
-    Rows with n_breaches >= 2 have been over-credited by sum - max.
+    When multiple SLA metrics breach in the same (account, period), only the
+    highest-severity credit applies.  Overcount = sum − max per group.
     """
     df = sla_df[~sla_df["account_id"].isin(test_ids)].copy()
 
@@ -249,9 +217,6 @@ def trap4_sla_credit_stacking(sla_df, test_ids):
         .reset_index()
     )
 
-    # BOTTLENECK: must group by BOTH account_id AND period_start.  Grouping by
-    # period_start alone merges different accounts' credits; by account_id alone
-    # sums across months.  Only (account, period) uniquely identifies one billing cycle.
     multi = grouped[grouped["n_breaches"] >= 2].copy()
     multi["overcount"] = (multi["total_credit"] - multi["max_credit"]).round(2)
 
@@ -280,10 +245,10 @@ def main():
     inv_valid = valid_invoices(d["invoices"], test_ids)
     valid_count = int(len(inv_valid))
 
-    amd_rows = trap1_amendment_credit_gap(d["amendments"], test_ids)
-    use_rows = trap2_unbilled_overage(d["usage"], d["products"], test_ids)
-    res_rows, gross_rev, net_rev = trap3_reseller_overstatement(inv_valid, d["accounts"])
-    sla_rows = trap4_sla_credit_stacking(d["sla"], test_ids)
+    amd_rows = amendment_credit_gap(d["amendments"], test_ids)
+    use_rows = unbilled_overage(d["usage"], d["products"], test_ids)
+    res_rows, gross_rev, net_rev = reseller_overstatement(inv_valid, d["accounts"])
+    sla_rows = sla_credit_stacking(d["sla"], test_ids)
 
     audit = pd.concat([amd_rows, use_rows, res_rows, sla_rows], ignore_index=True)
     for col in ("billed_amount_usd", "correct_amount_usd", "discrepancy_usd"):

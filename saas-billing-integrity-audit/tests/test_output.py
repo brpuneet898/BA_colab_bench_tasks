@@ -2,10 +2,10 @@
 saas-billing-integrity-audit — verifier tests.
 
 Reasoning challenges tested:
-  1. Amendment credit gap (trap 1): billing system uses monthly proration for all
-     credits; daily_prorate amendments are under-credited by the partial-month
-     fraction.  Agents that sum credited_amount without re-computing the partial
-     fraction will under-report the gap.
+  1. Amendment credit gap (trap 1): for daily_prorate amendments the billing system
+     issues no credit (credited_amount = 0); the contractual entitlement is
+     reduction × (remaining_days / days_in_month).  Agents that accept credited_amount
+     at face value will report zero discrepancy and miss the entire credit gap.
   2. Usage overage (trap 2): billing periods reset on the contract start day-of-month
      (anniversary), not the calendar 1st.  cumulative_units_ytd is a red herring
      (runs from Jan 1).  Agents grouping by calendar month will get a different
@@ -15,7 +15,7 @@ Reasoning challenges tested:
      reseller accounts is gross × reseller_margin_pct.  Agents that sum all
      usd_equivalent without applying the margin overstate reseller revenue by 3–5×.
   4. SLA credit stacking (trap 4): when multiple SLA metrics breach in the same
-     (account, period), only the highest-severity credit applies.  Agents that sum
+     (account, period), only the maximum single credit applies.  Agents that sum
      credit_calculated across all rows in a period overcount.
 
   Data quality:
@@ -259,8 +259,8 @@ def test_case_05_amendment_credit_gap(agent_audit, ground_truth):
     ))
     assert math.isclose(got, expected, abs_tol=50.0), \
         f"amendment_undercredit total: expected ~{expected:.2f}, got {got:.2f}. " \
-        f"daily_prorate amendments are under-credited by reduction × " \
-        f"(remaining_days_in_month / days_in_month); credited_amount omits that fraction."
+        f"daily_prorate amendments: system issues no credit (credited_amount=0); " \
+        f"correct = reduction × (remaining_days_in_month / days_in_month)."
 
 
 # ── test_case_06: SLA credit overcount (trap 4) ───────────────────────────────
@@ -276,7 +276,7 @@ def test_case_06_sla_credit_overcount(agent_audit, ground_truth):
     assert math.isclose(got, expected, abs_tol=200.0), \
         f"sla_credit_overcount total: expected ~{expected:.2f}, got {got:.2f}. " \
         f"When multiple metrics breach in the same (account, period), only the " \
-        f"highest-severity credit applies — not the sum."
+        f"maximum single credit applies — not the sum of all breach credits."
 
 
 # ── test_case_07: reseller revenue overstatement (trap 3) ─────────────────────

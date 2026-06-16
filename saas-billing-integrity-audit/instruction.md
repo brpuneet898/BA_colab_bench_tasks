@@ -17,7 +17,7 @@ Business policies:
 * Recognised revenue for reseller accounts equals the gross invoice amount multiplied by `reseller_margin_pct`.
 * When multiple SLA metrics breach in the same billing period for the same account, only the highest-severity breach generates a credit.
 * Billing periods are contract-dependent.
-* All monetary amounts in data files are stored in the account's billing currency. `invoices.usd_equivalent` is the sole pre-converted USD field; no further FX conversion is required for this audit.
+* All monetary amounts in data files are stored in the account's billing currency. `invoices.usd_equivalent` is the sole pre-converted USD field; no further FX conversion is required for this audit. Report all output monetary values in the account's native billing currency; the `_usd` suffix in output column names is a naming convention, not a currency requirement.
 * Pricing, discounts, entitlements, amendments, credits, invoices, payments, and revenue recognition must follow contractual and system records.
 
 Input files:
