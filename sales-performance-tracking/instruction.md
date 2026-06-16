@@ -35,11 +35,11 @@ ARR is recognised in equal thirds over three consecutive months beginning in the
 
 For each month in Q1, use the quota record in `quotas.csv` where `period_start` ≤ the first day of that month ≤ `period_end`. The base monthly quota equals `quota_usd` divided by the number of calendar months spanned by that record's period. If more than one record covers a given month, use the one with the latest `period_start`.
 
-Reps hired during Q1 have their base monthly quota prorated by the number of days they were active in that month.
+Reps hired during Q1 have their base monthly quota prorated by the number of days they were active in that month, counting the hire date as the first active day (e.g., a rep hired on February 21 is active 9 days in February).
 
 Quota shortfalls roll over: if a rep's Net ARR in a month is less than their effective quota, the exact dollar shortfall is added to their effective quota for the following month. The effective quota for February equals the base quota (no prior period).
 
-Any rep whose February `net_arr_usd` is at least 150% of their February `effective_quota` receives a 20% increase to their `base_quota` for March only. Reps with zero `effective_quota` in February are excluded from this adjustment. The April `base_quota` is not affected.
+Any rep whose February `net_arr_usd` is at least 150% of their February `effective_quota` receives a 20% increase to their March `base_quota`, applied after quota record selection from `quotas.csv`. Reps with zero `effective_quota` in February are excluded from this adjustment. The April `base_quota` is not affected.
 
 Required Output:
 
