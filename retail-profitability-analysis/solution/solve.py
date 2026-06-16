@@ -63,15 +63,16 @@ else:
 
 # ── Load ──────────────────────────────────────────────────────────────────────
 
-orders       = pd.read_csv(DATA_DIR / "orders.csv")
-returns      = pd.read_csv(DATA_DIR / "returns.csv")
-products     = pd.read_csv(DATA_DIR / "products.csv")
-cost_hist    = pd.read_csv(DATA_DIR / "product_cost_history.csv")
-shared_costs = pd.read_csv(DATA_DIR / "shared_costs.csv")
-alloc_rules  = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
+orders          = pd.read_csv(DATA_DIR / "orders.csv")
+returns         = pd.read_csv(DATA_DIR / "returns.csv")
+products        = pd.read_csv(DATA_DIR / "products.csv")
+cost_hist       = pd.read_csv(DATA_DIR / "product_cost_history.csv")
+shared_costs    = pd.read_csv(DATA_DIR / "shared_costs.csv")
+alloc_rules     = pd.read_csv(DATA_DIR / "cost_allocation_rules.csv")
 alloc_rules["cost_type"] = alloc_rules["cost_type"].str.lower().str.strip()
-promotions   = pd.read_csv(DATA_DIR / "promotions.csv")
-ch_fees_df   = pd.read_csv(DATA_DIR / "channel_return_fees.csv")
+promotions      = pd.read_csv(DATA_DIR / "promotions.csv")
+ch_fees_df      = pd.read_csv(DATA_DIR / "channel_return_fees.csv")
+reason_codes_df = pd.read_csv(DATA_DIR / "return_reason_codes.csv")
 
 # Resolve product → category; normalize product_id separator before joining.
 products["product_id"] = products["product_id"].str.replace("_", "-")
@@ -108,14 +109,26 @@ ret = returns[pd.to_datetime(returns["return_date"]).dt.year == report_year].cop
 # BOTTLENECK: order_id resets per channel; the true join key is (channel_id, order_id).
 # Naive merge on order_id alone creates a Cartesian explosion that inflates return losses.
 ret = ret.merge(orders[["channel_id", "order_id", "unit_price", "quantity"]], on=["channel_id", "order_id"])
-# BOTTLENECK: some records have quantity_returned > order quantity (data entry error); cap before computing losses.
-ret["quantity_returned"] = ret[["quantity_returned", "quantity"]].min(axis=1)
+# BOTTLENECK: cumulative return cap — total quantity returned across all records for the
+# same order cannot exceed the order quantity; earlier return dates take priority.
+# Naive per-row min(qty_returned, order_qty) misses multi-record cumulative excess.
+ret = ret.sort_values("return_date")
+ret["_cum"]       = ret.groupby(["channel_id", "order_id"])["quantity_returned"].cumsum()
+ret["_prev_cum"]  = ret["_cum"] - ret["quantity_returned"]
+ret["_available"] = (ret["quantity"] - ret["_prev_cum"]).clip(lower=0)
+ret["quantity_returned"] = ret[["quantity_returned", "_available"]].min(axis=1)
+ret.drop(columns=["_cum", "_prev_cum", "_available"], inplace=True)
+# Apply return reason code policies: composite key is (reason_code, channel_id).
+ret = ret.merge(reason_codes_df, on=["reason_code", "channel_id"], how="left")
+ret["refund_pct"] = ret["refund_pct"].fillna(1.0)
+ret["fee_waived"]  = ret["fee_waived"].fillna(0).astype(int)
 ret["return_cost"] = (
-    ret["quantity_returned"] * ret["unit_price"]
-    + ret["quantity_returned"] * ret["processing_cost_per_unit"]
+    ret["quantity_returned"] * ret["unit_price"] * ret["refund_pct"]
+    + ret["quantity_returned"] * ret["processing_cost_per_unit"] * (1 - ret["fee_waived"])
 )
 
-ch_gp       = orders.groupby("channel_id")["gross_profit"].sum()
+ch_gp = orders.groupby("channel_id")["gross_profit"].sum().copy()
+
 ch_ret      = ret.groupby("channel_id")["return_cost"].sum()
 ch_fees_sum = ch_fees_df.groupby("channel_id")["fee_amount"].sum()
 ch_net = (

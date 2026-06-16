@@ -1,8 +1,8 @@
 Build a 2024 annual profitability report for a multi-channel retailer that sells across five sales channels and five product categories. Compute net profit by channel, contribution margin by product category, and net profit by calendar month, then identify the top and bottom performer in each dimension.
 
-Each report covers only the costs directly attributable to its dimension. Channel net profit deducts return losses only — sales returns are processed through the originating sales channel. Channels operating through third-party platforms may also incur fixed monthly access fees; these are recorded in `channel_return_fees.csv` and form part of that channel's return losses. Category contribution margin deducts allocated shared overhead only — shared operational costs must be allocated to product categories according to the rules defined in `cost_allocation_rules.csv`. Monthly net profit deducts promotional cashback only — cashback obligations apply to revenue earned during a campaign's active dates and are recorded in `promotions.csv`. These three reports are independent analytical views and are not intended to sum to `total_net_profit`.
+Each report covers only the costs directly attributable to its dimension. Channel net profit is computed as channel gross profit minus return losses. Channels operating through third-party platforms may also incur fixed monthly access fees; these are recorded in `channel_return_fees.csv` and form part of that channel's return losses. Category contribution margin deducts allocated shared overhead only — shared operational costs must be allocated to product categories according to the rules defined in `cost_allocation_rules.csv`. Monthly net profit deducts promotional cashback only — cashback obligations apply to revenue earned during a campaign's active dates and are recorded in `promotions.csv`. These three reports are independent analytical views and are not intended to sum to `total_net_profit`.
 
-Return losses apply consistently to all figures in this report, including `total_net_profit`: for each return with a return_date within calendar year 2024, the loss equals the full customer refund (`unit_price` from the originating order × `quantity_returned`) plus the return-handling fee (`processing_cost_per_unit` × `quantity_returned`). Returned items are not restocked. Returns with a return_date outside 2024 are excluded from all calculations. The quantity returned for any return record cannot exceed the quantity of the originating order.
+Return losses apply consistently to all figures in this report, including `total_net_profit`: for each return with a return_date within calendar year 2024, the loss is the applicable customer refund (`unit_price` from the originating order × `quantity_returned` × `refund_pct`) plus, where applicable, the return-handling fee (`processing_cost_per_unit` × `quantity_returned`). The applicable `refund_pct` and whether the handling fee applies for each return are specified in `return_reason_codes.csv`. Returned items are not restocked. Returns with a return_date outside 2024 are excluded from all calculations. Across all return transactions for the same order, total quantity returned cannot exceed the original order quantity; where multiple return records exist for the same order, returns are processed in ascending order of `return_date` and earlier transactions take priority in filling the available quantity.
 
 The company's total net profit, reported in `summary.json`, is total gross profit minus all return losses (as defined above, including fixed monthly channel platform fees), minus all shared overhead costs incurred during the year, minus all promotional cashback obligations.
 
@@ -10,7 +10,7 @@ The company's total net profit, reported in `summary.json`, is total gross profi
 
 `/workspace/data/orders.csv` — order_id, channel_id, product_id, order_date (YYYY-MM-DD), quantity, unit_price
 
-`/workspace/data/returns.csv` — return_id, order_id, channel_id, quantity_returned, processing_cost_per_unit, return_date
+`/workspace/data/returns.csv` — return_id, order_id, channel_id, quantity_returned, processing_cost_per_unit, return_date, reason_code
 
 `/workspace/data/products.csv` — product_id, category_id, category_name, base_price, unit_cost
 
@@ -23,6 +23,8 @@ The company's total net profit, reported in `summary.json`, is total gross profi
 `/workspace/data/promotions.csv` — promotion_id, promotion_name, start_date, end_date, cashback_pct
 
 `/workspace/data/channel_return_fees.csv` — channel_id, month (YYYY-MM), fee_amount
+
+`/workspace/data/return_reason_codes.csv` — reason_code, channel_id, refund_pct, fee_waived. Defines the return policy for each reason code and channel combination.
 
 **Required outputs**
 
