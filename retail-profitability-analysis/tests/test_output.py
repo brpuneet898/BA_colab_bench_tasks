@@ -362,13 +362,8 @@ def ground_truth():
         rev_by_month = orders_2024[mask].groupby("month")["revenue"].sum()
         for mo in all_months:
             mo_ts = pd.Timestamp(mo)
-            if start <= mo_ts <= end:
                 computed = float(rev_by_month.get(mo, 0.0)) * pct
                 cashback_by_month[mo] += max(computed, min_g)
-
-    mo_net = mo_gp - cashback_by_month
-
-    total_net = float(round(
         float(orders_2024["gross_profit"].sum())
         - float(ret["return_cost"].sum())
         - float(ch_fees["fee_amount"].sum())
