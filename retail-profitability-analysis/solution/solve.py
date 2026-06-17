@@ -1,7 +1,7 @@
 """
 2024 Retail Profitability Report.
 
-Four assumption-blindness traps:
+Five assumption-blindness traps:
 
 Channel profitability (Trap 1):
     Gross profit per channel minus return losses. CH03 (Marketplace) is #1
@@ -46,6 +46,15 @@ Monthly profitability (Trap 3):
     Sub-trap: February 2024 has no orders. pandas groupby silently drops
     empty groups, producing 11 rows. The instruction requires January–December;
     the solution must reindex to all 12 months.
+
+Return-cap × date-window straddle (Trap 14):
+    orders.csv includes ~200 Dec-2023 straddle orders. Each has two returns:
+    a Dec-2023 return (qty=order_qty-1, out of 2024 loss window) and a Jan-2024
+    return (qty=order_qty, in-window). The cumulative FIFO cap must be applied
+    across ALL returns for each order (both years) BEFORE filtering to 2024
+    return_dates for loss recognition. A filter-first implementation excludes
+    the Dec-2023 return before the cap runs, letting the Jan-2024 return
+    charge the full order_qty instead of only the 1 remaining unit.
 """
 
 import json
@@ -99,25 +108,36 @@ orders.drop(columns=["order_date_ts"], inplace=True)
 orders["gross_profit"] = (orders["unit_price"] - orders["unit_cost"]) * orders["quantity"]
 orders["revenue"]      = orders["unit_price"] * orders["quantity"]
 
+# Gross profit and revenue are computed from 2024 orders only.
+# orders.csv also contains Dec-2023 straddle orders needed for return pricing.
+report_year  = 2024
+orders_2024  = orders[pd.to_datetime(orders["order_date"]).dt.year == report_year].copy()
+
 
 # ── Channel profitability ─────────────────────────────────────────────────────
 
-# BOTTLENECK: some returns from late-December orders have return_date in January 2025.
-# Instruction scopes return losses to return_date within the reporting calendar year.
-report_year = int(pd.to_datetime(orders["order_date"]).dt.year.mode()[0])
-ret = returns[pd.to_datetime(returns["return_date"]).dt.year == report_year].copy()
 # BOTTLENECK: order_id resets per channel; the true join key is (channel_id, order_id).
 # Naive merge on order_id alone creates a Cartesian explosion that inflates return losses.
+# Merge returns against ALL orders (including Dec-2023 straddle) so return quantities
+# and unit prices are always found; then apply the cap across all years.
+ret = returns.copy()
 ret = ret.merge(orders[["channel_id", "order_id", "unit_price", "quantity"]], on=["channel_id", "order_id"])
-# BOTTLENECK: cumulative return cap — total quantity returned across all records for the
-# same order cannot exceed the order quantity; earlier return dates take priority.
-# Naive per-row min(qty_returned, order_qty) misses multi-record cumulative excess.
+
+# BOTTLENECK: cumulative FIFO return cap applies across ALL return records for each
+# order, regardless of return_date year.  Dec-2023 straddle returns consume cap
+# capacity even though they incur no 2024 loss.  Filter to the 2024 loss window
+# AFTER the cap so the prior-year return's effect is correctly accounted for.
+# Naive filter-first approach: exclude Dec-2023 returns first, then cap —
+# the straddle 2024 return then sees the full order quantity and loss is overstated.
 ret = ret.sort_values("return_date")
 ret["_cum"]       = ret.groupby(["channel_id", "order_id"])["quantity_returned"].cumsum()
 ret["_prev_cum"]  = ret["_cum"] - ret["quantity_returned"]
 ret["_available"] = (ret["quantity"] - ret["_prev_cum"]).clip(lower=0)
 ret["quantity_returned"] = ret[["quantity_returned", "_available"]].min(axis=1)
 ret.drop(columns=["_cum", "_prev_cum", "_available"], inplace=True)
+
+# NOW filter to in-window returns (return_date within reporting year) for loss.
+ret = ret[pd.to_datetime(ret["return_date"]).dt.year == report_year].copy()
 # Apply return reason code policies: composite key is (reason_code, channel_id).
 ret = ret.merge(reason_codes_df, on=["reason_code", "channel_id"], how="left")
 ret["refund_pct"] = ret["refund_pct"].fillna(1.0)
@@ -127,7 +147,7 @@ ret["return_cost"] = (
     + ret["quantity_returned"] * ret["processing_cost_per_unit"] * (1 - ret["fee_waived"])
 )
 
-ch_gp = orders.groupby("channel_id")["gross_profit"].sum().copy()
+ch_gp = orders_2024.groupby("channel_id")["gross_profit"].sum().copy()
 
 ch_ret      = ret.groupby("channel_id")["return_cost"].sum()
 ch_fees_sum = ch_fees_df.groupby("channel_id")["fee_amount"].sum()
@@ -155,12 +175,12 @@ ch_report.to_csv(WORKSPACE_DIR / "channel_profitability.csv", index=False)
 # misattributes 9 months of revenue-based warehouse costs. Must iterate over each
 # cost month, pick the latest effective rule on or before that month, and allocate.
 
-orders["month"] = pd.to_datetime(orders["order_date"]).dt.to_period("M").astype(str)
+orders_2024["month"] = pd.to_datetime(orders_2024["order_date"]).dt.to_period("M").astype(str)
 
 alloc_rules["effective_from"] = pd.to_datetime(alloc_rules["effective_from"])
 alloc_rules_sorted = alloc_rules.sort_values("effective_from")
 
-cat_gp    = orders.groupby("category_id")["gross_profit"].sum()
+cat_gp    = orders_2024.groupby("category_id")["gross_profit"].sum()
 cat_alloc = pd.Series(0.0, index=cat_gp.index)
 
 for _, sc_row in shared_costs.iterrows():
@@ -176,7 +196,7 @@ for _, sc_row in shared_costs.iterrows():
         continue
     basis = applicable.iloc[-1]["allocation_basis"]
 
-    month_orders = orders[orders["month"] == sc_row["month"]]
+    month_orders = orders_2024[orders_2024["month"] == sc_row["month"]]
     if basis == "order_count":
         shares = month_orders.groupby("category_id")["order_id"].count()
     else:
@@ -200,7 +220,7 @@ cat_report.to_csv(WORKSPACE_DIR / "category_profitability.csv", index=False)
 
 # ── Monthly profitability ─────────────────────────────────────────────────────
 
-mo_gp  = orders.groupby("month")["gross_profit"].sum()
+mo_gp  = orders_2024.groupby("month")["gross_profit"].sum()
 
 cashback_by_month = pd.Series(0.0, index=mo_gp.index)
 for _, promo in promotions.iterrows():
@@ -208,10 +228,10 @@ for _, promo in promotions.iterrows():
     end   = pd.Timestamp(promo["end_date"])
     pct   = float(promo["cashback_pct"])
     mask  = (
-        (pd.to_datetime(orders["order_date"]) >= start)
-        & (pd.to_datetime(orders["order_date"]) <= end)
+        (pd.to_datetime(orders_2024["order_date"]) >= start)
+        & (pd.to_datetime(orders_2024["order_date"]) <= end)
     )
-    for mo, rev in orders[mask].groupby("month")["revenue"].sum().items():
+    for mo, rev in orders_2024[mask].groupby("month")["revenue"].sum().items():
         cashback_by_month[mo] = cashback_by_month.get(mo, 0.0) + rev * pct
 
 mo_net = mo_gp - cashback_by_month.reindex(mo_gp.index, fill_value=0.0)
@@ -235,7 +255,7 @@ mo_report.to_csv(WORKSPACE_DIR / "monthly_profitability.csv", index=False)
 # ── Summary JSON ──────────────────────────────────────────────────────────────
 
 total_net_profit = float(round(
-    float(orders["gross_profit"].sum())
+    float(orders_2024["gross_profit"].sum())
     - float(ret["return_cost"].sum())
     - float(ch_fees_df["fee_amount"].sum())
     - float(shared_costs["total_cost"].sum())
