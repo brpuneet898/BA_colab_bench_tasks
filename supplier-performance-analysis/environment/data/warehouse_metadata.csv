@@ -1,0 +1,4 @@
+warehouse_id,warehouse_name,location,capacity_sqft,manager_id,operating_hours,timezone
+AMER,North America Distribution Center,"Chicago, IL",450000,MGR001,06:00-22:00,America/Chicago
+EMEA,Europe Middle East Africa Hub,"Rotterdam, NL",380000,MGR002,07:00-21:00,Europe/Amsterdam
+APAC,Asia Pacific Fulfillment Center,Singapore,310000,MGR003,08:00-20:00,Asia/Singapore
