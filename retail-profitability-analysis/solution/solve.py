@@ -150,6 +150,10 @@ orders_2024  = orders[pd.to_datetime(orders["order_date"]).dt.year == report_yea
 ret = returns.copy()
 ret = ret.merge(orders[["channel_id", "order_id", "unit_price", "quantity"]], on=["channel_id", "order_id"])
 
+# Preserve original requested quantity before FIFO cap; fee waiver is evaluated
+# against the original quantity_returned column, not the capped accepted quantity.
+ret["_qty_raw"] = ret["quantity_returned"]
+
 # Cumulative FIFO cap across ALL return records (both 2023 and 2024) before filtering.
 ret = ret.sort_values("return_date")
 ret["_cum"]       = ret.groupby(["channel_id", "order_id"])["quantity_returned"].cumsum()
@@ -161,12 +165,12 @@ ret.drop(columns=["_cum", "_prev_cum", "_available"], inplace=True)
 ret = ret[pd.to_datetime(ret["return_date"]).dt.year == report_year].copy()
 
 # Apply return reason code policies: composite key is (reason_code, channel_id).
-# Trap D: fee waiver is quantity-threshold based, not a boolean flag.
-# The handling fee is waived when quantity_returned <= waiver_max_qty.
+# Fee waiver is evaluated against the original requested quantity (_qty_raw).
 ret = ret.merge(reason_codes_df, on=["reason_code", "channel_id"], how="left")
 ret["refund_pct"]     = ret["refund_pct"].fillna(1.0)
 ret["waiver_max_qty"] = ret["waiver_max_qty"].fillna(0).astype(int)
-ret["fee_applies"]    = (ret["quantity_returned"] > ret["waiver_max_qty"]).astype(int)
+ret["fee_applies"]    = (ret["_qty_raw"] > ret["waiver_max_qty"]).astype(int)
+ret.drop(columns=["_qty_raw"], inplace=True)
 ret["return_cost"] = (
     ret["quantity_returned"] * ret["unit_price"] * ret["refund_pct"]
     + ret["quantity_returned"] * ret["processing_cost_per_unit"] * ret["fee_applies"]

@@ -33,11 +33,7 @@ SUM_PATH = WORKSPACE_DIR / "summary.json"
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
-<<<<<<< HEAD
     """Hardcoded row counts and structural anchors prevent an agent from gaming
-=======
-    """Hardcoded row counts and structural anchors ensure the agent cannot game
->>>>>>> 7be82eb30ff75cc26ab5eeee0f2c69140663c8a3
     dynamic ground truth by modifying input files."""
     orders       = pd.read_csv(DATA_DIR / "orders.csv")
     returns      = pd.read_csv(DATA_DIR / "returns.csv")
@@ -276,6 +272,7 @@ def ground_truth():
     # Cumulative FIFO cap across ALL return records before filtering to 2024 return dates.
     ret = returns.copy()
     ret = ret.merge(orders[["channel_id", "order_id", "unit_price", "quantity"]], on=["channel_id", "order_id"])
+    ret["_qty_raw"] = ret["quantity_returned"]
     ret = ret.sort_values("return_date")
     ret["_cum"]       = ret.groupby(["channel_id", "order_id"])["quantity_returned"].cumsum()
     ret["_prev_cum"]  = ret["_cum"] - ret["quantity_returned"]
@@ -287,7 +284,8 @@ def ground_truth():
     ret = ret.merge(reason_codes, on=["reason_code", "channel_id"], how="left")
     ret["refund_pct"]     = ret["refund_pct"].fillna(1.0)
     ret["waiver_max_qty"] = ret["waiver_max_qty"].fillna(0).astype(int)
-    ret["fee_applies"]    = (ret["quantity_returned"] > ret["waiver_max_qty"]).astype(int)
+    ret["fee_applies"]    = (ret["_qty_raw"] > ret["waiver_max_qty"]).astype(int)
+    ret.drop(columns=["_qty_raw"], inplace=True)
     ret["return_cost"] = (
         ret["quantity_returned"] * ret["unit_price"] * ret["refund_pct"]
         + ret["quantity_returned"] * ret["processing_cost_per_unit"] * ret["fee_applies"]
