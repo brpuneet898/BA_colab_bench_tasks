@@ -27,16 +27,22 @@ def load_data():
 
 
 def get_applicable_contract(pos, contracts):
-    """Attach the contract row in effect on each PO's order_date."""
+    """Attach the contract row in effect on each PO's order_date.
+
+    Open-ended contracts have contract_effective_to = NaT (no expiry).
+    Pandas evaluates `order_date <= NaT` as False, so NaT must be handled
+    explicitly: treat it as always in effect after contract_effective_from.
+    """
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
                    "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd"]],
         on="supplier_id",
         how="left",
     )
+    open_ended = merged["contract_effective_to"].isna()
     applicable = merged[
         (merged["contract_effective_from"] <= merged["order_date"]) &
-        (merged["order_date"] <= merged["contract_effective_to"])
+        (open_ended | (merged["order_date"] <= merged["contract_effective_to"]))
     ].copy()
     applicable = applicable.sort_values("contract_effective_from", ascending=False)
     applicable = applicable.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
@@ -44,8 +50,13 @@ def get_applicable_contract(pos, contracts):
 
 
 def compute_po_level_metrics(pos_with_contracts, deliveries):
-    """Compute net fill rate, on-time flag, SLA breach, and penalty per PO."""
-    # Net fill rate uses ALL delivery events regardless of date (algebraic sum)
+    """Compute net fill rate, on-time flag, SLA breach, and penalty per PO.
+
+    Penalty uses an escalating rate: once a supplier's running SLA breach
+    count (sorted by order_date) exceeds 5, each further breaching PO is
+    assessed at 2x the standard penalty_rate_pct.
+    """
+    # Net fill rate: algebraic sum of ALL delivery events regardless of date
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -53,19 +64,18 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
         .rename(columns={"quantity_received": "net_qty_received"})
     )
 
-    # On-time: sum net quantity received on or before promised_delivery_date
-    # Filter first, then aggregate — movements after the deadline do not count
+    # On-time: total received on or before promised_delivery_date >= ordered_quantity
     d_with_deadline = deliveries.merge(
         pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
                             "ordered_quantity"]].drop_duplicates(),
         on=["warehouse_id", "po_id"],
         how="inner",
     )
-    d_before_deadline = d_with_deadline[
+    d_before = d_with_deadline[
         d_with_deadline["received_date"] <= d_with_deadline["promised_delivery_date"]
     ]
     net_by_deadline = (
-        d_before_deadline
+        d_before
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
         .sum()
         .rename(columns={"quantity_received": "net_qty_by_deadline"})
@@ -74,15 +84,22 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
     po = pos_with_contracts.merge(net_qty,         on=["warehouse_id", "po_id"], how="left")
     po = po.merge(net_by_deadline, on=["warehouse_id", "po_id"], how="left")
 
-    po["net_fill_rate_po"]  = po["net_qty_received"] / po["ordered_quantity"]
-    # on_time: cumulative net received by promised_date >= ordered_quantity
+    po["net_fill_rate_po"] = po["net_qty_received"] / po["ordered_quantity"]
     po["on_time"] = po["net_qty_by_deadline"].fillna(0) >= po["ordered_quantity"]
 
     fill_breach   = po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]
     ontime_breach = ~po["on_time"]
     po["sla_breach"] = fill_breach | ontime_breach
-    po["penalty_po"]  = po.apply(
-        lambda r: r["order_value_usd"] * r["penalty_rate_pct"] if r["sla_breach"] else 0.0,
+
+    # Escalating penalty: sort by supplier + order_date, compute running breach
+    # count per supplier. Apply 2x rate for each breach after the 5th.
+    po = po.sort_values(["supplier_id", "order_date"]).copy()
+    po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
+    escalated = po["sla_breach"] & (po["breach_rank"] > 5)
+    po["penalty_rate_eff"] = po["penalty_rate_pct"].where(~escalated,
+                                                           po["penalty_rate_pct"] * 2)
+    po["penalty_po"] = po.apply(
+        lambda r: r["order_value_usd"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
         axis=1,
     )
     return po

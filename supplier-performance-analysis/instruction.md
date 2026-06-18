@@ -11,7 +11,7 @@ All input files are located in `/workspace/data/`:
 | `suppliers.csv` | Master list of all suppliers |
 | `supplier_contracts.csv` | Contract terms per supplier, including SLA thresholds, penalty rates, and effective dates |
 | `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC |
-| `delivery_records.csv` | All delivery events against purchase orders, including returns and post-acceptance adjustments; each row carries a `delivery_type` indicating the nature of the event |
+| `delivery_records.csv` | All delivery events against purchase orders, including returns; each row carries a `delivery_type` column (`Primary` or `Return`) indicating the nature of the event |
 | `quality_inspections.csv` | Quality inspection results per delivery (reference only) |
 | `supplier_contacts.csv` | Supplier contact details (reference only) |
 | `warehouse_metadata.csv` | Warehouse reference data (reference only) |
@@ -26,7 +26,7 @@ Compute the following metrics per supplier across all Q1 purchase orders assigne
 
 ### On-Time Delivery Rate
 
-A purchase order is **on time** if the cumulative net quantity received on or before the `promised_delivery_date` meets or exceeds the `ordered_quantity`. Include all delivery events for the purchase order — including returns and replacements — where `received_date` falls on or before `promised_delivery_date` when evaluating whether the order was fulfilled in time.
+A purchase order is **on time** if the total quantity received on or before the `promised_delivery_date` meets or exceeds the `ordered_quantity`.
 
 `on_time_delivery_rate` = count of on-time POs / total Q1 POs for the supplier, rounded to 4 decimal places.
 
@@ -34,7 +34,7 @@ Suppliers with no Q1 POs: set to `null`.
 
 ### Net Fill Rate
 
-The net quantity received for a purchase order is the algebraic sum of all `quantity_received` values across every delivery record for that order — this accounts for all quantity adjustments made after initial receipt, regardless of when they occurred.
+The net quantity received for a purchase order is the algebraic sum of all `quantity_received` values across every delivery record for that order — this accounts for returns and all other quantity adjustments, regardless of when they occurred.
 
 `net_fill_rate` = sum of net quantities received across all Q1 POs / sum of `ordered_quantity` across all Q1 POs, rounded to 4 decimal places.
 
@@ -47,11 +47,13 @@ Use the contract terms in effect at the time of each purchase order to determine
 - The PO was not delivered on time (as defined above), or
 - The net fill rate for that individual PO falls below `fill_rate_sla_threshold`
 
-Penalty for a breaching PO = `order_value_usd` × `penalty_rate_pct`.
+**Escalating penalty for repeat breaches:** Where a supplier has 6 or more SLA-breaching purchase orders in Q1, each breaching PO from the 6th onwards — evaluated in ascending `order_date` order — is assessed at **twice** the standard `penalty_rate_pct`. The first five breaching purchase orders for that supplier are always assessed at the standard rate. Suppliers with fewer than 6 SLA breaches in Q1 are not subject to escalation.
+
+Penalty for a breaching PO = `order_value_usd` × applicable `penalty_rate_pct` (standard or 2× escalated, as determined above).
 
 `total_penalty_usd` per supplier = sum of all PO-level penalties, **capped** at `max_penalty_cap_usd`. Use the cap from the supplier's most recently effective contract.
 
-`sla_breach_count` = number of Q1 POs with an SLA breach for that supplier.
+`sla_breach_count` = number of Q1 POs with an SLA breach for that supplier (the count is unaffected by whether escalation applies).
 
 ### Composite Score
 

@@ -3,23 +3,25 @@ Tests for the Q1 2024 Supplier Performance Scorecard task.
 
 Ground truth is recomputed from the canonical data files baked into the image.
 
-Traps targeted by these tests:
+Headroom mechanisms tested:
 
   Trap 1 — (warehouse_id, po_id) composite key.
             Joining on po_id alone inflates every supplier's PO count ~3x,
             scrambling all downstream metrics.
 
-  Trap 2 — Post-promised return + replacement delivery events.
-            A PO is on time if the cumulative net quantity received ON OR
-            BEFORE the promised_delivery_date meets or exceeds ordered_quantity.
-            Return and replacement events that arrive AFTER that date must not
-            influence the on-time determination. Any implementation that uses
-            the latest positive delivery date to evaluate on-time will mark
-            ~120 correctly-on-time POs as late, inflating penalties.
+  Trap 2 — Open-ended contracts (NaT contract_effective_to).
+            Twenty suppliers hold contracts with no expiry date — the
+            contract_effective_to field is blank (NaT). A pandas comparison
+            of the form `order_date <= NaT` returns False, silently excluding
+            all POs for those suppliers from every metric. The correct
+            implementation treats NaT as "no expiry" and keeps those rows.
 
-  Trap 3 — Effective-dated contracts (SCD).
-            Ten suppliers renegotiated in Feb; their January POs must use the
-            old contract's fill_rate_sla_threshold and penalty_rate_pct.
+  Trap 3 — Escalating penalty after 5 cumulative SLA breaches.
+            Once a supplier's running breach count (in order_date order)
+            exceeds 5, each subsequent breaching PO is assessed at 2x the
+            standard penalty_rate_pct. A flat-rate implementation
+            significantly underestimates total_penalty_usd for high-breach
+            suppliers.
 """
 
 import json
@@ -56,14 +58,20 @@ Q1_END   = pd.Timestamp("2024-03-31")
 # ---------------------------------------------------------------------------
 
 def _get_applicable_contract(pos, contracts):
+    """
+    Filter merged PO-contract rows to those where the contract was in effect
+    on the order_date. NaT in contract_effective_to means open-ended (no expiry);
+    such contracts are always in effect after their start date.
+    """
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
                    "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd"]],
         on="supplier_id", how="left",
     )
+    open_ended = merged["contract_effective_to"].isna()
     applicable = merged[
         (merged["contract_effective_from"] <= merged["order_date"]) &
-        (merged["order_date"] <= merged["contract_effective_to"])
+        (open_ended | (merged["order_date"] <= merged["contract_effective_to"]))
     ].copy()
     applicable = applicable.sort_values("contract_effective_from", ascending=False)
     applicable = applicable.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
@@ -71,7 +79,6 @@ def _get_applicable_contract(pos, contracts):
 
 
 def _compute_po_level(pos_with_contracts, deliveries):
-    # Net fill rate: algebraic sum of ALL quantity_received regardless of date
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -79,20 +86,16 @@ def _compute_po_level(pos_with_contracts, deliveries):
         .rename(columns={"quantity_received": "net_qty_received"})
     )
 
-    # On-time: filter delivery events to received_date <= promised_delivery_date,
-    # then sum (including negatives). A PO is on time if that filtered net total
-    # meets or exceeds ordered_quantity.
     d_with_deadline = deliveries.merge(
         pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
                             "ordered_quantity"]].drop_duplicates(),
-        on=["warehouse_id", "po_id"],
-        how="inner",
+        on=["warehouse_id", "po_id"], how="inner",
     )
-    d_before_deadline = d_with_deadline[
+    d_before = d_with_deadline[
         d_with_deadline["received_date"] <= d_with_deadline["promised_delivery_date"]
     ]
     net_by_deadline = (
-        d_before_deadline
+        d_before
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
         .sum()
         .rename(columns={"quantity_received": "net_qty_by_deadline"})
@@ -103,12 +106,18 @@ def _compute_po_level(pos_with_contracts, deliveries):
 
     po["net_fill_rate_po"] = po["net_qty_received"] / po["ordered_quantity"]
     po["on_time"] = po["net_qty_by_deadline"].fillna(0) >= po["ordered_quantity"]
-
     po["sla_breach"] = (
         (po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]) | (~po["on_time"])
     )
+
+    # Escalating penalty: 2x rate for each breach after the 5th (per supplier, order_date order)
+    po = po.sort_values(["supplier_id", "order_date"]).copy()
+    po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
+    escalated = po["sla_breach"] & (po["breach_rank"] > 5)
+    po["penalty_rate_eff"] = po["penalty_rate_pct"].where(~escalated,
+                                                           po["penalty_rate_pct"] * 2)
     po["penalty_po"] = po.apply(
-        lambda r: r["order_value_usd"] * r["penalty_rate_pct"] if r["sla_breach"] else 0.0,
+        lambda r: r["order_value_usd"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
         axis=1,
     )
     return po
@@ -125,9 +134,9 @@ def _penalty_caps(contracts):
 
 
 def _build_expected(suppliers, contracts, q1_pos, deliveries):
-    pos_c   = _get_applicable_contract(q1_pos, contracts)
-    po_lvl  = _compute_po_level(pos_c, deliveries)
-    caps    = _penalty_caps(contracts)
+    pos_c  = _get_applicable_contract(q1_pos, contracts)
+    po_lvl = _compute_po_level(pos_c, deliveries)
+    caps   = _penalty_caps(contracts)
 
     records = []
     for _, sup in suppliers.iterrows():
@@ -212,20 +221,21 @@ def test_case_01_input_sentinels(raw_data):
     assert len(pos) == 3_000, \
         f"purchase_orders.csv must not be modified (expected 3000 rows, got {len(pos)})"
 
-    # po_id is not globally unique — resets per warehouse
     unique_po_ids = pos["po_id"].nunique()
     assert unique_po_ids == 1_000, \
         (f"po_id must not be globally unique — each warehouse uses its own sequence "
          f"(expected 1000 unique strings across 3000 rows, got {unique_po_ids})")
 
-    dual_contract_count = (contracts.groupby("supplier_id").size() > 1).sum()
-    assert dual_contract_count == 10, \
-        f"supplier_contracts.csv must contain exactly 10 suppliers with 2 contract rows, got {dual_contract_count}"
+    # Structural sentinel: 20 suppliers must have open-ended contracts (NaT effective_to)
+    nat_count = contracts["contract_effective_to"].isna().sum()
+    assert nat_count == 20, \
+        (f"supplier_contracts.csv must contain exactly 20 open-ended contracts "
+         f"(contract_effective_to is blank), got {nat_count}")
 
-    # Replacement rows are a structural property that must not be removed
-    replacement_rows = (deliveries["delivery_type"] == "Replacement").sum()
-    assert replacement_rows == 120, \
-        f"delivery_records.csv must contain exactly 120 Replacement rows, got {replacement_rows}"
+    # No dual-contract suppliers in this dataset
+    dual_count = (contracts.groupby("supplier_id").size() > 1).sum()
+    assert dual_count == 0, \
+        f"supplier_contracts.csv must have exactly one contract row per supplier, found {dual_count} with multiple"
 
 
 # ---------------------------------------------------------------------------
@@ -255,22 +265,23 @@ def test_case_02_output_structure(agent_scorecard, agent_summary):
 
 
 # ---------------------------------------------------------------------------
-# Test 03 — PO count accuracy  (Trap 1)
+# Test 03 — PO count accuracy  (Trap 1: composite key)
 # ---------------------------------------------------------------------------
 
 def test_case_03_po_count_per_supplier(agent_scorecard, expected, raw_data):
     """
     Trap 1 — Joining delivery_records to purchase_orders on po_id alone
-    inflates every supplier's PO count ~3x. The composite key is (warehouse_id, po_id).
+    inflates every supplier's PO count ~3x. The correct join key is
+    (warehouse_id, po_id).
 
-    Spot-checks total_pos for 5 suppliers with the highest PO count.
+    Spot-checks total_pos for the 5 suppliers with the highest PO count.
     """
     exp_df, _, _ = expected
 
-    spot_suppliers = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:5].tolist()
+    spot = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:5].tolist()
 
     failures = []
-    for sid in spot_suppliers:
+    for sid in spot:
         exp_count = int(exp_df.loc[exp_df["supplier_id"] == sid, "total_pos"].iloc[0])
         act_row   = agent_scorecard[agent_scorecard["supplier_id"] == sid]
         if act_row.empty:
@@ -280,87 +291,93 @@ def test_case_03_po_count_per_supplier(agent_scorecard, expected, raw_data):
         if act_count != exp_count:
             failures.append(
                 f"{sid}: total_pos {act_count} != expected {exp_count}. "
-                "po_id is not globally unique — join must use (warehouse_id, po_id)."
+                "Join must use (warehouse_id, po_id) — po_id is not globally unique."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 04 — On-time accuracy for POs with post-deadline delivery events  (Trap 2)
+# Test 04 — Open-ended contract suppliers have correct metrics  (Trap 2: NaT)
 # ---------------------------------------------------------------------------
 
-def test_case_04_on_time_with_post_deadline_adjustments(agent_scorecard, expected, raw_data):
+def test_case_04_open_ended_contract_suppliers(agent_scorecard, expected, raw_data):
     """
-    Trap 2 — Some POs have returns and replacements that arrive AFTER the
-    promised_delivery_date. The initial delivery was complete and on time.
-    On-time determination must be based on the cumulative net quantity received
-    ON OR BEFORE the promised_delivery_date. Any implementation that uses the
-    date of the latest positive delivery event marks these POs as late and
-    inflates SLA breach counts and penalties for the affected suppliers.
+    Trap 2 — Twenty suppliers have open-ended contracts with no expiry date
+    (contract_effective_to is NaT). A naive pandas date filter of the form
+    `order_date <= NaT` returns False, silently dropping all POs for these
+    suppliers. A correct implementation treats NaT as 'no expiry'.
 
-    Spot-checks on_time_delivery_rate for the 5 suppliers most affected by
-    post-deadline replacement events.
+    Verifies that NaT-contract suppliers appear with valid (non-zero, non-null)
+    metrics in the agent scorecard, and spot-checks their on_time_delivery_rate.
     """
-    exp_df, po_lvl, _ = expected
-    _, _, pos, deliveries = raw_data
+    _, contracts, _, _ = raw_data
+    exp_df, _, _ = expected
 
-    # Identify suppliers with the most Replacement rows
-    replacement_deliveries = deliveries[deliveries["delivery_type"] == "Replacement"]
-    replacement_po_keys = set(zip(replacement_deliveries["warehouse_id"],
-                                  replacement_deliveries["po_id"]))
-    po_lvl_copy = po_lvl.copy()
-    po_lvl_copy["is_replacement_po"] = po_lvl_copy.apply(
-        lambda r: (r["warehouse_id"], r["po_id"]) in replacement_po_keys, axis=1
-    )
-    rep_counts = (
-        po_lvl_copy[po_lvl_copy["is_replacement_po"]]
-        .groupby("supplier_id")
-        .size()
-        .sort_values(ascending=False)
-    )
-    spot_suppliers = rep_counts.index[:5].tolist()
+    nat_suppliers = contracts[contracts["contract_effective_to"].isna()]["supplier_id"].tolist()
+    assert len(nat_suppliers) == 20
+
+    spot = sorted(nat_suppliers)[:5]
 
     failures = []
-    for sid in spot_suppliers:
-        exp_row = exp_df[exp_df["supplier_id"] == sid]
+    for sid in spot:
         act_row = agent_scorecard[agent_scorecard["supplier_id"] == sid]
-        if exp_row.empty or act_row.empty:
+        exp_row = exp_df[exp_df["supplier_id"] == sid]
+        if act_row.empty or exp_row.empty:
             continue
+
+        act_total = int(act_row["total_pos"].iloc[0])
+        exp_total = int(exp_row["total_pos"].iloc[0])
+
+        if act_total == 0:
+            failures.append(
+                f"{sid}: total_pos=0 but expected {exp_total}. "
+                "Open-ended contracts (NaT effective_to) must not be excluded. "
+                "The comparison `order_date <= NaT` returns False in pandas — "
+                "NaT must be handled as 'no expiry date'."
+            )
+            continue
+
         exp_otr = float(exp_row["on_time_delivery_rate"].iloc[0])
-        act_otr = float(act_row["on_time_delivery_rate"].iloc[0])
+        act_otr_raw = act_row["on_time_delivery_rate"].iloc[0]
+        if pd.isna(act_otr_raw):
+            failures.append(f"{sid}: on_time_delivery_rate is null, expected {exp_otr:.4f}")
+            continue
+        act_otr = float(act_otr_raw)
         if abs(act_otr - exp_otr) > 0.005:
             failures.append(
-                f"{sid}: on_time_delivery_rate {act_otr:.4f} != expected {exp_otr:.4f} "
-                f"(diff {act_otr - exp_otr:+.4f}). "
-                "On-time must be evaluated by summing net quantity received on or "
-                "before promised_delivery_date, not by checking the latest delivery date."
+                f"{sid}: on_time_delivery_rate {act_otr:.4f} != expected {exp_otr:.4f}"
             )
+
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 05 — SLA breach count for dual-contract suppliers  (Trap 3)
+# Test 05 — Escalating penalty for high-breach suppliers  (Trap 3: step-up)
 # ---------------------------------------------------------------------------
 
-def test_case_05_sla_breach_count_renegotiated_suppliers(agent_scorecard, expected, raw_data):
+def test_case_05_escalating_penalty_high_breach_suppliers(agent_scorecard, expected, raw_data):
     """
-    Dual-contract suppliers — Ten suppliers renegotiated their contracts
-    effective 2024-02-01. Their SLA breach counts are sensitive to both the
-    applicable contract terms and the on-time delivery calculation. Any
-    systematic error in either dimension will cause sla_breach_count to
-    deviate for these suppliers.
+    Trap 3 — After a supplier's 5th SLA breach (evaluated in order_date order),
+    every further breaching PO is assessed at twice the standard penalty_rate_pct.
+    A flat-rate implementation underestimates total_penalty_usd for suppliers
+    with many breaches.
 
-    Spot-checks sla_breach_count for 5 of the 10 renegotiated suppliers.
+    Spot-checks total_penalty_usd for the 5 non-NaT suppliers with the most
+    SLA breaches (where the escalation effect is largest and the NaT trap
+    cannot confound the result).
     """
-    exp_df, _, _ = expected
     _, contracts, _, _ = raw_data
+    exp_df, po_lvl, _ = expected
 
-    dual_sups = (
-        contracts.groupby("supplier_id")
-        .filter(lambda x: len(x) > 1)["supplier_id"]
-        .unique()
+    nat_suppliers = set(contracts[contracts["contract_effective_to"].isna()]["supplier_id"])
+
+    breach_counts = (
+        po_lvl[~po_lvl["supplier_id"].isin(nat_suppliers)]
+        .groupby("supplier_id")["sla_breach"]
+        .sum()
+        .sort_values(ascending=False)
     )
-    spot = sorted(dual_sups)[:5]
+    spot = breach_counts.index[:5].tolist()
 
     failures = []
     for sid in spot:
@@ -368,28 +385,31 @@ def test_case_05_sla_breach_count_renegotiated_suppliers(agent_scorecard, expect
         act_row = agent_scorecard[agent_scorecard["supplier_id"] == sid]
         if exp_row.empty or act_row.empty:
             continue
-        exp_bc = int(exp_row["sla_breach_count"].iloc[0])
-        act_bc = int(act_row["sla_breach_count"].iloc[0])
-        if act_bc != exp_bc:
+
+        exp_pen = float(exp_row["total_penalty_usd"].iloc[0])
+        act_pen = float(act_row["total_penalty_usd"].iloc[0])
+        breach_n = int(breach_counts[sid])
+
+        if not math.isclose(act_pen, exp_pen, abs_tol=500):
             failures.append(
-                f"{sid}: sla_breach_count {act_bc} != expected {exp_bc}. "
-                "Contract SLA terms must be applied as of the purchase order date."
+                f"{sid}: total_penalty_usd {act_pen:,.2f} != expected {exp_pen:,.2f} "
+                f"(diff {act_pen - exp_pen:+,.2f}, {breach_n} SLA breaches). "
+                "Each breaching PO from the 6th onwards (by order_date) must be "
+                "assessed at twice the standard penalty_rate_pct."
             )
+
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 06 — Aggregate total penalty  (all traps)
+# Test 06 — Aggregate total penalty and breach count  (all traps)
 # ---------------------------------------------------------------------------
 
 def test_case_06_aggregate_breach_and_penalty(agent_summary, expected):
     """
-    Aggregate total_sla_breach_count and total_penalty_assessed_usd in
-    summary.json. Both are sensitive to on-time calculation accuracy,
-    contract term selection, and fill rate netting.
-
-    Note: penalty caps can dampen the effect of some breaches on the total
-    penalty, so breach count and penalty are tested independently.
+    Aggregate total_sla_breach_count and total_penalty_assessed_usd.
+    Both are sensitive to composite-key correctness, NaT contract exclusion,
+    and escalating penalty calculation.
     """
     exp_df, _, _ = expected
     exp_total_pen = round(float(exp_df["total_penalty_usd"].sum()), 2)
@@ -409,9 +429,8 @@ def test_case_06_aggregate_breach_and_penalty(agent_summary, expected):
 
 def test_case_07_row_level_accuracy(agent_scorecard, expected):
     """
-    Spot-checks all key metrics for 10 suppliers spanning different penalty
-    tiers, replacement event volumes, and contract types. Compound errors from
-    any trap will surface here.
+    Spot-checks all key metrics for 10 suppliers with the highest PO counts.
+    Compound errors from any trap will surface here.
     """
     exp_df, _, _ = expected
 
@@ -452,7 +471,7 @@ def test_case_07_row_level_accuracy(agent_scorecard, expected):
 
 def test_case_08_composite_score_ranking(agent_scorecard, expected):
     """
-    The bottom-3 and top-3 suppliers by composite_score must match ground truth.
+    Bottom-3 and top-3 suppliers by composite_score must match ground truth.
     Errors from any trap shuffle the ranking.
     """
     exp_df, _, _ = expected
@@ -476,9 +495,8 @@ def test_case_08_composite_score_ranking(agent_scorecard, expected):
 
 def test_case_09_summary_scalars(agent_summary, expected):
     """
-    Verifies worst_on_time_supplier_id and worst_fill_rate_supplier_id in
-    summary.json. These rankings shift when on-time or fill rate calculations
-    are incorrect.
+    Verifies worst_on_time_supplier_id and worst_fill_rate_supplier_id.
+    These shift when on-time or fill rate calculations are wrong.
     """
     exp_df, _, _ = expected
     active = exp_df[exp_df["total_pos"] > 0]
