@@ -4,8 +4,9 @@ import json
 import pandas as pd
 from pathlib import Path
 
-DATA_DIR      = Path("/workspace/data")
-WORKSPACE_DIR = Path("/workspace")
+import os as _os
+WORKSPACE_DIR = Path(_os.environ.get("WORKSPACE_DIR", "/workspace"))
+DATA_DIR      = Path(_os.environ.get("DATA_DIR", str(WORKSPACE_DIR / "data")))
 
 SCORECARD_PATH = WORKSPACE_DIR / "supplier_scorecard.csv"
 SUMMARY_PATH   = WORKSPACE_DIR / "summary.json"
@@ -26,7 +27,7 @@ def load_data():
 
 
 def get_applicable_contract(pos, contracts):
-    """Return pos with the contract row in effect on each PO's order_date merged in."""
+    """Attach the contract row in effect on each PO's order_date."""
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
                    "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd"]],
@@ -44,6 +45,7 @@ def get_applicable_contract(pos, contracts):
 
 def compute_po_level_metrics(pos_with_contracts, deliveries):
     """Compute net fill rate, on-time flag, SLA breach, and penalty per PO."""
+    # Net fill rate uses ALL delivery events regardless of date (algebraic sum)
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -51,19 +53,30 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
         .rename(columns={"quantity_received": "net_qty_received"})
     )
 
-    # On-time date: latest received_date among positive-quantity delivery rows
-    on_time_date = (
-        deliveries[deliveries["quantity_received"] > 0]
-        .groupby(["warehouse_id", "po_id"], as_index=False)["received_date"]
-        .max()
-        .rename(columns={"received_date": "latest_received_date"})
+    # On-time: sum net quantity received on or before promised_delivery_date
+    # Filter first, then aggregate — movements after the deadline do not count
+    d_with_deadline = deliveries.merge(
+        pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
+                            "ordered_quantity"]].drop_duplicates(),
+        on=["warehouse_id", "po_id"],
+        how="inner",
+    )
+    d_before_deadline = d_with_deadline[
+        d_with_deadline["received_date"] <= d_with_deadline["promised_delivery_date"]
+    ]
+    net_by_deadline = (
+        d_before_deadline
+        .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
+        .sum()
+        .rename(columns={"quantity_received": "net_qty_by_deadline"})
     )
 
-    po = pos_with_contracts.merge(net_qty,     on=["warehouse_id", "po_id"], how="left")
-    po = po.merge(on_time_date, on=["warehouse_id", "po_id"], how="left")
+    po = pos_with_contracts.merge(net_qty,         on=["warehouse_id", "po_id"], how="left")
+    po = po.merge(net_by_deadline, on=["warehouse_id", "po_id"], how="left")
 
-    po["net_fill_rate_po"] = po["net_qty_received"] / po["ordered_quantity"]
-    po["on_time"]          = po["latest_received_date"] <= po["promised_delivery_date"]
+    po["net_fill_rate_po"]  = po["net_qty_received"] / po["ordered_quantity"]
+    # on_time: cumulative net received by promised_date >= ordered_quantity
+    po["on_time"] = po["net_qty_by_deadline"].fillna(0) >= po["ordered_quantity"]
 
     fill_breach   = po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]
     ontime_breach = ~po["on_time"]
