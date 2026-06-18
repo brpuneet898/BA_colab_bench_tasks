@@ -1,0 +1,61 @@
+supplier_id,supplier_name,product_category,home_region,founded_year,employee_count,iso_certified,preferred_carrier,payment_terms
+SUP001,Supplier_001_Ltd,Raw Materials,APAC,2004,2222,False,FreightCo,Net 60
+SUP002,Supplier_002_Ltd,Packaging,AMER,2000,4880,False,DirectHaul,2/10 Net 30
+SUP003,Supplier_003_Ltd,Electronics,AMER,2010,2279,True,GlobalShip,2/10 Net 30
+SUP004,Supplier_004_Ltd,Chemicals,EMEA,1997,4123,True,FastFreight,Net 30
+SUP005,Supplier_005_Ltd,Raw Materials,EMEA,2011,365,False,GlobalShip,Net 60
+SUP006,Supplier_006_Ltd,Raw Materials,APAC,2006,1805,False,FastFreight,2/10 Net 30
+SUP007,Supplier_007_Ltd,Chemicals,APAC,2007,1013,True,FastFreight,Net 30
+SUP008,Supplier_008_Ltd,Electronics,AMER,2007,3431,False,FastFreight,2/10 Net 30
+SUP009,Supplier_009_Ltd,MRO,AMER,2012,1884,True,DirectHaul,Net 30
+SUP010,Supplier_010_Ltd,MRO,AMER,2005,2405,True,PrimeLogistics,Net 60
+SUP011,Supplier_011_Ltd,Assemblies,EMEA,1989,4172,False,FreightCo,Net 45
+SUP012,Supplier_012_Ltd,Chemicals,APAC,1998,4034,True,OceanLink,Net 45
+SUP013,Supplier_013_Ltd,Packaging,APAC,2004,741,True,DirectHaul,Net 30
+SUP014,Supplier_014_Ltd,Chemicals,APAC,2008,3341,False,GlobalShip,2/10 Net 30
+SUP015,Supplier_015_Ltd,Electronics,EMEA,2000,2865,True,GlobalShip,Net 30
+SUP016,Supplier_016_Ltd,MRO,APAC,2004,2382,True,FreightCo,2/10 Net 30
+SUP017,Supplier_017_Ltd,Electronics,EMEA,2001,2790,True,DirectHaul,Net 45
+SUP018,Supplier_018_Ltd,Electronics,AMER,1995,2212,True,GlobalShip,Net 45
+SUP019,Supplier_019_Ltd,Assemblies,APAC,1986,1208,True,OceanLink,Net 45
+SUP020,Supplier_020_Ltd,Assemblies,AMER,1998,3327,True,PrimeLogistics,2/10 Net 30
+SUP021,Supplier_021_Ltd,Assemblies,EMEA,1997,2062,False,GlobalShip,Net 30
+SUP022,Supplier_022_Ltd,MRO,AMER,1988,495,False,DirectHaul,Net 45
+SUP023,Supplier_023_Ltd,Chemicals,AMER,2012,2530,True,FastFreight,Net 60
+SUP024,Supplier_024_Ltd,MRO,EMEA,1989,1936,True,DirectHaul,Net 60
+SUP025,Supplier_025_Ltd,Electronics,EMEA,2013,483,True,FastFreight,2/10 Net 30
+SUP026,Supplier_026_Ltd,MRO,APAC,1999,3514,True,DirectHaul,2/10 Net 30
+SUP027,Supplier_027_Ltd,Packaging,APAC,1992,3599,True,DirectHaul,Net 45
+SUP028,Supplier_028_Ltd,Raw Materials,AMER,1998,4518,True,DirectHaul,Net 30
+SUP029,Supplier_029_Ltd,Chemicals,AMER,2009,2917,True,FastFreight,2/10 Net 30
+SUP030,Supplier_030_Ltd,Raw Materials,APAC,1999,3612,True,GlobalShip,Net 60
+SUP031,Supplier_031_Ltd,Raw Materials,EMEA,1987,3267,True,DirectHaul,Net 45
+SUP032,Supplier_032_Ltd,Chemicals,AMER,1990,2495,True,PrimeLogistics,Net 30
+SUP033,Supplier_033_Ltd,Chemicals,AMER,1990,2959,True,GlobalShip,2/10 Net 30
+SUP034,Supplier_034_Ltd,Assemblies,EMEA,1998,1767,True,GlobalShip,Net 30
+SUP035,Supplier_035_Ltd,Raw Materials,APAC,1997,2437,False,FreightCo,Net 30
+SUP036,Supplier_036_Ltd,Packaging,EMEA,2005,2479,False,FreightCo,Net 60
+SUP037,Supplier_037_Ltd,Electronics,EMEA,2009,1371,True,PrimeLogistics,Net 60
+SUP038,Supplier_038_Ltd,Assemblies,EMEA,1993,157,False,FreightCo,2/10 Net 30
+SUP039,Supplier_039_Ltd,Electronics,AMER,1994,2793,True,PrimeLogistics,Net 60
+SUP040,Supplier_040_Ltd,Raw Materials,AMER,1992,3314,False,OceanLink,2/10 Net 30
+SUP041,Supplier_041_Ltd,Packaging,AMER,2003,4585,True,GlobalShip,Net 30
+SUP042,Supplier_042_Ltd,Raw Materials,EMEA,2001,1886,False,FastFreight,2/10 Net 30
+SUP043,Supplier_043_Ltd,Assemblies,AMER,1991,4767,True,PrimeLogistics,Net 60
+SUP044,Supplier_044_Ltd,Assemblies,AMER,2014,4684,True,PrimeLogistics,Net 30
+SUP045,Supplier_045_Ltd,Packaging,EMEA,2014,4963,False,FreightCo,Net 60
+SUP046,Supplier_046_Ltd,Assemblies,APAC,1991,4473,True,FastFreight,Net 45
+SUP047,Supplier_047_Ltd,Raw Materials,APAC,1995,3325,True,OceanLink,Net 30
+SUP048,Supplier_048_Ltd,Chemicals,APAC,1996,1349,False,OceanLink,Net 30
+SUP049,Supplier_049_Ltd,Raw Materials,AMER,1987,4164,True,DirectHaul,Net 30
+SUP050,Supplier_050_Ltd,MRO,EMEA,2006,4379,True,GlobalShip,Net 45
+SUP051,Supplier_051_Ltd,Assemblies,APAC,1994,4861,True,FastFreight,Net 30
+SUP052,Supplier_052_Ltd,Assemblies,AMER,1990,1187,True,FreightCo,Net 60
+SUP053,Supplier_053_Ltd,Assemblies,AMER,1993,2556,False,DirectHaul,Net 60
+SUP054,Supplier_054_Ltd,MRO,AMER,2010,4031,False,FreightCo,Net 60
+SUP055,Supplier_055_Ltd,Chemicals,AMER,1998,662,False,FreightCo,Net 45
+SUP056,Supplier_056_Ltd,Assemblies,AMER,1988,2468,False,GlobalShip,2/10 Net 30
+SUP057,Supplier_057_Ltd,Electronics,AMER,2013,4628,True,PrimeLogistics,Net 60
+SUP058,Supplier_058_Ltd,Raw Materials,EMEA,2010,574,True,DirectHaul,Net 45
+SUP059,Supplier_059_Ltd,Raw Materials,APAC,1989,3001,False,DirectHaul,2/10 Net 30
+SUP060,Supplier_060_Ltd,MRO,EMEA,2004,3935,True,PrimeLogistics,Net 30

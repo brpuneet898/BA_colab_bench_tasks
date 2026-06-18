@@ -33,7 +33,11 @@ SUM_PATH = WORKSPACE_DIR / "summary.json"
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
+<<<<<<< HEAD
     """Hardcoded row counts and structural anchors prevent an agent from gaming
+=======
+    """Hardcoded row counts and structural anchors ensure the agent cannot game
+>>>>>>> 7be82eb30ff75cc26ab5eeee0f2c69140663c8a3
     dynamic ground truth by modifying input files."""
     orders       = pd.read_csv(DATA_DIR / "orders.csv")
     returns      = pd.read_csv(DATA_DIR / "returns.csv")
