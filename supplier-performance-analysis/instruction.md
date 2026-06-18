@@ -47,7 +47,7 @@ Use the contract terms in effect at the time of each purchase order to determine
 - The PO was not delivered on time (as defined above), or
 - The net fill rate for that individual PO falls below `fill_rate_sla_threshold`
 
-**Escalating penalty for repeat breaches:** Where a supplier has 6 or more SLA-breaching purchase orders in Q1, each breaching PO from the 6th onwards — evaluated in ascending `order_date` order — is assessed at **twice** the standard `penalty_rate_pct`. The first five breaching purchase orders for that supplier are always assessed at the standard rate. Suppliers with fewer than 6 SLA breaches in Q1 are not subject to escalation.
+**Escalating penalty for repeat breaches:** Where a supplier has 6 or more SLA-breaching purchase orders in Q1, each breaching PO from the 6th onwards — evaluated in ascending `order_date` order, with `po_id` as a tiebreaker within the same date — is assessed at **twice** the standard `penalty_rate_pct`. The first five breaching purchase orders for that supplier are always assessed at the standard rate. Suppliers with fewer than 6 SLA breaches in Q1 are not subject to escalation.
 
 Penalty for a breaching PO = `order_value_usd` × applicable `penalty_rate_pct` (standard or 2× escalated, as determined above).
 

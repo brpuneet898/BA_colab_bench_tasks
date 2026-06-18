@@ -17,11 +17,22 @@ Headroom mechanisms tested:
             implementation treats NaT as "no expiry" and keeps those rows.
 
   Trap 3 — Escalating penalty after 5 cumulative SLA breaches.
-            Once a supplier's running breach count (in order_date order)
+            Once a supplier's running breach count (in order_date, po_id order)
             exceeds 5, each subsequent breaching PO is assessed at 2x the
             standard penalty_rate_pct. A flat-rate implementation
             significantly underestimates total_penalty_usd for high-breach
             suppliers.
+
+  Trap 4 — Overlapping contract renegotiation.
+            Ten suppliers have two overlapping contracts: an original contract
+            (lower penalty_rate_pct, Jan 1–Mar 31) written first in the CSV,
+            and a renegotiated contract (higher penalty_rate_pct, Feb 1–Dec 31)
+            written second. A naive implementation iterating in CSV order finds
+            the original first and uses its lower rate for Feb–Mar POs. The
+            correct rule — apply the most recently effective contract (highest
+            contract_effective_from that covers the PO date) — is established
+            by the instruction's 'Use the cap from the supplier's most recently
+            effective contract' and applies equally to all contract terms.
 """
 
 import json
@@ -111,7 +122,7 @@ def _compute_po_level(pos_with_contracts, deliveries):
     )
 
     # Escalating penalty: 2x rate for each breach after the 5th (per supplier, order_date order)
-    po = po.sort_values(["supplier_id", "order_date"]).copy()
+    po = po.sort_values(["supplier_id", "order_date", "po_id"]).copy()
     po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
     escalated = po["sla_breach"] & (po["breach_rank"] > 5)
     po["penalty_rate_eff"] = po["penalty_rate_pct"].where(~escalated,
@@ -232,10 +243,10 @@ def test_case_01_input_sentinels(raw_data):
         (f"supplier_contracts.csv must contain exactly 20 open-ended contracts "
          f"(contract_effective_to is blank), got {nat_count}")
 
-    # No dual-contract suppliers in this dataset
+    # Ten suppliers have overlapping renegotiated contracts (dual-contract renegotiation trap)
     dual_count = (contracts.groupby("supplier_id").size() > 1).sum()
-    assert dual_count == 0, \
-        f"supplier_contracts.csv must have exactly one contract row per supplier, found {dual_count} with multiple"
+    assert dual_count == 10, \
+        f"supplier_contracts.csv must contain exactly 10 dual-contract suppliers, got {dual_count}"
 
 
 # ---------------------------------------------------------------------------
@@ -509,3 +520,59 @@ def test_case_09_summary_scalars(agent_summary, expected):
 
     assert agent_summary["worst_fill_rate_supplier_id"] == exp_worst_nfr, \
         f"worst_fill_rate_supplier_id: got {agent_summary['worst_fill_rate_supplier_id']}, expected {exp_worst_nfr}"
+
+# ---------------------------------------------------------------------------
+# Test 10 — Overlapping contract renegotiation  (Trap 4)
+# ---------------------------------------------------------------------------
+
+def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_data):
+    """
+    Trap 4 — Ten suppliers had their contracts renegotiated mid-quarter.
+    Each has two overlapping contract rows in supplier_contracts.csv:
+
+      OLD  contract_effective_from=2024-01-01, effective_to=2024-03-31, lower penalty_rate
+      NEW  contract_effective_from=2024-02-01, effective_to=2024-12-31, higher penalty_rate
+
+    The OLD contract is written first in the CSV. A naive implementation that
+    iterates contract rows in file order finds the OLD contract first for Feb–Mar
+    POs (both contracts are 'in effect') and uses the lower penalty rate, causing
+    total_penalty_usd to be underestimated for affected suppliers.
+
+    The correct rule: where multiple contracts cover a PO date, apply the one
+    with the most recent contract_effective_from. The instruction establishes
+    this principle explicitly for cap selection ('Use the cap from the supplier\'s
+    most recently effective contract') — the same precedence applies to all
+    contract terms.
+    """
+    _, contracts, _, _ = raw_data
+    exp_df, _, _ = expected
+
+    dual_suppliers = (
+        contracts.groupby("supplier_id")
+        .size()
+        .loc[lambda s: s > 1]
+        .index.tolist()
+    )
+    assert len(dual_suppliers) == 10, \
+        f"Expected 10 dual-contract suppliers, got {len(dual_suppliers)}"
+
+    spot = sorted(dual_suppliers)[:5]
+
+    failures = []
+    for sid in spot:
+        exp_row = exp_df[exp_df["supplier_id"] == sid]
+        act_row = agent_scorecard[agent_scorecard["supplier_id"] == sid]
+        if exp_row.empty or act_row.empty:
+            continue
+        exp_pen = float(exp_row["total_penalty_usd"].iloc[0])
+        act_pen = float(act_row["total_penalty_usd"].iloc[0])
+        if not math.isclose(act_pen, exp_pen, abs_tol=500):
+            failures.append(
+                f"{sid}: total_penalty_usd {act_pen:,.2f} != expected {exp_pen:,.2f} "
+                f"(diff {act_pen - exp_pen:+,.2f}). "
+                "When two contracts overlap, apply the one with the most recent "
+                "contract_effective_from — the renegotiated terms supersede the original."
+            )
+
+    assert not failures, "\n".join(failures)
+

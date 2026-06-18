@@ -91,9 +91,9 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
     ontime_breach = ~po["on_time"]
     po["sla_breach"] = fill_breach | ontime_breach
 
-    # Escalating penalty: sort by supplier + order_date, compute running breach
-    # count per supplier. Apply 2x rate for each breach after the 5th.
-    po = po.sort_values(["supplier_id", "order_date"]).copy()
+    # Escalating penalty: sort by supplier + order_date + po_id (tiebreaker),
+    # compute running breach count per supplier. Apply 2x rate after the 5th.
+    po = po.sort_values(["supplier_id", "order_date", "po_id"]).copy()
     po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
     escalated = po["sla_breach"] & (po["breach_rank"] > 5)
     po["penalty_rate_eff"] = po["penalty_rate_pct"].where(~escalated,
