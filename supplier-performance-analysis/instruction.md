@@ -42,7 +42,7 @@ Suppliers with no Q1 POs: set to `null`.
 
 ### SLA Breaches and Penalty
 
-Use the contract terms in effect at the time of each purchase order to determine the applicable `fill_rate_sla_threshold` and `penalty_rate_pct`. Where a supplier has more than one contract record, apply the terms from the contract with the most recent `contract_effective_from` as of the purchase order's `order_date`. A purchase order has an **SLA breach** if either condition holds:
+Use the contract terms in effect at the time of each purchase order to determine the applicable `fill_rate_sla_threshold` and `penalty_rate_pct`. Where a supplier has more than one contract record, apply the terms from the contract that was in effect on the purchase order's `order_date` and has the most recent `contract_effective_from` as of that date. A purchase order has an **SLA breach** if either condition holds:
 
 - The PO was not delivered on time (as defined above), or
 - The net fill rate for that individual PO falls below `fill_rate_sla_threshold`
