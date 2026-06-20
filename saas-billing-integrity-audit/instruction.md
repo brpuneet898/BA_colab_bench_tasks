@@ -15,8 +15,8 @@ Business policies:
 * Reduction amendments may generate contractual credits for the billing period in which the amendment takes effect, not for the remainder of the contract term. For amendments with `credit_method = 'daily_prorate'`, the credit equals the monthly MRR reduction multiplied by the fraction of days remaining in the calendar month from the effective date (inclusive).
 * Usage overages are subject to contractual billing.
 * Recognised revenue for reseller accounts equals the gross invoice amount multiplied by `reseller_margin_pct`.
-* When multiple SLA metrics breach in the same billing period for the same account, only the highest-severity breach generates a credit.
-* Billing periods are contract-dependent.
+* When multiple SLA metrics breach in the same calendar month for the same account, only the largest single credit applies regardless of which contract the breach belongs to.
+* Billing periods for usage and invoicing are contract-dependent.
 * Do not apply any FX conversion in this audit; `invoice_fx_rate` and `fx_rates.csv` are not needed. Where invoice revenue amounts are required, use `invoices.usd_equivalent`. The `_usd` suffix in output column names is a naming convention.
 * Pricing, discounts, entitlements, amendments, credits, invoices, payments, and revenue recognition must follow contractual and system records.
 

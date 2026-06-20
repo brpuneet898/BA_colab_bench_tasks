@@ -14,8 +14,9 @@ Approach:
   apply overage_rate from products.csv.
 - Reseller revenue: recognised revenue = gross usd_equivalent × reseller_margin_pct.
   Overstatement = gross × (1 − margin_pct) per account.
-- SLA stacking: when multiple metrics breach in the same (account, period), only
-  the highest-severity credit applies.  Overcount = sum − max per group.
+- SLA stacking: when multiple metrics breach in the same (account, calendar month),
+  only the largest single credit applies regardless of contract.
+  Overcount = sum − max per (account, period_start) group.
 """
 
 import json
@@ -201,8 +202,10 @@ def reseller_overstatement(inv_valid, accounts_df):
 
 def sla_credit_stacking(sla_df, test_ids):
     """
-    When multiple SLA metrics breach in the same (account, period), only the
-    highest-severity credit applies.  Overcount = sum − max per group.
+    When multiple SLA metrics breach in the same (account, calendar month), only
+    the largest single credit applies regardless of which contract it belongs to.
+    Overcount = sum − max per (account_id, period_start) group.
+    contract_id is empty — this is an account-level discrepancy.
     """
     df = sla_df[~sla_df["account_id"].isin(test_ids)].copy()
 
@@ -212,7 +215,6 @@ def sla_credit_stacking(sla_df, test_ids):
             total_credit=("credit_calculated", "sum"),
             max_credit=("credit_calculated", "max"),
             n_breaches=("credit_calculated", "count"),
-            contract_id=("contract_id", "first"),
         )
         .reset_index()
     )
@@ -225,7 +227,7 @@ def sla_credit_stacking(sla_df, test_ids):
         rows.append({
             "discrepancy_type":   "sla_credit_overcount",
             "account_id":         r["account_id"],
-            "contract_id":        r["contract_id"],
+            "contract_id":        "",
             "reference_id":       f"{r['account_id']}_{r['period_start']}",
             "period":             str(r["period_start"])[:7],
             "billed_amount_usd":  round(float(r["total_credit"]), 2),

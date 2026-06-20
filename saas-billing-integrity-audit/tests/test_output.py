@@ -15,8 +15,11 @@ Reasoning challenges tested:
      reseller accounts is gross × reseller_margin_pct.  Agents that sum all
      usd_equivalent without applying the margin overstate reseller revenue by 3–5×.
   4. SLA credit stacking (trap 4): when multiple SLA metrics breach in the same
-     (account, period), only the maximum single credit applies.  Agents that sum
-     credit_calculated across all rows in a period overcount.
+     calendar month for the same account, only the largest single credit applies
+     regardless of which contract the breach belongs to.  Two observed failure modes:
+     (a) agents that sum credit_calculated across all rows overcount; (b) agents that
+     group by (account_id, contract_id, period) instead of (account_id, period_start)
+     miss cross-contract stacking and under-report the overcount.
 
   Data quality:
      - Ghost-voided invoices (void_reason populated, status ≠ 'void') must be excluded.
