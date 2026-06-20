@@ -27,7 +27,13 @@ shaped the implementation:
     produces two candidate rows per review; the correct row is the one whose
     effective_from is the most recent date on or before the review_date.
 
-5.  Employees with two or more Q1 PIP events are subject to a composite score
+5.  employee_goals.csv is keyed by (department_id, employee_id), not
+    (business_unit_id, employee_id).  Joining goals to employees requires
+    bridging through department_metadata.csv to recover business_unit_id.
+    A naive join on employee_id alone produces 4× cross-BU phantom duplicates,
+    mixing the goals of unrelated employees who share the same employee_id string.
+
+6.  Employees with two or more Q1 PIP events are subject to a composite score
     cap at 2.5.  Employees with exactly one Q1 event are not — so the count is
     filtered to Q1 dates before grouping.
 """
@@ -57,7 +63,8 @@ def load_data():
     goals      = pd.read_csv(DATA_DIR / "employee_goals.csv")
     pip_events = pd.read_csv(DATA_DIR / "pip_events.csv",
                              parse_dates=["event_date"])
-    return employees, reviews, scales, goals, pip_events
+    dept_meta  = pd.read_csv(DATA_DIR / "department_metadata.csv")
+    return employees, reviews, scales, goals, pip_events, dept_meta
 
 
 def filter_active_employees(employees):
@@ -109,9 +116,19 @@ def attach_rating_scores(canonical_reviews, scales):
     )
 
 
-def compute_goal_completion(goals):
-    """Weighted average completion pct per (business_unit_id, employee_id)."""
-    g = goals.assign(weighted=goals["weight"] * goals["completion_pct"])
+def compute_goal_completion(goals, dept_meta):
+    """Weighted average completion pct per (business_unit_id, employee_id).
+
+    Goals are keyed by (department_id, employee_id).  Bridge through
+    department_metadata to recover business_unit_id before grouping.
+    """
+    goals_with_bu = goals.merge(
+        dept_meta[["department_id", "business_unit_id"]],
+        on="department_id", how="left",
+    )
+    g = goals_with_bu.assign(
+        weighted=goals_with_bu["weight"] * goals_with_bu["completion_pct"]
+    )
     agg = (
         g.groupby(["business_unit_id", "employee_id"])
         .agg(total_weighted=("weighted", "sum"), total_weight=("weight", "sum"))
@@ -188,12 +205,12 @@ def build_summary(scorecard):
 
 
 def main():
-    employees, reviews, scales, goals, pip_events = load_data()
+    employees, reviews, scales, goals, pip_events, dept_meta = load_data()
 
     active          = filter_active_employees(employees)
     canon_reviews   = get_canonical_reviews(reviews)
     rated_reviews   = attach_rating_scores(canon_reviews, scales)
-    goal_scores     = compute_goal_completion(goals)
+    goal_scores     = compute_goal_completion(goals, dept_meta)
     pip_counts      = count_q1_pip_events(pip_events)
 
     scorecard = build_scorecard(active, rated_reviews, goal_scores, pip_counts)

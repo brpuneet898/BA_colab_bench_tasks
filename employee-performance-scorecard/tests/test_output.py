@@ -96,8 +96,14 @@ def _attach_scores(canon, scales):
     )
 
 
-def _goal_completion(goals):
-    g = goals.assign(weighted=goals["weight"] * goals["completion_pct"])
+def _goal_completion(goals, dept_meta):
+    goals_with_bu = goals.merge(
+        dept_meta[["department_id", "business_unit_id"]],
+        on="department_id", how="left",
+    )
+    g = goals_with_bu.assign(
+        weighted=goals_with_bu["weight"] * goals_with_bu["completion_pct"]
+    )
     agg = g.groupby(["business_unit_id", "employee_id"]).agg(
         total_weighted=("weighted", "sum"),
         total_weight=("weight", "sum"),
@@ -118,11 +124,11 @@ def _pip_counts(pip_events):
     )
 
 
-def _build_expected(employees, reviews, scales, goals, pip_events):
+def _build_expected(employees, reviews, scales, goals, pip_events, dept_meta):
     active  = _filter_active(employees)
     canon   = _canonical_reviews(reviews)
     rated   = _attach_scores(canon, scales)
-    goal_sc = _goal_completion(goals)
+    goal_sc = _goal_completion(goals, dept_meta)
     pip_cnt = _pip_counts(pip_events)
 
     df = active.merge(
@@ -163,13 +169,14 @@ def raw_data():
     goals      = pd.read_csv(DATA_DIR / "employee_goals.csv")
     pip_events = pd.read_csv(DATA_DIR / "pip_events.csv",
                              parse_dates=["event_date"])
-    return employees, reviews, scales, goals, pip_events
+    dept_meta  = pd.read_csv(DATA_DIR / "department_metadata.csv")
+    return employees, reviews, scales, goals, pip_events, dept_meta
 
 
 @pytest.fixture(scope="module")
 def expected(raw_data):
-    employees, reviews, scales, goals, pip_events = raw_data
-    return _build_expected(employees, reviews, scales, goals, pip_events)
+    employees, reviews, scales, goals, pip_events, dept_meta = raw_data
+    return _build_expected(employees, reviews, scales, goals, pip_events, dept_meta)
 
 
 @pytest.fixture(scope="module")
@@ -191,7 +198,7 @@ def agent_summary():
 
 def test_case_01_input_sentinels(raw_data):
     """Canonical data fingerprint — verifies input files were not modified."""
-    employees, reviews, scales, goals, pip_events = raw_data
+    employees, reviews, scales, goals, pip_events, dept_meta = raw_data
 
     assert len(employees) == 4000, \
         f"employees.csv must not be modified (expected 4000 rows, got {len(employees)})"
@@ -231,6 +238,11 @@ def test_case_01_input_sentinels(raw_data):
     assert multi_pip == 200, \
         (f"pip_events.csv must contain exactly 200 employees with ≥2 Q1 events, "
          f"got {multi_pip}")
+
+    assert "department_id" in goals.columns, \
+        "employee_goals.csv must contain a department_id column (not business_unit_id)"
+    assert "business_unit_id" not in goals.columns, \
+        "employee_goals.csv must not contain business_unit_id — link via department_metadata.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -365,7 +377,7 @@ def test_case_05_rating_scale_scd(raw_data, agent_scorecard, expected):
     Spot-checks up to 5 employees whose final review falls before 2024-02-01
     and whose rating is Exceeds or Needs Improvement (Meets=3.0 in both scales).
     """
-    _, reviews, _, _, _ = raw_data
+    _, reviews, _, _, _, _ = raw_data
 
     canon = _canonical_reviews(reviews)
     pre_feb = canon[
@@ -422,7 +434,7 @@ def test_case_06_review_supersession(raw_data, agent_scorecard, expected):
 
     Spot-checks rating and rating_score for 5 of the 20 revised employees.
     """
-    _, reviews, _, _, _ = raw_data
+    _, reviews, _, _, _, _ = raw_data
 
     counts = reviews.groupby(["business_unit_id", "employee_id"]).size()
     revised = counts[counts > 1].reset_index().head(5)
@@ -473,7 +485,7 @@ def test_case_07_pip_cumulative_cap(raw_data, agent_scorecard, expected):
     Common mistake: cap all employees with any PIP event, incorrectly
     suppressing scores for those with only one incident.
     """
-    _, _, _, _, pip_events = raw_data
+    _, _, _, _, pip_events, _ = raw_data
     pip_ts = pip_events.copy()
     pip_ts["event_date"] = pd.to_datetime(pip_ts["event_date"])
     pip_q1 = pip_ts[
@@ -604,3 +616,47 @@ def test_case_10_summary_scalars(agent_summary, expected):
     assert act_top_bu == exp_top_bu, \
         (f"bu_with_highest_mean_score: expected {exp_top_bu}, got {act_top_bu}. "
          "Errors in composite_score calculation shift which BU ranks highest.")
+
+
+# ---------------------------------------------------------------------------
+# Test 11 — Goal completion accuracy  (department bridge trap)
+# ---------------------------------------------------------------------------
+
+def test_case_11_goal_department_bridge(raw_data, agent_scorecard, expected):
+    """
+    Structural trap — employee_goals.csv is keyed by (department_id, employee_id),
+    not (business_unit_id, employee_id).  Recovering business_unit_id requires
+    joining through department_metadata.csv.  A naive join on employee_id alone
+    creates 4× cross-BU phantom duplicates, mixing the goals of unrelated
+    employees who share the same employee_id string across business units.
+
+    Spot-checks goal_completion_pct for 2 employees per business unit (8 total).
+    """
+    # Sample the first 2 employees per BU from the sorted expected scorecard
+    sample = (
+        expected
+        .groupby("business_unit_id", group_keys=False)
+        .head(2)
+        [["business_unit_id", "employee_id", "goal_completion_pct"]]
+    )
+
+    failures = []
+    for _, row in sample.iterrows():
+        bu_id, emp_id = row["business_unit_id"], row["employee_id"]
+        act_row = agent_scorecard[
+            (agent_scorecard["business_unit_id"] == bu_id) &
+            (agent_scorecard["employee_id"] == emp_id)
+        ]
+        if act_row.empty:
+            continue
+        exp_pct = float(row["goal_completion_pct"])
+        act_pct = float(act_row["goal_completion_pct"].iloc[0])
+        if not math.isclose(act_pct, exp_pct, abs_tol=0.01):
+            failures.append(
+                f"{bu_id}/{emp_id}: goal_completion_pct {act_pct:.2f} != "
+                f"expected {exp_pct:.2f}. "
+                "Goals are stored with department_id; bridge through "
+                "department_metadata.csv to recover business_unit_id before joining."
+            )
+
+    assert not failures, "\n".join(failures)
