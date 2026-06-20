@@ -1,0 +1,17 @@
+department_id,department_name,business_unit_id,cost_center
+DEPT-001,Frontend Engineering,BU-01,CC-BU-01-001
+DEPT-002,Backend Engineering,BU-01,CC-BU-01-002
+DEPT-003,DevOps,BU-01,CC-BU-01-003
+DEPT-004,QA,BU-01,CC-BU-01-004
+DEPT-005,Enterprise Sales,BU-02,CC-BU-02-005
+DEPT-006,SMB Sales,BU-02,CC-BU-02-006
+DEPT-007,Sales Operations,BU-02,CC-BU-02-007
+DEPT-008,Partnerships,BU-02,CC-BU-02-008
+DEPT-009,Supply Chain,BU-03,CC-BU-03-009
+DEPT-010,Procurement,BU-03,CC-BU-03-010
+DEPT-011,Facilities,BU-03,CC-BU-03-011
+DEPT-012,Customer Support,BU-03,CC-BU-03-012
+DEPT-013,Accounting,BU-04,CC-BU-04-013
+DEPT-014,FP&A,BU-04,CC-BU-04-014
+DEPT-015,Tax,BU-04,CC-BU-04-015
+DEPT-016,Internal Audit,BU-04,CC-BU-04-016

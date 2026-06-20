@@ -1,0 +1,5 @@
+business_unit_id,bu_name,region,cost_center,headcount_budget
+BU-01,Engineering,North America,CC-BU-01,1000
+BU-02,Sales,North America,CC-BU-02,1000
+BU-03,Operations,EMEA,CC-BU-03,1000
+BU-04,Finance,APAC,CC-BU-04,1000
