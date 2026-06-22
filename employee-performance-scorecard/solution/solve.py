@@ -27,13 +27,20 @@ shaped the implementation:
     produces two candidate rows per review; the correct row is the one whose
     effective_from is the most recent date on or before the review_date.
 
-5.  employee_goals.csv is keyed by (department_id, employee_id), not
-    (business_unit_id, employee_id).  Joining goals to employees requires
-    bridging through department_metadata.csv to recover business_unit_id.
-    A naive join on employee_id alone produces 4× cross-BU phantom duplicates,
-    mixing the goals of unrelated employees who share the same employee_id string.
+5.  performance_reviews.csv contains Q1-2024 reviews AND Q4-2023 reviews that
+    were filed late (with review_dates in Feb–Mar 2024).  For employees with
+    both types, the Q4 finalization date is AFTER the Q1 review date, so naive
+    "latest review_date" dedup returns the wrong rating.  Correct: filter to
+    review_cycle == "Q1-2024" first, then dedup within Q1 by max review_date.
 
-6.  Employees with two or more Q1 PIP events are subject to a composite score
+6.  employee_goals.csv is keyed by (department_id, employee_id).  Recovering
+    business_unit_id requires bridging through department_metadata.csv.  BU-03
+    (Operations) records completion_pct as a fraction (0.0–1.0); all other BUs
+    use percentage (0–100).  The completion_unit column labels each row "fraction"
+    or "pct".  Applying goal_score = completion_pct / 100 × 5 to fraction-scale
+    values without first converting (× 100) collapses BU-03 scores by 100×.
+
+7.  Employees with two or more Q1 PIP events are subject to a composite score
     cap at 2.5.  Employees with exactly one Q1 event are not — so the count is
     filtered to Q1 dates before grouping.
 """
@@ -82,13 +89,17 @@ def filter_active_employees(employees):
 
 
 def get_canonical_reviews(reviews):
-    """Return the latest review per (business_unit_id, employee_id).
+    """Return the latest Q1-2024 review per (business_unit_id, employee_id).
 
-    Twenty employees have an initial review and a later manager revision.
-    Sorting ascending then keeping the last row gives the revision.
+    performance_reviews.csv contains both Q1-2024 reviews and Q4-2023 reviews
+    filed late (review_date in Feb–Mar 2024).  For employees with both, the Q4
+    finalization date is later, so naive latest-date dedup picks the wrong row.
+    Filter to review_cycle == "Q1-2024" first; then within Q1, keep the row with
+    the maximum review_date (manager revisions have a later date than initials).
     """
+    q1_only = reviews[reviews["review_cycle"] == "Q1-2024"]
     return (
-        reviews
+        q1_only
         .sort_values("review_date")
         .drop_duplicates(subset=["business_unit_id", "employee_id"], keep="last")
         .reset_index(drop=True)
@@ -119,13 +130,21 @@ def attach_rating_scores(canonical_reviews, scales):
 def compute_goal_completion(goals, dept_meta):
     """Weighted average completion pct per (business_unit_id, employee_id).
 
-    Goals are keyed by (department_id, employee_id).  Bridge through
-    department_metadata to recover business_unit_id before grouping.
+    Two sub-challenges:
+    1. Goals are keyed by (department_id, employee_id); bridge through
+       department_metadata to recover business_unit_id.
+    2. BU-03 records completion_pct as a fraction (0.0–1.0); all other BUs
+       use percentage (0–100).  Normalise fraction rows (× 100) before the
+       weighted average so all values are on the same percentage scale.
     """
     goals_with_bu = goals.merge(
         dept_meta[["department_id", "business_unit_id"]],
         on="department_id", how="left",
     )
+    # Normalise fraction-scale values to the percentage scale
+    frac = goals_with_bu["completion_unit"] == "fraction"
+    goals_with_bu.loc[frac, "completion_pct"] = goals_with_bu.loc[frac, "completion_pct"] * 100
+
     g = goals_with_bu.assign(
         weighted=goals_with_bu["weight"] * goals_with_bu["completion_pct"]
     )

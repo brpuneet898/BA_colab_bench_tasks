@@ -6,9 +6,9 @@ Include all employees who were active at any point during Q1 2024 (2024-01-01 th
 
 ## Rating Score
 
-Each employee's Q1 performance rating is recorded in `performance_reviews.csv`. Where a manager has submitted a revised rating for an employee, the revised assessment applies.
+Each employee's Q1 performance rating is recorded in `performance_reviews.csv`.
 
-Convert each rating to a numeric score using `rating_scales.csv`, applying the scale in effect on the employee's `review_date`.
+Convert each rating to a numeric score using `rating_scales.csv`.
 
 ## Goal Completion
 
@@ -40,7 +40,7 @@ All files are in `/workspace/data/`.
 
 `rating_scales.csv` — `rating`, `score`, `effective_from`
 
-`employee_goals.csv` — `goal_id`, `employee_id`, `department_id`, `goal_description`, `weight`, `completion_pct`, `recorded_date`
+`employee_goals.csv` — `goal_id`, `employee_id`, `department_id`, `goal_description`, `weight`, `completion_pct`, `completion_unit`, `recorded_date`
 
 `pip_events.csv` — `employee_id`, `business_unit_id`, `event_date`, `event_type`, `documented_by`, `notes`
 

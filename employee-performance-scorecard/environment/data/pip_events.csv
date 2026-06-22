@@ -1,801 +1,798 @@
 employee_id,business_unit_id,event_date,event_type,documented_by,notes
-EMP-0165,BU-02,2024-02-13,Performance Review Meeting,MGR-BU-02-02,Attendance and punctuality concern
-EMP-0076,BU-01,2024-03-29,HR Escalation,MGR-BU-01-10,Missed key deliverable deadline
-EMP-0436,BU-02,2024-02-12,HR Escalation,MGR-BU-02-04,Missed key deliverable deadline
-EMP-0965,BU-03,2024-01-03,Written Warning,MGR-BU-03-12,Performance below quarterly target
-EMP-0870,BU-03,2024-01-06,Written Warning,MGR-BU-03-05,Missed key deliverable deadline
-EMP-0764,BU-03,2024-01-25,Coaching Session,MGR-BU-03-10,Attendance and punctuality concern
-EMP-0969,BU-01,2024-01-09,Written Warning,MGR-BU-01-05,Missed key deliverable deadline
-EMP-0561,BU-04,2024-03-15,Coaching Session,MGR-BU-04-19,Attendance and punctuality concern
-EMP-0121,BU-04,2024-03-25,Performance Review Meeting,MGR-BU-04-14,Performance below quarterly target
-EMP-0362,BU-02,2024-02-17,HR Escalation,MGR-BU-02-07,Missed key deliverable deadline
-EMP-0648,BU-04,2024-03-28,Performance Review Meeting,MGR-BU-04-19,Missed key deliverable deadline
-EMP-0013,BU-04,2024-03-13,Performance Review Meeting,MGR-BU-04-10,Performance below quarterly target
-EMP-0755,BU-04,2024-03-24,Written Warning,MGR-BU-04-05,Missed key deliverable deadline
-EMP-0189,BU-04,2024-02-26,Written Warning,MGR-BU-04-17,Performance below quarterly target
-EMP-0985,BU-01,2024-02-26,Written Warning,MGR-BU-01-11,Attendance and punctuality concern
-EMP-0024,BU-01,2024-02-28,Coaching Session,MGR-BU-01-19,Attendance and punctuality concern
-EMP-0223,BU-02,2024-03-13,Coaching Session,MGR-BU-02-18,Missed key deliverable deadline
-EMP-0574,BU-01,2024-02-13,Coaching Session,MGR-BU-01-18,Attendance and punctuality concern
-EMP-0009,BU-01,2024-01-09,Performance Review Meeting,MGR-BU-01-18,Attendance and punctuality concern
-EMP-0881,BU-03,2024-02-28,Written Warning,MGR-BU-03-02,Missed key deliverable deadline
-EMP-0193,BU-04,2024-03-16,Coaching Session,MGR-BU-04-11,Performance below quarterly target
-EMP-0336,BU-03,2024-03-27,Written Warning,MGR-BU-03-16,Attendance and punctuality concern
-EMP-0478,BU-04,2024-03-18,Coaching Session,MGR-BU-04-15,Performance below quarterly target
-EMP-0255,BU-01,2024-01-14,Written Warning,MGR-BU-01-18,Performance below quarterly target
-EMP-0974,BU-01,2024-01-03,Written Warning,MGR-BU-01-06,Missed key deliverable deadline
-EMP-0557,BU-02,2024-02-14,Performance Review Meeting,MGR-BU-02-16,Performance below quarterly target
-EMP-0084,BU-04,2024-01-15,Written Warning,MGR-BU-04-07,Missed key deliverable deadline
-EMP-0967,BU-01,2024-01-24,Coaching Session,MGR-BU-01-06,Attendance and punctuality concern
-EMP-0340,BU-01,2024-03-29,Written Warning,MGR-BU-01-02,Missed key deliverable deadline
-EMP-0328,BU-03,2024-02-18,Performance Review Meeting,MGR-BU-03-13,Attendance and punctuality concern
-EMP-0918,BU-02,2024-01-19,Written Warning,MGR-BU-02-10,Performance below quarterly target
-EMP-0468,BU-01,2024-01-23,Written Warning,MGR-BU-01-11,Missed key deliverable deadline
-EMP-0582,BU-04,2024-03-26,Coaching Session,MGR-BU-04-11,Attendance and punctuality concern
-EMP-0096,BU-01,2024-03-18,Coaching Session,MGR-BU-01-08,Missed key deliverable deadline
-EMP-0467,BU-02,2024-03-12,Written Warning,MGR-BU-02-20,Performance below quarterly target
-EMP-0417,BU-03,2024-01-20,Coaching Session,MGR-BU-03-05,Missed key deliverable deadline
-EMP-0269,BU-03,2024-01-17,Written Warning,MGR-BU-03-14,Attendance and punctuality concern
-EMP-0267,BU-01,2024-01-13,HR Escalation,MGR-BU-01-03,Attendance and punctuality concern
-EMP-0844,BU-04,2024-03-16,HR Escalation,MGR-BU-04-10,Attendance and punctuality concern
-EMP-0376,BU-01,2024-01-19,Performance Review Meeting,MGR-BU-01-09,Missed key deliverable deadline
-EMP-0315,BU-03,2024-03-21,HR Escalation,MGR-BU-03-04,Missed key deliverable deadline
-EMP-0498,BU-01,2024-02-23,HR Escalation,MGR-BU-01-05,Attendance and punctuality concern
-EMP-0036,BU-04,2024-02-14,Coaching Session,MGR-BU-04-06,Attendance and punctuality concern
-EMP-0603,BU-03,2024-02-08,Coaching Session,MGR-BU-03-18,Attendance and punctuality concern
-EMP-0765,BU-03,2024-02-12,Written Warning,MGR-BU-03-18,Performance below quarterly target
-EMP-0198,BU-03,2024-02-25,Written Warning,MGR-BU-03-04,Missed key deliverable deadline
-EMP-0490,BU-02,2024-01-03,HR Escalation,MGR-BU-02-16,Attendance and punctuality concern
-EMP-0494,BU-03,2024-02-26,HR Escalation,MGR-BU-03-09,Performance below quarterly target
-EMP-0421,BU-04,2024-03-25,HR Escalation,MGR-BU-04-03,Attendance and punctuality concern
-EMP-0987,BU-03,2024-02-05,Written Warning,MGR-BU-03-12,Attendance and punctuality concern
-EMP-0743,BU-04,2024-02-12,Written Warning,MGR-BU-04-04,Attendance and punctuality concern
-EMP-0669,BU-04,2024-02-03,Written Warning,MGR-BU-04-20,Missed key deliverable deadline
-EMP-0169,BU-02,2024-02-12,Written Warning,MGR-BU-02-13,Missed key deliverable deadline
-EMP-0517,BU-03,2024-02-15,Performance Review Meeting,MGR-BU-03-01,Attendance and punctuality concern
-EMP-0738,BU-01,2024-02-26,Written Warning,MGR-BU-01-05,Missed key deliverable deadline
-EMP-0124,BU-04,2024-02-09,HR Escalation,MGR-BU-04-17,Attendance and punctuality concern
-EMP-0806,BU-04,2024-01-31,Written Warning,MGR-BU-04-15,Missed key deliverable deadline
-EMP-0182,BU-04,2024-01-05,Written Warning,MGR-BU-04-17,Missed key deliverable deadline
-EMP-0626,BU-02,2024-03-24,HR Escalation,MGR-BU-02-14,Performance below quarterly target
-EMP-0453,BU-02,2024-02-29,Performance Review Meeting,MGR-BU-02-05,Attendance and punctuality concern
-EMP-0112,BU-01,2024-03-21,HR Escalation,MGR-BU-01-07,Attendance and punctuality concern
-EMP-0866,BU-01,2024-02-16,Written Warning,MGR-BU-01-02,Performance below quarterly target
-EMP-0235,BU-01,2024-02-12,Written Warning,MGR-BU-01-03,Missed key deliverable deadline
-EMP-0917,BU-01,2024-03-06,Coaching Session,MGR-BU-01-10,Missed key deliverable deadline
-EMP-0021,BU-01,2024-03-06,Written Warning,MGR-BU-01-01,Missed key deliverable deadline
-EMP-0697,BU-02,2024-03-09,Coaching Session,MGR-BU-02-12,Performance below quarterly target
-EMP-0123,BU-02,2024-02-03,Coaching Session,MGR-BU-02-13,Performance below quarterly target
-EMP-0039,BU-04,2024-02-03,Performance Review Meeting,MGR-BU-04-06,Attendance and punctuality concern
-EMP-0590,BU-03,2024-02-14,Coaching Session,MGR-BU-03-19,Attendance and punctuality concern
-EMP-0989,BU-01,2024-03-16,Performance Review Meeting,MGR-BU-01-07,Performance below quarterly target
-EMP-0075,BU-04,2024-03-31,Performance Review Meeting,MGR-BU-04-16,Performance below quarterly target
-EMP-0043,BU-01,2024-01-21,Written Warning,MGR-BU-01-16,Missed key deliverable deadline
-EMP-0016,BU-04,2024-03-04,Written Warning,MGR-BU-04-05,Attendance and punctuality concern
-EMP-0400,BU-01,2024-03-22,Performance Review Meeting,MGR-BU-01-04,Missed key deliverable deadline
-EMP-0729,BU-04,2024-03-20,Performance Review Meeting,MGR-BU-04-15,Attendance and punctuality concern
-EMP-0424,BU-02,2024-02-07,Written Warning,MGR-BU-02-10,Performance below quarterly target
-EMP-0347,BU-04,2024-03-29,Coaching Session,MGR-BU-04-09,Attendance and punctuality concern
-EMP-0711,BU-01,2024-03-26,Performance Review Meeting,MGR-BU-01-04,Missed key deliverable deadline
-EMP-0218,BU-03,2024-03-08,HR Escalation,MGR-BU-03-11,Missed key deliverable deadline
-EMP-0463,BU-04,2024-01-30,Performance Review Meeting,MGR-BU-04-10,Missed key deliverable deadline
-EMP-0932,BU-03,2024-01-06,HR Escalation,MGR-BU-03-16,Missed key deliverable deadline
-EMP-0566,BU-03,2024-01-05,HR Escalation,MGR-BU-03-19,Missed key deliverable deadline
-EMP-0126,BU-02,2024-03-25,HR Escalation,MGR-BU-02-09,Attendance and punctuality concern
-EMP-0700,BU-01,2024-02-25,Coaching Session,MGR-BU-01-11,Performance below quarterly target
-EMP-0168,BU-01,2024-01-08,Written Warning,MGR-BU-01-10,Missed key deliverable deadline
-EMP-0714,BU-03,2024-03-21,Performance Review Meeting,MGR-BU-03-05,Missed key deliverable deadline
-EMP-0396,BU-03,2024-02-28,Performance Review Meeting,MGR-BU-03-09,Attendance and punctuality concern
-EMP-0341,BU-01,2024-01-17,HR Escalation,MGR-BU-01-11,Missed key deliverable deadline
-EMP-0486,BU-02,2024-01-14,Performance Review Meeting,MGR-BU-02-05,Attendance and punctuality concern
-EMP-0236,BU-01,2024-03-12,HR Escalation,MGR-BU-01-19,Performance below quarterly target
-EMP-0093,BU-03,2024-01-19,Coaching Session,MGR-BU-03-03,Attendance and punctuality concern
-EMP-0767,BU-04,2024-03-29,Written Warning,MGR-BU-04-07,Performance below quarterly target
-EMP-0582,BU-02,2024-03-16,Coaching Session,MGR-BU-02-09,Missed key deliverable deadline
-EMP-0824,BU-02,2024-01-09,Written Warning,MGR-BU-02-15,Missed key deliverable deadline
-EMP-0751,BU-02,2024-01-10,Performance Review Meeting,MGR-BU-02-18,Performance below quarterly target
-EMP-0606,BU-03,2024-03-06,Coaching Session,MGR-BU-03-17,Attendance and punctuality concern
-EMP-0481,BU-03,2024-01-29,HR Escalation,MGR-BU-03-18,Performance below quarterly target
-EMP-0671,BU-03,2024-01-18,Coaching Session,MGR-BU-03-05,Attendance and punctuality concern
-EMP-0847,BU-03,2024-02-28,Written Warning,MGR-BU-03-12,Performance below quarterly target
-EMP-0640,BU-01,2024-03-03,Written Warning,MGR-BU-01-11,Performance below quarterly target
-EMP-0765,BU-01,2024-03-14,HR Escalation,MGR-BU-01-06,Missed key deliverable deadline
-EMP-0163,BU-01,2024-03-22,Written Warning,MGR-BU-01-02,Missed key deliverable deadline
-EMP-0201,BU-04,2024-02-24,Written Warning,MGR-BU-04-14,Attendance and punctuality concern
-EMP-0431,BU-01,2024-01-19,Coaching Session,MGR-BU-01-01,Performance below quarterly target
-EMP-0783,BU-01,2024-01-18,Performance Review Meeting,MGR-BU-01-07,Missed key deliverable deadline
-EMP-0840,BU-02,2024-02-15,Performance Review Meeting,MGR-BU-02-06,Performance below quarterly target
-EMP-0163,BU-03,2024-01-20,HR Escalation,MGR-BU-03-02,Performance below quarterly target
-EMP-0964,BU-01,2024-02-15,Coaching Session,MGR-BU-01-07,Missed key deliverable deadline
-EMP-0542,BU-04,2024-01-20,Coaching Session,MGR-BU-04-13,Performance below quarterly target
-EMP-0452,BU-03,2024-01-15,Written Warning,MGR-BU-03-06,Missed key deliverable deadline
-EMP-0776,BU-01,2024-01-12,Performance Review Meeting,MGR-BU-01-07,Performance below quarterly target
-EMP-0739,BU-04,2024-02-12,HR Escalation,MGR-BU-04-14,Missed key deliverable deadline
-EMP-0309,BU-04,2024-03-03,Written Warning,MGR-BU-04-18,Performance below quarterly target
-EMP-0915,BU-02,2024-01-08,HR Escalation,MGR-BU-02-02,Missed key deliverable deadline
-EMP-0735,BU-04,2024-03-29,Written Warning,MGR-BU-04-20,Attendance and punctuality concern
-EMP-0904,BU-01,2024-01-08,Performance Review Meeting,MGR-BU-01-02,Attendance and punctuality concern
-EMP-0752,BU-04,2024-02-28,Coaching Session,MGR-BU-04-15,Attendance and punctuality concern
-EMP-0933,BU-01,2024-01-15,Performance Review Meeting,MGR-BU-01-05,Missed key deliverable deadline
-EMP-0186,BU-04,2024-02-16,HR Escalation,MGR-BU-04-11,Attendance and punctuality concern
-EMP-0216,BU-03,2024-03-23,Performance Review Meeting,MGR-BU-03-05,Missed key deliverable deadline
-EMP-0715,BU-01,2024-03-11,HR Escalation,MGR-BU-01-11,Missed key deliverable deadline
-EMP-0411,BU-04,2024-03-18,Written Warning,MGR-BU-04-09,Performance below quarterly target
-EMP-0633,BU-01,2024-02-29,Performance Review Meeting,MGR-BU-01-17,Missed key deliverable deadline
-EMP-0095,BU-02,2024-01-25,Performance Review Meeting,MGR-BU-02-01,Performance below quarterly target
-EMP-0312,BU-02,2024-02-29,Coaching Session,MGR-BU-02-03,Missed key deliverable deadline
-EMP-0676,BU-01,2024-02-25,Performance Review Meeting,MGR-BU-01-07,Performance below quarterly target
-EMP-0002,BU-04,2024-02-19,Coaching Session,MGR-BU-04-06,Missed key deliverable deadline
-EMP-0387,BU-03,2024-01-20,Performance Review Meeting,MGR-BU-03-16,Performance below quarterly target
-EMP-0502,BU-03,2024-02-18,Written Warning,MGR-BU-03-06,Performance below quarterly target
-EMP-0243,BU-03,2024-01-02,HR Escalation,MGR-BU-03-15,Missed key deliverable deadline
-EMP-0273,BU-04,2024-02-04,Written Warning,MGR-BU-04-02,Attendance and punctuality concern
-EMP-0777,BU-03,2024-03-28,HR Escalation,MGR-BU-03-14,Attendance and punctuality concern
-EMP-0422,BU-02,2024-01-15,Written Warning,MGR-BU-02-03,Performance below quarterly target
-EMP-0319,BU-03,2024-03-16,HR Escalation,MGR-BU-03-12,Attendance and punctuality concern
-EMP-0081,BU-02,2024-02-20,Performance Review Meeting,MGR-BU-02-09,Missed key deliverable deadline
-EMP-0042,BU-03,2024-01-22,Written Warning,MGR-BU-03-12,Missed key deliverable deadline
-EMP-0288,BU-02,2024-02-10,HR Escalation,MGR-BU-02-17,Performance below quarterly target
-EMP-0893,BU-02,2024-01-11,Coaching Session,MGR-BU-02-08,Attendance and punctuality concern
-EMP-0444,BU-03,2024-02-21,Coaching Session,MGR-BU-03-12,Performance below quarterly target
-EMP-0304,BU-03,2024-01-07,Written Warning,MGR-BU-03-03,Missed key deliverable deadline
-EMP-0197,BU-02,2024-02-11,Written Warning,MGR-BU-02-17,Attendance and punctuality concern
-EMP-0915,BU-01,2024-03-03,Coaching Session,MGR-BU-01-06,Performance below quarterly target
-EMP-0997,BU-01,2024-01-01,Performance Review Meeting,MGR-BU-01-09,Performance below quarterly target
-EMP-0782,BU-04,2024-01-10,Performance Review Meeting,MGR-BU-04-04,Attendance and punctuality concern
-EMP-0415,BU-04,2024-03-06,Performance Review Meeting,MGR-BU-04-18,Attendance and punctuality concern
-EMP-0675,BU-03,2024-02-15,Coaching Session,MGR-BU-03-04,Performance below quarterly target
-EMP-0220,BU-03,2024-01-03,Coaching Session,MGR-BU-03-12,Attendance and punctuality concern
-EMP-0655,BU-03,2024-01-10,Performance Review Meeting,MGR-BU-03-03,Attendance and punctuality concern
-EMP-0714,BU-04,2024-03-23,Written Warning,MGR-BU-04-07,Attendance and punctuality concern
-EMP-0187,BU-01,2024-03-27,Written Warning,MGR-BU-01-18,Missed key deliverable deadline
-EMP-0595,BU-04,2024-02-05,HR Escalation,MGR-BU-04-03,Attendance and punctuality concern
-EMP-0486,BU-04,2024-01-08,HR Escalation,MGR-BU-04-05,Performance below quarterly target
-EMP-0874,BU-04,2024-03-02,Coaching Session,MGR-BU-04-20,Missed key deliverable deadline
-EMP-0510,BU-03,2024-02-23,HR Escalation,MGR-BU-03-20,Attendance and punctuality concern
-EMP-0519,BU-01,2024-03-28,Written Warning,MGR-BU-01-03,Missed key deliverable deadline
-EMP-0876,BU-02,2024-03-05,Performance Review Meeting,MGR-BU-02-12,Missed key deliverable deadline
-EMP-0239,BU-02,2024-03-13,HR Escalation,MGR-BU-02-15,Performance below quarterly target
-EMP-0052,BU-04,2024-03-14,Performance Review Meeting,MGR-BU-04-09,Performance below quarterly target
-EMP-0950,BU-04,2024-02-08,Written Warning,MGR-BU-04-05,Performance below quarterly target
-EMP-0069,BU-02,2024-02-20,HR Escalation,MGR-BU-02-04,Missed key deliverable deadline
-EMP-0295,BU-04,2024-03-10,HR Escalation,MGR-BU-04-01,Missed key deliverable deadline
-EMP-0753,BU-04,2024-01-10,HR Escalation,MGR-BU-04-10,Missed key deliverable deadline
-EMP-0623,BU-03,2024-02-05,HR Escalation,MGR-BU-03-09,Missed key deliverable deadline
-EMP-0359,BU-04,2024-01-03,HR Escalation,MGR-BU-04-17,Performance below quarterly target
-EMP-0446,BU-01,2024-03-20,Written Warning,MGR-BU-01-10,Attendance and punctuality concern
-EMP-0323,BU-02,2024-01-06,Written Warning,MGR-BU-02-06,Performance below quarterly target
-EMP-0345,BU-02,2024-01-22,Coaching Session,MGR-BU-02-15,Performance below quarterly target
-EMP-0035,BU-04,2024-02-15,HR Escalation,MGR-BU-04-14,Performance below quarterly target
-EMP-0754,BU-04,2024-03-25,Performance Review Meeting,MGR-BU-04-19,Performance below quarterly target
-EMP-0469,BU-01,2024-02-06,Written Warning,MGR-BU-01-19,Missed key deliverable deadline
-EMP-0745,BU-02,2024-01-18,Performance Review Meeting,MGR-BU-02-14,Missed key deliverable deadline
-EMP-0239,BU-03,2024-01-01,Written Warning,MGR-BU-03-05,Performance below quarterly target
-EMP-0515,BU-04,2024-01-08,Written Warning,MGR-BU-04-16,Performance below quarterly target
-EMP-0158,BU-04,2024-03-15,Coaching Session,MGR-BU-04-07,Performance below quarterly target
-EMP-0018,BU-01,2024-01-02,Performance Review Meeting,MGR-BU-01-02,Performance below quarterly target
-EMP-0451,BU-04,2024-02-01,Coaching Session,MGR-BU-04-04,Attendance and punctuality concern
-EMP-0153,BU-02,2024-02-17,HR Escalation,MGR-BU-02-10,Missed key deliverable deadline
-EMP-0780,BU-02,2024-03-06,Written Warning,MGR-BU-02-19,Missed key deliverable deadline
-EMP-0508,BU-01,2024-03-27,Coaching Session,MGR-BU-01-09,Attendance and punctuality concern
-EMP-0541,BU-02,2024-03-27,Coaching Session,MGR-BU-02-19,Performance below quarterly target
-EMP-0522,BU-02,2024-02-12,Performance Review Meeting,MGR-BU-02-18,Performance below quarterly target
-EMP-0563,BU-02,2024-03-01,Written Warning,MGR-BU-02-02,Missed key deliverable deadline
-EMP-0065,BU-03,2024-01-28,HR Escalation,MGR-BU-03-07,Attendance and punctuality concern
-EMP-0996,BU-01,2024-03-09,Performance Review Meeting,MGR-BU-01-05,Missed key deliverable deadline
-EMP-0039,BU-03,2024-03-16,Performance Review Meeting,MGR-BU-03-06,Performance below quarterly target
-EMP-0207,BU-02,2024-03-22,Performance Review Meeting,MGR-BU-02-06,Performance below quarterly target
-EMP-0972,BU-01,2024-02-18,Coaching Session,MGR-BU-01-01,Performance below quarterly target
-EMP-0015,BU-01,2024-01-31,HR Escalation,MGR-BU-01-01,Missed key deliverable deadline
-EMP-0002,BU-03,2024-02-24,Performance Review Meeting,MGR-BU-03-06,Performance below quarterly target
-EMP-0202,BU-03,2024-02-12,Written Warning,MGR-BU-03-04,Missed key deliverable deadline
-EMP-0637,BU-03,2024-01-10,HR Escalation,MGR-BU-03-18,Attendance and punctuality concern
-EMP-0456,BU-03,2024-02-23,HR Escalation,MGR-BU-03-04,Missed key deliverable deadline
-EMP-0727,BU-02,2024-03-25,Performance Review Meeting,MGR-BU-02-06,Performance below quarterly target
-EMP-0418,BU-01,2024-02-12,Written Warning,MGR-BU-01-14,Attendance and punctuality concern
-EMP-0287,BU-02,2024-02-20,Performance Review Meeting,MGR-BU-02-13,Performance below quarterly target
-EMP-0723,BU-02,2024-02-14,HR Escalation,MGR-BU-02-17,Performance below quarterly target
-EMP-0070,BU-03,2024-01-25,Written Warning,MGR-BU-03-20,Performance below quarterly target
-EMP-0123,BU-04,2024-03-14,HR Escalation,MGR-BU-04-10,Attendance and punctuality concern
-EMP-0792,BU-04,2024-02-09,Performance Review Meeting,MGR-BU-04-13,Performance below quarterly target
-EMP-0219,BU-03,2024-01-18,Performance Review Meeting,MGR-BU-03-17,Attendance and punctuality concern
-EMP-0073,BU-04,2024-01-07,HR Escalation,MGR-BU-04-18,Missed key deliverable deadline
-EMP-0827,BU-04,2024-03-04,Coaching Session,MGR-BU-04-11,Missed key deliverable deadline
-EMP-0343,BU-02,2024-02-22,Performance Review Meeting,MGR-BU-02-20,Performance below quarterly target
-EMP-0099,BU-03,2024-03-20,Coaching Session,MGR-BU-03-13,Performance below quarterly target
-EMP-0679,BU-04,2024-02-28,Written Warning,MGR-BU-04-19,Missed key deliverable deadline
-EMP-0914,BU-03,2024-03-23,Performance Review Meeting,MGR-BU-03-16,Missed key deliverable deadline
-EMP-0335,BU-04,2024-01-05,Coaching Session,MGR-BU-04-19,Missed key deliverable deadline
-EMP-0911,BU-04,2024-01-13,HR Escalation,MGR-BU-04-15,Attendance and punctuality concern
-EMP-0153,BU-01,2024-02-07,Coaching Session,MGR-BU-01-17,Missed key deliverable deadline
-EMP-0415,BU-01,2024-01-31,Written Warning,MGR-BU-01-18,Attendance and punctuality concern
-EMP-0172,BU-02,2024-01-19,HR Escalation,MGR-BU-02-11,Attendance and punctuality concern
-EMP-0206,BU-01,2024-03-24,Coaching Session,MGR-BU-01-03,Performance below quarterly target
-EMP-0366,BU-01,2024-03-08,Written Warning,MGR-BU-01-08,Attendance and punctuality concern
-EMP-0242,BU-04,2024-02-19,Coaching Session,MGR-BU-04-04,Missed key deliverable deadline
-EMP-0182,BU-02,2024-03-09,HR Escalation,MGR-BU-02-20,Missed key deliverable deadline
-EMP-0041,BU-01,2024-02-26,HR Escalation,MGR-BU-01-03,Attendance and punctuality concern
-EMP-0965,BU-04,2024-02-10,Coaching Session,MGR-BU-04-19,Performance below quarterly target
-EMP-0275,BU-04,2024-02-09,Written Warning,MGR-BU-04-16,Missed key deliverable deadline
-EMP-0961,BU-02,2024-02-14,Coaching Session,MGR-BU-02-06,Missed key deliverable deadline
-EMP-0459,BU-01,2024-02-28,Written Warning,MGR-BU-01-09,Missed key deliverable deadline
-EMP-0158,BU-03,2024-01-07,Performance Review Meeting,MGR-BU-03-08,Performance below quarterly target
-EMP-0593,BU-03,2024-01-11,Performance Review Meeting,MGR-BU-03-13,Performance below quarterly target
-EMP-0370,BU-03,2024-03-03,Written Warning,MGR-BU-03-18,Attendance and punctuality concern
-EMP-0421,BU-03,2024-03-04,Performance Review Meeting,MGR-BU-03-12,Missed key deliverable deadline
-EMP-0464,BU-01,2024-02-16,HR Escalation,MGR-BU-01-12,Performance below quarterly target
-EMP-0702,BU-03,2024-01-11,Performance Review Meeting,MGR-BU-03-11,Attendance and punctuality concern
-EMP-0721,BU-01,2024-01-27,Performance Review Meeting,MGR-BU-01-11,Attendance and punctuality concern
-EMP-0194,BU-03,2024-03-12,Written Warning,MGR-BU-03-06,Performance below quarterly target
-EMP-0715,BU-03,2024-01-16,Performance Review Meeting,MGR-BU-03-08,Performance below quarterly target
-EMP-0517,BU-02,2024-01-12,Written Warning,MGR-BU-02-19,Missed key deliverable deadline
-EMP-0151,BU-04,2024-01-25,Performance Review Meeting,MGR-BU-04-09,Performance below quarterly target
-EMP-0202,BU-04,2024-01-30,Written Warning,MGR-BU-04-05,Attendance and punctuality concern
-EMP-0689,BU-02,2024-01-22,HR Escalation,MGR-BU-02-02,Attendance and punctuality concern
-EMP-0402,BU-03,2024-01-10,Performance Review Meeting,MGR-BU-03-18,Missed key deliverable deadline
-EMP-0530,BU-03,2024-02-14,Performance Review Meeting,MGR-BU-03-03,Missed key deliverable deadline
-EMP-0470,BU-02,2024-03-25,Performance Review Meeting,MGR-BU-02-02,Missed key deliverable deadline
-EMP-0746,BU-02,2024-01-29,HR Escalation,MGR-BU-02-06,Performance below quarterly target
-EMP-0778,BU-04,2024-02-07,Performance Review Meeting,MGR-BU-04-12,Missed key deliverable deadline
-EMP-0605,BU-04,2024-03-26,Written Warning,MGR-BU-04-15,Performance below quarterly target
-EMP-0973,BU-03,2024-01-11,Coaching Session,MGR-BU-03-05,Missed key deliverable deadline
-EMP-0228,BU-03,2024-03-03,Coaching Session,MGR-BU-03-07,Attendance and punctuality concern
-EMP-0897,BU-01,2024-03-22,Written Warning,MGR-BU-01-01,Attendance and punctuality concern
-EMP-0757,BU-04,2024-03-15,Written Warning,MGR-BU-04-15,Performance below quarterly target
-EMP-0433,BU-02,2024-02-17,Coaching Session,MGR-BU-02-13,Performance below quarterly target
-EMP-0511,BU-02,2024-02-01,Coaching Session,MGR-BU-02-04,Performance below quarterly target
-EMP-0783,BU-02,2024-01-12,Performance Review Meeting,MGR-BU-02-06,Missed key deliverable deadline
-EMP-0117,BU-03,2024-02-10,Written Warning,MGR-BU-03-05,Missed key deliverable deadline
-EMP-0932,BU-01,2024-03-01,Performance Review Meeting,MGR-BU-01-03,Attendance and punctuality concern
-EMP-0978,BU-01,2024-02-18,Written Warning,MGR-BU-01-17,Performance below quarterly target
-EMP-0473,BU-01,2024-01-16,Coaching Session,MGR-BU-01-04,Performance below quarterly target
-EMP-0974,BU-02,2024-02-15,HR Escalation,MGR-BU-02-06,Performance below quarterly target
-EMP-0589,BU-03,2024-03-21,Coaching Session,MGR-BU-03-11,Missed key deliverable deadline
-EMP-0094,BU-04,2024-02-29,HR Escalation,MGR-BU-04-18,Missed key deliverable deadline
-EMP-0736,BU-02,2024-01-01,HR Escalation,MGR-BU-02-10,Performance below quarterly target
-EMP-0409,BU-04,2024-02-13,Coaching Session,MGR-BU-04-03,Attendance and punctuality concern
-EMP-0822,BU-04,2024-03-22,Coaching Session,MGR-BU-04-09,Performance below quarterly target
-EMP-0290,BU-04,2024-02-03,HR Escalation,MGR-BU-04-13,Attendance and punctuality concern
-EMP-0191,BU-03,2024-01-06,Performance Review Meeting,MGR-BU-03-18,Missed key deliverable deadline
-EMP-0384,BU-04,2024-03-19,HR Escalation,MGR-BU-04-14,Attendance and punctuality concern
-EMP-0694,BU-02,2024-02-13,Written Warning,MGR-BU-02-05,Attendance and punctuality concern
-EMP-0926,BU-02,2024-02-28,Performance Review Meeting,MGR-BU-02-19,Missed key deliverable deadline
-EMP-0135,BU-01,2024-03-01,Written Warning,MGR-BU-01-17,Attendance and punctuality concern
-EMP-0573,BU-01,2024-02-23,Written Warning,MGR-BU-01-02,Missed key deliverable deadline
-EMP-0330,BU-04,2024-01-17,Performance Review Meeting,MGR-BU-04-02,Performance below quarterly target
-EMP-0787,BU-02,2024-03-16,Performance Review Meeting,MGR-BU-02-15,Attendance and punctuality concern
-EMP-0749,BU-01,2024-01-02,HR Escalation,MGR-BU-01-14,Missed key deliverable deadline
-EMP-0957,BU-03,2024-01-15,Performance Review Meeting,MGR-BU-03-01,Missed key deliverable deadline
-EMP-0878,BU-04,2024-03-31,HR Escalation,MGR-BU-04-07,Attendance and punctuality concern
-EMP-0282,BU-03,2024-01-17,Coaching Session,MGR-BU-03-07,Performance below quarterly target
-EMP-0346,BU-02,2024-03-22,Written Warning,MGR-BU-02-03,Attendance and punctuality concern
-EMP-1000,BU-04,2024-01-18,Coaching Session,MGR-BU-04-07,Attendance and punctuality concern
-EMP-0179,BU-04,2024-02-02,Performance Review Meeting,MGR-BU-04-10,Attendance and punctuality concern
-EMP-0749,BU-02,2024-03-02,Performance Review Meeting,MGR-BU-02-19,Performance below quarterly target
-EMP-0359,BU-02,2024-01-30,Performance Review Meeting,MGR-BU-02-12,Missed key deliverable deadline
-EMP-0519,BU-03,2024-02-05,Written Warning,MGR-BU-03-08,Missed key deliverable deadline
-EMP-0395,BU-02,2024-01-11,Written Warning,MGR-BU-02-06,Missed key deliverable deadline
-EMP-0446,BU-03,2024-01-29,Written Warning,MGR-BU-03-03,Missed key deliverable deadline
-EMP-0033,BU-04,2024-03-18,Written Warning,MGR-BU-04-17,Attendance and punctuality concern
-EMP-0868,BU-01,2024-01-07,Coaching Session,MGR-BU-01-11,Attendance and punctuality concern
-EMP-0861,BU-01,2024-01-09,HR Escalation,MGR-BU-01-01,Performance below quarterly target
-EMP-0319,BU-04,2024-03-11,Coaching Session,MGR-BU-04-11,Missed key deliverable deadline
-EMP-0310,BU-01,2024-01-06,HR Escalation,MGR-BU-01-04,Missed key deliverable deadline
-EMP-0175,BU-04,2024-02-15,Written Warning,MGR-BU-04-11,Missed key deliverable deadline
-EMP-0054,BU-01,2024-02-22,HR Escalation,MGR-BU-01-19,Attendance and punctuality concern
-EMP-0590,BU-01,2024-03-27,HR Escalation,MGR-BU-01-03,Performance below quarterly target
-EMP-0758,BU-03,2024-01-09,Performance Review Meeting,MGR-BU-03-01,Performance below quarterly target
-EMP-0787,BU-04,2024-03-02,Coaching Session,MGR-BU-04-02,Attendance and punctuality concern
-EMP-0601,BU-03,2024-01-01,Written Warning,MGR-BU-03-11,Missed key deliverable deadline
-EMP-0377,BU-03,2024-02-08,Coaching Session,MGR-BU-03-19,Attendance and punctuality concern
-EMP-0537,BU-02,2024-02-05,HR Escalation,MGR-BU-02-10,Missed key deliverable deadline
-EMP-0928,BU-02,2024-03-03,Performance Review Meeting,MGR-BU-02-20,Performance below quarterly target
-EMP-0450,BU-03,2024-01-27,HR Escalation,MGR-BU-03-14,Missed key deliverable deadline
-EMP-0991,BU-01,2024-02-22,HR Escalation,MGR-BU-01-09,Missed key deliverable deadline
-EMP-0493,BU-03,2024-03-17,Written Warning,MGR-BU-03-13,Missed key deliverable deadline
-EMP-0213,BU-01,2024-02-05,Performance Review Meeting,MGR-BU-01-15,Missed key deliverable deadline
-EMP-0279,BU-04,2024-02-06,Performance Review Meeting,MGR-BU-04-18,Attendance and punctuality concern
-EMP-0174,BU-01,2024-03-21,Performance Review Meeting,MGR-BU-01-04,Missed key deliverable deadline
-EMP-0525,BU-01,2024-01-12,Performance Review Meeting,MGR-BU-01-04,Missed key deliverable deadline
-EMP-0024,BU-04,2024-03-13,Written Warning,MGR-BU-04-12,Missed key deliverable deadline
-EMP-0256,BU-01,2024-03-30,Performance Review Meeting,MGR-BU-01-10,Performance below quarterly target
-EMP-0869,BU-04,2024-01-15,Performance Review Meeting,MGR-BU-04-17,Second documented incident within the quarter
-EMP-0869,BU-04,2024-02-24,Coaching Session,MGR-BU-04-17,Continued underperformance despite prior coaching
-EMP-0869,BU-04,2024-02-25,HR Escalation,MGR-BU-04-17,Pattern of missed targets across multiple weeks
-EMP-0804,BU-02,2024-03-02,Coaching Session,MGR-BU-02-07,Continued underperformance despite prior coaching
-EMP-0804,BU-02,2024-03-15,Performance Review Meeting,MGR-BU-02-07,Pattern of missed targets across multiple weeks
-EMP-0804,BU-02,2024-03-23,Written Warning,MGR-BU-02-07,Pattern of missed targets across multiple weeks
-EMP-0964,BU-04,2024-01-13,Written Warning,MGR-BU-04-07,Continued underperformance despite prior coaching
-EMP-0964,BU-04,2024-02-14,Written Warning,MGR-BU-04-07,Continued underperformance despite prior coaching
-EMP-0642,BU-04,2024-01-01,Written Warning,MGR-BU-04-04,Second documented incident within the quarter
-EMP-0642,BU-04,2024-01-12,Performance Review Meeting,MGR-BU-04-04,Second documented incident within the quarter
-EMP-0810,BU-04,2024-01-13,Coaching Session,MGR-BU-04-13,Pattern of missed targets across multiple weeks
-EMP-0810,BU-04,2024-01-14,Coaching Session,MGR-BU-04-13,Continued underperformance despite prior coaching
-EMP-0810,BU-04,2024-03-25,HR Escalation,MGR-BU-04-13,Second documented incident within the quarter
-EMP-0377,BU-04,2024-01-13,HR Escalation,MGR-BU-04-06,Continued underperformance despite prior coaching
-EMP-0377,BU-04,2024-02-08,Performance Review Meeting,MGR-BU-04-06,Continued underperformance despite prior coaching
-EMP-0377,BU-04,2024-02-23,Coaching Session,MGR-BU-04-06,Continued underperformance despite prior coaching
-EMP-0538,BU-01,2024-02-07,Performance Review Meeting,MGR-BU-01-13,Second documented incident within the quarter
-EMP-0538,BU-01,2024-02-17,Performance Review Meeting,MGR-BU-01-13,Continued underperformance despite prior coaching
-EMP-0538,BU-01,2024-03-15,Performance Review Meeting,MGR-BU-01-13,Continued underperformance despite prior coaching
-EMP-0989,BU-04,2024-02-09,Written Warning,MGR-BU-04-01,Continued underperformance despite prior coaching
-EMP-0989,BU-04,2024-03-19,Written Warning,MGR-BU-04-01,Continued underperformance despite prior coaching
-EMP-0989,BU-04,2024-03-26,Performance Review Meeting,MGR-BU-04-01,Continued underperformance despite prior coaching
-EMP-0350,BU-02,2024-01-16,Written Warning,MGR-BU-02-07,Continued underperformance despite prior coaching
-EMP-0350,BU-02,2024-03-31,HR Escalation,MGR-BU-02-07,Continued underperformance despite prior coaching
-EMP-0269,BU-01,2024-01-17,Written Warning,MGR-BU-01-08,Second documented incident within the quarter
-EMP-0269,BU-01,2024-02-21,HR Escalation,MGR-BU-01-08,Second documented incident within the quarter
-EMP-0269,BU-01,2024-03-04,HR Escalation,MGR-BU-01-08,Second documented incident within the quarter
-EMP-0706,BU-02,2024-01-03,Performance Review Meeting,MGR-BU-02-01,Continued underperformance despite prior coaching
-EMP-0706,BU-02,2024-01-24,Coaching Session,MGR-BU-02-01,Continued underperformance despite prior coaching
-EMP-0706,BU-02,2024-03-29,Performance Review Meeting,MGR-BU-02-01,Continued underperformance despite prior coaching
-EMP-0193,BU-01,2024-01-12,Written Warning,MGR-BU-01-18,Continued underperformance despite prior coaching
-EMP-0193,BU-01,2024-01-30,Coaching Session,MGR-BU-01-18,Continued underperformance despite prior coaching
-EMP-0193,BU-01,2024-02-16,Coaching Session,MGR-BU-01-18,Pattern of missed targets across multiple weeks
-EMP-0657,BU-01,2024-01-18,Coaching Session,MGR-BU-01-16,Second documented incident within the quarter
-EMP-0657,BU-01,2024-03-22,Written Warning,MGR-BU-01-16,Pattern of missed targets across multiple weeks
-EMP-0657,BU-01,2024-03-26,Written Warning,MGR-BU-01-16,Pattern of missed targets across multiple weeks
-EMP-0098,BU-01,2024-02-06,Written Warning,MGR-BU-01-20,Second documented incident within the quarter
-EMP-0098,BU-01,2024-03-03,Written Warning,MGR-BU-01-20,Second documented incident within the quarter
-EMP-0449,BU-02,2024-02-03,HR Escalation,MGR-BU-02-13,Continued underperformance despite prior coaching
-EMP-0449,BU-02,2024-03-12,Performance Review Meeting,MGR-BU-02-13,Pattern of missed targets across multiple weeks
-EMP-0449,BU-02,2024-03-17,Coaching Session,MGR-BU-02-13,Continued underperformance despite prior coaching
-EMP-0122,BU-04,2024-02-03,HR Escalation,MGR-BU-04-15,Second documented incident within the quarter
-EMP-0122,BU-04,2024-03-08,Coaching Session,MGR-BU-04-15,Continued underperformance despite prior coaching
-EMP-0871,BU-01,2024-01-06,HR Escalation,MGR-BU-01-20,Pattern of missed targets across multiple weeks
-EMP-0871,BU-01,2024-03-11,Performance Review Meeting,MGR-BU-01-20,Continued underperformance despite prior coaching
-EMP-0459,BU-02,2024-01-11,Coaching Session,MGR-BU-02-12,Continued underperformance despite prior coaching
-EMP-0459,BU-02,2024-01-13,Coaching Session,MGR-BU-02-12,Second documented incident within the quarter
-EMP-0459,BU-02,2024-02-17,HR Escalation,MGR-BU-02-12,Second documented incident within the quarter
-EMP-0883,BU-04,2024-01-07,Performance Review Meeting,MGR-BU-04-09,Continued underperformance despite prior coaching
-EMP-0883,BU-04,2024-02-14,Coaching Session,MGR-BU-04-09,Pattern of missed targets across multiple weeks
-EMP-0883,BU-04,2024-03-16,Written Warning,MGR-BU-04-09,Pattern of missed targets across multiple weeks
-EMP-0662,BU-01,2024-02-24,Performance Review Meeting,MGR-BU-01-03,Second documented incident within the quarter
-EMP-0662,BU-01,2024-03-15,Written Warning,MGR-BU-01-03,Second documented incident within the quarter
-EMP-0540,BU-04,2024-01-26,Performance Review Meeting,MGR-BU-04-18,Pattern of missed targets across multiple weeks
-EMP-0540,BU-04,2024-03-08,Written Warning,MGR-BU-04-18,Continued underperformance despite prior coaching
-EMP-0540,BU-04,2024-03-21,Written Warning,MGR-BU-04-18,Second documented incident within the quarter
-EMP-0500,BU-01,2024-01-11,Coaching Session,MGR-BU-01-11,Pattern of missed targets across multiple weeks
-EMP-0500,BU-01,2024-02-11,HR Escalation,MGR-BU-01-11,Pattern of missed targets across multiple weeks
-EMP-0500,BU-01,2024-03-25,Coaching Session,MGR-BU-01-11,Continued underperformance despite prior coaching
-EMP-0279,BU-03,2024-02-09,HR Escalation,MGR-BU-03-05,Pattern of missed targets across multiple weeks
-EMP-0279,BU-03,2024-02-23,Performance Review Meeting,MGR-BU-03-05,Second documented incident within the quarter
-EMP-0828,BU-02,2024-03-10,Performance Review Meeting,MGR-BU-02-07,Second documented incident within the quarter
-EMP-0828,BU-02,2024-03-22,HR Escalation,MGR-BU-02-07,Pattern of missed targets across multiple weeks
-EMP-0565,BU-04,2024-02-16,Written Warning,MGR-BU-04-13,Continued underperformance despite prior coaching
-EMP-0565,BU-04,2024-02-29,Performance Review Meeting,MGR-BU-04-13,Continued underperformance despite prior coaching
-EMP-0565,BU-04,2024-03-16,Written Warning,MGR-BU-04-13,Continued underperformance despite prior coaching
-EMP-0610,BU-03,2024-01-20,Written Warning,MGR-BU-03-05,Pattern of missed targets across multiple weeks
-EMP-0610,BU-03,2024-01-24,HR Escalation,MGR-BU-03-05,Second documented incident within the quarter
-EMP-0610,BU-03,2024-02-28,HR Escalation,MGR-BU-03-05,Continued underperformance despite prior coaching
-EMP-0216,BU-01,2024-01-20,Coaching Session,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0216,BU-01,2024-03-13,HR Escalation,MGR-BU-01-14,Continued underperformance despite prior coaching
-EMP-0533,BU-03,2024-01-31,Performance Review Meeting,MGR-BU-03-05,Continued underperformance despite prior coaching
-EMP-0533,BU-03,2024-03-07,Written Warning,MGR-BU-03-05,Second documented incident within the quarter
-EMP-0446,BU-04,2024-03-07,HR Escalation,MGR-BU-04-14,Pattern of missed targets across multiple weeks
-EMP-0446,BU-04,2024-03-15,HR Escalation,MGR-BU-04-14,Continued underperformance despite prior coaching
-EMP-0446,BU-04,2024-03-26,Written Warning,MGR-BU-04-14,Second documented incident within the quarter
-EMP-0420,BU-02,2024-01-02,Performance Review Meeting,MGR-BU-02-19,Continued underperformance despite prior coaching
-EMP-0420,BU-02,2024-02-26,Performance Review Meeting,MGR-BU-02-19,Second documented incident within the quarter
-EMP-0065,BU-04,2024-02-17,Performance Review Meeting,MGR-BU-04-11,Continued underperformance despite prior coaching
-EMP-0065,BU-04,2024-02-20,Performance Review Meeting,MGR-BU-04-11,Continued underperformance despite prior coaching
-EMP-0696,BU-04,2024-01-12,Written Warning,MGR-BU-04-14,Continued underperformance despite prior coaching
-EMP-0696,BU-04,2024-01-20,Coaching Session,MGR-BU-04-14,Pattern of missed targets across multiple weeks
-EMP-0696,BU-04,2024-03-27,HR Escalation,MGR-BU-04-14,Second documented incident within the quarter
-EMP-0976,BU-03,2024-02-07,Written Warning,MGR-BU-03-16,Pattern of missed targets across multiple weeks
-EMP-0976,BU-03,2024-03-25,HR Escalation,MGR-BU-03-16,Continued underperformance despite prior coaching
-EMP-0161,BU-01,2024-01-20,HR Escalation,MGR-BU-01-15,Second documented incident within the quarter
-EMP-0161,BU-01,2024-03-07,Written Warning,MGR-BU-01-15,Second documented incident within the quarter
-EMP-0161,BU-01,2024-03-31,HR Escalation,MGR-BU-01-15,Second documented incident within the quarter
-EMP-0486,BU-03,2024-02-24,Performance Review Meeting,MGR-BU-03-04,Pattern of missed targets across multiple weeks
-EMP-0486,BU-03,2024-03-09,Written Warning,MGR-BU-03-04,Continued underperformance despite prior coaching
-EMP-0593,BU-04,2024-01-15,Performance Review Meeting,MGR-BU-04-04,Pattern of missed targets across multiple weeks
-EMP-0593,BU-04,2024-02-10,Performance Review Meeting,MGR-BU-04-04,Pattern of missed targets across multiple weeks
-EMP-0593,BU-04,2024-03-27,Coaching Session,MGR-BU-04-04,Continued underperformance despite prior coaching
-EMP-0416,BU-03,2024-02-19,Written Warning,MGR-BU-03-06,Pattern of missed targets across multiple weeks
-EMP-0416,BU-03,2024-03-01,Written Warning,MGR-BU-03-06,Continued underperformance despite prior coaching
-EMP-0416,BU-03,2024-03-05,Coaching Session,MGR-BU-03-06,Second documented incident within the quarter
-EMP-0131,BU-04,2024-02-20,Performance Review Meeting,MGR-BU-04-07,Second documented incident within the quarter
-EMP-0131,BU-04,2024-02-25,Coaching Session,MGR-BU-04-07,Second documented incident within the quarter
-EMP-0131,BU-04,2024-03-29,Written Warning,MGR-BU-04-07,Continued underperformance despite prior coaching
-EMP-0204,BU-03,2024-02-06,Performance Review Meeting,MGR-BU-03-06,Pattern of missed targets across multiple weeks
-EMP-0204,BU-03,2024-02-14,Coaching Session,MGR-BU-03-06,Second documented incident within the quarter
-EMP-0204,BU-03,2024-03-31,Written Warning,MGR-BU-03-06,Continued underperformance despite prior coaching
-EMP-0487,BU-03,2024-01-17,HR Escalation,MGR-BU-03-06,Continued underperformance despite prior coaching
-EMP-0487,BU-03,2024-02-20,Written Warning,MGR-BU-03-06,Continued underperformance despite prior coaching
-EMP-0829,BU-01,2024-01-29,Written Warning,MGR-BU-01-19,Pattern of missed targets across multiple weeks
-EMP-0829,BU-01,2024-02-10,Coaching Session,MGR-BU-01-19,Continued underperformance despite prior coaching
-EMP-0829,BU-01,2024-03-23,Coaching Session,MGR-BU-01-19,Continued underperformance despite prior coaching
-EMP-0821,BU-03,2024-02-21,Written Warning,MGR-BU-03-15,Second documented incident within the quarter
-EMP-0821,BU-03,2024-03-19,HR Escalation,MGR-BU-03-15,Continued underperformance despite prior coaching
-EMP-0168,BU-02,2024-01-26,HR Escalation,MGR-BU-02-17,Second documented incident within the quarter
-EMP-0168,BU-02,2024-02-09,HR Escalation,MGR-BU-02-17,Continued underperformance despite prior coaching
-EMP-0858,BU-04,2024-02-19,HR Escalation,MGR-BU-04-12,Continued underperformance despite prior coaching
-EMP-0858,BU-04,2024-03-07,Coaching Session,MGR-BU-04-12,Second documented incident within the quarter
-EMP-0858,BU-04,2024-03-21,Performance Review Meeting,MGR-BU-04-12,Continued underperformance despite prior coaching
-EMP-0181,BU-01,2024-03-13,HR Escalation,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0181,BU-01,2024-03-18,Performance Review Meeting,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0540,BU-03,2024-01-11,Written Warning,MGR-BU-03-03,Second documented incident within the quarter
-EMP-0540,BU-03,2024-01-31,Coaching Session,MGR-BU-03-03,Pattern of missed targets across multiple weeks
-EMP-0789,BU-01,2024-01-19,Written Warning,MGR-BU-01-11,Continued underperformance despite prior coaching
-EMP-0789,BU-01,2024-03-09,Coaching Session,MGR-BU-01-11,Second documented incident within the quarter
-EMP-0789,BU-01,2024-03-24,Written Warning,MGR-BU-01-11,Pattern of missed targets across multiple weeks
-EMP-0130,BU-01,2024-02-08,Written Warning,MGR-BU-01-16,Pattern of missed targets across multiple weeks
-EMP-0130,BU-01,2024-02-25,Coaching Session,MGR-BU-01-16,Continued underperformance despite prior coaching
-EMP-0348,BU-01,2024-01-01,Coaching Session,MGR-BU-01-16,Continued underperformance despite prior coaching
-EMP-0348,BU-01,2024-01-26,Coaching Session,MGR-BU-01-16,Second documented incident within the quarter
-EMP-0348,BU-01,2024-02-26,Written Warning,MGR-BU-01-16,Pattern of missed targets across multiple weeks
-EMP-0804,BU-01,2024-02-12,Written Warning,MGR-BU-01-07,Second documented incident within the quarter
-EMP-0804,BU-01,2024-03-05,Performance Review Meeting,MGR-BU-01-07,Second documented incident within the quarter
-EMP-0804,BU-01,2024-03-19,HR Escalation,MGR-BU-01-07,Pattern of missed targets across multiple weeks
-EMP-0731,BU-01,2024-02-05,Performance Review Meeting,MGR-BU-01-07,Second documented incident within the quarter
-EMP-0731,BU-01,2024-03-05,HR Escalation,MGR-BU-01-07,Second documented incident within the quarter
-EMP-0538,BU-03,2024-01-20,HR Escalation,MGR-BU-03-14,Pattern of missed targets across multiple weeks
-EMP-0538,BU-03,2024-03-14,Written Warning,MGR-BU-03-14,Continued underperformance despite prior coaching
-EMP-0538,BU-03,2024-03-15,Performance Review Meeting,MGR-BU-03-14,Second documented incident within the quarter
-EMP-0141,BU-03,2024-01-03,Performance Review Meeting,MGR-BU-03-15,Continued underperformance despite prior coaching
-EMP-0141,BU-03,2024-02-08,HR Escalation,MGR-BU-03-15,Continued underperformance despite prior coaching
-EMP-0141,BU-03,2024-03-08,Coaching Session,MGR-BU-03-15,Continued underperformance despite prior coaching
-EMP-0096,BU-02,2024-01-21,HR Escalation,MGR-BU-02-10,Continued underperformance despite prior coaching
-EMP-0096,BU-02,2024-02-21,Performance Review Meeting,MGR-BU-02-10,Second documented incident within the quarter
-EMP-0096,BU-02,2024-03-19,HR Escalation,MGR-BU-02-10,Pattern of missed targets across multiple weeks
-EMP-0454,BU-02,2024-01-05,Performance Review Meeting,MGR-BU-02-16,Second documented incident within the quarter
-EMP-0454,BU-02,2024-02-19,Performance Review Meeting,MGR-BU-02-16,Pattern of missed targets across multiple weeks
-EMP-0658,BU-02,2024-02-14,Coaching Session,MGR-BU-02-09,Continued underperformance despite prior coaching
-EMP-0658,BU-02,2024-02-26,HR Escalation,MGR-BU-02-09,Continued underperformance despite prior coaching
-EMP-0120,BU-04,2024-02-19,Performance Review Meeting,MGR-BU-04-04,Continued underperformance despite prior coaching
-EMP-0120,BU-04,2024-02-27,HR Escalation,MGR-BU-04-04,Second documented incident within the quarter
-EMP-0597,BU-04,2024-01-24,Written Warning,MGR-BU-04-20,Continued underperformance despite prior coaching
-EMP-0597,BU-04,2024-03-06,Performance Review Meeting,MGR-BU-04-20,Pattern of missed targets across multiple weeks
-EMP-0325,BU-01,2024-03-03,Written Warning,MGR-BU-01-02,Second documented incident within the quarter
-EMP-0325,BU-01,2024-03-16,Written Warning,MGR-BU-01-02,Second documented incident within the quarter
-EMP-0325,BU-01,2024-03-21,Performance Review Meeting,MGR-BU-01-02,Pattern of missed targets across multiple weeks
-EMP-0043,BU-02,2024-01-09,Performance Review Meeting,MGR-BU-02-03,Continued underperformance despite prior coaching
-EMP-0043,BU-02,2024-01-23,HR Escalation,MGR-BU-02-03,Pattern of missed targets across multiple weeks
-EMP-0043,BU-02,2024-02-21,HR Escalation,MGR-BU-02-03,Pattern of missed targets across multiple weeks
-EMP-0727,BU-04,2024-01-27,Coaching Session,MGR-BU-04-20,Pattern of missed targets across multiple weeks
-EMP-0727,BU-04,2024-02-02,HR Escalation,MGR-BU-04-20,Second documented incident within the quarter
-EMP-0727,BU-04,2024-03-23,HR Escalation,MGR-BU-04-20,Pattern of missed targets across multiple weeks
-EMP-0750,BU-04,2024-02-23,Written Warning,MGR-BU-04-13,Pattern of missed targets across multiple weeks
-EMP-0750,BU-04,2024-02-27,Written Warning,MGR-BU-04-13,Pattern of missed targets across multiple weeks
-EMP-0010,BU-03,2024-01-04,Written Warning,MGR-BU-03-17,Pattern of missed targets across multiple weeks
-EMP-0010,BU-03,2024-01-24,Coaching Session,MGR-BU-03-17,Pattern of missed targets across multiple weeks
-EMP-0010,BU-03,2024-01-30,Performance Review Meeting,MGR-BU-03-17,Second documented incident within the quarter
-EMP-0024,BU-03,2024-02-01,HR Escalation,MGR-BU-03-19,Continued underperformance despite prior coaching
-EMP-0024,BU-03,2024-02-10,Written Warning,MGR-BU-03-19,Pattern of missed targets across multiple weeks
-EMP-0024,BU-03,2024-03-17,HR Escalation,MGR-BU-03-19,Second documented incident within the quarter
-EMP-0010,BU-04,2024-01-25,Coaching Session,MGR-BU-04-17,Second documented incident within the quarter
-EMP-0010,BU-04,2024-02-14,HR Escalation,MGR-BU-04-17,Pattern of missed targets across multiple weeks
-EMP-0010,BU-04,2024-03-17,Written Warning,MGR-BU-04-17,Continued underperformance despite prior coaching
-EMP-0759,BU-02,2024-01-11,Coaching Session,MGR-BU-02-15,Continued underperformance despite prior coaching
-EMP-0759,BU-02,2024-02-03,Coaching Session,MGR-BU-02-15,Continued underperformance despite prior coaching
-EMP-0706,BU-01,2024-01-09,HR Escalation,MGR-BU-01-07,Continued underperformance despite prior coaching
-EMP-0706,BU-01,2024-02-22,Performance Review Meeting,MGR-BU-01-07,Pattern of missed targets across multiple weeks
-EMP-0759,BU-03,2024-01-13,Performance Review Meeting,MGR-BU-03-14,Continued underperformance despite prior coaching
-EMP-0759,BU-03,2024-02-15,HR Escalation,MGR-BU-03-14,Second documented incident within the quarter
-EMP-0918,BU-04,2024-01-11,HR Escalation,MGR-BU-04-07,Continued underperformance despite prior coaching
-EMP-0918,BU-04,2024-02-06,Written Warning,MGR-BU-04-07,Second documented incident within the quarter
-EMP-0053,BU-04,2024-03-05,HR Escalation,MGR-BU-04-10,Continued underperformance despite prior coaching
-EMP-0053,BU-04,2024-03-13,Performance Review Meeting,MGR-BU-04-10,Pattern of missed targets across multiple weeks
-EMP-0050,BU-01,2024-01-01,Written Warning,MGR-BU-01-05,Second documented incident within the quarter
-EMP-0050,BU-01,2024-02-18,Performance Review Meeting,MGR-BU-01-05,Pattern of missed targets across multiple weeks
-EMP-0049,BU-01,2024-01-23,Performance Review Meeting,MGR-BU-01-17,Continued underperformance despite prior coaching
-EMP-0049,BU-01,2024-02-17,Coaching Session,MGR-BU-01-17,Second documented incident within the quarter
-EMP-0049,BU-01,2024-02-21,Written Warning,MGR-BU-01-17,Pattern of missed targets across multiple weeks
-EMP-0391,BU-04,2024-01-17,HR Escalation,MGR-BU-04-09,Continued underperformance despite prior coaching
-EMP-0391,BU-04,2024-03-28,Coaching Session,MGR-BU-04-09,Pattern of missed targets across multiple weeks
-EMP-0079,BU-01,2024-01-24,Coaching Session,MGR-BU-01-19,Continued underperformance despite prior coaching
-EMP-0079,BU-01,2024-03-03,Coaching Session,MGR-BU-01-19,Pattern of missed targets across multiple weeks
-EMP-0501,BU-02,2024-01-15,Written Warning,MGR-BU-02-20,Second documented incident within the quarter
-EMP-0501,BU-02,2024-03-26,Performance Review Meeting,MGR-BU-02-20,Pattern of missed targets across multiple weeks
-EMP-0897,BU-04,2024-01-25,Performance Review Meeting,MGR-BU-04-07,Second documented incident within the quarter
-EMP-0897,BU-04,2024-02-08,HR Escalation,MGR-BU-04-07,Continued underperformance despite prior coaching
-EMP-0535,BU-03,2024-02-25,Written Warning,MGR-BU-03-04,Pattern of missed targets across multiple weeks
-EMP-0535,BU-03,2024-02-29,Coaching Session,MGR-BU-03-04,Second documented incident within the quarter
-EMP-0535,BU-03,2024-03-10,Performance Review Meeting,MGR-BU-03-04,Pattern of missed targets across multiple weeks
-EMP-0583,BU-04,2024-01-13,HR Escalation,MGR-BU-04-03,Continued underperformance despite prior coaching
-EMP-0583,BU-04,2024-03-12,Performance Review Meeting,MGR-BU-04-03,Pattern of missed targets across multiple weeks
-EMP-0583,BU-04,2024-03-28,Written Warning,MGR-BU-04-03,Second documented incident within the quarter
-EMP-0797,BU-02,2024-01-08,Written Warning,MGR-BU-02-06,Second documented incident within the quarter
-EMP-0797,BU-02,2024-01-18,Written Warning,MGR-BU-02-06,Continued underperformance despite prior coaching
-EMP-0797,BU-02,2024-01-31,Performance Review Meeting,MGR-BU-02-06,Pattern of missed targets across multiple weeks
-EMP-0204,BU-04,2024-01-11,Coaching Session,MGR-BU-04-03,Second documented incident within the quarter
-EMP-0204,BU-04,2024-02-14,HR Escalation,MGR-BU-04-03,Continued underperformance despite prior coaching
-EMP-0204,BU-04,2024-03-28,Coaching Session,MGR-BU-04-03,Second documented incident within the quarter
-EMP-0916,BU-01,2024-01-19,Performance Review Meeting,MGR-BU-01-17,Pattern of missed targets across multiple weeks
-EMP-0916,BU-01,2024-01-26,HR Escalation,MGR-BU-01-17,Pattern of missed targets across multiple weeks
-EMP-0916,BU-01,2024-02-06,HR Escalation,MGR-BU-01-17,Pattern of missed targets across multiple weeks
-EMP-0835,BU-02,2024-01-30,Written Warning,MGR-BU-02-10,Second documented incident within the quarter
-EMP-0835,BU-02,2024-03-11,Performance Review Meeting,MGR-BU-02-10,Pattern of missed targets across multiple weeks
-EMP-0693,BU-01,2024-03-06,Coaching Session,MGR-BU-01-11,Pattern of missed targets across multiple weeks
-EMP-0693,BU-01,2024-03-18,Coaching Session,MGR-BU-01-11,Second documented incident within the quarter
-EMP-0240,BU-03,2024-01-08,Coaching Session,MGR-BU-03-02,Pattern of missed targets across multiple weeks
-EMP-0240,BU-03,2024-02-14,Written Warning,MGR-BU-03-02,Pattern of missed targets across multiple weeks
-EMP-0240,BU-03,2024-03-13,HR Escalation,MGR-BU-03-02,Second documented incident within the quarter
-EMP-0451,BU-02,2024-01-11,Performance Review Meeting,MGR-BU-02-14,Continued underperformance despite prior coaching
-EMP-0451,BU-02,2024-01-19,HR Escalation,MGR-BU-02-14,Second documented incident within the quarter
-EMP-0451,BU-02,2024-02-05,Performance Review Meeting,MGR-BU-02-14,Continued underperformance despite prior coaching
-EMP-0110,BU-03,2024-01-01,Written Warning,MGR-BU-03-05,Second documented incident within the quarter
-EMP-0110,BU-03,2024-03-01,Written Warning,MGR-BU-03-05,Continued underperformance despite prior coaching
-EMP-0987,BU-04,2024-01-20,Performance Review Meeting,MGR-BU-04-19,Second documented incident within the quarter
-EMP-0987,BU-04,2024-03-06,HR Escalation,MGR-BU-04-19,Pattern of missed targets across multiple weeks
-EMP-0755,BU-02,2024-01-29,Coaching Session,MGR-BU-02-06,Second documented incident within the quarter
-EMP-0755,BU-02,2024-02-18,Coaching Session,MGR-BU-02-06,Continued underperformance despite prior coaching
-EMP-0699,BU-03,2024-01-08,Coaching Session,MGR-BU-03-04,Second documented incident within the quarter
-EMP-0699,BU-03,2024-01-27,Performance Review Meeting,MGR-BU-03-04,Pattern of missed targets across multiple weeks
-EMP-0699,BU-03,2024-03-04,Written Warning,MGR-BU-03-04,Second documented incident within the quarter
-EMP-0214,BU-01,2024-01-08,Written Warning,MGR-BU-01-12,Pattern of missed targets across multiple weeks
-EMP-0214,BU-01,2024-01-12,Performance Review Meeting,MGR-BU-01-12,Second documented incident within the quarter
-EMP-0164,BU-01,2024-01-25,HR Escalation,MGR-BU-01-02,Continued underperformance despite prior coaching
-EMP-0164,BU-01,2024-02-18,Performance Review Meeting,MGR-BU-01-02,Second documented incident within the quarter
-EMP-0681,BU-01,2024-02-19,HR Escalation,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0681,BU-01,2024-03-26,Coaching Session,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0681,BU-01,2024-03-28,Written Warning,MGR-BU-01-14,Pattern of missed targets across multiple weeks
-EMP-0396,BU-04,2024-01-30,HR Escalation,MGR-BU-04-13,Continued underperformance despite prior coaching
-EMP-0396,BU-04,2024-03-18,Performance Review Meeting,MGR-BU-04-13,Second documented incident within the quarter
-EMP-0396,BU-04,2024-03-31,HR Escalation,MGR-BU-04-13,Pattern of missed targets across multiple weeks
-EMP-0334,BU-04,2024-02-07,Written Warning,MGR-BU-04-16,Second documented incident within the quarter
-EMP-0334,BU-04,2024-02-24,Coaching Session,MGR-BU-04-16,Continued underperformance despite prior coaching
-EMP-0089,BU-04,2024-02-15,Written Warning,MGR-BU-04-20,Second documented incident within the quarter
-EMP-0089,BU-04,2024-03-17,Performance Review Meeting,MGR-BU-04-20,Second documented incident within the quarter
-EMP-0089,BU-04,2024-03-19,Coaching Session,MGR-BU-04-20,Pattern of missed targets across multiple weeks
-EMP-0745,BU-01,2024-01-30,Written Warning,MGR-BU-01-16,Continued underperformance despite prior coaching
-EMP-0745,BU-01,2024-02-12,HR Escalation,MGR-BU-01-16,Continued underperformance despite prior coaching
-EMP-0745,BU-01,2024-03-06,HR Escalation,MGR-BU-01-16,Continued underperformance despite prior coaching
-EMP-0512,BU-04,2024-02-22,Coaching Session,MGR-BU-04-08,Pattern of missed targets across multiple weeks
-EMP-0512,BU-04,2024-03-29,Written Warning,MGR-BU-04-08,Continued underperformance despite prior coaching
-EMP-0503,BU-04,2024-01-28,Coaching Session,MGR-BU-04-20,Pattern of missed targets across multiple weeks
-EMP-0503,BU-04,2024-02-03,Coaching Session,MGR-BU-04-20,Continued underperformance despite prior coaching
-EMP-0503,BU-04,2024-02-25,Coaching Session,MGR-BU-04-20,Second documented incident within the quarter
-EMP-0272,BU-02,2024-01-18,Coaching Session,MGR-BU-02-03,Continued underperformance despite prior coaching
-EMP-0272,BU-02,2024-03-12,Coaching Session,MGR-BU-02-03,Pattern of missed targets across multiple weeks
-EMP-0272,BU-02,2024-03-30,Written Warning,MGR-BU-02-03,Continued underperformance despite prior coaching
-EMP-0090,BU-01,2024-02-11,Coaching Session,MGR-BU-01-02,Pattern of missed targets across multiple weeks
-EMP-0090,BU-01,2024-02-19,HR Escalation,MGR-BU-01-02,Continued underperformance despite prior coaching
-EMP-0090,BU-01,2024-02-22,Performance Review Meeting,MGR-BU-01-02,Pattern of missed targets across multiple weeks
-EMP-0843,BU-04,2024-02-19,Written Warning,MGR-BU-04-09,Continued underperformance despite prior coaching
-EMP-0843,BU-04,2024-03-25,Performance Review Meeting,MGR-BU-04-09,Continued underperformance despite prior coaching
-EMP-0066,BU-04,2024-01-28,Written Warning,MGR-BU-04-10,Continued underperformance despite prior coaching
-EMP-0066,BU-04,2024-03-09,Coaching Session,MGR-BU-04-10,Continued underperformance despite prior coaching
-EMP-0363,BU-03,2024-02-02,Written Warning,MGR-BU-03-07,Second documented incident within the quarter
-EMP-0363,BU-03,2024-02-29,Performance Review Meeting,MGR-BU-03-07,Continued underperformance despite prior coaching
-EMP-0363,BU-03,2024-03-17,Written Warning,MGR-BU-03-07,Second documented incident within the quarter
-EMP-0404,BU-04,2024-01-10,HR Escalation,MGR-BU-04-15,Pattern of missed targets across multiple weeks
-EMP-0404,BU-04,2024-02-21,Written Warning,MGR-BU-04-15,Pattern of missed targets across multiple weeks
-EMP-0053,BU-03,2024-01-25,HR Escalation,MGR-BU-03-10,Continued underperformance despite prior coaching
-EMP-0053,BU-03,2024-02-18,HR Escalation,MGR-BU-03-10,Continued underperformance despite prior coaching
-EMP-0053,BU-03,2024-03-30,HR Escalation,MGR-BU-03-10,Continued underperformance despite prior coaching
-EMP-0504,BU-03,2024-01-03,HR Escalation,MGR-BU-03-11,Second documented incident within the quarter
-EMP-0504,BU-03,2024-01-17,Performance Review Meeting,MGR-BU-03-11,Second documented incident within the quarter
-EMP-0504,BU-03,2024-03-06,Written Warning,MGR-BU-03-11,Pattern of missed targets across multiple weeks
-EMP-0811,BU-04,2024-01-27,Coaching Session,MGR-BU-04-01,Pattern of missed targets across multiple weeks
-EMP-0811,BU-04,2024-02-22,Performance Review Meeting,MGR-BU-04-01,Second documented incident within the quarter
-EMP-0312,BU-03,2024-01-04,Coaching Session,MGR-BU-03-17,Continued underperformance despite prior coaching
-EMP-0312,BU-03,2024-02-17,Coaching Session,MGR-BU-03-17,Pattern of missed targets across multiple weeks
-EMP-0312,BU-03,2024-03-10,Written Warning,MGR-BU-03-17,Continued underperformance despite prior coaching
-EMP-0709,BU-02,2024-03-18,HR Escalation,MGR-BU-02-20,Continued underperformance despite prior coaching
-EMP-0709,BU-02,2024-03-29,Written Warning,MGR-BU-02-20,Continued underperformance despite prior coaching
-EMP-0609,BU-04,2024-01-21,Written Warning,MGR-BU-04-08,Pattern of missed targets across multiple weeks
-EMP-0609,BU-04,2024-03-28,HR Escalation,MGR-BU-04-08,Pattern of missed targets across multiple weeks
-EMP-0866,BU-04,2024-02-06,Coaching Session,MGR-BU-04-05,Pattern of missed targets across multiple weeks
-EMP-0866,BU-04,2024-03-23,HR Escalation,MGR-BU-04-05,Continued underperformance despite prior coaching
-EMP-0796,BU-04,2024-01-04,Written Warning,MGR-BU-04-04,Pattern of missed targets across multiple weeks
-EMP-0796,BU-04,2024-03-09,Written Warning,MGR-BU-04-04,Continued underperformance despite prior coaching
-EMP-0411,BU-02,2024-01-30,Performance Review Meeting,MGR-BU-02-04,Pattern of missed targets across multiple weeks
-EMP-0411,BU-02,2024-02-10,Written Warning,MGR-BU-02-04,Pattern of missed targets across multiple weeks
-EMP-0411,BU-02,2024-03-01,Coaching Session,MGR-BU-02-04,Pattern of missed targets across multiple weeks
-EMP-0626,BU-01,2024-01-23,Performance Review Meeting,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0626,BU-01,2024-02-12,Performance Review Meeting,MGR-BU-01-14,Pattern of missed targets across multiple weeks
-EMP-0841,BU-02,2024-01-14,Coaching Session,MGR-BU-02-15,Second documented incident within the quarter
-EMP-0841,BU-02,2024-02-18,Performance Review Meeting,MGR-BU-02-15,Continued underperformance despite prior coaching
-EMP-0841,BU-02,2024-02-28,Coaching Session,MGR-BU-02-15,Continued underperformance despite prior coaching
-EMP-0822,BU-01,2024-01-30,Performance Review Meeting,MGR-BU-01-01,Second documented incident within the quarter
-EMP-0822,BU-01,2024-02-26,HR Escalation,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0822,BU-01,2024-03-28,Coaching Session,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0212,BU-01,2024-01-03,Coaching Session,MGR-BU-01-08,Pattern of missed targets across multiple weeks
-EMP-0212,BU-01,2024-03-08,Written Warning,MGR-BU-01-08,Continued underperformance despite prior coaching
-EMP-0683,BU-02,2024-01-26,HR Escalation,MGR-BU-02-04,Pattern of missed targets across multiple weeks
-EMP-0683,BU-02,2024-03-15,HR Escalation,MGR-BU-02-04,Pattern of missed targets across multiple weeks
-EMP-0264,BU-02,2024-02-17,Performance Review Meeting,MGR-BU-02-02,Second documented incident within the quarter
-EMP-0264,BU-02,2024-02-24,Coaching Session,MGR-BU-02-02,Continued underperformance despite prior coaching
-EMP-0264,BU-02,2024-03-12,Coaching Session,MGR-BU-02-02,Second documented incident within the quarter
-EMP-0147,BU-04,2024-02-09,Coaching Session,MGR-BU-04-19,Second documented incident within the quarter
-EMP-0147,BU-04,2024-03-21,Written Warning,MGR-BU-04-19,Pattern of missed targets across multiple weeks
-EMP-0016,BU-03,2024-02-17,Performance Review Meeting,MGR-BU-03-14,Second documented incident within the quarter
-EMP-0016,BU-03,2024-03-05,HR Escalation,MGR-BU-03-14,Pattern of missed targets across multiple weeks
-EMP-0461,BU-02,2024-01-10,Coaching Session,MGR-BU-02-11,Continued underperformance despite prior coaching
-EMP-0461,BU-02,2024-02-24,HR Escalation,MGR-BU-02-11,Pattern of missed targets across multiple weeks
-EMP-0461,BU-02,2024-03-13,Written Warning,MGR-BU-02-11,Second documented incident within the quarter
-EMP-0338,BU-03,2024-01-29,Coaching Session,MGR-BU-03-15,Continued underperformance despite prior coaching
-EMP-0338,BU-03,2024-02-12,Written Warning,MGR-BU-03-15,Continued underperformance despite prior coaching
-EMP-0338,BU-03,2024-03-21,Coaching Session,MGR-BU-03-15,Pattern of missed targets across multiple weeks
-EMP-0187,BU-03,2024-01-03,Written Warning,MGR-BU-03-03,Second documented incident within the quarter
-EMP-0187,BU-03,2024-02-09,HR Escalation,MGR-BU-03-03,Pattern of missed targets across multiple weeks
-EMP-0292,BU-01,2024-01-07,Written Warning,MGR-BU-01-10,Second documented incident within the quarter
-EMP-0292,BU-01,2024-02-15,Coaching Session,MGR-BU-01-10,Continued underperformance despite prior coaching
-EMP-0245,BU-03,2024-01-20,HR Escalation,MGR-BU-03-17,Second documented incident within the quarter
-EMP-0245,BU-03,2024-03-10,Coaching Session,MGR-BU-03-17,Second documented incident within the quarter
-EMP-0245,BU-03,2024-03-26,Written Warning,MGR-BU-03-17,Second documented incident within the quarter
-EMP-0960,BU-04,2024-01-28,Performance Review Meeting,MGR-BU-04-07,Second documented incident within the quarter
-EMP-0960,BU-04,2024-02-10,Coaching Session,MGR-BU-04-07,Continued underperformance despite prior coaching
-EMP-0489,BU-03,2024-01-04,Written Warning,MGR-BU-03-08,Second documented incident within the quarter
-EMP-0489,BU-03,2024-01-17,Written Warning,MGR-BU-03-08,Continued underperformance despite prior coaching
-EMP-0489,BU-03,2024-02-06,Coaching Session,MGR-BU-03-08,Continued underperformance despite prior coaching
-EMP-0996,BU-04,2024-02-24,Performance Review Meeting,MGR-BU-04-05,Pattern of missed targets across multiple weeks
-EMP-0996,BU-04,2024-03-08,HR Escalation,MGR-BU-04-05,Pattern of missed targets across multiple weeks
-EMP-0646,BU-04,2024-01-19,HR Escalation,MGR-BU-04-04,Pattern of missed targets across multiple weeks
-EMP-0646,BU-04,2024-02-18,Performance Review Meeting,MGR-BU-04-04,Continued underperformance despite prior coaching
-EMP-0289,BU-01,2024-01-07,HR Escalation,MGR-BU-01-04,Second documented incident within the quarter
-EMP-0289,BU-01,2024-03-27,Written Warning,MGR-BU-01-04,Pattern of missed targets across multiple weeks
-EMP-0284,BU-04,2024-01-22,Written Warning,MGR-BU-04-03,Second documented incident within the quarter
-EMP-0284,BU-04,2024-02-26,Written Warning,MGR-BU-04-03,Second documented incident within the quarter
-EMP-0284,BU-04,2024-03-29,Coaching Session,MGR-BU-04-03,Pattern of missed targets across multiple weeks
-EMP-0491,BU-01,2024-02-08,HR Escalation,MGR-BU-01-07,Second documented incident within the quarter
-EMP-0491,BU-01,2024-02-14,Coaching Session,MGR-BU-01-07,Continued underperformance despite prior coaching
-EMP-0491,BU-01,2024-03-02,HR Escalation,MGR-BU-01-07,Pattern of missed targets across multiple weeks
-EMP-0997,BU-02,2024-02-11,Written Warning,MGR-BU-02-17,Second documented incident within the quarter
-EMP-0997,BU-02,2024-03-27,Written Warning,MGR-BU-02-17,Second documented incident within the quarter
-EMP-0137,BU-03,2024-01-22,Coaching Session,MGR-BU-03-04,Continued underperformance despite prior coaching
-EMP-0137,BU-03,2024-02-20,Coaching Session,MGR-BU-03-04,Pattern of missed targets across multiple weeks
-EMP-0137,BU-03,2024-03-17,Written Warning,MGR-BU-03-04,Second documented incident within the quarter
-EMP-0534,BU-02,2024-01-11,Written Warning,MGR-BU-02-13,Pattern of missed targets across multiple weeks
-EMP-0534,BU-02,2024-03-10,Written Warning,MGR-BU-02-13,Pattern of missed targets across multiple weeks
-EMP-0870,BU-04,2024-01-06,Coaching Session,MGR-BU-04-14,Second documented incident within the quarter
-EMP-0870,BU-04,2024-03-15,Coaching Session,MGR-BU-04-14,Continued underperformance despite prior coaching
-EMP-0696,BU-03,2024-01-28,HR Escalation,MGR-BU-03-11,Second documented incident within the quarter
-EMP-0696,BU-03,2024-03-01,HR Escalation,MGR-BU-03-11,Second documented incident within the quarter
-EMP-0696,BU-03,2024-03-30,Written Warning,MGR-BU-03-11,Second documented incident within the quarter
-EMP-0798,BU-04,2024-02-27,HR Escalation,MGR-BU-04-05,Continued underperformance despite prior coaching
-EMP-0798,BU-04,2024-03-17,Coaching Session,MGR-BU-04-05,Second documented incident within the quarter
-EMP-0113,BU-01,2024-01-10,Performance Review Meeting,MGR-BU-01-14,Continued underperformance despite prior coaching
-EMP-0113,BU-01,2024-02-18,Written Warning,MGR-BU-01-14,Continued underperformance despite prior coaching
-EMP-0113,BU-01,2024-03-05,Coaching Session,MGR-BU-01-14,Continued underperformance despite prior coaching
-EMP-0242,BU-03,2024-02-03,HR Escalation,MGR-BU-03-18,Second documented incident within the quarter
-EMP-0242,BU-03,2024-02-07,HR Escalation,MGR-BU-03-18,Second documented incident within the quarter
-EMP-0242,BU-03,2024-02-14,HR Escalation,MGR-BU-03-18,Continued underperformance despite prior coaching
-EMP-0536,BU-01,2024-02-16,HR Escalation,MGR-BU-01-02,Continued underperformance despite prior coaching
-EMP-0536,BU-01,2024-03-02,Performance Review Meeting,MGR-BU-01-02,Pattern of missed targets across multiple weeks
-EMP-0536,BU-01,2024-03-26,HR Escalation,MGR-BU-01-02,Continued underperformance despite prior coaching
-EMP-0140,BU-02,2024-01-04,HR Escalation,MGR-BU-02-01,Continued underperformance despite prior coaching
-EMP-0140,BU-02,2024-01-29,HR Escalation,MGR-BU-02-01,Pattern of missed targets across multiple weeks
-EMP-0702,BU-04,2024-01-09,Coaching Session,MGR-BU-04-19,Continued underperformance despite prior coaching
-EMP-0702,BU-04,2024-01-27,Coaching Session,MGR-BU-04-19,Continued underperformance despite prior coaching
-EMP-0227,BU-04,2024-02-10,HR Escalation,MGR-BU-04-13,Second documented incident within the quarter
-EMP-0227,BU-04,2024-02-27,Written Warning,MGR-BU-04-13,Second documented incident within the quarter
-EMP-0227,BU-04,2024-03-02,Coaching Session,MGR-BU-04-13,Pattern of missed targets across multiple weeks
-EMP-0569,BU-02,2024-01-19,HR Escalation,MGR-BU-02-16,Pattern of missed targets across multiple weeks
-EMP-0569,BU-02,2024-03-25,Performance Review Meeting,MGR-BU-02-16,Second documented incident within the quarter
-EMP-0569,BU-02,2024-03-31,Written Warning,MGR-BU-02-16,Second documented incident within the quarter
-EMP-0434,BU-02,2024-02-10,Coaching Session,MGR-BU-02-10,Pattern of missed targets across multiple weeks
-EMP-0434,BU-02,2024-02-19,Coaching Session,MGR-BU-02-10,Second documented incident within the quarter
-EMP-0434,BU-02,2024-03-31,Performance Review Meeting,MGR-BU-02-10,Continued underperformance despite prior coaching
-EMP-0379,BU-01,2024-01-23,Written Warning,MGR-BU-01-16,Pattern of missed targets across multiple weeks
-EMP-0379,BU-01,2024-02-25,HR Escalation,MGR-BU-01-16,Pattern of missed targets across multiple weeks
-EMP-0011,BU-04,2024-03-01,HR Escalation,MGR-BU-04-08,Continued underperformance despite prior coaching
-EMP-0011,BU-04,2024-03-13,Coaching Session,MGR-BU-04-08,Continued underperformance despite prior coaching
-EMP-0408,BU-04,2024-01-18,Performance Review Meeting,MGR-BU-04-10,Second documented incident within the quarter
-EMP-0408,BU-04,2024-02-04,Performance Review Meeting,MGR-BU-04-10,Second documented incident within the quarter
-EMP-0461,BU-01,2024-01-22,Performance Review Meeting,MGR-BU-01-14,Continued underperformance despite prior coaching
-EMP-0461,BU-01,2024-02-10,Written Warning,MGR-BU-01-14,Pattern of missed targets across multiple weeks
-EMP-0461,BU-01,2024-02-25,Performance Review Meeting,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0555,BU-04,2024-03-16,HR Escalation,MGR-BU-04-05,Continued underperformance despite prior coaching
-EMP-0555,BU-04,2024-03-28,Coaching Session,MGR-BU-04-05,Second documented incident within the quarter
-EMP-0712,BU-04,2024-01-19,Coaching Session,MGR-BU-04-08,Continued underperformance despite prior coaching
-EMP-0712,BU-04,2024-03-24,Written Warning,MGR-BU-04-08,Second documented incident within the quarter
-EMP-0982,BU-01,2024-02-02,Coaching Session,MGR-BU-01-01,Continued underperformance despite prior coaching
-EMP-0982,BU-01,2024-02-20,Coaching Session,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0222,BU-01,2024-01-30,Written Warning,MGR-BU-01-20,Second documented incident within the quarter
-EMP-0222,BU-01,2024-03-15,Performance Review Meeting,MGR-BU-01-20,Second documented incident within the quarter
-EMP-0827,BU-02,2024-01-12,Coaching Session,MGR-BU-02-06,Second documented incident within the quarter
-EMP-0827,BU-02,2024-02-01,Performance Review Meeting,MGR-BU-02-06,Pattern of missed targets across multiple weeks
-EMP-0893,BU-03,2024-03-02,Performance Review Meeting,MGR-BU-03-06,Continued underperformance despite prior coaching
-EMP-0893,BU-03,2024-03-16,Coaching Session,MGR-BU-03-06,Continued underperformance despite prior coaching
-EMP-0893,BU-03,2024-03-24,Coaching Session,MGR-BU-03-06,Second documented incident within the quarter
-EMP-0109,BU-02,2024-01-16,Coaching Session,MGR-BU-02-16,Pattern of missed targets across multiple weeks
-EMP-0109,BU-02,2024-03-07,HR Escalation,MGR-BU-02-16,Continued underperformance despite prior coaching
-EMP-0465,BU-03,2024-01-12,Coaching Session,MGR-BU-03-05,Continued underperformance despite prior coaching
-EMP-0465,BU-03,2024-01-20,Coaching Session,MGR-BU-03-05,Second documented incident within the quarter
-EMP-0465,BU-03,2024-01-31,Performance Review Meeting,MGR-BU-03-05,Second documented incident within the quarter
-EMP-0580,BU-02,2024-02-24,Written Warning,MGR-BU-02-08,Second documented incident within the quarter
-EMP-0580,BU-02,2024-03-27,HR Escalation,MGR-BU-02-08,Continued underperformance despite prior coaching
-EMP-0474,BU-03,2024-01-31,Coaching Session,MGR-BU-03-18,Pattern of missed targets across multiple weeks
-EMP-0474,BU-03,2024-02-21,Coaching Session,MGR-BU-03-18,Continued underperformance despite prior coaching
-EMP-0581,BU-02,2024-01-01,HR Escalation,MGR-BU-02-10,Second documented incident within the quarter
-EMP-0581,BU-02,2024-01-20,HR Escalation,MGR-BU-02-10,Continued underperformance despite prior coaching
-EMP-0581,BU-02,2024-01-30,Written Warning,MGR-BU-02-10,Second documented incident within the quarter
-EMP-0952,BU-01,2024-01-04,Written Warning,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0952,BU-01,2024-03-21,Coaching Session,MGR-BU-01-01,Continued underperformance despite prior coaching
-EMP-0378,BU-01,2024-01-01,Coaching Session,MGR-BU-01-09,Second documented incident within the quarter
-EMP-0378,BU-01,2024-01-06,Written Warning,MGR-BU-01-09,Second documented incident within the quarter
-EMP-0378,BU-01,2024-02-22,Coaching Session,MGR-BU-01-09,Continued underperformance despite prior coaching
-EMP-0874,BU-01,2024-01-03,Performance Review Meeting,MGR-BU-01-01,Continued underperformance despite prior coaching
-EMP-0874,BU-01,2024-01-14,HR Escalation,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0874,BU-01,2024-01-19,HR Escalation,MGR-BU-01-01,Pattern of missed targets across multiple weeks
-EMP-0618,BU-02,2024-01-02,Coaching Session,MGR-BU-02-15,Pattern of missed targets across multiple weeks
-EMP-0618,BU-02,2024-03-02,Coaching Session,MGR-BU-02-15,Second documented incident within the quarter
-EMP-0618,BU-02,2024-03-09,Performance Review Meeting,MGR-BU-02-15,Continued underperformance despite prior coaching
-EMP-0921,BU-03,2024-01-15,HR Escalation,MGR-BU-03-09,Pattern of missed targets across multiple weeks
-EMP-0921,BU-03,2024-02-23,Written Warning,MGR-BU-03-09,Continued underperformance despite prior coaching
-EMP-0921,BU-03,2024-03-25,Written Warning,MGR-BU-03-09,Pattern of missed targets across multiple weeks
-EMP-0505,BU-03,2024-02-09,Written Warning,MGR-BU-03-19,Second documented incident within the quarter
-EMP-0505,BU-03,2024-03-06,Written Warning,MGR-BU-03-19,Second documented incident within the quarter
-EMP-0505,BU-03,2024-03-17,Performance Review Meeting,MGR-BU-03-19,Continued underperformance despite prior coaching
-EMP-0008,BU-04,2024-01-24,Performance Review Meeting,MGR-BU-04-18,Continued underperformance despite prior coaching
-EMP-0008,BU-04,2024-03-04,Performance Review Meeting,MGR-BU-04-18,Pattern of missed targets across multiple weeks
-EMP-0334,BU-03,2024-02-01,Performance Review Meeting,MGR-BU-03-07,Pattern of missed targets across multiple weeks
-EMP-0334,BU-03,2024-02-05,Written Warning,MGR-BU-03-07,Second documented incident within the quarter
-EMP-0046,BU-03,2024-01-13,Coaching Session,MGR-BU-03-08,Second documented incident within the quarter
-EMP-0046,BU-03,2024-02-23,Performance Review Meeting,MGR-BU-03-08,Pattern of missed targets across multiple weeks
-EMP-0046,BU-03,2024-03-17,HR Escalation,MGR-BU-03-08,Continued underperformance despite prior coaching
-EMP-0063,BU-03,2024-01-11,Coaching Session,MGR-BU-03-15,Pattern of missed targets across multiple weeks
-EMP-0063,BU-03,2024-01-26,Written Warning,MGR-BU-03-15,Continued underperformance despite prior coaching
-EMP-0063,BU-03,2024-02-13,Written Warning,MGR-BU-03-15,Pattern of missed targets across multiple weeks
-EMP-0934,BU-03,2024-01-17,Written Warning,MGR-BU-03-11,Continued underperformance despite prior coaching
-EMP-0934,BU-03,2024-03-27,Coaching Session,MGR-BU-03-11,Continued underperformance despite prior coaching
-EMP-0743,BU-01,2024-02-12,Coaching Session,MGR-BU-01-09,Pattern of missed targets across multiple weeks
-EMP-0743,BU-01,2024-03-12,HR Escalation,MGR-BU-01-09,Pattern of missed targets across multiple weeks
-EMP-0386,BU-02,2024-01-01,Performance Review Meeting,MGR-BU-02-02,Pattern of missed targets across multiple weeks
-EMP-0386,BU-02,2024-02-02,HR Escalation,MGR-BU-02-02,Continued underperformance despite prior coaching
-EMP-0386,BU-02,2024-02-09,Coaching Session,MGR-BU-02-02,Pattern of missed targets across multiple weeks
-EMP-0672,BU-02,2024-02-05,HR Escalation,MGR-BU-02-05,Second documented incident within the quarter
-EMP-0672,BU-02,2024-03-06,Coaching Session,MGR-BU-02-05,Continued underperformance despite prior coaching
-EMP-0294,BU-01,2024-01-24,Performance Review Meeting,MGR-BU-01-15,Continued underperformance despite prior coaching
-EMP-0294,BU-01,2024-02-20,HR Escalation,MGR-BU-01-15,Pattern of missed targets across multiple weeks
-EMP-0767,BU-02,2024-01-07,Performance Review Meeting,MGR-BU-02-15,Pattern of missed targets across multiple weeks
-EMP-0767,BU-02,2024-02-12,HR Escalation,MGR-BU-02-15,Continued underperformance despite prior coaching
-EMP-0767,BU-02,2024-03-25,Written Warning,MGR-BU-02-15,Second documented incident within the quarter
-EMP-0314,BU-01,2024-01-24,Performance Review Meeting,MGR-BU-01-02,Pattern of missed targets across multiple weeks
-EMP-0314,BU-01,2024-02-21,HR Escalation,MGR-BU-01-02,Second documented incident within the quarter
-EMP-0314,BU-01,2024-03-31,Performance Review Meeting,MGR-BU-01-02,Second documented incident within the quarter
-EMP-0176,BU-01,2024-02-05,Performance Review Meeting,MGR-BU-01-09,Continued underperformance despite prior coaching
-EMP-0176,BU-01,2024-02-27,Written Warning,MGR-BU-01-09,Continued underperformance despite prior coaching
-EMP-0329,BU-03,2024-01-19,Written Warning,MGR-BU-03-04,Second documented incident within the quarter
-EMP-0329,BU-03,2024-01-27,HR Escalation,MGR-BU-03-04,Second documented incident within the quarter
-EMP-0329,BU-03,2024-03-15,Written Warning,MGR-BU-03-04,Second documented incident within the quarter
-EMP-0646,BU-02,2024-01-16,Written Warning,MGR-BU-02-16,Pattern of missed targets across multiple weeks
-EMP-0646,BU-02,2024-01-30,Written Warning,MGR-BU-02-16,Continued underperformance despite prior coaching
-EMP-0646,BU-02,2024-03-31,Written Warning,MGR-BU-02-16,Second documented incident within the quarter
-EMP-0818,BU-02,2024-01-14,Coaching Session,MGR-BU-02-02,Pattern of missed targets across multiple weeks
-EMP-0818,BU-02,2024-02-23,Coaching Session,MGR-BU-02-02,Continued underperformance despite prior coaching
-EMP-0970,BU-04,2024-01-09,Performance Review Meeting,MGR-BU-04-14,Continued underperformance despite prior coaching
-EMP-0970,BU-04,2024-02-22,Written Warning,MGR-BU-04-14,Continued underperformance despite prior coaching
-EMP-0851,BU-02,2024-03-06,Coaching Session,MGR-BU-02-06,Continued underperformance despite prior coaching
-EMP-0851,BU-02,2024-03-20,Performance Review Meeting,MGR-BU-02-06,Continued underperformance despite prior coaching
-EMP-0677,BU-02,2024-02-28,Written Warning,MGR-BU-02-10,Continued underperformance despite prior coaching
-EMP-0677,BU-02,2024-03-05,Coaching Session,MGR-BU-02-10,Second documented incident within the quarter
-EMP-0677,BU-02,2024-03-26,Coaching Session,MGR-BU-02-10,Continued underperformance despite prior coaching
-EMP-0758,BU-01,2024-03-14,Performance Review Meeting,MGR-BU-01-09,Continued underperformance despite prior coaching
-EMP-0758,BU-01,2024-03-17,HR Escalation,MGR-BU-01-09,Second documented incident within the quarter
-EMP-0397,BU-04,2024-01-18,Coaching Session,MGR-BU-04-08,Second documented incident within the quarter
-EMP-0397,BU-04,2024-03-16,Performance Review Meeting,MGR-BU-04-08,Continued underperformance despite prior coaching
-EMP-0397,BU-04,2024-03-27,Coaching Session,MGR-BU-04-08,Continued underperformance despite prior coaching
-EMP-0944,BU-01,2024-02-16,HR Escalation,MGR-BU-01-14,Pattern of missed targets across multiple weeks
-EMP-0944,BU-01,2024-02-23,Written Warning,MGR-BU-01-14,Pattern of missed targets across multiple weeks
-EMP-0944,BU-01,2024-03-17,Coaching Session,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0843,BU-01,2024-01-15,Coaching Session,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0843,BU-01,2024-01-23,Coaching Session,MGR-BU-01-14,Continued underperformance despite prior coaching
-EMP-0843,BU-01,2024-01-26,Written Warning,MGR-BU-01-14,Second documented incident within the quarter
-EMP-0300,BU-04,2024-01-04,HR Escalation,MGR-BU-04-04,Second documented incident within the quarter
-EMP-0300,BU-04,2024-02-16,Written Warning,MGR-BU-04-04,Pattern of missed targets across multiple weeks
-EMP-0587,BU-03,2024-01-12,HR Escalation,MGR-BU-03-10,Pattern of missed targets across multiple weeks
-EMP-0587,BU-03,2024-02-23,HR Escalation,MGR-BU-03-10,Second documented incident within the quarter
-EMP-0587,BU-03,2024-03-03,Written Warning,MGR-BU-03-10,Pattern of missed targets across multiple weeks
-EMP-0061,BU-04,2024-02-06,Performance Review Meeting,MGR-BU-04-16,Continued underperformance despite prior coaching
-EMP-0061,BU-04,2024-03-04,Written Warning,MGR-BU-04-16,Continued underperformance despite prior coaching
-EMP-0092,BU-04,2024-01-17,Coaching Session,MGR-BU-04-19,Continued underperformance despite prior coaching
-EMP-0092,BU-04,2024-03-17,Performance Review Meeting,MGR-BU-04-19,Second documented incident within the quarter
-EMP-0092,BU-04,2024-03-18,HR Escalation,MGR-BU-04-19,Continued underperformance despite prior coaching
-EMP-0811,BU-02,2024-01-01,Performance Review Meeting,MGR-BU-02-04,Pattern of missed targets across multiple weeks
-EMP-0811,BU-02,2024-01-13,Performance Review Meeting,MGR-BU-02-04,Continued underperformance despite prior coaching
-EMP-0617,BU-01,2024-02-25,Coaching Session,MGR-BU-01-08,Second documented incident within the quarter
-EMP-0617,BU-01,2024-03-12,HR Escalation,MGR-BU-01-08,Continued underperformance despite prior coaching
-EMP-0617,BU-01,2024-03-18,HR Escalation,MGR-BU-01-08,Pattern of missed targets across multiple weeks
-EMP-0717,BU-01,2024-03-13,Performance Review Meeting,MGR-BU-01-19,Second documented incident within the quarter
-EMP-0717,BU-01,2024-03-21,Coaching Session,MGR-BU-01-19,Pattern of missed targets across multiple weeks
-EMP-0026,BU-01,2024-01-15,Coaching Session,MGR-BU-01-19,Continued underperformance despite prior coaching
-EMP-0026,BU-01,2024-01-30,HR Escalation,MGR-BU-01-19,Second documented incident within the quarter
-EMP-0266,BU-02,2024-01-09,HR Escalation,MGR-BU-02-12,Pattern of missed targets across multiple weeks
-EMP-0266,BU-02,2024-02-04,Performance Review Meeting,MGR-BU-02-12,Second documented incident within the quarter
-EMP-0405,BU-04,2024-01-06,HR Escalation,MGR-BU-04-12,Second documented incident within the quarter
-EMP-0405,BU-04,2024-02-24,Coaching Session,MGR-BU-04-12,Pattern of missed targets across multiple weeks
-EMP-0405,BU-04,2024-03-03,HR Escalation,MGR-BU-04-12,Pattern of missed targets across multiple weeks
+EMP-0782,BU-04,2024-02-05,Coaching Session,MGR-BU-04-04,Attendance and punctuality concern
+EMP-0543,BU-02,2024-02-26,Written Warning,MGR-BU-02-08,Performance below quarterly target
+EMP-0156,BU-03,2024-03-05,Performance Review Meeting,MGR-BU-03-09,Missed key deliverable deadline
+EMP-0493,BU-03,2024-02-29,Performance Review Meeting,MGR-BU-03-13,Missed key deliverable deadline
+EMP-0489,BU-04,2024-01-10,HR Escalation,MGR-BU-04-05,Missed key deliverable deadline
+EMP-0807,BU-02,2024-03-13,Written Warning,MGR-BU-02-01,Performance below quarterly target
+EMP-0954,BU-03,2024-01-01,Written Warning,MGR-BU-03-12,Missed key deliverable deadline
+EMP-0476,BU-03,2024-01-31,Written Warning,MGR-BU-03-01,Performance below quarterly target
+EMP-0066,BU-01,2024-01-17,HR Escalation,MGR-BU-01-19,Performance below quarterly target
+EMP-0502,BU-04,2024-01-30,Performance Review Meeting,MGR-BU-04-05,Performance below quarterly target
+EMP-0452,BU-02,2024-01-22,Written Warning,MGR-BU-02-01,Attendance and punctuality concern
+EMP-0309,BU-01,2024-02-25,HR Escalation,MGR-BU-01-16,Attendance and punctuality concern
+EMP-0688,BU-04,2024-01-23,Written Warning,MGR-BU-04-01,Missed key deliverable deadline
+EMP-0485,BU-02,2024-02-02,Coaching Session,MGR-BU-02-12,Performance below quarterly target
+EMP-0858,BU-01,2024-01-17,Written Warning,MGR-BU-01-03,Missed key deliverable deadline
+EMP-0583,BU-01,2024-01-17,Performance Review Meeting,MGR-BU-01-13,Performance below quarterly target
+EMP-0288,BU-01,2024-01-03,Written Warning,MGR-BU-01-06,Performance below quarterly target
+EMP-0514,BU-02,2024-03-15,Written Warning,MGR-BU-02-13,Missed key deliverable deadline
+EMP-0087,BU-04,2024-03-15,HR Escalation,MGR-BU-04-18,Missed key deliverable deadline
+EMP-0902,BU-01,2024-01-04,Written Warning,MGR-BU-01-09,Missed key deliverable deadline
+EMP-0892,BU-04,2024-02-21,HR Escalation,MGR-BU-04-16,Missed key deliverable deadline
+EMP-0206,BU-02,2024-02-09,Performance Review Meeting,MGR-BU-02-16,Performance below quarterly target
+EMP-0717,BU-04,2024-01-19,HR Escalation,MGR-BU-04-06,Missed key deliverable deadline
+EMP-0524,BU-01,2024-03-19,HR Escalation,MGR-BU-01-12,Attendance and punctuality concern
+EMP-0168,BU-01,2024-02-14,Performance Review Meeting,MGR-BU-01-10,Performance below quarterly target
+EMP-0327,BU-03,2024-03-16,Performance Review Meeting,MGR-BU-03-10,Attendance and punctuality concern
+EMP-0755,BU-02,2024-01-29,Written Warning,MGR-BU-02-06,Attendance and punctuality concern
+EMP-0854,BU-01,2024-02-02,Coaching Session,MGR-BU-01-02,Missed key deliverable deadline
+EMP-0951,BU-04,2024-03-25,Written Warning,MGR-BU-04-20,Performance below quarterly target
+EMP-0098,BU-04,2024-03-11,HR Escalation,MGR-BU-04-10,Missed key deliverable deadline
+EMP-0038,BU-03,2024-03-13,Coaching Session,MGR-BU-03-17,Attendance and punctuality concern
+EMP-0370,BU-01,2024-03-28,Written Warning,MGR-BU-01-04,Missed key deliverable deadline
+EMP-0417,BU-03,2024-03-27,Performance Review Meeting,MGR-BU-03-05,Missed key deliverable deadline
+EMP-0779,BU-02,2024-03-31,Coaching Session,MGR-BU-02-07,Missed key deliverable deadline
+EMP-0734,BU-03,2024-01-17,Written Warning,MGR-BU-03-14,Performance below quarterly target
+EMP-0559,BU-02,2024-01-08,HR Escalation,MGR-BU-02-17,Attendance and punctuality concern
+EMP-0361,BU-03,2024-03-12,HR Escalation,MGR-BU-03-16,Attendance and punctuality concern
+EMP-0457,BU-04,2024-03-05,Performance Review Meeting,MGR-BU-04-07,Performance below quarterly target
+EMP-0400,BU-02,2024-02-15,Written Warning,MGR-BU-02-19,Missed key deliverable deadline
+EMP-0472,BU-02,2024-03-07,Performance Review Meeting,MGR-BU-02-09,Performance below quarterly target
+EMP-0373,BU-04,2024-01-14,Coaching Session,MGR-BU-04-04,Performance below quarterly target
+EMP-0016,BU-02,2024-03-24,Performance Review Meeting,MGR-BU-02-11,Attendance and punctuality concern
+EMP-0701,BU-04,2024-02-08,HR Escalation,MGR-BU-04-08,Performance below quarterly target
+EMP-0152,BU-03,2024-01-21,Performance Review Meeting,MGR-BU-03-03,Missed key deliverable deadline
+EMP-0391,BU-03,2024-02-18,Coaching Session,MGR-BU-03-18,Missed key deliverable deadline
+EMP-0712,BU-02,2024-03-11,Coaching Session,MGR-BU-02-06,Attendance and punctuality concern
+EMP-0926,BU-02,2024-01-09,Coaching Session,MGR-BU-02-19,Attendance and punctuality concern
+EMP-0973,BU-04,2024-01-07,Written Warning,MGR-BU-04-20,Performance below quarterly target
+EMP-0949,BU-01,2024-02-09,Coaching Session,MGR-BU-01-07,Attendance and punctuality concern
+EMP-0147,BU-01,2024-02-04,Coaching Session,MGR-BU-01-03,Attendance and punctuality concern
+EMP-0558,BU-03,2024-03-06,HR Escalation,MGR-BU-03-12,Attendance and punctuality concern
+EMP-0675,BU-04,2024-02-03,HR Escalation,MGR-BU-04-01,Attendance and punctuality concern
+EMP-0493,BU-04,2024-01-04,HR Escalation,MGR-BU-04-08,Attendance and punctuality concern
+EMP-0180,BU-02,2024-03-18,HR Escalation,MGR-BU-02-10,Attendance and punctuality concern
+EMP-0761,BU-03,2024-01-13,Written Warning,MGR-BU-03-15,Performance below quarterly target
+EMP-0578,BU-04,2024-01-04,Coaching Session,MGR-BU-04-11,Attendance and punctuality concern
+EMP-0073,BU-03,2024-03-21,Written Warning,MGR-BU-03-12,Missed key deliverable deadline
+EMP-0007,BU-04,2024-02-18,Coaching Session,MGR-BU-04-13,Attendance and punctuality concern
+EMP-0333,BU-02,2024-01-11,Written Warning,MGR-BU-02-05,Attendance and punctuality concern
+EMP-0597,BU-04,2024-02-25,Performance Review Meeting,MGR-BU-04-20,Performance below quarterly target
+EMP-0200,BU-03,2024-01-10,Coaching Session,MGR-BU-03-03,Attendance and punctuality concern
+EMP-0157,BU-02,2024-03-27,Written Warning,MGR-BU-02-11,Missed key deliverable deadline
+EMP-0706,BU-03,2024-02-18,HR Escalation,MGR-BU-03-04,Attendance and punctuality concern
+EMP-0277,BU-04,2024-01-12,Coaching Session,MGR-BU-04-12,Attendance and punctuality concern
+EMP-0297,BU-01,2024-01-22,Performance Review Meeting,MGR-BU-01-08,Attendance and punctuality concern
+EMP-0635,BU-03,2024-02-03,Written Warning,MGR-BU-03-19,Attendance and punctuality concern
+EMP-0550,BU-02,2024-03-14,Written Warning,MGR-BU-02-01,Missed key deliverable deadline
+EMP-0599,BU-04,2024-03-09,Written Warning,MGR-BU-04-01,Missed key deliverable deadline
+EMP-0603,BU-03,2024-01-23,Written Warning,MGR-BU-03-18,Performance below quarterly target
+EMP-0470,BU-01,2024-02-21,Written Warning,MGR-BU-01-09,Attendance and punctuality concern
+EMP-0116,BU-02,2024-03-21,Coaching Session,MGR-BU-02-08,Performance below quarterly target
+EMP-0813,BU-02,2024-01-19,Coaching Session,MGR-BU-02-19,Attendance and punctuality concern
+EMP-0226,BU-03,2024-01-19,Performance Review Meeting,MGR-BU-03-08,Performance below quarterly target
+EMP-0340,BU-01,2024-03-12,Performance Review Meeting,MGR-BU-01-02,Missed key deliverable deadline
+EMP-0323,BU-03,2024-03-27,Performance Review Meeting,MGR-BU-03-10,Performance below quarterly target
+EMP-0378,BU-03,2024-02-02,Coaching Session,MGR-BU-03-02,Missed key deliverable deadline
+EMP-0356,BU-02,2024-02-03,HR Escalation,MGR-BU-02-07,Performance below quarterly target
+EMP-0850,BU-04,2024-02-24,Coaching Session,MGR-BU-04-08,Missed key deliverable deadline
+EMP-0891,BU-02,2024-02-03,Coaching Session,MGR-BU-02-06,Attendance and punctuality concern
+EMP-0873,BU-02,2024-01-07,HR Escalation,MGR-BU-02-08,Performance below quarterly target
+EMP-0665,BU-04,2024-02-21,Performance Review Meeting,MGR-BU-04-17,Performance below quarterly target
+EMP-0391,BU-02,2024-03-13,Coaching Session,MGR-BU-02-11,Performance below quarterly target
+EMP-0583,BU-02,2024-03-21,Performance Review Meeting,MGR-BU-02-09,Attendance and punctuality concern
+EMP-0736,BU-01,2024-01-13,Written Warning,MGR-BU-01-14,Missed key deliverable deadline
+EMP-0248,BU-04,2024-01-06,HR Escalation,MGR-BU-04-01,Performance below quarterly target
+EMP-0316,BU-01,2024-02-15,Coaching Session,MGR-BU-01-05,Attendance and punctuality concern
+EMP-0620,BU-02,2024-01-16,HR Escalation,MGR-BU-02-07,Performance below quarterly target
+EMP-0849,BU-02,2024-03-28,Coaching Session,MGR-BU-02-09,Performance below quarterly target
+EMP-0223,BU-03,2024-02-21,HR Escalation,MGR-BU-03-15,Attendance and punctuality concern
+EMP-0452,BU-03,2024-01-26,Performance Review Meeting,MGR-BU-03-06,Missed key deliverable deadline
+EMP-0089,BU-04,2024-03-11,Coaching Session,MGR-BU-04-20,Performance below quarterly target
+EMP-0420,BU-04,2024-01-05,Coaching Session,MGR-BU-04-12,Attendance and punctuality concern
+EMP-0490,BU-03,2024-02-09,Performance Review Meeting,MGR-BU-03-15,Attendance and punctuality concern
+EMP-0297,BU-04,2024-01-24,Coaching Session,MGR-BU-04-09,Performance below quarterly target
+EMP-0081,BU-01,2024-03-03,Performance Review Meeting,MGR-BU-01-05,Attendance and punctuality concern
+EMP-0498,BU-03,2024-02-22,Written Warning,MGR-BU-03-04,Missed key deliverable deadline
+EMP-0580,BU-02,2024-03-09,Performance Review Meeting,MGR-BU-02-08,Attendance and punctuality concern
+EMP-0476,BU-01,2024-03-18,HR Escalation,MGR-BU-01-02,Missed key deliverable deadline
+EMP-0367,BU-03,2024-02-09,Performance Review Meeting,MGR-BU-03-06,Missed key deliverable deadline
+EMP-0284,BU-02,2024-02-19,Written Warning,MGR-BU-02-19,Attendance and punctuality concern
+EMP-0756,BU-01,2024-02-20,Performance Review Meeting,MGR-BU-01-01,Missed key deliverable deadline
+EMP-0837,BU-02,2024-01-29,Written Warning,MGR-BU-02-19,Performance below quarterly target
+EMP-0011,BU-02,2024-03-24,Coaching Session,MGR-BU-02-04,Attendance and punctuality concern
+EMP-0961,BU-01,2024-03-05,HR Escalation,MGR-BU-01-09,Attendance and punctuality concern
+EMP-0534,BU-02,2024-01-17,Coaching Session,MGR-BU-02-13,Performance below quarterly target
+EMP-0915,BU-03,2024-01-02,Coaching Session,MGR-BU-03-07,Missed key deliverable deadline
+EMP-0634,BU-04,2024-01-25,Performance Review Meeting,MGR-BU-04-04,Missed key deliverable deadline
+EMP-0569,BU-04,2024-03-15,Coaching Session,MGR-BU-04-11,Missed key deliverable deadline
+EMP-0067,BU-04,2024-02-22,Written Warning,MGR-BU-04-15,Missed key deliverable deadline
+EMP-0767,BU-01,2024-01-28,Written Warning,MGR-BU-01-11,Attendance and punctuality concern
+EMP-0144,BU-02,2024-01-25,Coaching Session,MGR-BU-02-15,Attendance and punctuality concern
+EMP-0642,BU-01,2024-01-02,Performance Review Meeting,MGR-BU-01-13,Performance below quarterly target
+EMP-0979,BU-04,2024-01-29,HR Escalation,MGR-BU-04-15,Performance below quarterly target
+EMP-0933,BU-03,2024-02-21,Performance Review Meeting,MGR-BU-03-12,Performance below quarterly target
+EMP-0706,BU-04,2024-01-21,Written Warning,MGR-BU-04-09,Missed key deliverable deadline
+EMP-0985,BU-02,2024-01-19,Coaching Session,MGR-BU-02-14,Performance below quarterly target
+EMP-0266,BU-04,2024-01-06,Coaching Session,MGR-BU-04-09,Attendance and punctuality concern
+EMP-0184,BU-01,2024-01-22,Written Warning,MGR-BU-01-08,Missed key deliverable deadline
+EMP-0234,BU-03,2024-03-03,Written Warning,MGR-BU-03-10,Performance below quarterly target
+EMP-0665,BU-01,2024-02-23,Performance Review Meeting,MGR-BU-01-16,Attendance and punctuality concern
+EMP-0567,BU-01,2024-01-12,Coaching Session,MGR-BU-01-12,Missed key deliverable deadline
+EMP-0693,BU-02,2024-01-25,HR Escalation,MGR-BU-02-01,Performance below quarterly target
+EMP-0605,BU-02,2024-02-20,Performance Review Meeting,MGR-BU-02-15,Attendance and punctuality concern
+EMP-0524,BU-03,2024-01-10,Written Warning,MGR-BU-03-01,Missed key deliverable deadline
+EMP-0703,BU-03,2024-02-02,HR Escalation,MGR-BU-03-14,Missed key deliverable deadline
+EMP-0364,BU-02,2024-02-12,Performance Review Meeting,MGR-BU-02-02,Missed key deliverable deadline
+EMP-0212,BU-01,2024-02-08,Written Warning,MGR-BU-01-08,Missed key deliverable deadline
+EMP-0418,BU-02,2024-02-12,Written Warning,MGR-BU-02-02,Missed key deliverable deadline
+EMP-0109,BU-04,2024-01-19,Written Warning,MGR-BU-04-05,Performance below quarterly target
+EMP-0431,BU-03,2024-03-12,Performance Review Meeting,MGR-BU-03-12,Missed key deliverable deadline
+EMP-0643,BU-04,2024-02-28,Coaching Session,MGR-BU-04-14,Missed key deliverable deadline
+EMP-0489,BU-01,2024-01-28,Performance Review Meeting,MGR-BU-01-17,Missed key deliverable deadline
+EMP-0108,BU-02,2024-03-28,Performance Review Meeting,MGR-BU-02-10,Missed key deliverable deadline
+EMP-0977,BU-02,2024-01-30,Performance Review Meeting,MGR-BU-02-10,Missed key deliverable deadline
+EMP-0852,BU-03,2024-01-05,Performance Review Meeting,MGR-BU-03-12,Performance below quarterly target
+EMP-0374,BU-03,2024-01-12,Performance Review Meeting,MGR-BU-03-13,Performance below quarterly target
+EMP-0049,BU-02,2024-01-19,Coaching Session,MGR-BU-02-08,Performance below quarterly target
+EMP-0929,BU-02,2024-03-05,HR Escalation,MGR-BU-02-15,Missed key deliverable deadline
+EMP-0199,BU-04,2024-03-26,Performance Review Meeting,MGR-BU-04-11,Missed key deliverable deadline
+EMP-0049,BU-04,2024-02-14,HR Escalation,MGR-BU-04-12,Performance below quarterly target
+EMP-0483,BU-01,2024-01-26,Performance Review Meeting,MGR-BU-01-14,Attendance and punctuality concern
+EMP-0074,BU-03,2024-03-24,HR Escalation,MGR-BU-03-18,Performance below quarterly target
+EMP-0777,BU-03,2024-03-16,Performance Review Meeting,MGR-BU-03-14,Missed key deliverable deadline
+EMP-0826,BU-01,2024-03-09,HR Escalation,MGR-BU-01-14,Performance below quarterly target
+EMP-0435,BU-03,2024-01-01,HR Escalation,MGR-BU-03-07,Missed key deliverable deadline
+EMP-0273,BU-01,2024-03-09,HR Escalation,MGR-BU-01-04,Missed key deliverable deadline
+EMP-0973,BU-02,2024-02-07,Written Warning,MGR-BU-02-13,Performance below quarterly target
+EMP-0276,BU-02,2024-02-27,HR Escalation,MGR-BU-02-20,Missed key deliverable deadline
+EMP-0402,BU-02,2024-02-25,Performance Review Meeting,MGR-BU-02-08,Missed key deliverable deadline
+EMP-0261,BU-01,2024-03-25,Performance Review Meeting,MGR-BU-01-08,Attendance and punctuality concern
+EMP-0862,BU-04,2024-01-09,Written Warning,MGR-BU-04-09,Attendance and punctuality concern
+EMP-0177,BU-04,2024-02-17,Written Warning,MGR-BU-04-17,Performance below quarterly target
+EMP-0411,BU-01,2024-02-27,Performance Review Meeting,MGR-BU-01-13,Performance below quarterly target
+EMP-0904,BU-01,2024-03-31,Written Warning,MGR-BU-01-02,Attendance and punctuality concern
+EMP-0248,BU-03,2024-02-10,Written Warning,MGR-BU-03-04,Attendance and punctuality concern
+EMP-0235,BU-03,2024-03-17,Written Warning,MGR-BU-03-03,Missed key deliverable deadline
+EMP-0244,BU-02,2024-01-09,Coaching Session,MGR-BU-02-09,Missed key deliverable deadline
+EMP-0507,BU-03,2024-03-17,Coaching Session,MGR-BU-03-05,Performance below quarterly target
+EMP-0544,BU-02,2024-02-29,Performance Review Meeting,MGR-BU-02-12,Missed key deliverable deadline
+EMP-0057,BU-02,2024-02-25,Performance Review Meeting,MGR-BU-02-17,Performance below quarterly target
+EMP-0565,BU-01,2024-01-14,HR Escalation,MGR-BU-01-06,Performance below quarterly target
+EMP-0732,BU-02,2024-03-16,Written Warning,MGR-BU-02-04,Attendance and punctuality concern
+EMP-0866,BU-03,2024-01-13,Written Warning,MGR-BU-03-15,Attendance and punctuality concern
+EMP-0377,BU-04,2024-03-23,Written Warning,MGR-BU-04-06,Missed key deliverable deadline
+EMP-0549,BU-02,2024-02-22,HR Escalation,MGR-BU-02-12,Missed key deliverable deadline
+EMP-0076,BU-01,2024-03-21,Coaching Session,MGR-BU-01-10,Performance below quarterly target
+EMP-0312,BU-03,2024-02-23,Written Warning,MGR-BU-03-17,Missed key deliverable deadline
+EMP-0393,BU-01,2024-01-08,Performance Review Meeting,MGR-BU-01-13,Attendance and punctuality concern
+EMP-0279,BU-03,2024-02-01,HR Escalation,MGR-BU-03-05,Performance below quarterly target
+EMP-0260,BU-03,2024-03-22,Performance Review Meeting,MGR-BU-03-13,Missed key deliverable deadline
+EMP-0533,BU-03,2024-02-02,Performance Review Meeting,MGR-BU-03-05,Attendance and punctuality concern
+EMP-0005,BU-01,2024-01-18,Written Warning,MGR-BU-01-13,Missed key deliverable deadline
+EMP-0893,BU-01,2024-02-22,HR Escalation,MGR-BU-01-17,Attendance and punctuality concern
+EMP-0928,BU-01,2024-02-23,HR Escalation,MGR-BU-01-01,Performance below quarterly target
+EMP-0617,BU-02,2024-03-04,Coaching Session,MGR-BU-02-14,Missed key deliverable deadline
+EMP-0464,BU-02,2024-03-18,Coaching Session,MGR-BU-02-15,Performance below quarterly target
+EMP-0964,BU-04,2024-03-26,Performance Review Meeting,MGR-BU-04-07,Missed key deliverable deadline
+EMP-0354,BU-02,2024-01-17,Performance Review Meeting,MGR-BU-02-09,Attendance and punctuality concern
+EMP-0599,BU-03,2024-01-02,Performance Review Meeting,MGR-BU-03-04,Missed key deliverable deadline
+EMP-0263,BU-01,2024-03-24,Written Warning,MGR-BU-01-19,Attendance and punctuality concern
+EMP-0612,BU-03,2024-01-29,Performance Review Meeting,MGR-BU-03-04,Missed key deliverable deadline
+EMP-0190,BU-04,2024-02-09,Performance Review Meeting,MGR-BU-04-06,Performance below quarterly target
+EMP-0585,BU-04,2024-01-21,Written Warning,MGR-BU-04-04,Missed key deliverable deadline
+EMP-0920,BU-01,2024-02-11,Written Warning,MGR-BU-01-05,Performance below quarterly target
+EMP-0687,BU-04,2024-03-25,HR Escalation,MGR-BU-04-03,Attendance and punctuality concern
+EMP-0245,BU-03,2024-03-04,HR Escalation,MGR-BU-03-17,Attendance and punctuality concern
+EMP-0526,BU-01,2024-01-01,Coaching Session,MGR-BU-01-10,Performance below quarterly target
+EMP-0013,BU-03,2024-01-13,Written Warning,MGR-BU-03-03,Performance below quarterly target
+EMP-0387,BU-02,2024-03-24,Written Warning,MGR-BU-02-09,Attendance and punctuality concern
+EMP-0005,BU-04,2024-01-29,Written Warning,MGR-BU-04-12,Missed key deliverable deadline
+EMP-0748,BU-02,2024-01-07,Performance Review Meeting,MGR-BU-02-09,Performance below quarterly target
+EMP-0593,BU-02,2024-01-05,Performance Review Meeting,MGR-BU-02-08,Performance below quarterly target
+EMP-0156,BU-02,2024-01-01,Coaching Session,MGR-BU-02-11,Performance below quarterly target
+EMP-0586,BU-02,2024-03-04,Coaching Session,MGR-BU-02-05,Attendance and punctuality concern
+EMP-0737,BU-04,2024-02-23,Performance Review Meeting,MGR-BU-04-14,Missed key deliverable deadline
+EMP-0197,BU-01,2024-01-22,Written Warning,MGR-BU-01-10,Performance below quarterly target
+EMP-0196,BU-03,2024-02-13,Coaching Session,MGR-BU-03-11,Missed key deliverable deadline
+EMP-0861,BU-02,2024-03-07,Performance Review Meeting,MGR-BU-02-08,Attendance and punctuality concern
+EMP-0507,BU-04,2024-01-13,Coaching Session,MGR-BU-04-19,Attendance and punctuality concern
+EMP-0992,BU-02,2024-03-17,Written Warning,MGR-BU-02-07,Attendance and punctuality concern
+EMP-0723,BU-04,2024-03-17,Performance Review Meeting,MGR-BU-04-20,Missed key deliverable deadline
+EMP-0396,BU-04,2024-02-14,Performance Review Meeting,MGR-BU-04-13,Missed key deliverable deadline
+EMP-0219,BU-04,2024-01-24,Performance Review Meeting,MGR-BU-04-09,Attendance and punctuality concern
+EMP-0179,BU-02,2024-01-10,Performance Review Meeting,MGR-BU-02-15,Attendance and punctuality concern
+EMP-0717,BU-02,2024-01-10,Performance Review Meeting,MGR-BU-02-02,Attendance and punctuality concern
+EMP-0888,BU-02,2024-02-16,Coaching Session,MGR-BU-02-19,Attendance and punctuality concern
+EMP-0022,BU-02,2024-03-11,Performance Review Meeting,MGR-BU-02-17,Performance below quarterly target
+EMP-0152,BU-02,2024-02-29,Performance Review Meeting,MGR-BU-02-09,Performance below quarterly target
+EMP-0958,BU-04,2024-01-30,Performance Review Meeting,MGR-BU-04-07,Performance below quarterly target
+EMP-0981,BU-04,2024-01-22,HR Escalation,MGR-BU-04-03,Attendance and punctuality concern
+EMP-0615,BU-04,2024-02-03,Written Warning,MGR-BU-04-10,Performance below quarterly target
+EMP-0477,BU-04,2024-02-08,Performance Review Meeting,MGR-BU-04-08,Missed key deliverable deadline
+EMP-0236,BU-04,2024-03-28,HR Escalation,MGR-BU-04-03,Missed key deliverable deadline
+EMP-0783,BU-04,2024-03-30,HR Escalation,MGR-BU-04-19,Missed key deliverable deadline
+EMP-0473,BU-04,2024-03-25,HR Escalation,MGR-BU-04-18,Performance below quarterly target
+EMP-0293,BU-01,2024-01-28,Coaching Session,MGR-BU-01-07,Attendance and punctuality concern
+EMP-0050,BU-03,2024-02-28,Coaching Session,MGR-BU-03-04,Performance below quarterly target
+EMP-0086,BU-04,2024-03-05,HR Escalation,MGR-BU-04-04,Attendance and punctuality concern
+EMP-0808,BU-01,2024-02-24,Written Warning,MGR-BU-01-08,Attendance and punctuality concern
+EMP-0825,BU-01,2024-02-20,Coaching Session,MGR-BU-01-06,Attendance and punctuality concern
+EMP-0752,BU-02,2024-01-21,Coaching Session,MGR-BU-02-19,Missed key deliverable deadline
+EMP-0641,BU-03,2024-02-16,HR Escalation,MGR-BU-03-05,Missed key deliverable deadline
+EMP-0203,BU-01,2024-03-10,Coaching Session,MGR-BU-01-06,Missed key deliverable deadline
+EMP-0059,BU-04,2024-03-01,Coaching Session,MGR-BU-04-18,Missed key deliverable deadline
+EMP-0583,BU-04,2024-02-28,Coaching Session,MGR-BU-04-03,Missed key deliverable deadline
+EMP-0009,BU-02,2024-03-03,Performance Review Meeting,MGR-BU-02-06,Missed key deliverable deadline
+EMP-0136,BU-04,2024-02-10,Coaching Session,MGR-BU-04-11,Attendance and punctuality concern
+EMP-0208,BU-04,2024-02-25,Coaching Session,MGR-BU-04-02,Missed key deliverable deadline
+EMP-0425,BU-02,2024-01-13,HR Escalation,MGR-BU-02-07,Performance below quarterly target
+EMP-0433,BU-01,2024-02-28,Written Warning,MGR-BU-01-12,Attendance and punctuality concern
+EMP-0164,BU-01,2024-03-21,Written Warning,MGR-BU-01-02,Performance below quarterly target
+EMP-0422,BU-02,2024-02-13,Performance Review Meeting,MGR-BU-02-03,Performance below quarterly target
+EMP-0799,BU-01,2024-02-28,Performance Review Meeting,MGR-BU-01-15,Attendance and punctuality concern
+EMP-0503,BU-04,2024-01-27,Performance Review Meeting,MGR-BU-04-20,Attendance and punctuality concern
+EMP-0488,BU-01,2024-01-22,Performance Review Meeting,MGR-BU-01-05,Performance below quarterly target
+EMP-0663,BU-01,2024-01-20,Written Warning,MGR-BU-01-02,Performance below quarterly target
+EMP-0191,BU-01,2024-01-14,Coaching Session,MGR-BU-01-05,Attendance and punctuality concern
+EMP-0718,BU-03,2024-02-17,Written Warning,MGR-BU-03-01,Attendance and punctuality concern
+EMP-0077,BU-02,2024-02-29,HR Escalation,MGR-BU-02-03,Attendance and punctuality concern
+EMP-0039,BU-01,2024-02-03,Coaching Session,MGR-BU-01-08,Performance below quarterly target
+EMP-0578,BU-01,2024-03-26,HR Escalation,MGR-BU-01-18,Missed key deliverable deadline
+EMP-0191,BU-02,2024-03-04,Performance Review Meeting,MGR-BU-02-06,Performance below quarterly target
+EMP-0175,BU-03,2024-01-15,HR Escalation,MGR-BU-03-09,Missed key deliverable deadline
+EMP-0834,BU-03,2024-01-19,HR Escalation,MGR-BU-03-17,Attendance and punctuality concern
+EMP-0546,BU-02,2024-01-19,Performance Review Meeting,MGR-BU-02-16,Missed key deliverable deadline
+EMP-0303,BU-01,2024-01-16,Performance Review Meeting,MGR-BU-01-18,Missed key deliverable deadline
+EMP-0760,BU-02,2024-03-30,HR Escalation,MGR-BU-02-08,Performance below quarterly target
+EMP-0473,BU-03,2024-02-23,Performance Review Meeting,MGR-BU-03-20,Performance below quarterly target
+EMP-0346,BU-01,2024-02-07,HR Escalation,MGR-BU-01-05,Missed key deliverable deadline
+EMP-0568,BU-03,2024-02-24,Performance Review Meeting,MGR-BU-03-03,Attendance and punctuality concern
+EMP-0265,BU-03,2024-01-26,Written Warning,MGR-BU-03-13,Missed key deliverable deadline
+EMP-0943,BU-04,2024-01-26,Written Warning,MGR-BU-04-17,Attendance and punctuality concern
+EMP-0616,BU-04,2024-01-12,Written Warning,MGR-BU-04-14,Attendance and punctuality concern
+EMP-0781,BU-03,2024-01-11,Coaching Session,MGR-BU-03-07,Attendance and punctuality concern
+EMP-0453,BU-04,2024-03-12,HR Escalation,MGR-BU-04-16,Missed key deliverable deadline
+EMP-0739,BU-03,2024-03-30,HR Escalation,MGR-BU-03-16,Missed key deliverable deadline
+EMP-0408,BU-02,2024-03-14,Written Warning,MGR-BU-02-08,Attendance and punctuality concern
+EMP-0131,BU-01,2024-01-30,HR Escalation,MGR-BU-01-13,Performance below quarterly target
+EMP-0064,BU-01,2024-03-06,HR Escalation,MGR-BU-01-01,Missed key deliverable deadline
+EMP-0620,BU-01,2024-01-02,HR Escalation,MGR-BU-01-17,Attendance and punctuality concern
+EMP-0026,BU-02,2024-01-29,HR Escalation,MGR-BU-02-03,Performance below quarterly target
+EMP-0897,BU-01,2024-02-05,Performance Review Meeting,MGR-BU-01-01,Missed key deliverable deadline
+EMP-0073,BU-01,2024-03-11,HR Escalation,MGR-BU-01-16,Performance below quarterly target
+EMP-0031,BU-03,2024-03-21,HR Escalation,MGR-BU-03-02,Missed key deliverable deadline
+EMP-0369,BU-03,2024-02-18,Coaching Session,MGR-BU-03-06,Attendance and punctuality concern
+EMP-0144,BU-01,2024-02-02,Coaching Session,MGR-BU-01-12,Attendance and punctuality concern
+EMP-0719,BU-04,2024-03-17,Performance Review Meeting,MGR-BU-04-10,Attendance and punctuality concern
+EMP-0885,BU-04,2024-03-18,HR Escalation,MGR-BU-04-18,Missed key deliverable deadline
+EMP-0518,BU-03,2024-03-20,HR Escalation,MGR-BU-03-01,Attendance and punctuality concern
+EMP-0136,BU-02,2024-01-09,Performance Review Meeting,MGR-BU-02-14,Attendance and punctuality concern
+EMP-0591,BU-01,2024-02-02,Performance Review Meeting,MGR-BU-01-16,Missed key deliverable deadline
+EMP-0362,BU-02,2024-03-10,Written Warning,MGR-BU-02-07,Missed key deliverable deadline
+EMP-0337,BU-03,2024-02-10,HR Escalation,MGR-BU-03-12,Performance below quarterly target
+EMP-0876,BU-03,2024-01-06,Performance Review Meeting,MGR-BU-03-01,Attendance and punctuality concern
+EMP-0798,BU-04,2024-03-05,Performance Review Meeting,MGR-BU-04-05,Performance below quarterly target
+EMP-0254,BU-04,2024-02-24,HR Escalation,MGR-BU-04-11,Attendance and punctuality concern
+EMP-0669,BU-04,2024-01-05,HR Escalation,MGR-BU-04-20,Performance below quarterly target
+EMP-0206,BU-01,2024-03-13,HR Escalation,MGR-BU-01-03,Missed key deliverable deadline
+EMP-0557,BU-03,2024-03-20,Coaching Session,MGR-BU-03-03,Performance below quarterly target
+EMP-0193,BU-01,2024-02-04,HR Escalation,MGR-BU-01-18,Missed key deliverable deadline
+EMP-0413,BU-03,2024-03-18,Performance Review Meeting,MGR-BU-03-07,Missed key deliverable deadline
+EMP-0339,BU-03,2024-03-29,HR Escalation,MGR-BU-03-20,Attendance and punctuality concern
+EMP-0587,BU-04,2024-02-14,Coaching Session,MGR-BU-04-11,Performance below quarterly target
+EMP-0218,BU-03,2024-03-21,Written Warning,MGR-BU-03-11,Performance below quarterly target
+EMP-0883,BU-04,2024-01-31,Performance Review Meeting,MGR-BU-04-09,Missed key deliverable deadline
+EMP-0937,BU-04,2024-01-17,Coaching Session,MGR-BU-04-11,Performance below quarterly target
+EMP-0064,BU-02,2024-01-20,HR Escalation,MGR-BU-02-13,Attendance and punctuality concern
+EMP-0928,BU-03,2024-03-29,Coaching Session,MGR-BU-03-05,Performance below quarterly target
+EMP-0888,BU-04,2024-02-24,Written Warning,MGR-BU-04-08,Attendance and punctuality concern
+EMP-0211,BU-01,2024-02-08,HR Escalation,MGR-BU-01-12,Performance below quarterly target
+EMP-0951,BU-03,2024-02-04,Performance Review Meeting,MGR-BU-03-09,Attendance and punctuality concern
+EMP-0560,BU-02,2024-03-01,Written Warning,MGR-BU-02-12,Attendance and punctuality concern
+EMP-0166,BU-04,2024-03-11,HR Escalation,MGR-BU-04-16,Attendance and punctuality concern
+EMP-0386,BU-04,2024-02-03,HR Escalation,MGR-BU-04-15,Attendance and punctuality concern
+EMP-0548,BU-03,2024-01-17,Performance Review Meeting,MGR-BU-03-15,Performance below quarterly target
+EMP-0934,BU-02,2024-03-09,HR Escalation,MGR-BU-02-12,Attendance and punctuality concern
+EMP-0302,BU-02,2024-01-31,HR Escalation,MGR-BU-02-13,Missed key deliverable deadline
+EMP-0840,BU-04,2024-02-05,HR Escalation,MGR-BU-04-14,Missed key deliverable deadline
+EMP-0033,BU-04,2024-03-02,Coaching Session,MGR-BU-04-17,Performance below quarterly target
+EMP-0809,BU-02,2024-03-06,Written Warning,MGR-BU-02-18,Missed key deliverable deadline
+EMP-0596,BU-01,2024-03-01,HR Escalation,MGR-BU-01-08,Second documented incident within the quarter
+EMP-0596,BU-01,2024-03-17,Written Warning,MGR-BU-01-08,Pattern of missed targets across multiple weeks
+EMP-0553,BU-02,2024-01-05,HR Escalation,MGR-BU-02-13,Pattern of missed targets across multiple weeks
+EMP-0553,BU-02,2024-03-14,HR Escalation,MGR-BU-02-13,Second documented incident within the quarter
+EMP-0759,BU-04,2024-01-17,Coaching Session,MGR-BU-04-16,Pattern of missed targets across multiple weeks
+EMP-0759,BU-04,2024-02-14,Written Warning,MGR-BU-04-16,Second documented incident within the quarter
+EMP-0759,BU-04,2024-02-24,Performance Review Meeting,MGR-BU-04-16,Pattern of missed targets across multiple weeks
+EMP-0247,BU-02,2024-01-19,HR Escalation,MGR-BU-02-05,Continued underperformance despite prior coaching
+EMP-0247,BU-02,2024-01-27,Coaching Session,MGR-BU-02-05,Continued underperformance despite prior coaching
+EMP-0273,BU-04,2024-02-10,Coaching Session,MGR-BU-04-02,Pattern of missed targets across multiple weeks
+EMP-0273,BU-04,2024-03-26,Coaching Session,MGR-BU-04-02,Pattern of missed targets across multiple weeks
+EMP-0809,BU-03,2024-01-07,Coaching Session,MGR-BU-03-07,Second documented incident within the quarter
+EMP-0809,BU-03,2024-01-14,Performance Review Meeting,MGR-BU-03-07,Continued underperformance despite prior coaching
+EMP-0809,BU-03,2024-01-18,Written Warning,MGR-BU-03-07,Second documented incident within the quarter
+EMP-0216,BU-01,2024-02-13,Coaching Session,MGR-BU-01-14,Continued underperformance despite prior coaching
+EMP-0216,BU-01,2024-02-15,Coaching Session,MGR-BU-01-14,Continued underperformance despite prior coaching
+EMP-0216,BU-01,2024-03-25,Performance Review Meeting,MGR-BU-01-14,Continued underperformance despite prior coaching
+EMP-0824,BU-01,2024-03-05,Performance Review Meeting,MGR-BU-01-07,Continued underperformance despite prior coaching
+EMP-0824,BU-01,2024-03-07,Coaching Session,MGR-BU-01-07,Second documented incident within the quarter
+EMP-0824,BU-01,2024-03-09,HR Escalation,MGR-BU-01-07,Second documented incident within the quarter
+EMP-0792,BU-04,2024-01-18,Coaching Session,MGR-BU-04-13,Second documented incident within the quarter
+EMP-0792,BU-04,2024-02-14,Coaching Session,MGR-BU-04-13,Continued underperformance despite prior coaching
+EMP-0792,BU-04,2024-03-15,HR Escalation,MGR-BU-04-13,Second documented incident within the quarter
+EMP-0542,BU-03,2024-02-16,HR Escalation,MGR-BU-03-05,Second documented incident within the quarter
+EMP-0542,BU-03,2024-03-28,Coaching Session,MGR-BU-03-05,Continued underperformance despite prior coaching
+EMP-0542,BU-03,2024-03-29,Written Warning,MGR-BU-03-05,Continued underperformance despite prior coaching
+EMP-0502,BU-03,2024-03-16,Coaching Session,MGR-BU-03-06,Second documented incident within the quarter
+EMP-0502,BU-03,2024-03-17,HR Escalation,MGR-BU-03-06,Pattern of missed targets across multiple weeks
+EMP-0536,BU-04,2024-02-15,Performance Review Meeting,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0536,BU-04,2024-03-05,Written Warning,MGR-BU-04-01,Second documented incident within the quarter
+EMP-0232,BU-02,2024-01-18,Coaching Session,MGR-BU-02-04,Continued underperformance despite prior coaching
+EMP-0232,BU-02,2024-03-28,HR Escalation,MGR-BU-02-04,Continued underperformance despite prior coaching
+EMP-0238,BU-01,2024-01-21,HR Escalation,MGR-BU-01-02,Pattern of missed targets across multiple weeks
+EMP-0238,BU-01,2024-02-19,Written Warning,MGR-BU-01-02,Pattern of missed targets across multiple weeks
+EMP-0238,BU-01,2024-03-14,Written Warning,MGR-BU-01-02,Second documented incident within the quarter
+EMP-0300,BU-03,2024-01-22,Coaching Session,MGR-BU-03-08,Pattern of missed targets across multiple weeks
+EMP-0300,BU-03,2024-02-21,Written Warning,MGR-BU-03-08,Second documented incident within the quarter
+EMP-0300,BU-03,2024-02-25,Performance Review Meeting,MGR-BU-03-08,Continued underperformance despite prior coaching
+EMP-0716,BU-01,2024-03-04,Written Warning,MGR-BU-01-03,Pattern of missed targets across multiple weeks
+EMP-0716,BU-01,2024-03-12,Performance Review Meeting,MGR-BU-01-03,Pattern of missed targets across multiple weeks
+EMP-0067,BU-01,2024-02-24,Performance Review Meeting,MGR-BU-01-08,Second documented incident within the quarter
+EMP-0067,BU-01,2024-03-05,Coaching Session,MGR-BU-01-08,Pattern of missed targets across multiple weeks
+EMP-0508,BU-04,2024-03-10,Written Warning,MGR-BU-04-06,Continued underperformance despite prior coaching
+EMP-0508,BU-04,2024-03-16,Written Warning,MGR-BU-04-06,Pattern of missed targets across multiple weeks
+EMP-0508,BU-04,2024-03-31,Written Warning,MGR-BU-04-06,Pattern of missed targets across multiple weeks
+EMP-0269,BU-04,2024-01-24,HR Escalation,MGR-BU-04-11,Second documented incident within the quarter
+EMP-0269,BU-04,2024-02-15,HR Escalation,MGR-BU-04-11,Pattern of missed targets across multiple weeks
+EMP-0874,BU-04,2024-03-06,Performance Review Meeting,MGR-BU-04-20,Continued underperformance despite prior coaching
+EMP-0874,BU-04,2024-03-27,Written Warning,MGR-BU-04-20,Pattern of missed targets across multiple weeks
+EMP-0671,BU-01,2024-02-02,HR Escalation,MGR-BU-01-10,Pattern of missed targets across multiple weeks
+EMP-0671,BU-01,2024-02-04,Coaching Session,MGR-BU-01-10,Continued underperformance despite prior coaching
+EMP-0671,BU-01,2024-02-26,HR Escalation,MGR-BU-01-10,Second documented incident within the quarter
+EMP-0062,BU-04,2024-01-06,Coaching Session,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0062,BU-04,2024-01-26,HR Escalation,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0702,BU-01,2024-01-03,HR Escalation,MGR-BU-01-14,Continued underperformance despite prior coaching
+EMP-0702,BU-01,2024-01-10,Coaching Session,MGR-BU-01-14,Continued underperformance despite prior coaching
+EMP-0702,BU-01,2024-03-06,HR Escalation,MGR-BU-01-14,Continued underperformance despite prior coaching
+EMP-0729,BU-04,2024-02-22,HR Escalation,MGR-BU-04-15,Continued underperformance despite prior coaching
+EMP-0729,BU-04,2024-03-27,Performance Review Meeting,MGR-BU-04-15,Second documented incident within the quarter
+EMP-0934,BU-03,2024-01-12,Coaching Session,MGR-BU-03-11,Second documented incident within the quarter
+EMP-0934,BU-03,2024-02-29,Performance Review Meeting,MGR-BU-03-11,Second documented incident within the quarter
+EMP-0934,BU-03,2024-03-06,Performance Review Meeting,MGR-BU-03-11,Continued underperformance despite prior coaching
+EMP-0822,BU-02,2024-01-15,Written Warning,MGR-BU-02-07,Continued underperformance despite prior coaching
+EMP-0822,BU-02,2024-03-18,Performance Review Meeting,MGR-BU-02-07,Pattern of missed targets across multiple weeks
+EMP-0822,BU-02,2024-03-22,HR Escalation,MGR-BU-02-07,Continued underperformance despite prior coaching
+EMP-0897,BU-02,2024-02-04,Written Warning,MGR-BU-02-17,Pattern of missed targets across multiple weeks
+EMP-0897,BU-02,2024-02-12,Performance Review Meeting,MGR-BU-02-17,Continued underperformance despite prior coaching
+EMP-0897,BU-02,2024-03-16,HR Escalation,MGR-BU-02-17,Pattern of missed targets across multiple weeks
+EMP-0471,BU-02,2024-01-05,Written Warning,MGR-BU-02-07,Second documented incident within the quarter
+EMP-0471,BU-02,2024-01-09,Performance Review Meeting,MGR-BU-02-07,Continued underperformance despite prior coaching
+EMP-0471,BU-02,2024-02-04,HR Escalation,MGR-BU-02-07,Pattern of missed targets across multiple weeks
+EMP-0898,BU-04,2024-01-22,Written Warning,MGR-BU-04-16,Continued underperformance despite prior coaching
+EMP-0898,BU-04,2024-01-26,Performance Review Meeting,MGR-BU-04-16,Pattern of missed targets across multiple weeks
+EMP-0898,BU-04,2024-03-29,Performance Review Meeting,MGR-BU-04-16,Pattern of missed targets across multiple weeks
+EMP-0184,BU-03,2024-01-20,Written Warning,MGR-BU-03-04,Pattern of missed targets across multiple weeks
+EMP-0184,BU-03,2024-03-03,Written Warning,MGR-BU-03-04,Pattern of missed targets across multiple weeks
+EMP-0834,BU-02,2024-01-30,Coaching Session,MGR-BU-02-03,Second documented incident within the quarter
+EMP-0834,BU-02,2024-03-30,Coaching Session,MGR-BU-02-03,Pattern of missed targets across multiple weeks
+EMP-0605,BU-01,2024-01-16,Performance Review Meeting,MGR-BU-01-04,Pattern of missed targets across multiple weeks
+EMP-0605,BU-01,2024-02-03,Performance Review Meeting,MGR-BU-01-04,Second documented incident within the quarter
+EMP-0661,BU-01,2024-03-10,Written Warning,MGR-BU-01-10,Second documented incident within the quarter
+EMP-0661,BU-01,2024-03-15,Coaching Session,MGR-BU-01-10,Continued underperformance despite prior coaching
+EMP-0899,BU-03,2024-02-15,Coaching Session,MGR-BU-03-10,Pattern of missed targets across multiple weeks
+EMP-0899,BU-03,2024-02-27,Coaching Session,MGR-BU-03-10,Continued underperformance despite prior coaching
+EMP-0475,BU-03,2024-02-10,Coaching Session,MGR-BU-03-08,Pattern of missed targets across multiple weeks
+EMP-0475,BU-03,2024-02-11,Written Warning,MGR-BU-03-08,Continued underperformance despite prior coaching
+EMP-0475,BU-03,2024-03-28,Performance Review Meeting,MGR-BU-03-08,Second documented incident within the quarter
+EMP-0231,BU-02,2024-01-14,Written Warning,MGR-BU-02-20,Pattern of missed targets across multiple weeks
+EMP-0231,BU-02,2024-01-24,HR Escalation,MGR-BU-02-20,Continued underperformance despite prior coaching
+EMP-0231,BU-02,2024-02-20,HR Escalation,MGR-BU-02-20,Second documented incident within the quarter
+EMP-0657,BU-02,2024-01-14,Written Warning,MGR-BU-02-20,Second documented incident within the quarter
+EMP-0657,BU-02,2024-02-01,HR Escalation,MGR-BU-02-20,Second documented incident within the quarter
+EMP-0657,BU-02,2024-03-30,HR Escalation,MGR-BU-02-20,Second documented incident within the quarter
+EMP-0948,BU-02,2024-01-08,Written Warning,MGR-BU-02-12,Second documented incident within the quarter
+EMP-0948,BU-02,2024-02-29,HR Escalation,MGR-BU-02-12,Continued underperformance despite prior coaching
+EMP-0948,BU-02,2024-03-04,Written Warning,MGR-BU-02-12,Pattern of missed targets across multiple weeks
+EMP-0630,BU-01,2024-01-24,Performance Review Meeting,MGR-BU-01-03,Continued underperformance despite prior coaching
+EMP-0630,BU-01,2024-02-20,Performance Review Meeting,MGR-BU-01-03,Second documented incident within the quarter
+EMP-0750,BU-01,2024-01-12,HR Escalation,MGR-BU-01-09,Continued underperformance despite prior coaching
+EMP-0750,BU-01,2024-01-25,HR Escalation,MGR-BU-01-09,Second documented incident within the quarter
+EMP-0521,BU-03,2024-02-22,Performance Review Meeting,MGR-BU-03-07,Continued underperformance despite prior coaching
+EMP-0521,BU-03,2024-03-08,Performance Review Meeting,MGR-BU-03-07,Continued underperformance despite prior coaching
+EMP-0965,BU-04,2024-01-31,HR Escalation,MGR-BU-04-19,Second documented incident within the quarter
+EMP-0965,BU-04,2024-03-06,Written Warning,MGR-BU-04-19,Pattern of missed targets across multiple weeks
+EMP-0965,BU-04,2024-03-08,Performance Review Meeting,MGR-BU-04-19,Continued underperformance despite prior coaching
+EMP-0399,BU-02,2024-02-29,Performance Review Meeting,MGR-BU-02-01,Continued underperformance despite prior coaching
+EMP-0399,BU-02,2024-03-01,Written Warning,MGR-BU-02-01,Second documented incident within the quarter
+EMP-0220,BU-04,2024-01-24,Coaching Session,MGR-BU-04-08,Second documented incident within the quarter
+EMP-0220,BU-04,2024-03-03,Coaching Session,MGR-BU-04-08,Pattern of missed targets across multiple weeks
+EMP-0004,BU-04,2024-01-02,Coaching Session,MGR-BU-04-02,Continued underperformance despite prior coaching
+EMP-0004,BU-04,2024-03-11,Coaching Session,MGR-BU-04-02,Continued underperformance despite prior coaching
+EMP-0004,BU-04,2024-03-19,Performance Review Meeting,MGR-BU-04-02,Continued underperformance despite prior coaching
+EMP-0154,BU-04,2024-01-01,Performance Review Meeting,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0154,BU-04,2024-01-07,Written Warning,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0154,BU-04,2024-03-29,Written Warning,MGR-BU-04-01,Second documented incident within the quarter
+EMP-0112,BU-04,2024-02-11,Coaching Session,MGR-BU-04-14,Pattern of missed targets across multiple weeks
+EMP-0112,BU-04,2024-02-23,Written Warning,MGR-BU-04-14,Pattern of missed targets across multiple weeks
+EMP-0799,BU-02,2024-01-10,HR Escalation,MGR-BU-02-16,Pattern of missed targets across multiple weeks
+EMP-0799,BU-02,2024-01-26,HR Escalation,MGR-BU-02-16,Second documented incident within the quarter
+EMP-0428,BU-02,2024-03-22,Written Warning,MGR-BU-02-18,Second documented incident within the quarter
+EMP-0428,BU-02,2024-03-30,Coaching Session,MGR-BU-02-18,Second documented incident within the quarter
+EMP-0580,BU-03,2024-01-01,HR Escalation,MGR-BU-03-17,Continued underperformance despite prior coaching
+EMP-0580,BU-03,2024-01-07,HR Escalation,MGR-BU-03-17,Second documented incident within the quarter
+EMP-0580,BU-03,2024-02-06,Performance Review Meeting,MGR-BU-03-17,Pattern of missed targets across multiple weeks
+EMP-0230,BU-04,2024-01-19,Written Warning,MGR-BU-04-01,Pattern of missed targets across multiple weeks
+EMP-0230,BU-04,2024-03-24,Performance Review Meeting,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0353,BU-04,2024-02-10,Coaching Session,MGR-BU-04-06,Pattern of missed targets across multiple weeks
+EMP-0353,BU-04,2024-03-27,Written Warning,MGR-BU-04-06,Continued underperformance despite prior coaching
+EMP-0408,BU-01,2024-02-17,HR Escalation,MGR-BU-01-11,Pattern of missed targets across multiple weeks
+EMP-0408,BU-01,2024-03-25,Written Warning,MGR-BU-01-11,Continued underperformance despite prior coaching
+EMP-0328,BU-03,2024-02-17,HR Escalation,MGR-BU-03-13,Pattern of missed targets across multiple weeks
+EMP-0328,BU-03,2024-02-19,Written Warning,MGR-BU-03-13,Second documented incident within the quarter
+EMP-0328,BU-03,2024-03-12,Written Warning,MGR-BU-03-13,Pattern of missed targets across multiple weeks
+EMP-0444,BU-03,2024-01-26,Coaching Session,MGR-BU-03-12,Continued underperformance despite prior coaching
+EMP-0444,BU-03,2024-03-10,HR Escalation,MGR-BU-03-12,Second documented incident within the quarter
+EMP-0916,BU-01,2024-02-08,Written Warning,MGR-BU-01-17,Pattern of missed targets across multiple weeks
+EMP-0916,BU-01,2024-03-02,HR Escalation,MGR-BU-01-17,Second documented incident within the quarter
+EMP-0916,BU-01,2024-03-13,HR Escalation,MGR-BU-01-17,Pattern of missed targets across multiple weeks
+EMP-0323,BU-04,2024-01-05,Performance Review Meeting,MGR-BU-04-16,Continued underperformance despite prior coaching
+EMP-0323,BU-04,2024-03-23,Written Warning,MGR-BU-04-16,Continued underperformance despite prior coaching
+EMP-0385,BU-01,2024-01-24,Coaching Session,MGR-BU-01-13,Continued underperformance despite prior coaching
+EMP-0385,BU-01,2024-03-30,Coaching Session,MGR-BU-01-13,Continued underperformance despite prior coaching
+EMP-0584,BU-03,2024-01-22,Coaching Session,MGR-BU-03-02,Second documented incident within the quarter
+EMP-0584,BU-03,2024-03-14,Performance Review Meeting,MGR-BU-03-02,Continued underperformance despite prior coaching
+EMP-0172,BU-02,2024-01-11,Written Warning,MGR-BU-02-11,Pattern of missed targets across multiple weeks
+EMP-0172,BU-02,2024-01-13,Written Warning,MGR-BU-02-11,Continued underperformance despite prior coaching
+EMP-0172,BU-02,2024-03-07,HR Escalation,MGR-BU-02-11,Continued underperformance despite prior coaching
+EMP-0016,BU-01,2024-01-02,Written Warning,MGR-BU-01-10,Pattern of missed targets across multiple weeks
+EMP-0016,BU-01,2024-01-28,Performance Review Meeting,MGR-BU-01-10,Second documented incident within the quarter
+EMP-0566,BU-01,2024-02-08,Coaching Session,MGR-BU-01-04,Continued underperformance despite prior coaching
+EMP-0566,BU-01,2024-02-27,Performance Review Meeting,MGR-BU-01-04,Continued underperformance despite prior coaching
+EMP-0335,BU-02,2024-01-22,Written Warning,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0335,BU-02,2024-02-29,HR Escalation,MGR-BU-02-13,Pattern of missed targets across multiple weeks
+EMP-0335,BU-02,2024-03-03,Performance Review Meeting,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0682,BU-01,2024-01-08,Performance Review Meeting,MGR-BU-01-04,Continued underperformance despite prior coaching
+EMP-0682,BU-01,2024-01-22,HR Escalation,MGR-BU-01-04,Second documented incident within the quarter
+EMP-0682,BU-01,2024-02-29,Performance Review Meeting,MGR-BU-01-04,Continued underperformance despite prior coaching
+EMP-0035,BU-03,2024-01-03,Performance Review Meeting,MGR-BU-03-06,Continued underperformance despite prior coaching
+EMP-0035,BU-03,2024-01-18,Written Warning,MGR-BU-03-06,Pattern of missed targets across multiple weeks
+EMP-0130,BU-01,2024-01-14,Coaching Session,MGR-BU-01-16,Pattern of missed targets across multiple weeks
+EMP-0130,BU-01,2024-03-15,Written Warning,MGR-BU-01-16,Pattern of missed targets across multiple weeks
+EMP-0746,BU-01,2024-01-27,Written Warning,MGR-BU-01-09,Second documented incident within the quarter
+EMP-0746,BU-01,2024-02-17,Coaching Session,MGR-BU-01-09,Second documented incident within the quarter
+EMP-0299,BU-04,2024-02-20,Coaching Session,MGR-BU-04-08,Continued underperformance despite prior coaching
+EMP-0299,BU-04,2024-03-20,Coaching Session,MGR-BU-04-08,Continued underperformance despite prior coaching
+EMP-0822,BU-04,2024-01-07,HR Escalation,MGR-BU-04-09,Second documented incident within the quarter
+EMP-0822,BU-04,2024-01-22,HR Escalation,MGR-BU-04-09,Second documented incident within the quarter
+EMP-0822,BU-04,2024-02-13,Written Warning,MGR-BU-04-09,Pattern of missed targets across multiple weeks
+EMP-0950,BU-04,2024-02-21,Performance Review Meeting,MGR-BU-04-05,Continued underperformance despite prior coaching
+EMP-0950,BU-04,2024-03-24,HR Escalation,MGR-BU-04-05,Pattern of missed targets across multiple weeks
+EMP-0950,BU-04,2024-03-29,Performance Review Meeting,MGR-BU-04-05,Second documented incident within the quarter
+EMP-0046,BU-03,2024-02-24,Performance Review Meeting,MGR-BU-03-08,Second documented incident within the quarter
+EMP-0046,BU-03,2024-03-29,Performance Review Meeting,MGR-BU-03-08,Continued underperformance despite prior coaching
+EMP-0304,BU-03,2024-03-07,HR Escalation,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0304,BU-03,2024-03-19,Written Warning,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0304,BU-03,2024-03-21,Coaching Session,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0443,BU-02,2024-02-01,Performance Review Meeting,MGR-BU-02-13,Pattern of missed targets across multiple weeks
+EMP-0443,BU-02,2024-02-20,Coaching Session,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0145,BU-01,2024-01-14,Coaching Session,MGR-BU-01-10,Pattern of missed targets across multiple weeks
+EMP-0145,BU-01,2024-03-05,HR Escalation,MGR-BU-01-10,Continued underperformance despite prior coaching
+EMP-0145,BU-01,2024-03-26,Performance Review Meeting,MGR-BU-01-10,Pattern of missed targets across multiple weeks
+EMP-0992,BU-03,2024-01-20,HR Escalation,MGR-BU-03-12,Second documented incident within the quarter
+EMP-0992,BU-03,2024-01-26,Written Warning,MGR-BU-03-12,Second documented incident within the quarter
+EMP-0992,BU-03,2024-01-29,HR Escalation,MGR-BU-03-12,Second documented incident within the quarter
+EMP-0586,BU-01,2024-01-30,Coaching Session,MGR-BU-01-20,Pattern of missed targets across multiple weeks
+EMP-0586,BU-01,2024-02-06,Coaching Session,MGR-BU-01-20,Continued underperformance despite prior coaching
+EMP-0586,BU-01,2024-03-06,HR Escalation,MGR-BU-01-20,Second documented incident within the quarter
+EMP-0117,BU-03,2024-02-17,Performance Review Meeting,MGR-BU-03-05,Second documented incident within the quarter
+EMP-0117,BU-03,2024-03-01,Written Warning,MGR-BU-03-05,Pattern of missed targets across multiple weeks
+EMP-0060,BU-01,2024-02-14,Written Warning,MGR-BU-01-15,Pattern of missed targets across multiple weeks
+EMP-0060,BU-01,2024-03-28,Coaching Session,MGR-BU-01-15,Second documented incident within the quarter
+EMP-0566,BU-04,2024-01-17,Coaching Session,MGR-BU-04-08,Pattern of missed targets across multiple weeks
+EMP-0566,BU-04,2024-02-02,Performance Review Meeting,MGR-BU-04-08,Second documented incident within the quarter
+EMP-0618,BU-02,2024-02-16,HR Escalation,MGR-BU-02-15,Second documented incident within the quarter
+EMP-0618,BU-02,2024-02-29,Performance Review Meeting,MGR-BU-02-15,Continued underperformance despite prior coaching
+EMP-0618,BU-02,2024-03-06,HR Escalation,MGR-BU-02-15,Second documented incident within the quarter
+EMP-0554,BU-04,2024-01-07,Written Warning,MGR-BU-04-13,Continued underperformance despite prior coaching
+EMP-0554,BU-04,2024-02-19,HR Escalation,MGR-BU-04-13,Continued underperformance despite prior coaching
+EMP-0554,BU-04,2024-02-21,Coaching Session,MGR-BU-04-13,Second documented incident within the quarter
+EMP-0855,BU-03,2024-01-14,Performance Review Meeting,MGR-BU-03-11,Pattern of missed targets across multiple weeks
+EMP-0855,BU-03,2024-01-21,Coaching Session,MGR-BU-03-11,Second documented incident within the quarter
+EMP-0855,BU-03,2024-02-28,HR Escalation,MGR-BU-03-11,Continued underperformance despite prior coaching
+EMP-0532,BU-01,2024-01-23,Performance Review Meeting,MGR-BU-01-14,Second documented incident within the quarter
+EMP-0532,BU-01,2024-03-05,Written Warning,MGR-BU-01-14,Continued underperformance despite prior coaching
+EMP-0532,BU-01,2024-03-16,Coaching Session,MGR-BU-01-14,Second documented incident within the quarter
+EMP-0526,BU-02,2024-01-29,Written Warning,MGR-BU-02-03,Continued underperformance despite prior coaching
+EMP-0526,BU-02,2024-02-05,Coaching Session,MGR-BU-02-03,Pattern of missed targets across multiple weeks
+EMP-0526,BU-02,2024-02-13,Coaching Session,MGR-BU-02-03,Pattern of missed targets across multiple weeks
+EMP-0038,BU-02,2024-01-24,Performance Review Meeting,MGR-BU-02-09,Pattern of missed targets across multiple weeks
+EMP-0038,BU-02,2024-03-09,Coaching Session,MGR-BU-02-09,Continued underperformance despite prior coaching
+EMP-0038,BU-02,2024-03-18,Performance Review Meeting,MGR-BU-02-09,Continued underperformance despite prior coaching
+EMP-0026,BU-01,2024-01-12,Written Warning,MGR-BU-01-19,Continued underperformance despite prior coaching
+EMP-0026,BU-01,2024-03-08,Performance Review Meeting,MGR-BU-01-19,Continued underperformance despite prior coaching
+EMP-0026,BU-01,2024-03-27,Performance Review Meeting,MGR-BU-01-19,Pattern of missed targets across multiple weeks
+EMP-0011,BU-04,2024-03-21,Coaching Session,MGR-BU-04-08,Second documented incident within the quarter
+EMP-0011,BU-04,2024-03-27,Coaching Session,MGR-BU-04-08,Second documented incident within the quarter
+EMP-0821,BU-03,2024-01-08,Written Warning,MGR-BU-03-15,Pattern of missed targets across multiple weeks
+EMP-0821,BU-03,2024-01-31,Written Warning,MGR-BU-03-15,Continued underperformance despite prior coaching
+EMP-0041,BU-01,2024-01-25,Coaching Session,MGR-BU-01-03,Continued underperformance despite prior coaching
+EMP-0041,BU-01,2024-02-11,Performance Review Meeting,MGR-BU-01-03,Pattern of missed targets across multiple weeks
+EMP-0120,BU-02,2024-02-13,Performance Review Meeting,MGR-BU-02-12,Continued underperformance despite prior coaching
+EMP-0120,BU-02,2024-03-05,Coaching Session,MGR-BU-02-12,Continued underperformance despite prior coaching
+EMP-0120,BU-02,2024-03-10,HR Escalation,MGR-BU-02-12,Continued underperformance despite prior coaching
+EMP-0691,BU-04,2024-01-13,HR Escalation,MGR-BU-04-09,Pattern of missed targets across multiple weeks
+EMP-0691,BU-04,2024-02-06,Performance Review Meeting,MGR-BU-04-09,Second documented incident within the quarter
+EMP-0691,BU-04,2024-03-16,Coaching Session,MGR-BU-04-09,Pattern of missed targets across multiple weeks
+EMP-0050,BU-02,2024-01-03,HR Escalation,MGR-BU-02-13,Pattern of missed targets across multiple weeks
+EMP-0050,BU-02,2024-03-16,Coaching Session,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0050,BU-02,2024-03-26,Performance Review Meeting,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0185,BU-01,2024-01-31,Written Warning,MGR-BU-01-07,Continued underperformance despite prior coaching
+EMP-0185,BU-01,2024-02-29,HR Escalation,MGR-BU-01-07,Pattern of missed targets across multiple weeks
+EMP-0185,BU-01,2024-03-24,HR Escalation,MGR-BU-01-07,Continued underperformance despite prior coaching
+EMP-0521,BU-02,2024-01-21,Written Warning,MGR-BU-02-14,Pattern of missed targets across multiple weeks
+EMP-0521,BU-02,2024-02-13,Written Warning,MGR-BU-02-14,Second documented incident within the quarter
+EMP-0940,BU-02,2024-03-07,Written Warning,MGR-BU-02-02,Pattern of missed targets across multiple weeks
+EMP-0940,BU-02,2024-03-23,Written Warning,MGR-BU-02-02,Second documented incident within the quarter
+EMP-0664,BU-01,2024-01-10,Coaching Session,MGR-BU-01-11,Pattern of missed targets across multiple weeks
+EMP-0664,BU-01,2024-03-29,Performance Review Meeting,MGR-BU-01-11,Second documented incident within the quarter
+EMP-0664,BU-01,2024-03-31,Performance Review Meeting,MGR-BU-01-11,Second documented incident within the quarter
+EMP-0481,BU-03,2024-02-22,Written Warning,MGR-BU-03-18,Continued underperformance despite prior coaching
+EMP-0481,BU-03,2024-02-25,HR Escalation,MGR-BU-03-18,Continued underperformance despite prior coaching
+EMP-0533,BU-02,2024-02-16,HR Escalation,MGR-BU-02-13,Pattern of missed targets across multiple weeks
+EMP-0533,BU-02,2024-03-31,Written Warning,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0513,BU-04,2024-01-18,Written Warning,MGR-BU-04-04,Continued underperformance despite prior coaching
+EMP-0513,BU-04,2024-01-19,HR Escalation,MGR-BU-04-04,Pattern of missed targets across multiple weeks
+EMP-0513,BU-04,2024-02-01,Performance Review Meeting,MGR-BU-04-04,Pattern of missed targets across multiple weeks
+EMP-0018,BU-03,2024-03-07,HR Escalation,MGR-BU-03-14,Continued underperformance despite prior coaching
+EMP-0018,BU-03,2024-03-14,HR Escalation,MGR-BU-03-14,Pattern of missed targets across multiple weeks
+EMP-0936,BU-04,2024-01-08,Written Warning,MGR-BU-04-09,Continued underperformance despite prior coaching
+EMP-0936,BU-04,2024-02-14,Coaching Session,MGR-BU-04-09,Pattern of missed targets across multiple weeks
+EMP-0936,BU-04,2024-02-29,HR Escalation,MGR-BU-04-09,Pattern of missed targets across multiple weeks
+EMP-0304,BU-04,2024-02-29,HR Escalation,MGR-BU-04-20,Pattern of missed targets across multiple weeks
+EMP-0304,BU-04,2024-03-15,Performance Review Meeting,MGR-BU-04-20,Continued underperformance despite prior coaching
+EMP-0304,BU-04,2024-03-18,Coaching Session,MGR-BU-04-20,Pattern of missed targets across multiple weeks
+EMP-0007,BU-03,2024-01-01,HR Escalation,MGR-BU-03-10,Continued underperformance despite prior coaching
+EMP-0007,BU-03,2024-01-27,HR Escalation,MGR-BU-03-10,Second documented incident within the quarter
+EMP-0007,BU-03,2024-02-05,HR Escalation,MGR-BU-03-10,Continued underperformance despite prior coaching
+EMP-0788,BU-04,2024-02-07,Written Warning,MGR-BU-04-08,Continued underperformance despite prior coaching
+EMP-0788,BU-04,2024-02-13,Performance Review Meeting,MGR-BU-04-08,Continued underperformance despite prior coaching
+EMP-0052,BU-01,2024-01-17,HR Escalation,MGR-BU-01-11,Second documented incident within the quarter
+EMP-0052,BU-01,2024-03-21,Coaching Session,MGR-BU-01-11,Pattern of missed targets across multiple weeks
+EMP-0810,BU-01,2024-01-15,Performance Review Meeting,MGR-BU-01-15,Continued underperformance despite prior coaching
+EMP-0810,BU-01,2024-03-28,Performance Review Meeting,MGR-BU-01-15,Pattern of missed targets across multiple weeks
+EMP-0723,BU-02,2024-01-02,HR Escalation,MGR-BU-02-17,Continued underperformance despite prior coaching
+EMP-0723,BU-02,2024-01-04,Performance Review Meeting,MGR-BU-02-17,Continued underperformance despite prior coaching
+EMP-0723,BU-02,2024-02-13,Written Warning,MGR-BU-02-17,Second documented incident within the quarter
+EMP-0491,BU-02,2024-01-05,Coaching Session,MGR-BU-02-03,Continued underperformance despite prior coaching
+EMP-0491,BU-02,2024-03-05,Written Warning,MGR-BU-02-03,Pattern of missed targets across multiple weeks
+EMP-0491,BU-02,2024-03-27,Written Warning,MGR-BU-02-03,Continued underperformance despite prior coaching
+EMP-0294,BU-01,2024-02-28,HR Escalation,MGR-BU-01-15,Continued underperformance despite prior coaching
+EMP-0294,BU-01,2024-03-19,HR Escalation,MGR-BU-01-15,Pattern of missed targets across multiple weeks
+EMP-0628,BU-03,2024-01-18,Coaching Session,MGR-BU-03-12,Second documented incident within the quarter
+EMP-0628,BU-03,2024-02-22,Coaching Session,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0628,BU-03,2024-03-08,Written Warning,MGR-BU-03-12,Continued underperformance despite prior coaching
+EMP-0804,BU-01,2024-02-25,Performance Review Meeting,MGR-BU-01-07,Continued underperformance despite prior coaching
+EMP-0804,BU-01,2024-03-17,HR Escalation,MGR-BU-01-07,Pattern of missed targets across multiple weeks
+EMP-0804,BU-01,2024-03-31,Performance Review Meeting,MGR-BU-01-07,Pattern of missed targets across multiple weeks
+EMP-0869,BU-01,2024-02-02,Performance Review Meeting,MGR-BU-01-05,Continued underperformance despite prior coaching
+EMP-0869,BU-01,2024-03-16,Performance Review Meeting,MGR-BU-01-05,Continued underperformance despite prior coaching
+EMP-0869,BU-01,2024-03-19,Written Warning,MGR-BU-01-05,Pattern of missed targets across multiple weeks
+EMP-0835,BU-02,2024-02-17,HR Escalation,MGR-BU-02-10,Second documented incident within the quarter
+EMP-0835,BU-02,2024-03-18,HR Escalation,MGR-BU-02-10,Second documented incident within the quarter
+EMP-0863,BU-02,2024-01-28,HR Escalation,MGR-BU-02-12,Second documented incident within the quarter
+EMP-0863,BU-02,2024-02-28,Performance Review Meeting,MGR-BU-02-12,Second documented incident within the quarter
+EMP-0863,BU-02,2024-03-18,Performance Review Meeting,MGR-BU-02-12,Second documented incident within the quarter
+EMP-0889,BU-03,2024-02-08,HR Escalation,MGR-BU-03-04,Pattern of missed targets across multiple weeks
+EMP-0889,BU-03,2024-02-23,HR Escalation,MGR-BU-03-04,Continued underperformance despite prior coaching
+EMP-0889,BU-03,2024-03-16,Written Warning,MGR-BU-03-04,Pattern of missed targets across multiple weeks
+EMP-0788,BU-03,2024-01-12,Performance Review Meeting,MGR-BU-03-14,Continued underperformance despite prior coaching
+EMP-0788,BU-03,2024-02-13,HR Escalation,MGR-BU-03-14,Continued underperformance despite prior coaching
+EMP-0788,BU-03,2024-03-19,Performance Review Meeting,MGR-BU-03-14,Second documented incident within the quarter
+EMP-0956,BU-02,2024-01-03,Coaching Session,MGR-BU-02-04,Pattern of missed targets across multiple weeks
+EMP-0956,BU-02,2024-02-27,Coaching Session,MGR-BU-02-04,Pattern of missed targets across multiple weeks
+EMP-0956,BU-02,2024-03-12,Performance Review Meeting,MGR-BU-02-04,Continued underperformance despite prior coaching
+EMP-0340,BU-03,2024-01-02,Written Warning,MGR-BU-03-12,Second documented incident within the quarter
+EMP-0340,BU-03,2024-01-19,Performance Review Meeting,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0644,BU-04,2024-01-25,Written Warning,MGR-BU-04-04,Pattern of missed targets across multiple weeks
+EMP-0644,BU-04,2024-02-04,Performance Review Meeting,MGR-BU-04-04,Pattern of missed targets across multiple weeks
+EMP-0644,BU-04,2024-03-11,Performance Review Meeting,MGR-BU-04-04,Second documented incident within the quarter
+EMP-0228,BU-01,2024-02-17,Performance Review Meeting,MGR-BU-01-05,Continued underperformance despite prior coaching
+EMP-0228,BU-01,2024-03-04,Written Warning,MGR-BU-01-05,Pattern of missed targets across multiple weeks
+EMP-0040,BU-03,2024-01-28,Coaching Session,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0040,BU-03,2024-02-11,Performance Review Meeting,MGR-BU-03-03,Continued underperformance despite prior coaching
+EMP-0947,BU-01,2024-01-21,HR Escalation,MGR-BU-01-12,Continued underperformance despite prior coaching
+EMP-0947,BU-01,2024-02-29,HR Escalation,MGR-BU-01-12,Pattern of missed targets across multiple weeks
+EMP-0947,BU-01,2024-03-27,Coaching Session,MGR-BU-01-12,Continued underperformance despite prior coaching
+EMP-0164,BU-02,2024-01-07,Written Warning,MGR-BU-02-05,Continued underperformance despite prior coaching
+EMP-0164,BU-02,2024-03-11,Performance Review Meeting,MGR-BU-02-05,Second documented incident within the quarter
+EMP-0281,BU-03,2024-02-08,Written Warning,MGR-BU-03-07,Second documented incident within the quarter
+EMP-0281,BU-03,2024-02-09,HR Escalation,MGR-BU-03-07,Continued underperformance despite prior coaching
+EMP-0798,BU-01,2024-01-06,Performance Review Meeting,MGR-BU-01-17,Second documented incident within the quarter
+EMP-0798,BU-01,2024-01-15,Coaching Session,MGR-BU-01-17,Continued underperformance despite prior coaching
+EMP-0798,BU-01,2024-02-27,Coaching Session,MGR-BU-01-17,Second documented incident within the quarter
+EMP-0027,BU-04,2024-01-05,Performance Review Meeting,MGR-BU-04-02,Continued underperformance despite prior coaching
+EMP-0027,BU-04,2024-02-22,Coaching Session,MGR-BU-04-02,Continued underperformance despite prior coaching
+EMP-0027,BU-04,2024-03-31,Written Warning,MGR-BU-04-02,Pattern of missed targets across multiple weeks
+EMP-0134,BU-03,2024-01-15,Written Warning,MGR-BU-03-07,Pattern of missed targets across multiple weeks
+EMP-0134,BU-03,2024-02-21,Coaching Session,MGR-BU-03-07,Continued underperformance despite prior coaching
+EMP-0703,BU-01,2024-01-17,HR Escalation,MGR-BU-01-17,Continued underperformance despite prior coaching
+EMP-0703,BU-01,2024-03-27,HR Escalation,MGR-BU-01-17,Pattern of missed targets across multiple weeks
+EMP-0636,BU-02,2024-01-30,Performance Review Meeting,MGR-BU-02-08,Pattern of missed targets across multiple weeks
+EMP-0636,BU-02,2024-02-21,Written Warning,MGR-BU-02-08,Second documented incident within the quarter
+EMP-0748,BU-01,2024-03-02,Performance Review Meeting,MGR-BU-01-04,Second documented incident within the quarter
+EMP-0748,BU-01,2024-03-11,Performance Review Meeting,MGR-BU-01-04,Continued underperformance despite prior coaching
+EMP-0748,BU-01,2024-03-28,Written Warning,MGR-BU-01-04,Second documented incident within the quarter
+EMP-0993,BU-01,2024-01-31,Coaching Session,MGR-BU-01-04,Second documented incident within the quarter
+EMP-0993,BU-01,2024-03-10,Performance Review Meeting,MGR-BU-01-04,Second documented incident within the quarter
+EMP-0993,BU-01,2024-03-18,Performance Review Meeting,MGR-BU-01-04,Second documented incident within the quarter
+EMP-0692,BU-01,2024-02-12,HR Escalation,MGR-BU-01-10,Second documented incident within the quarter
+EMP-0692,BU-01,2024-03-09,Coaching Session,MGR-BU-01-10,Continued underperformance despite prior coaching
+EMP-0710,BU-03,2024-02-07,Coaching Session,MGR-BU-03-05,Pattern of missed targets across multiple weeks
+EMP-0710,BU-03,2024-02-29,HR Escalation,MGR-BU-03-05,Continued underperformance despite prior coaching
+EMP-0793,BU-04,2024-01-06,HR Escalation,MGR-BU-04-18,Second documented incident within the quarter
+EMP-0793,BU-04,2024-02-25,Coaching Session,MGR-BU-04-18,Continued underperformance despite prior coaching
+EMP-0482,BU-04,2024-02-07,Written Warning,MGR-BU-04-09,Second documented incident within the quarter
+EMP-0482,BU-04,2024-03-20,Performance Review Meeting,MGR-BU-04-09,Pattern of missed targets across multiple weeks
+EMP-0482,BU-04,2024-03-24,Written Warning,MGR-BU-04-09,Pattern of missed targets across multiple weeks
+EMP-0708,BU-01,2024-01-31,Performance Review Meeting,MGR-BU-01-12,Continued underperformance despite prior coaching
+EMP-0708,BU-01,2024-03-12,HR Escalation,MGR-BU-01-12,Pattern of missed targets across multiple weeks
+EMP-0708,BU-01,2024-03-15,Coaching Session,MGR-BU-01-12,Continued underperformance despite prior coaching
+EMP-0255,BU-04,2024-01-15,HR Escalation,MGR-BU-04-07,Continued underperformance despite prior coaching
+EMP-0255,BU-04,2024-03-27,HR Escalation,MGR-BU-04-07,Pattern of missed targets across multiple weeks
+EMP-0268,BU-02,2024-01-23,HR Escalation,MGR-BU-02-07,Continued underperformance despite prior coaching
+EMP-0268,BU-02,2024-01-29,Coaching Session,MGR-BU-02-07,Pattern of missed targets across multiple weeks
+EMP-0268,BU-02,2024-03-11,HR Escalation,MGR-BU-02-07,Continued underperformance despite prior coaching
+EMP-0769,BU-04,2024-01-31,HR Escalation,MGR-BU-04-20,Continued underperformance despite prior coaching
+EMP-0769,BU-04,2024-03-09,Coaching Session,MGR-BU-04-20,Second documented incident within the quarter
+EMP-0149,BU-01,2024-01-09,HR Escalation,MGR-BU-01-18,Pattern of missed targets across multiple weeks
+EMP-0149,BU-01,2024-01-12,HR Escalation,MGR-BU-01-18,Continued underperformance despite prior coaching
+EMP-0149,BU-01,2024-03-04,Performance Review Meeting,MGR-BU-01-18,Second documented incident within the quarter
+EMP-0573,BU-02,2024-01-05,Written Warning,MGR-BU-02-18,Second documented incident within the quarter
+EMP-0573,BU-02,2024-02-16,HR Escalation,MGR-BU-02-18,Second documented incident within the quarter
+EMP-0573,BU-02,2024-03-03,HR Escalation,MGR-BU-02-18,Second documented incident within the quarter
+EMP-0790,BU-02,2024-01-13,Written Warning,MGR-BU-02-02,Pattern of missed targets across multiple weeks
+EMP-0790,BU-02,2024-03-21,HR Escalation,MGR-BU-02-02,Pattern of missed targets across multiple weeks
+EMP-0753,BU-03,2024-01-25,Performance Review Meeting,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0753,BU-03,2024-02-06,Coaching Session,MGR-BU-03-03,Second documented incident within the quarter
+EMP-0753,BU-03,2024-03-13,Performance Review Meeting,MGR-BU-03-03,Continued underperformance despite prior coaching
+EMP-0943,BU-02,2024-03-03,Written Warning,MGR-BU-02-11,Second documented incident within the quarter
+EMP-0943,BU-02,2024-03-15,Coaching Session,MGR-BU-02-11,Pattern of missed targets across multiple weeks
+EMP-0663,BU-02,2024-01-12,Coaching Session,MGR-BU-02-16,Pattern of missed targets across multiple weeks
+EMP-0663,BU-02,2024-01-25,Coaching Session,MGR-BU-02-16,Second documented incident within the quarter
+EMP-0024,BU-01,2024-01-29,HR Escalation,MGR-BU-01-19,Continued underperformance despite prior coaching
+EMP-0024,BU-01,2024-03-15,Coaching Session,MGR-BU-01-19,Pattern of missed targets across multiple weeks
+EMP-0719,BU-02,2024-02-19,Written Warning,MGR-BU-02-11,Continued underperformance despite prior coaching
+EMP-0719,BU-02,2024-02-20,Performance Review Meeting,MGR-BU-02-11,Pattern of missed targets across multiple weeks
+EMP-0908,BU-01,2024-01-24,Coaching Session,MGR-BU-01-16,Second documented incident within the quarter
+EMP-0908,BU-01,2024-03-09,Written Warning,MGR-BU-01-16,Second documented incident within the quarter
+EMP-0908,BU-01,2024-03-20,Coaching Session,MGR-BU-01-16,Second documented incident within the quarter
+EMP-0342,BU-03,2024-01-11,Written Warning,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0342,BU-03,2024-02-28,Performance Review Meeting,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0342,BU-03,2024-03-24,Performance Review Meeting,MGR-BU-03-12,Second documented incident within the quarter
+EMP-0084,BU-04,2024-01-16,HR Escalation,MGR-BU-04-07,Second documented incident within the quarter
+EMP-0084,BU-04,2024-03-18,Coaching Session,MGR-BU-04-07,Pattern of missed targets across multiple weeks
+EMP-0580,BU-01,2024-01-01,Performance Review Meeting,MGR-BU-01-06,Second documented incident within the quarter
+EMP-0580,BU-01,2024-03-04,Coaching Session,MGR-BU-01-06,Continued underperformance despite prior coaching
+EMP-0693,BU-04,2024-01-18,Written Warning,MGR-BU-04-02,Second documented incident within the quarter
+EMP-0693,BU-04,2024-01-31,Performance Review Meeting,MGR-BU-04-02,Pattern of missed targets across multiple weeks
+EMP-0716,BU-04,2024-01-28,HR Escalation,MGR-BU-04-11,Continued underperformance despite prior coaching
+EMP-0716,BU-04,2024-02-08,Written Warning,MGR-BU-04-11,Second documented incident within the quarter
+EMP-0023,BU-01,2024-03-03,Performance Review Meeting,MGR-BU-01-11,Second documented incident within the quarter
+EMP-0023,BU-01,2024-03-12,Coaching Session,MGR-BU-01-11,Pattern of missed targets across multiple weeks
+EMP-0817,BU-04,2024-01-21,Coaching Session,MGR-BU-04-16,Second documented incident within the quarter
+EMP-0817,BU-04,2024-03-09,HR Escalation,MGR-BU-04-16,Second documented incident within the quarter
+EMP-0817,BU-04,2024-03-27,Performance Review Meeting,MGR-BU-04-16,Pattern of missed targets across multiple weeks
+EMP-0440,BU-04,2024-02-14,Coaching Session,MGR-BU-04-12,Pattern of missed targets across multiple weeks
+EMP-0440,BU-04,2024-03-19,Written Warning,MGR-BU-04-12,Continued underperformance despite prior coaching
+EMP-0020,BU-02,2024-02-06,Performance Review Meeting,MGR-BU-02-13,Pattern of missed targets across multiple weeks
+EMP-0020,BU-02,2024-02-10,Coaching Session,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0020,BU-02,2024-02-16,Performance Review Meeting,MGR-BU-02-13,Continued underperformance despite prior coaching
+EMP-0049,BU-01,2024-02-05,Written Warning,MGR-BU-01-17,Continued underperformance despite prior coaching
+EMP-0049,BU-01,2024-03-23,Coaching Session,MGR-BU-01-17,Continued underperformance despite prior coaching
+EMP-0541,BU-02,2024-01-19,Performance Review Meeting,MGR-BU-02-19,Continued underperformance despite prior coaching
+EMP-0541,BU-02,2024-01-20,Written Warning,MGR-BU-02-19,Pattern of missed targets across multiple weeks
+EMP-0541,BU-02,2024-03-11,Written Warning,MGR-BU-02-19,Pattern of missed targets across multiple weeks
+EMP-0776,BU-03,2024-01-14,Performance Review Meeting,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0776,BU-03,2024-02-02,HR Escalation,MGR-BU-03-03,Continued underperformance despite prior coaching
+EMP-0586,BU-03,2024-01-20,HR Escalation,MGR-BU-03-04,Pattern of missed targets across multiple weeks
+EMP-0586,BU-03,2024-02-24,Coaching Session,MGR-BU-03-04,Second documented incident within the quarter
+EMP-0396,BU-03,2024-01-14,Performance Review Meeting,MGR-BU-03-09,Second documented incident within the quarter
+EMP-0396,BU-03,2024-01-19,HR Escalation,MGR-BU-03-09,Continued underperformance despite prior coaching
+EMP-0400,BU-03,2024-01-12,Written Warning,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0400,BU-03,2024-01-24,HR Escalation,MGR-BU-03-03,Second documented incident within the quarter
+EMP-0400,BU-03,2024-02-10,HR Escalation,MGR-BU-03-03,Pattern of missed targets across multiple weeks
+EMP-0286,BU-01,2024-03-05,HR Escalation,MGR-BU-01-15,Pattern of missed targets across multiple weeks
+EMP-0286,BU-01,2024-03-28,Coaching Session,MGR-BU-01-15,Pattern of missed targets across multiple weeks
+EMP-0949,BU-03,2024-01-08,Performance Review Meeting,MGR-BU-03-02,Second documented incident within the quarter
+EMP-0949,BU-03,2024-02-12,Written Warning,MGR-BU-03-02,Second documented incident within the quarter
+EMP-0949,BU-03,2024-02-22,Written Warning,MGR-BU-03-02,Pattern of missed targets across multiple weeks
+EMP-0201,BU-03,2024-01-18,HR Escalation,MGR-BU-03-12,Continued underperformance despite prior coaching
+EMP-0201,BU-03,2024-01-31,Performance Review Meeting,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0201,BU-03,2024-02-04,Performance Review Meeting,MGR-BU-03-12,Continued underperformance despite prior coaching
+EMP-0450,BU-01,2024-01-04,Performance Review Meeting,MGR-BU-01-20,Continued underperformance despite prior coaching
+EMP-0450,BU-01,2024-03-11,HR Escalation,MGR-BU-01-20,Pattern of missed targets across multiple weeks
+EMP-0450,BU-01,2024-03-29,Written Warning,MGR-BU-01-20,Pattern of missed targets across multiple weeks
+EMP-0425,BU-03,2024-01-12,HR Escalation,MGR-BU-03-01,Second documented incident within the quarter
+EMP-0425,BU-03,2024-01-29,Performance Review Meeting,MGR-BU-03-01,Pattern of missed targets across multiple weeks
+EMP-0411,BU-04,2024-01-17,Written Warning,MGR-BU-04-09,Continued underperformance despite prior coaching
+EMP-0411,BU-04,2024-02-02,Performance Review Meeting,MGR-BU-04-09,Continued underperformance despite prior coaching
+EMP-0411,BU-04,2024-02-21,HR Escalation,MGR-BU-04-09,Second documented incident within the quarter
+EMP-0387,BU-01,2024-01-12,Performance Review Meeting,MGR-BU-01-02,Continued underperformance despite prior coaching
+EMP-0387,BU-01,2024-01-29,HR Escalation,MGR-BU-01-02,Pattern of missed targets across multiple weeks
+EMP-0387,BU-01,2024-03-27,Performance Review Meeting,MGR-BU-01-02,Continued underperformance despite prior coaching
+EMP-0503,BU-02,2024-01-11,HR Escalation,MGR-BU-02-18,Second documented incident within the quarter
+EMP-0503,BU-02,2024-03-22,Written Warning,MGR-BU-02-18,Pattern of missed targets across multiple weeks
+EMP-0743,BU-01,2024-02-05,HR Escalation,MGR-BU-01-09,Second documented incident within the quarter
+EMP-0743,BU-01,2024-03-26,Coaching Session,MGR-BU-01-09,Continued underperformance despite prior coaching
+EMP-0496,BU-01,2024-03-21,Performance Review Meeting,MGR-BU-01-19,Pattern of missed targets across multiple weeks
+EMP-0496,BU-01,2024-03-24,Written Warning,MGR-BU-01-19,Pattern of missed targets across multiple weeks
+EMP-0303,BU-04,2024-02-27,HR Escalation,MGR-BU-04-01,Second documented incident within the quarter
+EMP-0303,BU-04,2024-03-22,Coaching Session,MGR-BU-04-01,Pattern of missed targets across multiple weeks
+EMP-0747,BU-02,2024-01-17,HR Escalation,MGR-BU-02-08,Continued underperformance despite prior coaching
+EMP-0747,BU-02,2024-01-27,Coaching Session,MGR-BU-02-08,Pattern of missed targets across multiple weeks
+EMP-0747,BU-02,2024-03-05,Coaching Session,MGR-BU-02-08,Second documented incident within the quarter
+EMP-0991,BU-03,2024-01-09,Written Warning,MGR-BU-03-11,Continued underperformance despite prior coaching
+EMP-0991,BU-03,2024-01-19,Coaching Session,MGR-BU-03-11,Second documented incident within the quarter
+EMP-0991,BU-03,2024-02-12,HR Escalation,MGR-BU-03-11,Second documented incident within the quarter
+EMP-0311,BU-04,2024-01-03,Coaching Session,MGR-BU-04-19,Pattern of missed targets across multiple weeks
+EMP-0311,BU-04,2024-02-06,Coaching Session,MGR-BU-04-19,Pattern of missed targets across multiple weeks
+EMP-0747,BU-03,2024-01-31,Written Warning,MGR-BU-03-20,Pattern of missed targets across multiple weeks
+EMP-0747,BU-03,2024-02-14,HR Escalation,MGR-BU-03-20,Pattern of missed targets across multiple weeks
+EMP-0495,BU-04,2024-01-20,Written Warning,MGR-BU-04-10,Pattern of missed targets across multiple weeks
+EMP-0495,BU-04,2024-02-18,Coaching Session,MGR-BU-04-10,Continued underperformance despite prior coaching
+EMP-0495,BU-04,2024-03-16,Written Warning,MGR-BU-04-10,Continued underperformance despite prior coaching
+EMP-0454,BU-01,2024-01-05,Written Warning,MGR-BU-01-17,Continued underperformance despite prior coaching
+EMP-0454,BU-01,2024-03-30,Performance Review Meeting,MGR-BU-01-17,Continued underperformance despite prior coaching
+EMP-0578,BU-02,2024-01-19,HR Escalation,MGR-BU-02-03,Second documented incident within the quarter
+EMP-0578,BU-02,2024-01-27,Written Warning,MGR-BU-02-03,Continued underperformance despite prior coaching
+EMP-0578,BU-02,2024-02-13,Written Warning,MGR-BU-02-03,Continued underperformance despite prior coaching
+EMP-0057,BU-03,2024-02-17,Written Warning,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0057,BU-03,2024-02-24,HR Escalation,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0057,BU-03,2024-03-15,Coaching Session,MGR-BU-03-12,Pattern of missed targets across multiple weeks
+EMP-0472,BU-04,2024-01-25,Coaching Session,MGR-BU-04-18,Second documented incident within the quarter
+EMP-0472,BU-04,2024-02-03,Coaching Session,MGR-BU-04-18,Pattern of missed targets across multiple weeks
+EMP-0314,BU-04,2024-02-07,HR Escalation,MGR-BU-04-13,Pattern of missed targets across multiple weeks
+EMP-0314,BU-04,2024-03-16,Coaching Session,MGR-BU-04-13,Pattern of missed targets across multiple weeks
+EMP-0350,BU-04,2024-01-31,Coaching Session,MGR-BU-04-16,Continued underperformance despite prior coaching
+EMP-0350,BU-04,2024-02-11,Performance Review Meeting,MGR-BU-04-16,Second documented incident within the quarter
+EMP-0350,BU-04,2024-03-22,Performance Review Meeting,MGR-BU-04-16,Continued underperformance despite prior coaching
+EMP-0331,BU-04,2024-01-23,Performance Review Meeting,MGR-BU-04-15,Second documented incident within the quarter
+EMP-0331,BU-04,2024-03-12,Coaching Session,MGR-BU-04-15,Second documented incident within the quarter
+EMP-0331,BU-04,2024-03-17,HR Escalation,MGR-BU-04-15,Continued underperformance despite prior coaching
+EMP-0791,BU-02,2024-02-09,Performance Review Meeting,MGR-BU-02-03,Second documented incident within the quarter
+EMP-0791,BU-02,2024-03-20,Coaching Session,MGR-BU-02-03,Pattern of missed targets across multiple weeks
+EMP-0587,BU-03,2024-01-03,HR Escalation,MGR-BU-03-10,Continued underperformance despite prior coaching
+EMP-0587,BU-03,2024-01-15,Coaching Session,MGR-BU-03-10,Second documented incident within the quarter
+EMP-0587,BU-03,2024-03-30,Coaching Session,MGR-BU-03-10,Second documented incident within the quarter
+EMP-0030,BU-02,2024-02-18,HR Escalation,MGR-BU-02-12,Second documented incident within the quarter
+EMP-0030,BU-02,2024-03-21,Written Warning,MGR-BU-02-12,Pattern of missed targets across multiple weeks
+EMP-0866,BU-02,2024-02-07,Coaching Session,MGR-BU-02-02,Pattern of missed targets across multiple weeks
+EMP-0866,BU-02,2024-02-12,Coaching Session,MGR-BU-02-02,Continued underperformance despite prior coaching
+EMP-0438,BU-04,2024-01-17,Written Warning,MGR-BU-04-14,Pattern of missed targets across multiple weeks
+EMP-0438,BU-04,2024-03-18,Coaching Session,MGR-BU-04-14,Second documented incident within the quarter
+EMP-0861,BU-01,2024-01-13,HR Escalation,MGR-BU-01-01,Continued underperformance despite prior coaching
+EMP-0861,BU-01,2024-01-17,Written Warning,MGR-BU-01-01,Continued underperformance despite prior coaching
+EMP-0861,BU-01,2024-03-14,Written Warning,MGR-BU-01-01,Pattern of missed targets across multiple weeks
+EMP-0610,BU-03,2024-01-12,HR Escalation,MGR-BU-03-05,Pattern of missed targets across multiple weeks
+EMP-0610,BU-03,2024-03-01,Written Warning,MGR-BU-03-05,Continued underperformance despite prior coaching
+EMP-0213,BU-01,2024-02-07,HR Escalation,MGR-BU-01-15,Second documented incident within the quarter
+EMP-0213,BU-01,2024-03-23,Coaching Session,MGR-BU-01-15,Continued underperformance despite prior coaching
+EMP-0213,BU-01,2024-03-24,Written Warning,MGR-BU-01-15,Continued underperformance despite prior coaching
+EMP-0640,BU-01,2024-01-16,Performance Review Meeting,MGR-BU-01-11,Second documented incident within the quarter
+EMP-0640,BU-01,2024-03-07,HR Escalation,MGR-BU-01-11,Pattern of missed targets across multiple weeks
+EMP-0597,BU-01,2024-01-09,Written Warning,MGR-BU-01-18,Continued underperformance despite prior coaching
+EMP-0597,BU-01,2024-01-12,HR Escalation,MGR-BU-01-18,Second documented incident within the quarter
+EMP-0597,BU-01,2024-02-17,Coaching Session,MGR-BU-01-18,Pattern of missed targets across multiple weeks
+EMP-0848,BU-01,2024-01-18,HR Escalation,MGR-BU-01-03,Continued underperformance despite prior coaching
+EMP-0848,BU-01,2024-02-18,HR Escalation,MGR-BU-01-03,Pattern of missed targets across multiple weeks
+EMP-0848,BU-01,2024-03-02,Coaching Session,MGR-BU-01-03,Pattern of missed targets across multiple weeks
+EMP-0167,BU-03,2024-02-28,HR Escalation,MGR-BU-03-14,Pattern of missed targets across multiple weeks
+EMP-0167,BU-03,2024-03-06,HR Escalation,MGR-BU-03-14,Second documented incident within the quarter
+EMP-0899,BU-04,2024-01-26,Coaching Session,MGR-BU-04-01,Second documented incident within the quarter
+EMP-0899,BU-04,2024-02-25,Coaching Session,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0899,BU-04,2024-03-29,Performance Review Meeting,MGR-BU-04-01,Continued underperformance despite prior coaching
+EMP-0887,BU-01,2024-01-22,Performance Review Meeting,MGR-BU-01-01,Continued underperformance despite prior coaching
+EMP-0887,BU-01,2024-02-01,Performance Review Meeting,MGR-BU-01-01,Second documented incident within the quarter
+EMP-0887,BU-01,2024-02-22,Written Warning,MGR-BU-01-01,Pattern of missed targets across multiple weeks
