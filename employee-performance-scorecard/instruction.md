@@ -12,9 +12,7 @@ Convert each rating to a numeric score using `rating_scales.csv`.
 
 ## Goal Completion
 
-Each employee has one or more goals for the quarter in `employee_goals.csv`. Compute the weighted average completion percentage across all goals for each employee:
-
-`goal_completion_pct = Σ(weight × completion_pct) / Σ(weight)`, rounded to 2 decimal places.
+Each employee has one or more goals for the quarter in `employee_goals.csv`. Compute each employee's `goal_completion_pct`, the weighted average completion percentage across all goals using each goal's `weight`, rounded to 2 decimal places.
 
 Scale this to a 0–5 score: `goal_score = goal_completion_pct / 100 × 5`.
 
