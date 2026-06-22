@@ -657,9 +657,13 @@ def test_case_11_goal_department_bridge(raw_data, agent_scorecard, expected):
 
     Spot-checks goal_completion_pct for 2 employees per business unit (8 total).
     """
-    # Sample the first 2 employees per BU from the sorted expected scorecard
+    # Sample from BU-01, BU-02, BU-04 only (pct-scale BUs).
+    # BU-03 is excluded here because its goals use a different completion scale
+    # (fraction vs pct) which is tested separately in test_case_12.  Mixing the
+    # two failure modes would produce misleading attribution in error messages.
+    pct_scale_bus = ["BU-01", "BU-02", "BU-04"]
     sample = (
-        expected
+        expected[expected["business_unit_id"].isin(pct_scale_bus)]
         .groupby("business_unit_id", group_keys=False)
         .head(2)
         [["business_unit_id", "employee_id", "goal_completion_pct"]]
