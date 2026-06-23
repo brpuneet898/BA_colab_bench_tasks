@@ -8,19 +8,19 @@ Headroom mechanisms tested:
 
   Trap 1 — (business_unit_id, employee_id) composite key.
             Each BU assigns employee IDs independently from the same sequence
-            (EMP-001 … EMP-040), so the same string identifies different people
-            across units.  A naive join on employee_id alone creates phantom
-            cross-BU matches, inflating every metric for every employee.
+            (EMP-0001 … EMP-1000), so the same string identifies different
+            people across units.  A naive join on employee_id alone creates
+            phantom cross-BU matches, inflating every metric for every employee.
 
   Trap 2 — NaT termination_date (active employees silently dropped).
-            32 employees have no termination_date because they are still
-            employed.  pandas evaluates `termination_date >= date` as False
-            when the value is NaT, silently excluding the entire group.
-            Correct filter: treat NaT as "no expiry".
+            800 employees (200 per BU) have no termination_date because they
+            are still employed.  pandas evaluates `termination_date >= date`
+            as False when the value is NaT, silently excluding the entire
+            group.  Correct filter: treat NaT as "no expiry".
 
-  Trap 3 — Review supersession (latest review_date wins).
-            20 employees have an initial review plus a manager revision with a
-            later review_date.  The initial review appears first in the CSV;
+  Trap 3 — Review supersession within Q1-2024.
+            400 employees have a manager revision — a second Q1-2024 row with
+            a later review_date.  The initial review appears first in the CSV;
             naive CSV-order reads pick up the superseded rating.
 
   Trap 4 — Effective-dated rating scale (SCD join on review_date).
@@ -29,9 +29,27 @@ Headroom mechanisms tested:
             latest-row selection applies the wrong scale to one cohort.
 
   Trap 5 — PIP cumulative cap (≥2 Q1 events → composite_score ≤ 2.5).
-            10 employees have ≥2 Q1 PIP events and are correctly capped.
-            15 employees have exactly one Q1 event and must NOT be capped.
+            200 employees have ≥2 Q1 PIP events and are correctly capped.
+            300 employees have exactly one Q1 event and must NOT be capped.
             Capping all employees with any PIP event is the common mistake.
+
+  Trap 6 — Q4-2023 late-filing contamination (cross-period review cycle).
+            200 employees have a Q4-2023 review row whose review_date falls in
+            Feb–Mar 2024, after their Q1-2024 initial review date.  Naive
+            "latest review_date" dedup across all cycles returns the Q4 rating.
+            Correct: filter to review_cycle == "Q1-2024" before deduplicating.
+
+  Trap 7 — Department bridge (employee_goals keyed by department_id).
+            employee_goals.csv uses department_id, not business_unit_id.
+            Recovering business_unit_id requires joining through
+            department_metadata.csv.  Joining on employee_id alone creates 4×
+            cross-BU phantom duplicates.
+
+  Trap 8 — Completion unit normalisation (BU-03 fraction scale).
+            BU-03 records completion_pct as a fraction (0.0–1.0); all other
+            BUs use percentage (0–100).  The completion_unit column labels each
+            row.  Using fraction values raw collapses BU-03 goal scores by
+            100×.
 """
 
 import json
@@ -298,11 +316,11 @@ def test_case_02_output_structure(agent_scorecard, agent_summary):
 def test_case_03_composite_key_employee_counts(agent_scorecard, expected):
     """
     Trap 1 — joining performance_reviews or employee_goals to employees on
-    employee_id alone inflates every BU's row count ~4x because EMP-001 in
-    BU-01 is a different person from EMP-001 in BU-02, BU-03, and BU-04.
+    employee_id alone inflates every BU's row count ~4x because EMP-0001 in
+    BU-01 is a different person from EMP-0001 in BU-02, BU-03, and BU-04.
     Correct join key: (business_unit_id, employee_id).
 
-    Verifies per-BU row counts and spot-checks that EMP-001 in BU-01 is not
+    Verifies per-BU row counts and spot-checks that EMP-0001 in BU-01 is not
     confused with its cross-BU namesakes.
     """
     failures = []
@@ -343,9 +361,9 @@ def test_case_03_composite_key_employee_counts(agent_scorecard, expected):
 
 def test_case_04_active_employees_nat_filter(raw_data, agent_scorecard, expected):
     """
-    Trap 2 — 32 employees have no termination_date (NaT) because they are
-    currently active.  pandas evaluates `termination_date >= Timestamp` as
-    False for NaT, silently dropping the entire group.
+    Trap 2 — 800 employees (200 per BU) have no termination_date (NaT) because
+    they are currently active.  pandas evaluates `termination_date >= Timestamp`
+    as False for NaT, silently dropping the entire group.
 
     Verifies that NaT-termination employees appear in the output with a valid
     (non-null) composite_score.
@@ -505,7 +523,8 @@ def test_case_06_review_cycle_and_supersession(raw_data, agent_scorecard, expect
 def test_case_07_pip_cumulative_cap(raw_data, agent_scorecard, expected):
     """
     Trap 5 — Only employees with ≥2 Q1 PIP events are subject to the 2.5 cap.
-    Employees with exactly 1 Q1 event must NOT have their score capped.
+    200 employees have ≥2 Q1 events and must be capped; 300 employees have
+    exactly 1 Q1 event and must NOT be capped.
 
     Common mistake: cap all employees with any PIP event, incorrectly
     suppressing scores for those with only one incident.
@@ -655,7 +674,9 @@ def test_case_11_goal_department_bridge(raw_data, agent_scorecard, expected):
     creates 4× cross-BU phantom duplicates, mixing the goals of unrelated
     employees who share the same employee_id string across business units.
 
-    Spot-checks goal_completion_pct for 2 employees per business unit (8 total).
+    Spot-checks goal_completion_pct for 2 employees per business unit across
+    BU-01, BU-02, and BU-04 (6 total; BU-03 is excluded — its errors originate
+    from the fraction-scale trap tested in test_case_12, not the bridge).
     """
     # Sample from BU-01, BU-02, BU-04 only (pct-scale BUs).
     # BU-03 is excluded here because its goals use a different completion scale

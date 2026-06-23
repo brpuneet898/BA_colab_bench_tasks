@@ -5,20 +5,23 @@ Exploratory checks on the raw data revealed several characteristics that
 shaped the implementation:
 
 1.  employee_id values are not globally unique — each business unit assigns its
-    own sequence (EMP-001 through EMP-040), so the same string appears in all
+    own sequence (EMP-0001 through EMP-1000), so the same string appears in all
     four units.  Every join between tables requires the composite key
     (business_unit_id, employee_id).
 
-2.  Roughly 32 employees carry no termination_date (NaT) because they are still
-    active.  pandas evaluates any date comparison against NaT as False, so the
-    Q1 eligibility filter must treat NaT as "no expiry" with an explicit null
-    check: hire_date <= Q1_END AND (termination_date IS NULL OR
-    termination_date >= Q1_START).
+2.  800 employees (200 per business unit) carry no termination_date (NaT)
+    because they are still active.  pandas evaluates any date comparison against
+    NaT as False, so the Q1 eligibility filter must treat NaT as "no expiry"
+    with an explicit null check: hire_date <= Q1_END AND (termination_date IS
+    NULL OR termination_date >= Q1_START).
 
-3.  Twenty employees have two review records — an initial rating and a manager
-    revision with a later review_date.  Deduplication to the row with the
-    maximum review_date per (business_unit_id, employee_id) is required before
-    any downstream calculation.
+3.  600 employees have more than one review row: 400 have a manager revision
+    (a second Q1-2024 row with a later review_date) and 200 have a Q4-2023
+    review filed late (review_cycle = "Q4-2023" with review_date in Feb–Mar
+    2024).  For the contaminated 200, the Q4 finalization date falls after the
+    Q1 review date, so naive "latest review_date" dedup returns the wrong
+    cycle's rating.  Correct: filter to review_cycle == "Q1-2024" first, then
+    within Q1 keep the row with the maximum review_date.
 
 4.  rating_scales.csv holds two effective-date versions of the rating-to-score
     mapping.  Reviews conducted before 2024-02-01 use the old scale
@@ -27,11 +30,10 @@ shaped the implementation:
     produces two candidate rows per review; the correct row is the one whose
     effective_from is the most recent date on or before the review_date.
 
-5.  performance_reviews.csv contains Q1-2024 reviews AND Q4-2023 reviews that
-    were filed late (with review_dates in Feb–Mar 2024).  For employees with
-    both types, the Q4 finalization date is AFTER the Q1 review date, so naive
-    "latest review_date" dedup returns the wrong rating.  Correct: filter to
-    review_cycle == "Q1-2024" first, then dedup within Q1 by max review_date.
+5.  The Q4-2023 contamination is described above in point 3.  Filtering by
+    review_cycle == "Q1-2024" before deduplication is the required corrective
+    step; deduplicating within Q1 by max review_date then handles the 400
+    manager revisions.
 
 6.  employee_goals.csv is keyed by (department_id, employee_id).  Recovering
     business_unit_id requires bridging through department_metadata.csv.  BU-03
