@@ -1,6 +1,6 @@
-test_id,test_name,test_category,reporting_unit
-T01,Active Ingredient Assay,chemical,%
-T02,pH,physical,pH units
-T03,Viscosity,physical,cP
-T04,Particulate Count,physical,particles/mL
-T05,Microbial Count,microbiological,CFU/mL
+test_id,test_name,test_category,reporting_unit,unit_conversion_factor
+T01,Active Ingredient Assay,chemical,%,0.0001
+T02,pH,physical,pH units,1.0
+T03,Viscosity,physical,cP,1.0
+T04,Particulate Count,physical,particles/mL,1.0
+T05,Microbial Count,microbiological,CFU/mL,1.0

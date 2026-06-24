@@ -182,18 +182,15 @@ def ground_truth():
     )
     valid = merged[merged["effective_from"] <= merged["tested_date"]].copy()
     idx   = valid.groupby("result_id")["effective_from"].idxmax()
-    jn    = valid.loc[idx].merge(catalog[["test_id", "reporting_unit"]], on="test_id")
+    jn    = valid.loc[idx].merge(
+        catalog[["test_id", "reporting_unit", "unit_conversion_factor"]], on="test_id"
+    )
 
-    # Normalise measured values to spec reporting units
-    # ppm -> %: 1% = 10,000 ppm (SI definition)
+    # Normalise measured values to spec reporting units via catalog conversion factor
     jn["normalized_value"] = np.where(
         jn["units"] == jn["reporting_unit"],
         jn["measured_value"],
-        np.where(
-            (jn["units"] == "ppm") & (jn["reporting_unit"] == "%"),
-            jn["measured_value"] * 1e-4,
-            jn["measured_value"],
-        ),
+        jn["measured_value"] * jn["unit_conversion_factor"],
     )
     jn["in_spec"] = (
         (jn["normalized_value"] >= jn["lower_spec_limit"]) &

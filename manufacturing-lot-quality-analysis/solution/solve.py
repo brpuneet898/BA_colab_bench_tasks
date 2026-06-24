@@ -88,16 +88,13 @@ def scd_spec_join(results_with_lots, specs):
 
 
 def normalize_units(results_with_specs, catalog):
-    r = results_with_specs.merge(catalog[["test_id", "reporting_unit"]], on="test_id")
-    # ppm -> %: 1% = 10,000 ppm (SI definition)
+    r = results_with_specs.merge(
+        catalog[["test_id", "reporting_unit", "unit_conversion_factor"]], on="test_id"
+    )
     r["normalized_value"] = np.where(
         r["units"] == r["reporting_unit"],
         r["measured_value"],
-        np.where(
-            (r["units"] == "ppm") & (r["reporting_unit"] == "%"),
-            r["measured_value"] * 1e-4,
-            r["measured_value"],
-        ),
+        r["measured_value"] * r["unit_conversion_factor"],
     )
     return r
 
