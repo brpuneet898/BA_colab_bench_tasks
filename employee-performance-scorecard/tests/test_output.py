@@ -8,19 +8,19 @@ Headroom mechanisms tested:
 
   Trap 1 — (business_unit_id, employee_id) composite key.
             Each BU assigns employee IDs independently from the same sequence
-            (EMP-001 … EMP-040), so the same string identifies different people
-            across units.  A naive join on employee_id alone creates phantom
-            cross-BU matches, inflating every metric for every employee.
+            (EMP-0001 … EMP-1000), so the same string identifies different
+            people across units.  A naive join on employee_id alone creates
+            phantom cross-BU matches, inflating every metric for every employee.
 
   Trap 2 — NaT termination_date (active employees silently dropped).
-            32 employees have no termination_date because they are still
-            employed.  pandas evaluates `termination_date >= date` as False
-            when the value is NaT, silently excluding the entire group.
-            Correct filter: treat NaT as "no expiry".
+            800 employees (200 per BU) have no termination_date because they
+            are still employed.  pandas evaluates `termination_date >= date`
+            as False when the value is NaT, silently excluding the entire
+            group.  Correct filter: treat NaT as "no expiry".
 
-  Trap 3 — Review supersession (latest review_date wins).
-            20 employees have an initial review plus a manager revision with a
-            later review_date.  The initial review appears first in the CSV;
+  Trap 3 — Review supersession within Q1-2024.
+            400 employees have a manager revision — a second Q1-2024 row with
+            a later review_date.  The initial review appears first in the CSV;
             naive CSV-order reads pick up the superseded rating.
 
   Trap 4 — Effective-dated rating scale (SCD join on review_date).
@@ -29,9 +29,27 @@ Headroom mechanisms tested:
             latest-row selection applies the wrong scale to one cohort.
 
   Trap 5 — PIP cumulative cap (≥2 Q1 events → composite_score ≤ 2.5).
-            10 employees have ≥2 Q1 PIP events and are correctly capped.
-            15 employees have exactly one Q1 event and must NOT be capped.
+            200 employees have ≥2 Q1 PIP events and are correctly capped.
+            300 employees have exactly one Q1 event and must NOT be capped.
             Capping all employees with any PIP event is the common mistake.
+
+  Trap 6 — Q4-2023 late-filing contamination (cross-period review cycle).
+            200 employees have a Q4-2023 review row whose review_date falls in
+            Feb–Mar 2024, after their Q1-2024 initial review date.  Naive
+            "latest review_date" dedup across all cycles returns the Q4 rating.
+            Correct: filter to review_cycle == "Q1-2024" before deduplicating.
+
+  Trap 7 — Department bridge (employee_goals keyed by department_id).
+            employee_goals.csv uses department_id, not business_unit_id.
+            Recovering business_unit_id requires joining through
+            department_metadata.csv.  Joining on employee_id alone creates 4×
+            cross-BU phantom duplicates.
+
+  Trap 8 — Completion unit normalisation (BU-03 fraction scale).
+            BU-03 records completion_pct as a fraction (0.0–1.0); all other
+            BUs use percentage (0–100).  The completion_unit column labels each
+            row.  Using fraction values raw collapses BU-03 goal scores by
+            100×.
 """
 
 import json
@@ -76,8 +94,9 @@ def _filter_active(employees):
 
 
 def _canonical_reviews(reviews):
+    q1_only = reviews[reviews["review_cycle"] == "Q1-2024"]
     return (
-        reviews
+        q1_only
         .sort_values("review_date")
         .drop_duplicates(subset=["business_unit_id", "employee_id"], keep="last")
         .reset_index(drop=True)
@@ -101,6 +120,9 @@ def _goal_completion(goals, dept_meta):
         dept_meta[["department_id", "business_unit_id"]],
         on="department_id", how="left",
     )
+    frac = goals_with_bu["completion_unit"] == "fraction"
+    goals_with_bu = goals_with_bu.copy()
+    goals_with_bu.loc[frac, "completion_pct"] = goals_with_bu.loc[frac, "completion_pct"] * 100
     g = goals_with_bu.assign(
         weighted=goals_with_bu["weight"] * goals_with_bu["completion_pct"]
     )
@@ -215,12 +237,18 @@ def test_case_01_input_sentinels(raw_data):
         (f"employee_id must not be globally unique — each BU uses its own "
          f"sequence (expected 1000 employee_id strings spanning >1 BU, got {emp_id_span})")
 
-    revised_count = int(
+    multi_review_count = int(
         (reviews.groupby(["business_unit_id", "employee_id"]).size() > 1).sum()
     )
-    assert revised_count == 400, \
-        (f"performance_reviews.csv must contain exactly 400 (business_unit_id, employee_id) "
-         f"pairs with more than one review row, got {revised_count}")
+    assert multi_review_count == 600, \
+        (f"performance_reviews.csv must contain exactly 600 employees with more than one "
+         f"review row (400 Q1-2024 revisions + 200 Q4-2023 late filings), "
+         f"got {multi_review_count}")
+
+    q4_count = int((reviews["review_cycle"] == "Q4-2023").sum())
+    assert q4_count == 200, \
+        (f"performance_reviews.csv must contain exactly 200 Q4-2023 review rows "
+         f"(late-filed Q4 assessments with review_date in Q1 2024), got {q4_count}")
 
     scale_counts = scales.groupby("rating").size()
     for label in ["Exceeds", "Meets", "Needs Improvement"]:
@@ -243,6 +271,10 @@ def test_case_01_input_sentinels(raw_data):
         "employee_goals.csv must contain a department_id column (not business_unit_id)"
     assert "business_unit_id" not in goals.columns, \
         "employee_goals.csv must not contain business_unit_id — link via department_metadata.csv"
+    assert "completion_unit" in goals.columns, \
+        "employee_goals.csv must contain a completion_unit column"
+    assert set(goals["completion_unit"].unique()) == {"pct", "fraction"}, \
+        "completion_unit must contain both 'pct' and 'fraction' values"
 
 
 # ---------------------------------------------------------------------------
@@ -284,11 +316,11 @@ def test_case_02_output_structure(agent_scorecard, agent_summary):
 def test_case_03_composite_key_employee_counts(agent_scorecard, expected):
     """
     Trap 1 — joining performance_reviews or employee_goals to employees on
-    employee_id alone inflates every BU's row count ~4x because EMP-001 in
-    BU-01 is a different person from EMP-001 in BU-02, BU-03, and BU-04.
+    employee_id alone inflates every BU's row count ~4x because EMP-0001 in
+    BU-01 is a different person from EMP-0001 in BU-02, BU-03, and BU-04.
     Correct join key: (business_unit_id, employee_id).
 
-    Verifies per-BU row counts and spot-checks that EMP-001 in BU-01 is not
+    Verifies per-BU row counts and spot-checks that EMP-0001 in BU-01 is not
     confused with its cross-BU namesakes.
     """
     failures = []
@@ -329,9 +361,9 @@ def test_case_03_composite_key_employee_counts(agent_scorecard, expected):
 
 def test_case_04_active_employees_nat_filter(raw_data, agent_scorecard, expected):
     """
-    Trap 2 — 32 employees have no termination_date (NaT) because they are
-    currently active.  pandas evaluates `termination_date >= Timestamp` as
-    False for NaT, silently dropping the entire group.
+    Trap 2 — 800 employees (200 per BU) have no termination_date (NaT) because
+    they are currently active.  pandas evaluates `termination_date >= Timestamp`
+    as False for NaT, silently dropping the entire group.
 
     Verifies that NaT-termination employees appear in the output with a valid
     (non-null) composite_score.
@@ -424,20 +456,30 @@ def test_case_05_rating_scale_scd(raw_data, agent_scorecard, expected):
 # Test 06 — Review supersession  (Trap 3)
 # ---------------------------------------------------------------------------
 
-def test_case_06_review_supersession(raw_data, agent_scorecard, expected):
+def test_case_06_review_cycle_and_supersession(raw_data, agent_scorecard, expected):
     """
-    Trap 3 — 20 employees have two review rows: an initial rating and a manager
-    revision with a later review_date.  Initial reviews appear first in the CSV
-    so naive CSV-order reads or drop_duplicates(keep='first') pick up the
-    superseded rating.  Correct: use the row with the max review_date per
-    (business_unit_id, employee_id).
+    Traps 3 & 7 — performance_reviews.csv contains Q1-2024 reviews AND Q4-2023
+    reviews filed late (review_date in Feb–Mar 2024).  For contaminated employees
+    the Q4 date is AFTER the Q1 date, so naive 'latest review_date' dedup returns
+    the Q4 rating.  Correct approach: restrict to review_cycle == 'Q1-2024', then
+    within Q1 take the row with the maximum review_date (handles manager revisions).
 
-    Spot-checks rating and rating_score for 5 of the 20 revised employees.
+    Spot-checks 5 employees who have a Q4-2023 contamination row, verifying that
+    the agent used the Q1-2024 rating, not the Q4 finalization.
     """
     _, reviews, _, _, _, _ = raw_data
 
-    counts = reviews.groupby(["business_unit_id", "employee_id"]).size()
-    revised = counts[counts > 1].reset_index().head(5)
+    # Find employees who have BOTH a Q4-2023 row AND a Q1-2024 row
+    has_q4 = set(
+        reviews[reviews["review_cycle"] == "Q4-2023"]
+        .apply(lambda r: (r["business_unit_id"], r["employee_id"]), axis=1)
+    )
+    contaminated = reviews[
+        reviews.apply(
+            lambda r: (r["business_unit_id"], r["employee_id"]) in has_q4, axis=1
+        ) & (reviews["review_cycle"] == "Q1-2024")
+    ].drop_duplicates(["business_unit_id", "employee_id"]).head(5)
+    revised = contaminated[["business_unit_id", "employee_id"]].reset_index(drop=True)
 
     failures = []
     for _, row in revised.iterrows():
@@ -458,8 +500,9 @@ def test_case_06_review_supersession(raw_data, agent_scorecard, expected):
         if act_rating != exp_rating:
             failures.append(
                 f"{bu_id}/{emp_id}: rating '{act_rating}' != expected '{exp_rating}'. "
-                "This employee has two review records; use the one with the "
-                "latest review_date."
+                "This employee has both a Q4-2023 late-filing row and a Q1-2024 row. "
+                "The Q4 row has a later review_date; filter to review_cycle == 'Q1-2024' "
+                "before deduplicating."
             )
 
         exp_rs = float(exp_row["rating_score"].iloc[0])
@@ -467,7 +510,7 @@ def test_case_06_review_supersession(raw_data, agent_scorecard, expected):
         if not pd.isna(act_rs_raw) and not math.isclose(float(act_rs_raw), exp_rs, abs_tol=0.01):
             failures.append(
                 f"{bu_id}/{emp_id}: rating_score {float(act_rs_raw):.1f} != "
-                f"expected {exp_rs:.1f} (revision changes both rating and score)"
+                f"expected {exp_rs:.1f}"
             )
 
     assert not failures, "\n".join(failures)
@@ -480,7 +523,8 @@ def test_case_06_review_supersession(raw_data, agent_scorecard, expected):
 def test_case_07_pip_cumulative_cap(raw_data, agent_scorecard, expected):
     """
     Trap 5 — Only employees with ≥2 Q1 PIP events are subject to the 2.5 cap.
-    Employees with exactly 1 Q1 event must NOT have their score capped.
+    200 employees have ≥2 Q1 events and must be capped; 300 employees have
+    exactly 1 Q1 event and must NOT be capped.
 
     Common mistake: cap all employees with any PIP event, incorrectly
     suppressing scores for those with only one incident.
@@ -630,11 +674,17 @@ def test_case_11_goal_department_bridge(raw_data, agent_scorecard, expected):
     creates 4× cross-BU phantom duplicates, mixing the goals of unrelated
     employees who share the same employee_id string across business units.
 
-    Spot-checks goal_completion_pct for 2 employees per business unit (8 total).
+    Spot-checks goal_completion_pct for 2 employees per business unit across
+    BU-01, BU-02, and BU-04 (6 total; BU-03 is excluded — its errors originate
+    from the fraction-scale trap tested in test_case_12, not the bridge).
     """
-    # Sample the first 2 employees per BU from the sorted expected scorecard
+    # Sample from BU-01, BU-02, BU-04 only (pct-scale BUs).
+    # BU-03 is excluded here because its goals use a different completion scale
+    # (fraction vs pct) which is tested separately in test_case_12.  Mixing the
+    # two failure modes would produce misleading attribution in error messages.
+    pct_scale_bus = ["BU-01", "BU-02", "BU-04"]
     sample = (
-        expected
+        expected[expected["business_unit_id"].isin(pct_scale_bus)]
         .groupby("business_unit_id", group_keys=False)
         .head(2)
         [["business_unit_id", "employee_id", "goal_completion_pct"]]
@@ -657,6 +707,52 @@ def test_case_11_goal_department_bridge(raw_data, agent_scorecard, expected):
                 f"expected {exp_pct:.2f}. "
                 "Goals are stored with department_id; bridge through "
                 "department_metadata.csv to recover business_unit_id before joining."
+            )
+
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 12 — Completion unit normalisation  (BU-03 fraction-scale trap)
+# ---------------------------------------------------------------------------
+
+def test_case_12_completion_unit_normalisation(raw_data, agent_scorecard, expected):
+    """
+    BU-03 (Operations) records goal completion as a fraction (0.0–1.0); all
+    other BUs use percentage (0–100).  The completion_unit column in
+    employee_goals.csv labels each row 'fraction' or 'pct'.  Applying
+    goal_score = completion_pct / 100 × 5 to raw fraction values yields
+    goal_score ≈ 0.035 instead of 3.5 — a 100× collapse for every BU-03 employee.
+
+    Spot-checks goal_completion_pct for 4 BU-03 employees to verify the
+    fraction→percentage conversion was applied.
+    """
+    sample = (
+        expected[expected["business_unit_id"] == "BU-03"]
+        .head(4)
+        [["business_unit_id", "employee_id", "goal_completion_pct"]]
+    )
+
+    if sample.empty:
+        pytest.skip("No BU-03 employees in expected output")
+
+    failures = []
+    for _, row in sample.iterrows():
+        bu_id, emp_id = row["business_unit_id"], row["employee_id"]
+        act_row = agent_scorecard[
+            (agent_scorecard["business_unit_id"] == bu_id) &
+            (agent_scorecard["employee_id"] == emp_id)
+        ]
+        if act_row.empty:
+            continue
+        exp_pct = float(row["goal_completion_pct"])
+        act_pct = float(act_row["goal_completion_pct"].iloc[0])
+        if not math.isclose(act_pct, exp_pct, abs_tol=0.5):
+            failures.append(
+                f"{bu_id}/{emp_id}: goal_completion_pct {act_pct:.2f} != "
+                f"expected {exp_pct:.2f}. "
+                "BU-03 goals use completion_unit='fraction' (0.0–1.0 scale); "
+                "multiply by 100 before applying the weighted-average formula."
             )
 
     assert not failures, "\n".join(failures)

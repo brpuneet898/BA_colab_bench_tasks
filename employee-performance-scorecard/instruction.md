@@ -6,15 +6,13 @@ Include all employees who were active at any point during Q1 2024 (2024-01-01 th
 
 ## Rating Score
 
-Each employee's Q1 performance rating is recorded in `performance_reviews.csv`. Where a manager has submitted a revised rating for an employee, the revised assessment applies.
+Each employee's Q1 performance rating is recorded in `performance_reviews.csv`.
 
-Convert each rating to a numeric score using `rating_scales.csv`, applying the scale in effect on the employee's `review_date`.
+Convert each rating to a numeric score using `rating_scales.csv`.
 
 ## Goal Completion
 
-Each employee has one or more goals for the quarter in `employee_goals.csv`. Compute the weighted average completion percentage across all goals for each employee:
-
-`goal_completion_pct = Σ(weight × completion_pct) / Σ(weight)`, rounded to 2 decimal places.
+Each employee has one or more goals for the quarter in `employee_goals.csv`. Compute each employee's `goal_completion_pct`, the weighted average completion percentage across all goals using each goal's `weight`, rounded to 2 decimal places.
 
 Scale this to a 0–5 score: `goal_score = goal_completion_pct / 100 × 5`.
 
@@ -40,7 +38,7 @@ All files are in `/workspace/data/`.
 
 `rating_scales.csv` — `rating`, `score`, `effective_from`
 
-`employee_goals.csv` — `goal_id`, `employee_id`, `department_id`, `goal_description`, `weight`, `completion_pct`, `recorded_date`
+`employee_goals.csv` — `goal_id`, `employee_id`, `department_id`, `goal_description`, `weight`, `completion_pct`, `completion_unit`, `recorded_date`
 
 `pip_events.csv` — `employee_id`, `business_unit_id`, `event_date`, `event_type`, `documented_by`, `notes`
 
