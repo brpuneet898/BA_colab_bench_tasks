@@ -168,7 +168,7 @@ def _normalize_timestamps(trips):
 
     trips["pickup_utc"] = (
         trips["pickup_local"]
-        .dt.tz_localize(LOCAL_TIMEZONE)
+        .dt.tz_localize(LOCAL_TIMEZONE, ambiguous="NaT", nonexistent="NaT")
         .dt.tz_convert("UTC")
     )
 
@@ -449,31 +449,33 @@ def _apply_airport_exemptions(raw, chains):
 
     chains = chains.copy()
 
-    chains = chains.merge(
-        airport[
-            [
-                "zone_id",
-                "queue_start_utc",
-                "queue_end_utc",
-            ]
-        ],
-        left_on="dropoff_zone_id",
-        right_on="zone_id",
-        how="left",
-    )
-
-    chains["airport_exempt"] = False
-
     airport_zone_ids = set(airport["zone_id"])
 
-    mask = (
+    # Compute exemptions on a side table to avoid duplicating chain rows
+    # (left merge would create N rows per chain for each matching queue period)
+    airport_check = chains[
         chains["dropoff_zone_id"].isin(airport_zone_ids)
-        & (chains["idle_minutes"] >= IDLE_THRESHOLD_MINUTES)
-        & (chains["dropoff_utc"] >= chains["queue_start_utc"])
-        & (chains["dropoff_utc"] <= chains["queue_end_utc"])
+    ][[
+        "trip_id",
+        "dropoff_zone_id",
+        "dropoff_utc",
+        "idle_minutes",
+    ]].merge(
+        airport[["zone_id", "queue_start_utc", "queue_end_utc"]],
+        left_on="dropoff_zone_id",
+        right_on="zone_id",
     )
 
-    chains.loc[mask, "airport_exempt"] = True
+    exempt_ids = set(
+        airport_check.loc[
+            (airport_check["idle_minutes"] >= IDLE_THRESHOLD_MINUTES)
+            & (airport_check["dropoff_utc"] >= airport_check["queue_start_utc"])
+            & (airport_check["dropoff_utc"] <= airport_check["queue_end_utc"]),
+            "trip_id",
+        ]
+    )
+
+    chains["airport_exempt"] = chains["trip_id"].isin(exempt_ids)
 
     return chains
 
