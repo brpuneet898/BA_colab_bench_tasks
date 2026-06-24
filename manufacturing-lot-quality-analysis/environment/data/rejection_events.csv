@@ -1,574 +1,574 @@
-lot_id,rejection_date,rejection_reason,rework_possible,rework_cost_per_unit,disposal_cost_per_unit
-L01-0129,2024-01-07,viscosity failure,True,16.51,51.97
-L01-0165,2024-01-08,assay out of specification,True,19.96,55.25
-L01-0172,2024-01-09,microbial contamination,False,19.37,70.34
-L02-0134,2024-01-08,microbial contamination,False,15.06,48.51
-L02-0138,2024-01-12,microbial contamination,False,18.79,71.78
-L03-0123,2024-01-10,viscosity failure,False,19.85,71.13
-L03-0137,2024-01-08,microbial contamination,False,14.37,70.12
-L03-0138,2024-01-08,pH deviation,True,19.7,55.99
-L01-0224,2024-01-10,particulate exceedance,False,19.24,48.6
-L03-0144,2024-01-13,assay out of specification,False,14.41,48.15
-L03-0155,2024-01-10,pH deviation,True,20.86,56.95
-L01-0247,2024-01-15,particulate exceedance,False,16.65,55.74
-L02-0163,2024-01-15,pH deviation,False,15.68,64.42
-L02-0167,2024-01-13,microbial contamination,False,20.1,52.33
-L02-0177,2024-01-11,assay out of specification,False,16.09,68.99
-L03-0173,2024-01-13,particulate exceedance,True,16.28,62.33
-L03-0177,2024-01-14,viscosity failure,True,14.48,64.55
-L02-0194,2024-01-14,particulate exceedance,False,18.01,57.57
-L02-0197,2024-01-15,particulate exceedance,False,17.12,59.14
-L02-0200,2024-01-16,pH deviation,True,15.69,67.37
-L02-0201,2024-01-16,viscosity failure,False,17.5,64.32
-L01-0286,2024-01-15,assay out of specification,True,15.5,62.5
-L01-0298,2024-01-13,particulate exceedance,True,18.37,69.88
-L02-0214,2024-01-16,particulate exceedance,False,16.84,48.3
-L01-0312,2024-01-14,pH deviation,True,17.63,70.13
-L02-0218,2024-01-14,pH deviation,True,16.57,53.14
-L02-0224,2024-01-18,particulate exceedance,False,19.88,48.1
-L02-0230,2024-01-16,microbial contamination,True,14.16,71.78
-L02-0236,2024-01-14,viscosity failure,True,19.46,63.31
-L03-0232,2024-01-15,viscosity failure,True,15.71,64.08
-L01-0327,2024-01-16,assay out of specification,False,15.71,66.41
-L01-0328,2024-01-17,assay out of specification,False,14.64,50.5
-L01-0339,2024-01-16,assay out of specification,False,15.32,56.72
-L02-0251,2024-01-15,viscosity failure,True,15.32,64.07
-L03-0267,2024-01-18,assay out of specification,False,17.56,70.42
-L03-0273,2024-01-16,pH deviation,False,20.81,63.57
-L03-0276,2024-01-19,pH deviation,True,18.49,61.65
-L03-0277,2024-01-17,pH deviation,False,15.89,71.33
-L03-0288,2024-01-17,microbial contamination,False,19.24,48.16
-L03-0311,2024-01-20,pH deviation,False,21.37,52.59
-L01-0376,2024-01-19,viscosity failure,True,19.57,69.01
-L01-0385,2024-01-20,pH deviation,True,17.78,62.95
-L01-0387,2024-01-20,particulate exceedance,False,21.35,50.75
-L01-0389,2024-01-18,viscosity failure,True,21.46,66.21
-L03-0332,2024-01-17,viscosity failure,False,14.9,63.93
-L01-0414,2024-01-18,pH deviation,True,18.21,62.37
-L02-0289,2024-01-21,microbial contamination,False,15.82,56.69
-L02-0303,2024-01-22,viscosity failure,False,17.68,53.7
-L03-0360,2024-01-21,viscosity failure,True,21.23,58.56
-L01-0438,2024-01-23,microbial contamination,True,15.23,53.69
-L02-0316,2024-01-21,particulate exceedance,False,17.85,66.89
-L02-0319,2024-01-21,assay out of specification,False,18.8,55.97
-L03-0364,2024-01-23,particulate exceedance,False,20.46,54.87
-L03-0374,2024-01-21,microbial contamination,False,21.78,50.18
-L03-0376,2024-01-22,microbial contamination,True,17.14,58.21
-L01-0455,2024-01-23,pH deviation,False,15.95,68.4
-L03-0409,2024-01-20,viscosity failure,True,14.6,58.02
-L03-0410,2024-01-23,microbial contamination,False,15.66,61.22
-L01-0493,2024-01-22,assay out of specification,True,16.24,65.54
-L02-0351,2024-01-24,microbial contamination,True,15.35,52.71
-L03-0424,2024-01-22,particulate exceedance,True,20.3,64.24
-L01-0508,2024-01-22,microbial contamination,True,18.41,55.33
-L01-0521,2024-01-21,particulate exceedance,True,15.57,49.98
-L02-0372,2024-01-24,microbial contamination,False,21.84,64.45
-L02-0379,2024-01-25,viscosity failure,True,20.42,53.43
-L02-0383,2024-01-23,particulate exceedance,True,19.5,62.07
-L02-0384,2024-01-26,microbial contamination,True,21.15,55.54
-L03-0466,2024-01-26,assay out of specification,True,14.27,63.76
-L01-0565,2024-01-28,assay out of specification,False,21.27,62.15
-L01-0577,2024-01-26,microbial contamination,False,14.71,58.33
-L03-0489,2024-01-25,particulate exceedance,True,19.0,60.3
-L01-0583,2024-01-25,viscosity failure,False,19.7,69.72
-L01-0603,2024-01-26,particulate exceedance,False,17.32,54.92
-L02-0421,2024-01-28,microbial contamination,False,17.29,63.22
-L03-0507,2024-01-26,viscosity failure,True,20.11,56.37
-L01-0612,2024-01-26,viscosity failure,True,19.15,66.22
-L01-0613,2024-01-27,assay out of specification,False,17.24,48.74
-L02-0439,2024-01-28,microbial contamination,True,21.5,60.31
-L01-0642,2024-01-28,viscosity failure,False,21.51,61.0
-L02-0442,2024-01-29,pH deviation,True,16.03,69.73
-L02-0453,2024-01-31,viscosity failure,True,16.05,52.87
-L01-0659,2024-01-30,particulate exceedance,False,21.85,56.49
-L01-0660,2024-01-30,particulate exceedance,False,14.12,66.97
-L01-0677,2024-01-28,microbial contamination,False,21.71,61.6
-L01-0680,2024-01-27,microbial contamination,False,20.75,61.96
-L02-0468,2024-01-29,assay out of specification,True,21.01,50.0
-L03-0577,2024-01-28,viscosity failure,False,20.48,57.65
-L01-0683,2024-02-01,pH deviation,False,18.72,64.45
-L01-0694,2024-01-29,viscosity failure,False,14.66,53.96
-L01-0705,2024-01-30,microbial contamination,False,18.05,63.39
-L03-0584,2024-01-30,microbial contamination,True,17.8,69.05
-L03-0590,2024-01-29,assay out of specification,False,18.41,65.26
-L03-0605,2024-02-01,viscosity failure,False,20.58,58.38
-L01-0724,2024-01-30,assay out of specification,False,20.03,51.57
-L02-0489,2024-01-31,microbial contamination,False,18.34,68.55
-L02-0496,2024-01-31,viscosity failure,True,15.41,50.22
-L02-0501,2024-01-31,viscosity failure,True,18.28,50.23
-L03-0629,2024-01-30,particulate exceedance,False,15.86,64.33
-L03-0631,2024-01-31,particulate exceedance,False,21.74,55.55
-L01-0759,2024-02-03,viscosity failure,False,15.29,56.45
-L02-0520,2024-02-03,pH deviation,False,16.13,54.71
-L03-0635,2024-02-04,microbial contamination,False,19.88,59.91
-L03-0637,2024-02-04,microbial contamination,False,20.86,64.97
-L03-0642,2024-02-02,microbial contamination,False,16.34,62.2
-L03-0643,2024-02-01,viscosity failure,False,14.97,57.45
-L03-0645,2024-01-31,pH deviation,False,18.48,69.29
-L03-0650,2024-02-03,assay out of specification,False,17.88,62.06
-L01-0777,2024-02-03,viscosity failure,False,14.0,68.51
-L02-0540,2024-02-05,viscosity failure,False,15.57,55.12
-L02-0554,2024-02-01,assay out of specification,False,17.32,69.66
-L02-0555,2024-02-04,microbial contamination,True,16.07,58.93
-L01-0804,2024-02-03,pH deviation,False,14.24,62.96
-L01-0817,2024-02-04,viscosity failure,True,16.75,69.89
-L02-0561,2024-02-04,microbial contamination,True,17.28,50.91
-L02-0562,2024-02-01,pH deviation,False,14.7,55.97
-L02-0572,2024-02-03,assay out of specification,False,17.11,59.57
-L03-0673,2024-02-03,assay out of specification,False,20.95,66.94
-L03-0675,2024-02-04,viscosity failure,False,18.31,68.83
-L03-0676,2024-02-06,viscosity failure,False,15.41,61.63
-L03-0679,2024-02-03,microbial contamination,False,19.74,52.52
-L03-0682,2024-02-06,assay out of specification,True,18.34,53.15
-L03-0689,2024-02-06,assay out of specification,False,20.04,56.64
-L01-0012,2024-02-03,assay out of specification,True,17.17,53.06
-L01-0013,2024-02-04,assay out of specification,False,16.08,68.66
-L01-0018,2024-02-06,viscosity failure,False,16.02,63.39
-L02-0001,2024-02-02,viscosity failure,False,15.23,67.77
-L02-0006,2024-02-03,particulate exceedance,False,15.46,60.95
-L02-0007,2024-02-03,microbial contamination,True,21.62,52.07
-L02-0014,2024-02-04,assay out of specification,False,15.37,63.41
-L02-0017,2024-02-07,particulate exceedance,False,17.64,50.91
-L03-0005,2024-02-04,pH deviation,False,20.11,69.23
-L03-0006,2024-02-03,pH deviation,True,16.92,56.84
-L01-0031,2024-02-04,particulate exceedance,False,17.38,54.1
-L01-0037,2024-02-05,assay out of specification,False,19.91,68.53
-L01-0040,2024-02-07,assay out of specification,False,21.23,68.29
-L01-0041,2024-02-06,assay out of specification,True,21.74,60.93
-L02-0020,2024-02-05,microbial contamination,True,17.58,57.2
-L02-0024,2024-02-04,microbial contamination,True,17.68,69.29
-L02-0025,2024-02-06,viscosity failure,False,14.85,61.93
-L03-0016,2024-02-03,pH deviation,False,18.62,69.63
-L03-0017,2024-02-06,assay out of specification,False,17.32,59.65
-L03-0021,2024-02-06,viscosity failure,True,15.3,49.24
-L01-0048,2024-02-08,particulate exceedance,False,21.43,66.44
-L01-0056,2024-02-06,microbial contamination,False,17.65,58.49
-L01-0074,2024-02-09,viscosity failure,True,16.51,69.42
-L03-0047,2024-02-08,viscosity failure,False,19.24,56.73
-L03-0055,2024-02-08,microbial contamination,False,18.04,57.31
-L01-0076,2024-02-09,assay out of specification,False,18.17,63.29
-L01-0079,2024-02-10,assay out of specification,False,20.58,62.13
-L01-0088,2024-02-06,particulate exceedance,False,18.91,67.15
-L01-0094,2024-02-06,pH deviation,True,21.39,70.26
-L02-0064,2024-02-08,assay out of specification,False,19.83,55.18
-L02-0065,2024-02-08,pH deviation,False,14.78,65.05
-L03-0070,2024-02-06,viscosity failure,False,20.6,64.19
-L03-0072,2024-02-10,particulate exceedance,False,19.22,71.38
-L03-0077,2024-02-08,assay out of specification,True,19.3,71.63
-L03-0085,2024-02-06,particulate exceedance,True,21.68,54.69
-L01-0102,2024-02-06,pH deviation,False,18.15,49.3
-L01-0110,2024-02-07,particulate exceedance,False,14.99,59.07
-L01-0116,2024-02-08,pH deviation,True,21.33,56.59
-L01-0118,2024-02-07,particulate exceedance,False,15.33,61.6
-L01-0120,2024-02-07,pH deviation,False,14.94,67.01
-L02-0086,2024-02-08,viscosity failure,False,21.16,63.94
-L03-0095,2024-02-07,assay out of specification,True,14.63,68.16
-L03-0099,2024-02-06,microbial contamination,True,15.89,50.32
-L01-0128,2024-02-09,viscosity failure,True,20.78,66.36
-L01-0145,2024-02-10,viscosity failure,False,15.71,53.29
-L02-0096,2024-02-10,viscosity failure,False,19.37,60.73
-L03-0125,2024-02-10,pH deviation,False,20.88,53.61
-L03-0127,2024-02-12,assay out of specification,True,21.23,64.5
-L01-0154,2024-02-12,microbial contamination,True,17.19,49.38
-L01-0155,2024-02-11,microbial contamination,True,21.85,65.3
-L02-0122,2024-02-11,assay out of specification,True,14.98,53.99
-L03-0135,2024-02-13,viscosity failure,False,16.3,53.86
-L03-0136,2024-02-10,pH deviation,False,17.85,58.76
-L03-0147,2024-02-12,assay out of specification,True,17.63,53.18
-L03-0153,2024-02-10,microbial contamination,True,16.87,66.22
-L01-0184,2024-02-11,particulate exceedance,False,16.31,48.25
-L01-0189,2024-02-12,particulate exceedance,True,14.99,48.43
-L01-0212,2024-02-10,particulate exceedance,True,16.59,57.15
-L02-0127,2024-02-14,microbial contamination,True,18.08,71.86
-L02-0132,2024-02-12,assay out of specification,False,19.46,58.15
-L02-0134,2024-02-12,viscosity failure,False,19.7,51.11
-L02-0135,2024-02-12,particulate exceedance,True,14.64,58.19
-L03-0162,2024-02-13,assay out of specification,True,21.77,69.05
-L01-0225,2024-02-11,assay out of specification,True,16.74,50.7
-L02-0147,2024-02-10,pH deviation,False,15.92,66.69
-L02-0154,2024-02-12,viscosity failure,True,18.32,49.84
-L03-0176,2024-02-14,particulate exceedance,True,17.98,58.25
-L03-0192,2024-02-11,viscosity failure,True,14.87,49.75
-L03-0193,2024-02-15,assay out of specification,False,21.79,62.3
-L01-0237,2024-02-12,microbial contamination,False,15.4,70.67
-L01-0241,2024-02-15,viscosity failure,True,15.99,61.69
-L01-0248,2024-02-11,viscosity failure,False,17.02,57.12
-L01-0257,2024-02-12,particulate exceedance,False,20.17,67.21
-L02-0163,2024-02-16,assay out of specification,True,20.27,50.85
-L02-0165,2024-02-12,pH deviation,False,18.47,61.06
-L02-0166,2024-02-13,pH deviation,True,20.92,52.36
-L02-0167,2024-02-16,particulate exceedance,False,17.82,67.52
-L03-0213,2024-02-11,assay out of specification,True,19.6,49.16
-L01-0266,2024-02-14,viscosity failure,True,18.76,48.23
-L01-0270,2024-02-14,particulate exceedance,True,16.69,70.51
-L01-0284,2024-02-16,microbial contamination,False,21.91,52.29
-L02-0186,2024-02-17,assay out of specification,False,14.18,66.7
-L02-0191,2024-02-12,particulate exceedance,True,19.12,59.86
-L03-0220,2024-02-13,assay out of specification,False,16.31,53.88
-L03-0230,2024-02-17,microbial contamination,False,16.75,61.44
-L01-0289,2024-02-15,microbial contamination,True,21.16,56.94
-L02-0207,2024-02-14,assay out of specification,True,21.19,49.53
-L02-0214,2024-02-16,microbial contamination,True,21.03,69.85
-L02-0219,2024-02-15,pH deviation,True,14.31,70.99
-L03-0249,2024-02-16,microbial contamination,False,17.84,67.25
-L03-0250,2024-02-16,viscosity failure,True,14.72,54.74
-L03-0254,2024-02-16,particulate exceedance,False,21.81,66.83
-L01-0314,2024-02-17,assay out of specification,False,20.76,53.16
-L01-0316,2024-02-15,viscosity failure,True,18.2,66.46
-L02-0222,2024-02-15,assay out of specification,False,18.14,60.23
-L01-0343,2024-02-16,microbial contamination,True,15.02,52.24
-L01-0356,2024-02-16,assay out of specification,False,18.8,51.21
-L02-0243,2024-02-18,microbial contamination,False,14.77,52.04
-L02-0244,2024-02-18,pH deviation,False,14.68,56.34
-L02-0246,2024-02-16,viscosity failure,False,15.39,62.68
-L03-0300,2024-02-17,pH deviation,False,21.6,53.65
-L01-0370,2024-02-17,viscosity failure,False,15.24,67.83
-L01-0386,2024-02-16,assay out of specification,True,20.22,56.31
-L02-0257,2024-02-17,viscosity failure,False,18.88,65.9
-L02-0259,2024-02-16,viscosity failure,True,15.63,69.31
-L02-0266,2024-02-21,pH deviation,False,14.57,64.03
-L02-0270,2024-02-16,assay out of specification,False,19.94,62.11
-L03-0302,2024-02-19,assay out of specification,True,14.34,55.56
-L03-0304,2024-02-19,pH deviation,False,21.97,65.41
-L01-0390,2024-02-17,pH deviation,False,16.93,56.7
-L01-0397,2024-02-22,assay out of specification,False,15.62,53.64
-L01-0402,2024-02-20,pH deviation,False,20.89,61.22
-L02-0279,2024-02-21,viscosity failure,False,18.84,70.3
-L02-0280,2024-02-20,particulate exceedance,False,14.23,69.13
-L02-0283,2024-02-21,assay out of specification,False,20.35,60.3
-L03-0336,2024-02-20,microbial contamination,False,20.84,49.91
-L03-0339,2024-02-17,pH deviation,False,16.1,64.96
-L03-0344,2024-02-18,particulate exceedance,False,16.04,67.35
-L03-0354,2024-02-17,particulate exceedance,True,17.93,60.98
-L01-0418,2024-02-21,assay out of specification,True,21.27,63.98
-L01-0434,2024-02-19,microbial contamination,True,18.32,48.92
-L01-0437,2024-02-20,assay out of specification,False,15.68,59.78
-L01-0439,2024-02-21,viscosity failure,False,15.33,58.78
-L02-0301,2024-02-21,particulate exceedance,False,20.73,61.34
-L02-0305,2024-02-19,microbial contamination,True,19.57,58.28
-L03-0357,2024-02-19,microbial contamination,False,16.72,56.55
-L03-0363,2024-02-19,viscosity failure,False,18.93,71.01
-L03-0365,2024-02-22,pH deviation,False,15.57,53.75
-L01-0452,2024-02-20,microbial contamination,True,15.19,53.84
-L02-0319,2024-02-23,particulate exceedance,False,19.45,63.68
-L03-0381,2024-02-22,pH deviation,True,20.36,48.93
-L01-0475,2024-02-22,microbial contamination,True,17.81,60.48
-L01-0480,2024-02-21,pH deviation,False,16.23,51.5
-L01-0485,2024-02-21,pH deviation,False,17.33,71.12
-L01-0489,2024-02-20,assay out of specification,True,21.17,52.61
-L01-0499,2024-02-21,pH deviation,False,15.45,62.74
-L02-0326,2024-02-23,assay out of specification,False,18.57,58.78
-L02-0329,2024-02-24,pH deviation,True,16.11,71.4
-L02-0335,2024-02-21,pH deviation,True,17.66,54.18
-L03-0390,2024-02-24,pH deviation,True,15.1,69.29
-L03-0395,2024-02-23,assay out of specification,True,20.22,58.84
-L01-0514,2024-02-25,pH deviation,False,18.45,57.24
-L01-0516,2024-02-22,viscosity failure,False,16.92,53.33
-L02-0340,2024-02-26,particulate exceedance,True,16.26,57.2
-L02-0342,2024-02-24,pH deviation,True,18.08,62.73
-L02-0345,2024-02-24,microbial contamination,False,14.62,51.77
-L02-0346,2024-02-23,particulate exceedance,False,15.64,55.18
-L03-0407,2024-02-24,assay out of specification,False,17.82,64.51
-L03-0409,2024-02-24,microbial contamination,True,20.08,51.64
-L03-0418,2024-02-24,microbial contamination,False,15.88,52.69
-L01-0538,2024-02-22,assay out of specification,False,16.91,71.97
-L01-0541,2024-02-26,microbial contamination,True,16.99,48.34
-L01-0545,2024-02-26,microbial contamination,False,19.96,54.37
-L01-0548,2024-02-27,assay out of specification,False,14.95,65.04
-L01-0561,2024-02-24,pH deviation,True,14.37,52.08
-L02-0355,2024-02-23,assay out of specification,False,17.6,60.78
-L02-0357,2024-02-27,assay out of specification,False,14.99,67.97
-L02-0363,2024-02-27,pH deviation,False,19.22,62.53
-L02-0368,2024-02-24,particulate exceedance,False,17.84,49.57
-L02-0370,2024-02-24,assay out of specification,False,19.38,56.08
-L03-0431,2024-02-27,microbial contamination,False,18.22,71.52
-L01-0566,2024-02-26,pH deviation,True,14.07,51.6
-L01-0572,2024-02-28,viscosity failure,False,15.52,64.26
-L01-0582,2024-02-25,assay out of specification,False,21.98,55.59
-L01-0585,2024-02-25,microbial contamination,True,16.4,55.33
-L02-0374,2024-02-24,viscosity failure,True,16.58,51.91
-L02-0382,2024-02-28,particulate exceedance,True,15.43,58.36
-L02-0384,2024-02-24,particulate exceedance,True,21.73,51.49
-L02-0389,2024-02-27,microbial contamination,False,17.08,64.18
-L03-0443,2024-02-28,assay out of specification,False,20.67,65.86
-L03-0444,2024-02-24,viscosity failure,False,15.62,69.28
-L03-0461,2024-02-25,microbial contamination,False,18.25,61.49
-L03-0463,2024-02-28,particulate exceedance,False,18.98,67.76
-L01-0596,2024-02-29,viscosity failure,False,21.57,71.1
-L01-0606,2024-02-28,microbial contamination,True,18.15,69.7
-L01-0617,2024-02-26,assay out of specification,False,21.57,65.23
-L01-0622,2024-02-26,viscosity failure,False,21.89,71.06
-L01-0631,2024-02-28,microbial contamination,False,21.17,66.49
-L01-0637,2024-02-25,particulate exceedance,False,14.56,70.93
-L02-0399,2024-02-29,particulate exceedance,True,17.03,60.33
-L03-0471,2024-02-24,viscosity failure,False,14.36,49.73
-L03-0475,2024-02-27,particulate exceedance,False,16.88,71.63
-L03-0478,2024-02-27,assay out of specification,False,21.81,59.6
-L03-0483,2024-02-27,particulate exceedance,True,20.4,70.33
-L01-0647,2024-02-26,particulate exceedance,False,15.12,64.2
-L01-0648,2024-02-27,pH deviation,True,18.94,61.04
-L01-0649,2024-03-01,particulate exceedance,False,17.81,57.14
-L01-0662,2024-02-25,microbial contamination,False,18.22,62.88
-L02-0423,2024-02-29,particulate exceedance,False,17.2,67.53
-L03-0489,2024-02-26,microbial contamination,False,21.85,60.11
-L03-0490,2024-02-29,viscosity failure,True,21.28,61.58
-L03-0491,2024-02-28,particulate exceedance,False,21.64,52.79
-L03-0492,2024-03-01,assay out of specification,False,16.87,51.32
-L03-0493,2024-03-01,pH deviation,True,20.18,49.77
-L01-0667,2024-03-01,particulate exceedance,True,19.59,71.12
-L01-0668,2024-02-29,pH deviation,False,21.08,56.36
-L01-0691,2024-02-27,pH deviation,True,21.32,58.21
-L02-0430,2024-02-28,particulate exceedance,True,15.83,70.23
-L03-0516,2024-03-01,viscosity failure,True,19.6,64.48
-L03-0526,2024-02-28,particulate exceedance,False,21.16,66.59
-L01-0695,2024-02-29,particulate exceedance,False,20.7,65.99
-L01-0696,2024-03-02,viscosity failure,False,14.46,65.2
-L01-0699,2024-03-01,assay out of specification,False,14.8,54.9
-L01-0700,2024-02-29,pH deviation,False,21.91,60.93
-L01-0705,2024-03-02,particulate exceedance,False,19.12,49.65
-L02-0439,2024-03-02,pH deviation,False,15.88,62.62
-L02-0447,2024-03-02,viscosity failure,False,18.27,54.69
-L03-0543,2024-02-29,particulate exceedance,True,15.16,71.97
-L03-0555,2024-02-29,viscosity failure,False,19.03,54.73
-L01-0720,2024-02-29,pH deviation,True,21.6,67.56
-L02-0453,2024-03-04,pH deviation,True,14.09,54.43
-L03-0578,2024-03-03,pH deviation,True,21.32,48.56
-L03-0582,2024-03-01,particulate exceedance,False,17.2,51.61
-L03-0588,2024-03-03,microbial contamination,True,19.47,55.58
-L03-0591,2024-03-02,viscosity failure,True,20.66,65.84
-L03-0598,2024-02-29,viscosity failure,False,18.62,65.52
-L01-0771,2024-03-02,particulate exceedance,False,18.94,68.31
-L01-0772,2024-03-04,pH deviation,True,14.79,63.66
-L02-0476,2024-03-03,viscosity failure,True,18.72,60.61
-L03-0607,2024-03-04,microbial contamination,True,15.78,66.71
-L03-0611,2024-03-01,assay out of specification,False,14.57,50.48
-L03-0620,2024-03-04,pH deviation,True,21.89,58.95
-L01-0788,2024-03-04,particulate exceedance,False,16.16,62.33
-L02-0479,2024-03-06,microbial contamination,False,14.98,63.72
-L03-0625,2024-03-02,assay out of specification,False,16.89,67.55
-L03-0642,2024-03-06,microbial contamination,False,15.36,55.44
-L01-0005,2024-03-05,pH deviation,True,17.37,58.2
-L01-0013,2024-03-05,pH deviation,False,19.52,67.08
-L01-0015,2024-03-06,viscosity failure,True,21.57,63.61
-L02-0005,2024-03-05,microbial contamination,False,20.52,61.43
-L02-0010,2024-03-07,particulate exceedance,False,21.0,49.59
-L01-0026,2024-03-03,pH deviation,True,17.57,62.45
-L01-0033,2024-03-05,microbial contamination,True,17.45,54.97
-L02-0027,2024-03-04,microbial contamination,True,15.87,52.15
-L02-0032,2024-03-06,particulate exceedance,True,19.58,69.22
-L02-0034,2024-03-03,assay out of specification,False,21.04,68.46
-L02-0037,2024-03-06,microbial contamination,True,17.5,71.6
-L03-0028,2024-03-05,pH deviation,True,17.31,51.63
-L01-0055,2024-03-08,particulate exceedance,False,17.16,54.07
-L02-0046,2024-03-05,particulate exceedance,False,20.54,48.15
-L02-0048,2024-03-07,assay out of specification,False,15.82,57.75
-L03-0034,2024-03-09,assay out of specification,True,20.09,49.27
-L03-0036,2024-03-09,particulate exceedance,False,16.29,67.71
-L03-0049,2024-03-07,assay out of specification,False,20.82,50.8
-L03-0051,2024-03-05,assay out of specification,False,16.52,53.93
-L01-0082,2024-03-09,particulate exceedance,False,19.72,57.17
-L01-0083,2024-03-07,particulate exceedance,False,21.6,63.18
-L01-0090,2024-03-08,particulate exceedance,False,21.27,53.4
-L01-0091,2024-03-09,pH deviation,True,21.74,67.62
-L01-0096,2024-03-09,assay out of specification,False,19.66,68.71
-L02-0070,2024-03-05,viscosity failure,True,16.33,56.12
-L02-0073,2024-03-07,microbial contamination,False,17.9,61.06
-L03-0080,2024-03-09,particulate exceedance,True,20.51,61.71
-L01-0101,2024-03-08,microbial contamination,True,15.97,57.73
-L03-0083,2024-03-10,pH deviation,False,19.72,53.45
-L01-0117,2024-03-09,assay out of specification,False,21.85,55.86
-L01-0131,2024-03-12,microbial contamination,True,18.55,61.44
-L01-0133,2024-03-10,particulate exceedance,False,17.6,68.76
-L01-0140,2024-03-09,assay out of specification,True,17.33,67.89
-L02-0104,2024-03-11,pH deviation,True,14.98,50.89
-L02-0105,2024-03-10,microbial contamination,False,15.99,52.53
-L03-0106,2024-03-12,viscosity failure,False,20.75,54.35
-L03-0108,2024-03-12,particulate exceedance,True,15.28,57.34
-L03-0112,2024-03-09,assay out of specification,False,17.6,50.97
-L02-0111,2024-03-11,particulate exceedance,False,21.66,48.04
-L02-0114,2024-03-09,viscosity failure,True,19.66,66.07
-L02-0116,2024-03-11,viscosity failure,False,20.13,64.45
-L01-0185,2024-03-10,pH deviation,False,21.13,61.6
-L01-0186,2024-03-14,viscosity failure,False,20.31,62.84
-L01-0188,2024-03-12,microbial contamination,True,14.77,57.92
-L01-0196,2024-03-12,microbial contamination,True,14.11,53.23
-L02-0135,2024-03-14,viscosity failure,False,16.36,64.36
-L03-0141,2024-03-10,microbial contamination,True,16.99,51.6
-L03-0143,2024-03-13,pH deviation,True,14.61,71.66
-L03-0149,2024-03-13,particulate exceedance,True,15.88,48.88
-L03-0157,2024-03-11,pH deviation,True,15.98,58.45
-L01-0206,2024-03-14,microbial contamination,False,14.44,53.92
-L01-0207,2024-03-14,assay out of specification,True,15.41,53.64
-L01-0210,2024-03-13,viscosity failure,False,20.93,61.04
-L01-0213,2024-03-12,viscosity failure,True,15.96,61.17
-L02-0152,2024-03-11,viscosity failure,False,15.95,70.91
-L03-0164,2024-03-13,particulate exceedance,False,16.31,63.05
-L03-0177,2024-03-12,particulate exceedance,False,21.32,65.92
-L03-0180,2024-03-11,assay out of specification,True,18.29,51.69
-L01-0232,2024-03-11,microbial contamination,True,15.86,50.01
-L01-0242,2024-03-11,viscosity failure,False,16.77,57.52
-L01-0243,2024-03-15,assay out of specification,False,16.44,49.71
-L02-0177,2024-03-13,pH deviation,True,17.26,68.65
-L03-0183,2024-03-15,microbial contamination,True,16.57,58.39
-L03-0187,2024-03-16,assay out of specification,True,16.47,52.53
-L03-0188,2024-03-12,pH deviation,False,20.78,64.32
-L03-0196,2024-03-13,assay out of specification,False,15.88,48.03
-L03-0199,2024-03-12,particulate exceedance,True,19.18,54.26
-L01-0254,2024-03-14,pH deviation,False,18.73,68.37
-L01-0256,2024-03-13,assay out of specification,False,16.95,71.28
-L01-0260,2024-03-12,assay out of specification,False,21.71,54.97
-L01-0268,2024-03-16,pH deviation,False,15.1,55.08
-L02-0184,2024-03-17,viscosity failure,False,20.37,68.96
-L02-0190,2024-03-14,microbial contamination,False,19.86,57.39
-L03-0216,2024-03-12,assay out of specification,False,20.4,53.63
-L03-0219,2024-03-14,assay out of specification,False,15.11,61.17
-L03-0220,2024-03-16,microbial contamination,True,18.48,64.32
-L03-0235,2024-03-14,assay out of specification,False,17.79,61.34
-L01-0270,2024-03-16,assay out of specification,False,20.88,68.48
-L01-0271,2024-03-18,particulate exceedance,False,20.41,71.12
-L01-0281,2024-03-17,viscosity failure,True,15.14,60.21
-L01-0287,2024-03-15,microbial contamination,False,14.09,58.41
-L01-0295,2024-03-14,particulate exceedance,False,18.43,67.27
-L02-0204,2024-03-14,microbial contamination,False,15.9,63.46
-L03-0240,2024-03-17,pH deviation,False,15.21,53.09
-L01-0304,2024-03-18,particulate exceedance,False,21.63,62.58
-L01-0308,2024-03-17,particulate exceedance,False,15.11,48.35
-L01-0315,2024-03-15,pH deviation,False,19.09,67.24
-L01-0320,2024-03-16,microbial contamination,True,20.33,48.3
-L01-0323,2024-03-19,microbial contamination,False,17.96,65.89
-L03-0265,2024-03-16,assay out of specification,False,21.53,48.33
-L03-0280,2024-03-18,viscosity failure,False,21.26,49.1
-L01-0324,2024-03-17,viscosity failure,False,15.99,59.3
-L01-0342,2024-03-19,viscosity failure,False,15.09,49.57
-L01-0353,2024-03-16,assay out of specification,True,18.39,56.41
-L02-0239,2024-03-17,viscosity failure,False,17.72,53.53
-L02-0240,2024-03-16,particulate exceedance,False,14.19,69.34
-L03-0289,2024-03-18,microbial contamination,False,19.31,56.71
-L03-0294,2024-03-18,particulate exceedance,True,14.46,50.47
-L01-0356,2024-03-17,pH deviation,True,17.21,57.75
-L01-0357,2024-03-16,pH deviation,False,21.48,60.55
-L03-0315,2024-03-16,viscosity failure,False,17.34,53.75
-L01-0384,2024-03-18,assay out of specification,True,15.75,69.05
-L01-0395,2024-03-22,assay out of specification,False,17.66,63.49
-L01-0396,2024-03-21,assay out of specification,False,14.72,60.55
-L01-0398,2024-03-22,assay out of specification,False,18.71,61.1
-L01-0406,2024-03-20,pH deviation,False,14.17,59.54
-L02-0262,2024-03-22,pH deviation,False,16.18,60.27
-L03-0328,2024-03-19,assay out of specification,False,15.29,71.97
-L03-0334,2024-03-19,pH deviation,False,21.68,66.15
-L01-0409,2024-03-18,pH deviation,False,15.7,63.23
-L01-0412,2024-03-22,microbial contamination,True,20.65,59.34
-L02-0278,2024-03-19,viscosity failure,True,21.17,60.79
-L02-0280,2024-03-22,particulate exceedance,True,14.82,54.99
-L02-0284,2024-03-22,pH deviation,False,19.79,49.03
-L03-0344,2024-03-22,viscosity failure,True,19.43,67.36
-L03-0348,2024-03-20,particulate exceedance,False,14.38,57.8
-L01-0437,2024-03-24,viscosity failure,True,21.18,64.82
-L01-0441,2024-03-24,viscosity failure,True,19.35,50.39
-L01-0446,2024-03-22,particulate exceedance,False,15.29,71.01
-L01-0450,2024-03-23,particulate exceedance,False,21.09,68.64
-L01-0456,2024-03-22,viscosity failure,False,19.3,53.51
-L01-0457,2024-03-20,microbial contamination,False,16.74,71.2
-L01-0461,2024-03-23,particulate exceedance,False,19.33,48.25
-L02-0294,2024-03-19,particulate exceedance,False,22.0,51.7
-L02-0302,2024-03-21,microbial contamination,False,17.76,51.8
-L02-0304,2024-03-21,particulate exceedance,True,17.31,57.73
-L02-0309,2024-03-21,assay out of specification,False,19.7,70.94
-L02-0311,2024-03-23,microbial contamination,False,18.9,52.03
-L03-0367,2024-03-22,assay out of specification,False,15.62,66.48
-L03-0369,2024-03-19,pH deviation,True,18.68,61.33
-L03-0378,2024-03-22,pH deviation,True,19.03,65.77
-L03-0383,2024-03-22,assay out of specification,False,19.24,66.59
-L03-0384,2024-03-23,assay out of specification,False,19.28,54.21
-L02-0327,2024-03-23,viscosity failure,False,15.28,68.46
-L03-0391,2024-03-22,microbial contamination,True,18.35,57.58
-L03-0393,2024-03-23,assay out of specification,False,15.88,51.71
-L03-0395,2024-03-25,assay out of specification,True,20.08,56.61
-L03-0398,2024-03-20,assay out of specification,True,19.22,57.68
-L01-0481,2024-03-26,microbial contamination,True,19.83,71.11
-L02-0334,2024-03-25,microbial contamination,False,15.59,57.73
-L02-0337,2024-03-21,assay out of specification,False,19.94,50.96
-L02-0338,2024-03-21,microbial contamination,False,21.85,71.75
-L03-0413,2024-03-25,assay out of specification,False,15.28,61.2
-L03-0416,2024-03-24,particulate exceedance,True,19.78,60.86
-L01-0521,2024-03-26,microbial contamination,False,17.24,48.99
-L01-0530,2024-03-25,pH deviation,True,20.03,53.99
-L01-0534,2024-03-23,pH deviation,False,20.68,68.27
-L02-0361,2024-03-24,pH deviation,False,15.96,71.42
-L03-0426,2024-03-24,particulate exceedance,True,14.72,68.54
-L03-0428,2024-03-24,pH deviation,False,19.31,60.8
-L03-0436,2024-03-22,viscosity failure,False,18.65,50.04
-L03-0452,2024-03-25,viscosity failure,False,21.15,50.44
-L03-0454,2024-03-28,viscosity failure,False,15.74,65.06
-L03-0455,2024-03-24,microbial contamination,True,16.6,59.24
-L03-0457,2024-03-24,viscosity failure,True,20.01,70.35
-L03-0462,2024-03-25,viscosity failure,True,18.94,59.44
-L01-0566,2024-03-26,microbial contamination,False,21.24,65.58
-L01-0576,2024-03-28,particulate exceedance,False,21.51,51.59
-L02-0379,2024-03-26,microbial contamination,False,20.76,69.46
-L02-0386,2024-03-25,microbial contamination,True,14.14,55.24
-L03-0487,2024-03-29,microbial contamination,False,17.15,63.04
-L01-0584,2024-03-30,particulate exceedance,True,16.51,56.96
-L01-0590,2024-03-28,microbial contamination,False,17.8,71.79
-L01-0602,2024-03-29,pH deviation,False,14.89,58.84
-L02-0388,2024-03-27,microbial contamination,False,18.69,59.47
-L02-0395,2024-03-30,pH deviation,False,19.31,65.84
-L02-0406,2024-03-26,viscosity failure,False,14.52,63.11
-L03-0490,2024-03-28,particulate exceedance,True,18.75,64.15
-L03-0514,2024-03-28,particulate exceedance,True,19.08,48.6
-L03-0515,2024-03-26,assay out of specification,False,17.92,62.17
-L03-0519,2024-03-29,pH deviation,False,14.3,48.57
-L03-0522,2024-03-28,viscosity failure,True,20.43,60.39
-L01-0607,2024-03-28,assay out of specification,True,14.5,60.06
-L01-0615,2024-03-29,pH deviation,False,14.86,57.52
-L01-0619,2024-03-29,assay out of specification,False,14.76,64.34
-L01-0623,2024-03-28,microbial contamination,False,15.77,63.76
-L02-0410,2024-03-31,pH deviation,True,20.85,69.37
-L02-0418,2024-03-28,pH deviation,False,19.92,56.14
-L03-0529,2024-03-29,assay out of specification,False,18.18,54.67
-L03-0534,2024-03-28,assay out of specification,False,17.56,61.31
-L03-0544,2024-03-27,assay out of specification,True,16.85,53.5
-L01-0633,2024-03-28,assay out of specification,True,19.23,54.02
-L01-0641,2024-04-01,viscosity failure,False,16.77,66.99
-L02-0423,2024-03-29,assay out of specification,False,17.43,68.95
-L02-0435,2024-03-30,particulate exceedance,True,19.59,63.37
-L03-0553,2024-03-30,pH deviation,False,19.12,51.71
-L03-0554,2024-03-29,pH deviation,False,18.8,48.84
-L03-0563,2024-04-01,pH deviation,True,21.79,59.6
-L03-0565,2024-03-29,particulate exceedance,True,17.75,71.13
-L01-0669,2024-04-02,viscosity failure,False,21.05,58.12
-L01-0670,2024-03-30,microbial contamination,True,19.45,64.85
-L01-0675,2024-03-31,assay out of specification,False,16.01,66.29
-L02-0445,2024-04-01,viscosity failure,True,21.8,66.58
-L02-0446,2024-04-02,microbial contamination,True,17.71,59.36
-L02-0449,2024-03-31,viscosity failure,False,17.09,58.18
-L03-0570,2024-03-29,viscosity failure,False,17.98,66.33
-L03-0578,2024-03-30,pH deviation,False,18.99,54.34
-L03-0581,2024-03-29,assay out of specification,False,20.1,55.86
-L01-0705,2024-04-02,viscosity failure,False,20.81,50.97
-L02-0470,2024-04-02,particulate exceedance,False,17.48,66.68
-L03-0588,2024-04-02,microbial contamination,True,20.64,58.62
-L03-0596,2024-03-31,pH deviation,False,15.71,69.78
-L01-0711,2024-04-02,assay out of specification,False,18.33,64.06
-L01-0718,2024-04-01,viscosity failure,False,20.82,66.33
-L01-0730,2024-03-30,particulate exceedance,True,17.52,61.89
-L03-0604,2024-04-03,pH deviation,False,18.5,65.23
-L03-0607,2024-04-04,microbial contamination,False,17.36,61.84
-L03-0617,2024-04-04,microbial contamination,True,19.3,55.93
-L01-0739,2024-04-02,microbial contamination,False,16.02,62.05
-L01-0741,2024-04-05,viscosity failure,False,17.37,64.65
-L01-0745,2024-04-01,particulate exceedance,False,21.94,57.11
-L01-0752,2024-04-01,viscosity failure,False,17.36,69.65
-L01-0754,2024-04-01,assay out of specification,False,19.65,61.12
-L01-0757,2024-04-01,particulate exceedance,False,20.48,61.19
-L01-0761,2024-04-04,viscosity failure,False,19.82,63.29
-L02-0507,2024-04-02,assay out of specification,True,19.78,54.73
-L03-0621,2024-04-02,viscosity failure,False,15.11,66.39
-L03-0625,2024-04-04,microbial contamination,False,21.27,65.91
-L03-0635,2024-04-03,microbial contamination,False,20.11,58.25
-L01-0764,2024-04-01,particulate exceedance,False,20.06,50.19
-L01-0783,2024-04-03,particulate exceedance,True,18.01,58.39
-L02-0508,2024-04-01,assay out of specification,True,16.26,69.43
-L02-0510,2024-04-01,particulate exceedance,True,17.2,63.41
-L03-0654,2024-04-02,viscosity failure,False,17.51,63.19
-L03-0668,2024-04-05,viscosity failure,True,21.07,68.32
+lot_id,rejection_date,rejection_reason,rework_possible,rejected_quantity,rework_cost_per_unit,disposal_cost_per_unit
+L01-0129,2024-01-07,viscosity failure,True,90,16.51,51.97
+L01-0165,2024-01-08,assay out of specification,True,114,19.96,55.25
+L01-0172,2024-01-09,microbial contamination,False,256,19.37,70.34
+L02-0134,2024-01-08,microbial contamination,False,241,15.06,48.51
+L02-0138,2024-01-12,microbial contamination,False,254,18.79,71.78
+L03-0123,2024-01-10,viscosity failure,False,140,19.85,71.13
+L03-0137,2024-01-08,microbial contamination,False,226,14.37,70.12
+L03-0138,2024-01-08,pH deviation,True,274,19.7,55.99
+L01-0224,2024-01-10,particulate exceedance,False,183,19.24,48.6
+L03-0144,2024-01-13,assay out of specification,False,51,14.41,48.15
+L03-0155,2024-01-10,pH deviation,True,296,20.86,56.95
+L01-0247,2024-01-15,particulate exceedance,False,81,16.65,55.74
+L02-0163,2024-01-15,pH deviation,False,372,15.68,64.42
+L02-0167,2024-01-13,microbial contamination,False,108,20.1,52.33
+L02-0177,2024-01-11,assay out of specification,False,252,16.09,68.99
+L03-0173,2024-01-13,particulate exceedance,True,384,16.28,62.33
+L03-0177,2024-01-14,viscosity failure,True,268,14.48,64.55
+L02-0194,2024-01-14,particulate exceedance,False,123,18.01,57.57
+L02-0197,2024-01-15,particulate exceedance,False,97,17.12,59.14
+L02-0200,2024-01-16,pH deviation,True,99,15.69,67.37
+L02-0201,2024-01-16,viscosity failure,False,239,17.5,64.32
+L01-0286,2024-01-15,assay out of specification,True,254,15.5,62.5
+L01-0298,2024-01-13,particulate exceedance,True,125,18.37,69.88
+L02-0214,2024-01-16,particulate exceedance,False,147,16.84,48.3
+L01-0312,2024-01-14,pH deviation,True,240,17.63,70.13
+L02-0218,2024-01-14,pH deviation,True,200,16.57,53.14
+L02-0224,2024-01-18,particulate exceedance,False,176,19.88,48.1
+L02-0230,2024-01-16,microbial contamination,True,359,14.16,71.78
+L02-0236,2024-01-14,viscosity failure,True,390,19.46,63.31
+L03-0232,2024-01-15,viscosity failure,True,232,15.71,64.08
+L01-0327,2024-01-16,assay out of specification,False,207,15.71,66.41
+L01-0328,2024-01-17,assay out of specification,False,116,14.64,50.5
+L01-0339,2024-01-16,assay out of specification,False,278,15.32,56.72
+L02-0251,2024-01-15,viscosity failure,True,175,15.32,64.07
+L03-0267,2024-01-18,assay out of specification,False,108,17.56,70.42
+L03-0273,2024-01-16,pH deviation,False,262,20.81,63.57
+L03-0276,2024-01-19,pH deviation,True,244,18.49,61.65
+L03-0277,2024-01-17,pH deviation,False,296,15.89,71.33
+L03-0288,2024-01-17,microbial contamination,False,150,19.24,48.16
+L03-0311,2024-01-20,pH deviation,False,223,21.37,52.59
+L01-0376,2024-01-19,viscosity failure,True,356,19.57,69.01
+L01-0385,2024-01-20,pH deviation,True,164,17.78,62.95
+L01-0387,2024-01-20,particulate exceedance,False,298,21.35,50.75
+L01-0389,2024-01-18,viscosity failure,True,125,21.46,66.21
+L03-0332,2024-01-17,viscosity failure,False,329,14.9,63.93
+L01-0414,2024-01-18,pH deviation,True,283,18.21,62.37
+L02-0289,2024-01-21,microbial contamination,False,92,15.82,56.69
+L02-0303,2024-01-22,viscosity failure,False,247,17.68,53.7
+L03-0360,2024-01-21,viscosity failure,True,280,21.23,58.56
+L01-0438,2024-01-23,microbial contamination,True,226,15.23,53.69
+L02-0316,2024-01-21,particulate exceedance,False,132,17.85,66.89
+L02-0319,2024-01-21,assay out of specification,False,217,18.8,55.97
+L03-0364,2024-01-23,particulate exceedance,False,285,20.46,54.87
+L03-0374,2024-01-21,microbial contamination,False,112,21.78,50.18
+L03-0376,2024-01-22,microbial contamination,True,321,17.14,58.21
+L01-0455,2024-01-23,pH deviation,False,82,15.95,68.4
+L03-0409,2024-01-20,viscosity failure,True,221,14.6,58.02
+L03-0410,2024-01-23,microbial contamination,False,289,15.66,61.22
+L01-0493,2024-01-22,assay out of specification,True,373,16.24,65.54
+L02-0351,2024-01-24,microbial contamination,True,135,15.35,52.71
+L03-0424,2024-01-22,particulate exceedance,True,150,20.3,64.24
+L01-0508,2024-01-22,microbial contamination,True,375,18.41,55.33
+L01-0521,2024-01-21,particulate exceedance,True,181,15.57,49.98
+L02-0372,2024-01-24,microbial contamination,False,384,21.84,64.45
+L02-0379,2024-01-25,viscosity failure,True,264,20.42,53.43
+L02-0383,2024-01-23,particulate exceedance,True,142,19.5,62.07
+L02-0384,2024-01-26,microbial contamination,True,241,21.15,55.54
+L03-0466,2024-01-26,assay out of specification,True,185,14.27,63.76
+L01-0565,2024-01-28,assay out of specification,False,161,21.27,62.15
+L01-0577,2024-01-26,microbial contamination,False,99,14.71,58.33
+L03-0489,2024-01-25,particulate exceedance,True,200,19.0,60.3
+L01-0583,2024-01-25,viscosity failure,False,160,19.7,69.72
+L01-0603,2024-01-26,particulate exceedance,False,259,17.32,54.92
+L02-0421,2024-01-28,microbial contamination,False,106,17.29,63.22
+L03-0507,2024-01-26,viscosity failure,True,305,20.11,56.37
+L01-0612,2024-01-26,viscosity failure,True,212,19.15,66.22
+L01-0613,2024-01-27,assay out of specification,False,270,17.24,48.74
+L02-0439,2024-01-28,microbial contamination,True,128,21.5,60.31
+L01-0642,2024-01-28,viscosity failure,False,285,21.51,61.0
+L02-0442,2024-01-29,pH deviation,True,245,16.03,69.73
+L02-0453,2024-01-31,viscosity failure,True,254,16.05,52.87
+L01-0659,2024-01-30,particulate exceedance,False,216,21.85,56.49
+L01-0660,2024-01-30,particulate exceedance,False,195,14.12,66.97
+L01-0677,2024-01-28,microbial contamination,False,230,21.71,61.6
+L01-0680,2024-01-27,microbial contamination,False,95,20.75,61.96
+L02-0468,2024-01-29,assay out of specification,True,270,21.01,50.0
+L03-0577,2024-01-28,viscosity failure,False,306,20.48,57.65
+L01-0683,2024-02-01,pH deviation,False,110,18.72,64.45
+L01-0694,2024-01-29,viscosity failure,False,60,14.66,53.96
+L01-0705,2024-01-30,microbial contamination,False,315,18.05,63.39
+L03-0584,2024-01-30,microbial contamination,True,320,17.8,69.05
+L03-0590,2024-01-29,assay out of specification,False,215,18.41,65.26
+L03-0605,2024-02-01,viscosity failure,False,179,20.58,58.38
+L01-0724,2024-01-30,assay out of specification,False,224,20.03,51.57
+L02-0489,2024-01-31,microbial contamination,False,217,18.34,68.55
+L02-0496,2024-01-31,viscosity failure,True,265,15.41,50.22
+L02-0501,2024-01-31,viscosity failure,True,196,18.28,50.23
+L03-0629,2024-01-30,particulate exceedance,False,112,15.86,64.33
+L03-0631,2024-01-31,particulate exceedance,False,330,21.74,55.55
+L01-0759,2024-02-03,viscosity failure,False,205,15.29,56.45
+L02-0520,2024-02-03,pH deviation,False,194,16.13,54.71
+L03-0635,2024-02-04,microbial contamination,False,178,19.88,59.91
+L03-0637,2024-02-04,microbial contamination,False,67,20.86,64.97
+L03-0642,2024-02-02,microbial contamination,False,137,16.34,62.2
+L03-0643,2024-02-01,viscosity failure,False,140,14.97,57.45
+L03-0645,2024-01-31,pH deviation,False,268,18.48,69.29
+L03-0650,2024-02-03,assay out of specification,False,204,17.88,62.06
+L01-0777,2024-02-03,viscosity failure,False,221,14.0,68.51
+L02-0540,2024-02-05,viscosity failure,False,303,15.57,55.12
+L02-0554,2024-02-01,assay out of specification,False,288,17.32,69.66
+L02-0555,2024-02-04,microbial contamination,True,380,16.07,58.93
+L01-0804,2024-02-03,pH deviation,False,333,14.24,62.96
+L01-0817,2024-02-04,viscosity failure,True,252,16.75,69.89
+L02-0561,2024-02-04,microbial contamination,True,263,17.28,50.91
+L02-0562,2024-02-01,pH deviation,False,337,14.7,55.97
+L02-0572,2024-02-03,assay out of specification,False,299,17.11,59.57
+L03-0673,2024-02-03,assay out of specification,False,215,20.95,66.94
+L03-0675,2024-02-04,viscosity failure,False,125,18.31,68.83
+L03-0676,2024-02-06,viscosity failure,False,370,15.41,61.63
+L03-0679,2024-02-03,microbial contamination,False,119,19.74,52.52
+L03-0682,2024-02-06,assay out of specification,True,291,18.34,53.15
+L03-0689,2024-02-06,assay out of specification,False,327,20.04,56.64
+L01-0012,2024-02-03,assay out of specification,True,240,17.17,53.06
+L01-0013,2024-02-04,assay out of specification,False,118,16.08,68.66
+L01-0018,2024-02-06,viscosity failure,False,108,16.02,63.39
+L02-0001,2024-02-02,viscosity failure,False,130,15.23,67.77
+L02-0006,2024-02-03,particulate exceedance,False,333,15.46,60.95
+L02-0007,2024-02-03,microbial contamination,True,274,21.62,52.07
+L02-0014,2024-02-04,assay out of specification,False,273,15.37,63.41
+L02-0017,2024-02-07,particulate exceedance,False,272,17.64,50.91
+L03-0005,2024-02-04,pH deviation,False,188,20.11,69.23
+L03-0006,2024-02-03,pH deviation,True,93,16.92,56.84
+L01-0031,2024-02-04,particulate exceedance,False,242,17.38,54.1
+L01-0037,2024-02-05,assay out of specification,False,161,19.91,68.53
+L01-0040,2024-02-07,assay out of specification,False,219,21.23,68.29
+L01-0041,2024-02-06,assay out of specification,True,326,21.74,60.93
+L02-0020,2024-02-05,microbial contamination,True,53,17.58,57.2
+L02-0024,2024-02-04,microbial contamination,True,204,17.68,69.29
+L02-0025,2024-02-06,viscosity failure,False,269,14.85,61.93
+L03-0016,2024-02-03,pH deviation,False,63,18.62,69.63
+L03-0017,2024-02-06,assay out of specification,False,272,17.32,59.65
+L03-0021,2024-02-06,viscosity failure,True,200,15.3,49.24
+L01-0048,2024-02-08,particulate exceedance,False,119,21.43,66.44
+L01-0056,2024-02-06,microbial contamination,False,126,17.65,58.49
+L01-0074,2024-02-09,viscosity failure,True,131,16.51,69.42
+L03-0047,2024-02-08,viscosity failure,False,282,19.24,56.73
+L03-0055,2024-02-08,microbial contamination,False,294,18.04,57.31
+L01-0076,2024-02-09,assay out of specification,False,354,18.17,63.29
+L01-0079,2024-02-10,assay out of specification,False,229,20.58,62.13
+L01-0088,2024-02-06,particulate exceedance,False,178,18.91,67.15
+L01-0094,2024-02-06,pH deviation,True,336,21.39,70.26
+L02-0064,2024-02-08,assay out of specification,False,70,19.83,55.18
+L02-0065,2024-02-08,pH deviation,False,351,14.78,65.05
+L03-0070,2024-02-06,viscosity failure,False,98,20.6,64.19
+L03-0072,2024-02-10,particulate exceedance,False,323,19.22,71.38
+L03-0077,2024-02-08,assay out of specification,True,186,19.3,71.63
+L03-0085,2024-02-06,particulate exceedance,True,128,21.68,54.69
+L01-0102,2024-02-06,pH deviation,False,123,18.15,49.3
+L01-0110,2024-02-07,particulate exceedance,False,124,14.99,59.07
+L01-0116,2024-02-08,pH deviation,True,187,21.33,56.59
+L01-0118,2024-02-07,particulate exceedance,False,86,15.33,61.6
+L01-0120,2024-02-07,pH deviation,False,321,14.94,67.01
+L02-0086,2024-02-08,viscosity failure,False,268,21.16,63.94
+L03-0095,2024-02-07,assay out of specification,True,273,14.63,68.16
+L03-0099,2024-02-06,microbial contamination,True,183,15.89,50.32
+L01-0128,2024-02-09,viscosity failure,True,170,20.78,66.36
+L01-0145,2024-02-10,viscosity failure,False,138,15.71,53.29
+L02-0096,2024-02-10,viscosity failure,False,115,19.37,60.73
+L03-0125,2024-02-10,pH deviation,False,113,20.88,53.61
+L03-0127,2024-02-12,assay out of specification,True,395,21.23,64.5
+L01-0154,2024-02-12,microbial contamination,True,75,17.19,49.38
+L01-0155,2024-02-11,microbial contamination,True,148,21.85,65.3
+L02-0122,2024-02-11,assay out of specification,True,120,14.98,53.99
+L03-0135,2024-02-13,viscosity failure,False,315,16.3,53.86
+L03-0136,2024-02-10,pH deviation,False,181,17.85,58.76
+L03-0147,2024-02-12,assay out of specification,True,358,17.63,53.18
+L03-0153,2024-02-10,microbial contamination,True,328,16.87,66.22
+L01-0184,2024-02-11,particulate exceedance,False,171,16.31,48.25
+L01-0189,2024-02-12,particulate exceedance,True,257,14.99,48.43
+L01-0212,2024-02-10,particulate exceedance,True,92,16.59,57.15
+L02-0127,2024-02-14,microbial contamination,True,244,18.08,71.86
+L02-0132,2024-02-12,assay out of specification,False,76,19.46,58.15
+L02-0134,2024-02-12,viscosity failure,False,92,19.7,51.11
+L02-0135,2024-02-12,particulate exceedance,True,219,14.64,58.19
+L03-0162,2024-02-13,assay out of specification,True,102,21.77,69.05
+L01-0225,2024-02-11,assay out of specification,True,204,16.74,50.7
+L02-0147,2024-02-10,pH deviation,False,203,15.92,66.69
+L02-0154,2024-02-12,viscosity failure,True,316,18.32,49.84
+L03-0176,2024-02-14,particulate exceedance,True,363,17.98,58.25
+L03-0192,2024-02-11,viscosity failure,True,109,14.87,49.75
+L03-0193,2024-02-15,assay out of specification,False,262,21.79,62.3
+L01-0237,2024-02-12,microbial contamination,False,253,15.4,70.67
+L01-0241,2024-02-15,viscosity failure,True,242,15.99,61.69
+L01-0248,2024-02-11,viscosity failure,False,162,17.02,57.12
+L01-0257,2024-02-12,particulate exceedance,False,147,20.17,67.21
+L02-0163,2024-02-16,assay out of specification,True,124,20.27,50.85
+L02-0165,2024-02-12,pH deviation,False,234,18.47,61.06
+L02-0166,2024-02-13,pH deviation,True,145,20.92,52.36
+L02-0167,2024-02-16,particulate exceedance,False,156,17.82,67.52
+L03-0213,2024-02-11,assay out of specification,True,150,19.6,49.16
+L01-0266,2024-02-14,viscosity failure,True,98,18.76,48.23
+L01-0270,2024-02-14,particulate exceedance,True,318,16.69,70.51
+L01-0284,2024-02-16,microbial contamination,False,236,21.91,52.29
+L02-0186,2024-02-17,assay out of specification,False,95,14.18,66.7
+L02-0191,2024-02-12,particulate exceedance,True,390,19.12,59.86
+L03-0220,2024-02-13,assay out of specification,False,196,16.31,53.88
+L03-0230,2024-02-17,microbial contamination,False,230,16.75,61.44
+L01-0289,2024-02-15,microbial contamination,True,125,21.16,56.94
+L02-0207,2024-02-14,assay out of specification,True,398,21.19,49.53
+L02-0214,2024-02-16,microbial contamination,True,256,21.03,69.85
+L02-0219,2024-02-15,pH deviation,True,219,14.31,70.99
+L03-0249,2024-02-16,microbial contamination,False,97,17.84,67.25
+L03-0250,2024-02-16,viscosity failure,True,147,14.72,54.74
+L03-0254,2024-02-16,particulate exceedance,False,202,21.81,66.83
+L01-0314,2024-02-17,assay out of specification,False,284,20.76,53.16
+L01-0316,2024-02-15,viscosity failure,True,266,18.2,66.46
+L02-0222,2024-02-15,assay out of specification,False,394,18.14,60.23
+L01-0343,2024-02-16,microbial contamination,True,144,15.02,52.24
+L01-0356,2024-02-16,assay out of specification,False,150,18.8,51.21
+L02-0243,2024-02-18,microbial contamination,False,245,14.77,52.04
+L02-0244,2024-02-18,pH deviation,False,237,14.68,56.34
+L02-0246,2024-02-16,viscosity failure,False,154,15.39,62.68
+L03-0300,2024-02-17,pH deviation,False,209,21.6,53.65
+L01-0370,2024-02-17,viscosity failure,False,122,15.24,67.83
+L01-0386,2024-02-16,assay out of specification,True,165,20.22,56.31
+L02-0257,2024-02-17,viscosity failure,False,110,18.88,65.9
+L02-0259,2024-02-16,viscosity failure,True,161,15.63,69.31
+L02-0266,2024-02-21,pH deviation,False,255,14.57,64.03
+L02-0270,2024-02-16,assay out of specification,False,180,19.94,62.11
+L03-0302,2024-02-19,assay out of specification,True,228,14.34,55.56
+L03-0304,2024-02-19,pH deviation,False,83,21.97,65.41
+L01-0390,2024-02-17,pH deviation,False,303,16.93,56.7
+L01-0397,2024-02-22,assay out of specification,False,376,15.62,53.64
+L01-0402,2024-02-20,pH deviation,False,140,20.89,61.22
+L02-0279,2024-02-21,viscosity failure,False,186,18.84,70.3
+L02-0280,2024-02-20,particulate exceedance,False,315,14.23,69.13
+L02-0283,2024-02-21,assay out of specification,False,330,20.35,60.3
+L03-0336,2024-02-20,microbial contamination,False,334,20.84,49.91
+L03-0339,2024-02-17,pH deviation,False,165,16.1,64.96
+L03-0344,2024-02-18,particulate exceedance,False,203,16.04,67.35
+L03-0354,2024-02-17,particulate exceedance,True,238,17.93,60.98
+L01-0418,2024-02-21,assay out of specification,True,271,21.27,63.98
+L01-0434,2024-02-19,microbial contamination,True,121,18.32,48.92
+L01-0437,2024-02-20,assay out of specification,False,135,15.68,59.78
+L01-0439,2024-02-21,viscosity failure,False,140,15.33,58.78
+L02-0301,2024-02-21,particulate exceedance,False,117,20.73,61.34
+L02-0305,2024-02-19,microbial contamination,True,250,19.57,58.28
+L03-0357,2024-02-19,microbial contamination,False,221,16.72,56.55
+L03-0363,2024-02-19,viscosity failure,False,285,18.93,71.01
+L03-0365,2024-02-22,pH deviation,False,399,15.57,53.75
+L01-0452,2024-02-20,microbial contamination,True,151,15.19,53.84
+L02-0319,2024-02-23,particulate exceedance,False,394,19.45,63.68
+L03-0381,2024-02-22,pH deviation,True,233,20.36,48.93
+L01-0475,2024-02-22,microbial contamination,True,297,17.81,60.48
+L01-0480,2024-02-21,pH deviation,False,357,16.23,51.5
+L01-0485,2024-02-21,pH deviation,False,133,17.33,71.12
+L01-0489,2024-02-20,assay out of specification,True,342,21.17,52.61
+L01-0499,2024-02-21,pH deviation,False,161,15.45,62.74
+L02-0326,2024-02-23,assay out of specification,False,282,18.57,58.78
+L02-0329,2024-02-24,pH deviation,True,59,16.11,71.4
+L02-0335,2024-02-21,pH deviation,True,60,17.66,54.18
+L03-0390,2024-02-24,pH deviation,True,248,15.1,69.29
+L03-0395,2024-02-23,assay out of specification,True,138,20.22,58.84
+L01-0514,2024-02-25,pH deviation,False,171,18.45,57.24
+L01-0516,2024-02-22,viscosity failure,False,210,16.92,53.33
+L02-0340,2024-02-26,particulate exceedance,True,146,16.26,57.2
+L02-0342,2024-02-24,pH deviation,True,217,18.08,62.73
+L02-0345,2024-02-24,microbial contamination,False,116,14.62,51.77
+L02-0346,2024-02-23,particulate exceedance,False,367,15.64,55.18
+L03-0407,2024-02-24,assay out of specification,False,153,17.82,64.51
+L03-0409,2024-02-24,microbial contamination,True,120,20.08,51.64
+L03-0418,2024-02-24,microbial contamination,False,394,15.88,52.69
+L01-0538,2024-02-22,assay out of specification,False,153,16.91,71.97
+L01-0541,2024-02-26,microbial contamination,True,318,16.99,48.34
+L01-0545,2024-02-26,microbial contamination,False,140,19.96,54.37
+L01-0548,2024-02-27,assay out of specification,False,295,14.95,65.04
+L01-0561,2024-02-24,pH deviation,True,316,14.37,52.08
+L02-0355,2024-02-23,assay out of specification,False,329,17.6,60.78
+L02-0357,2024-02-27,assay out of specification,False,167,14.99,67.97
+L02-0363,2024-02-27,pH deviation,False,283,19.22,62.53
+L02-0368,2024-02-24,particulate exceedance,False,95,17.84,49.57
+L02-0370,2024-02-24,assay out of specification,False,153,19.38,56.08
+L03-0431,2024-02-27,microbial contamination,False,154,18.22,71.52
+L01-0566,2024-02-26,pH deviation,True,230,14.07,51.6
+L01-0572,2024-02-28,viscosity failure,False,81,15.52,64.26
+L01-0582,2024-02-25,assay out of specification,False,84,21.98,55.59
+L01-0585,2024-02-25,microbial contamination,True,311,16.4,55.33
+L02-0374,2024-02-24,viscosity failure,True,324,16.58,51.91
+L02-0382,2024-02-28,particulate exceedance,True,95,15.43,58.36
+L02-0384,2024-02-24,particulate exceedance,True,226,21.73,51.49
+L02-0389,2024-02-27,microbial contamination,False,131,17.08,64.18
+L03-0443,2024-02-28,assay out of specification,False,295,20.67,65.86
+L03-0444,2024-02-24,viscosity failure,False,338,15.62,69.28
+L03-0461,2024-02-25,microbial contamination,False,176,18.25,61.49
+L03-0463,2024-02-28,particulate exceedance,False,222,18.98,67.76
+L01-0596,2024-02-29,viscosity failure,False,202,21.57,71.1
+L01-0606,2024-02-28,microbial contamination,True,211,18.15,69.7
+L01-0617,2024-02-26,assay out of specification,False,320,21.57,65.23
+L01-0622,2024-02-26,viscosity failure,False,364,21.89,71.06
+L01-0631,2024-02-28,microbial contamination,False,139,21.17,66.49
+L01-0637,2024-02-25,particulate exceedance,False,103,14.56,70.93
+L02-0399,2024-02-29,particulate exceedance,True,375,17.03,60.33
+L03-0471,2024-02-24,viscosity failure,False,217,14.36,49.73
+L03-0475,2024-02-27,particulate exceedance,False,362,16.88,71.63
+L03-0478,2024-02-27,assay out of specification,False,218,21.81,59.6
+L03-0483,2024-02-27,particulate exceedance,True,180,20.4,70.33
+L01-0647,2024-02-26,particulate exceedance,False,143,15.12,64.2
+L01-0648,2024-02-27,pH deviation,True,316,18.94,61.04
+L01-0649,2024-03-01,particulate exceedance,False,176,17.81,57.14
+L01-0662,2024-02-25,microbial contamination,False,341,18.22,62.88
+L02-0423,2024-02-29,particulate exceedance,False,167,17.2,67.53
+L03-0489,2024-02-26,microbial contamination,False,94,21.85,60.11
+L03-0490,2024-02-29,viscosity failure,True,356,21.28,61.58
+L03-0491,2024-02-28,particulate exceedance,False,241,21.64,52.79
+L03-0492,2024-03-01,assay out of specification,False,114,16.87,51.32
+L03-0493,2024-03-01,pH deviation,True,332,20.18,49.77
+L01-0667,2024-03-01,particulate exceedance,True,161,19.59,71.12
+L01-0668,2024-02-29,pH deviation,False,226,21.08,56.36
+L01-0691,2024-02-27,pH deviation,True,74,21.32,58.21
+L02-0430,2024-02-28,particulate exceedance,True,152,15.83,70.23
+L03-0516,2024-03-01,viscosity failure,True,355,19.6,64.48
+L03-0526,2024-02-28,particulate exceedance,False,180,21.16,66.59
+L01-0695,2024-02-29,particulate exceedance,False,248,20.7,65.99
+L01-0696,2024-03-02,viscosity failure,False,387,14.46,65.2
+L01-0699,2024-03-01,assay out of specification,False,194,14.8,54.9
+L01-0700,2024-02-29,pH deviation,False,303,21.91,60.93
+L01-0705,2024-03-02,particulate exceedance,False,247,19.12,49.65
+L02-0439,2024-03-02,pH deviation,False,333,15.88,62.62
+L02-0447,2024-03-02,viscosity failure,False,342,18.27,54.69
+L03-0543,2024-02-29,particulate exceedance,True,283,15.16,71.97
+L03-0555,2024-02-29,viscosity failure,False,168,19.03,54.73
+L01-0720,2024-02-29,pH deviation,True,242,21.6,67.56
+L02-0453,2024-03-04,pH deviation,True,148,14.09,54.43
+L03-0578,2024-03-03,pH deviation,True,214,21.32,48.56
+L03-0582,2024-03-01,particulate exceedance,False,187,17.2,51.61
+L03-0588,2024-03-03,microbial contamination,True,222,19.47,55.58
+L03-0591,2024-03-02,viscosity failure,True,142,20.66,65.84
+L03-0598,2024-02-29,viscosity failure,False,321,18.62,65.52
+L01-0771,2024-03-02,particulate exceedance,False,89,18.94,68.31
+L01-0772,2024-03-04,pH deviation,True,320,14.79,63.66
+L02-0476,2024-03-03,viscosity failure,True,345,18.72,60.61
+L03-0607,2024-03-04,microbial contamination,True,100,15.78,66.71
+L03-0611,2024-03-01,assay out of specification,False,217,14.57,50.48
+L03-0620,2024-03-04,pH deviation,True,178,21.89,58.95
+L01-0788,2024-03-04,particulate exceedance,False,400,16.16,62.33
+L02-0479,2024-03-06,microbial contamination,False,206,14.98,63.72
+L03-0625,2024-03-02,assay out of specification,False,215,16.89,67.55
+L03-0642,2024-03-06,microbial contamination,False,176,15.36,55.44
+L01-0005,2024-03-05,pH deviation,True,265,17.37,58.2
+L01-0013,2024-03-05,pH deviation,False,260,19.52,67.08
+L01-0015,2024-03-06,viscosity failure,True,205,21.57,63.61
+L02-0005,2024-03-05,microbial contamination,False,313,20.52,61.43
+L02-0010,2024-03-07,particulate exceedance,False,145,21.0,49.59
+L01-0026,2024-03-03,pH deviation,True,336,17.57,62.45
+L01-0033,2024-03-05,microbial contamination,True,157,17.45,54.97
+L02-0027,2024-03-04,microbial contamination,True,229,15.87,52.15
+L02-0032,2024-03-06,particulate exceedance,True,105,19.58,69.22
+L02-0034,2024-03-03,assay out of specification,False,197,21.04,68.46
+L02-0037,2024-03-06,microbial contamination,True,196,17.5,71.6
+L03-0028,2024-03-05,pH deviation,True,193,17.31,51.63
+L01-0055,2024-03-08,particulate exceedance,False,240,17.16,54.07
+L02-0046,2024-03-05,particulate exceedance,False,290,20.54,48.15
+L02-0048,2024-03-07,assay out of specification,False,108,15.82,57.75
+L03-0034,2024-03-09,assay out of specification,True,271,20.09,49.27
+L03-0036,2024-03-09,particulate exceedance,False,240,16.29,67.71
+L03-0049,2024-03-07,assay out of specification,False,291,20.82,50.8
+L03-0051,2024-03-05,assay out of specification,False,153,16.52,53.93
+L01-0082,2024-03-09,particulate exceedance,False,88,19.72,57.17
+L01-0083,2024-03-07,particulate exceedance,False,87,21.6,63.18
+L01-0090,2024-03-08,particulate exceedance,False,323,21.27,53.4
+L01-0091,2024-03-09,pH deviation,True,263,21.74,67.62
+L01-0096,2024-03-09,assay out of specification,False,240,19.66,68.71
+L02-0070,2024-03-05,viscosity failure,True,56,16.33,56.12
+L02-0073,2024-03-07,microbial contamination,False,122,17.9,61.06
+L03-0080,2024-03-09,particulate exceedance,True,289,20.51,61.71
+L01-0101,2024-03-08,microbial contamination,True,194,15.97,57.73
+L03-0083,2024-03-10,pH deviation,False,358,19.72,53.45
+L01-0117,2024-03-09,assay out of specification,False,394,21.85,55.86
+L01-0131,2024-03-12,microbial contamination,True,179,18.55,61.44
+L01-0133,2024-03-10,particulate exceedance,False,183,17.6,68.76
+L01-0140,2024-03-09,assay out of specification,True,303,17.33,67.89
+L02-0104,2024-03-11,pH deviation,True,363,14.98,50.89
+L02-0105,2024-03-10,microbial contamination,False,225,15.99,52.53
+L03-0106,2024-03-12,viscosity failure,False,107,20.75,54.35
+L03-0108,2024-03-12,particulate exceedance,True,231,15.28,57.34
+L03-0112,2024-03-09,assay out of specification,False,360,17.6,50.97
+L02-0111,2024-03-11,particulate exceedance,False,368,21.66,48.04
+L02-0114,2024-03-09,viscosity failure,True,113,19.66,66.07
+L02-0116,2024-03-11,viscosity failure,False,136,20.13,64.45
+L01-0185,2024-03-10,pH deviation,False,144,21.13,61.6
+L01-0186,2024-03-14,viscosity failure,False,221,20.31,62.84
+L01-0188,2024-03-12,microbial contamination,True,233,14.77,57.92
+L01-0196,2024-03-12,microbial contamination,True,196,14.11,53.23
+L02-0135,2024-03-14,viscosity failure,False,187,16.36,64.36
+L03-0141,2024-03-10,microbial contamination,True,112,16.99,51.6
+L03-0143,2024-03-13,pH deviation,True,340,14.61,71.66
+L03-0149,2024-03-13,particulate exceedance,True,229,15.88,48.88
+L03-0157,2024-03-11,pH deviation,True,306,15.98,58.45
+L01-0206,2024-03-14,microbial contamination,False,180,14.44,53.92
+L01-0207,2024-03-14,assay out of specification,True,326,15.41,53.64
+L01-0210,2024-03-13,viscosity failure,False,384,20.93,61.04
+L01-0213,2024-03-12,viscosity failure,True,329,15.96,61.17
+L02-0152,2024-03-11,viscosity failure,False,95,15.95,70.91
+L03-0164,2024-03-13,particulate exceedance,False,211,16.31,63.05
+L03-0177,2024-03-12,particulate exceedance,False,220,21.32,65.92
+L03-0180,2024-03-11,assay out of specification,True,218,18.29,51.69
+L01-0232,2024-03-11,microbial contamination,True,169,15.86,50.01
+L01-0242,2024-03-11,viscosity failure,False,198,16.77,57.52
+L01-0243,2024-03-15,assay out of specification,False,304,16.44,49.71
+L02-0177,2024-03-13,pH deviation,True,302,17.26,68.65
+L03-0183,2024-03-15,microbial contamination,True,284,16.57,58.39
+L03-0187,2024-03-16,assay out of specification,True,335,16.47,52.53
+L03-0188,2024-03-12,pH deviation,False,227,20.78,64.32
+L03-0196,2024-03-13,assay out of specification,False,351,15.88,48.03
+L03-0199,2024-03-12,particulate exceedance,True,295,19.18,54.26
+L01-0254,2024-03-14,pH deviation,False,207,18.73,68.37
+L01-0256,2024-03-13,assay out of specification,False,297,16.95,71.28
+L01-0260,2024-03-12,assay out of specification,False,149,21.71,54.97
+L01-0268,2024-03-16,pH deviation,False,253,15.1,55.08
+L02-0184,2024-03-17,viscosity failure,False,188,20.37,68.96
+L02-0190,2024-03-14,microbial contamination,False,207,19.86,57.39
+L03-0216,2024-03-12,assay out of specification,False,370,20.4,53.63
+L03-0219,2024-03-14,assay out of specification,False,117,15.11,61.17
+L03-0220,2024-03-16,microbial contamination,True,369,18.48,64.32
+L03-0235,2024-03-14,assay out of specification,False,172,17.79,61.34
+L01-0270,2024-03-16,assay out of specification,False,217,20.88,68.48
+L01-0271,2024-03-18,particulate exceedance,False,315,20.41,71.12
+L01-0281,2024-03-17,viscosity failure,True,131,15.14,60.21
+L01-0287,2024-03-15,microbial contamination,False,316,14.09,58.41
+L01-0295,2024-03-14,particulate exceedance,False,306,18.43,67.27
+L02-0204,2024-03-14,microbial contamination,False,299,15.9,63.46
+L03-0240,2024-03-17,pH deviation,False,176,15.21,53.09
+L01-0304,2024-03-18,particulate exceedance,False,347,21.63,62.58
+L01-0308,2024-03-17,particulate exceedance,False,282,15.11,48.35
+L01-0315,2024-03-15,pH deviation,False,181,19.09,67.24
+L01-0320,2024-03-16,microbial contamination,True,123,20.33,48.3
+L01-0323,2024-03-19,microbial contamination,False,153,17.96,65.89
+L03-0265,2024-03-16,assay out of specification,False,187,21.53,48.33
+L03-0280,2024-03-18,viscosity failure,False,99,21.26,49.1
+L01-0324,2024-03-17,viscosity failure,False,213,15.99,59.3
+L01-0342,2024-03-19,viscosity failure,False,219,15.09,49.57
+L01-0353,2024-03-16,assay out of specification,True,137,18.39,56.41
+L02-0239,2024-03-17,viscosity failure,False,236,17.72,53.53
+L02-0240,2024-03-16,particulate exceedance,False,366,14.19,69.34
+L03-0289,2024-03-18,microbial contamination,False,337,19.31,56.71
+L03-0294,2024-03-18,particulate exceedance,True,177,14.46,50.47
+L01-0356,2024-03-17,pH deviation,True,207,17.21,57.75
+L01-0357,2024-03-16,pH deviation,False,100,21.48,60.55
+L03-0315,2024-03-16,viscosity failure,False,183,17.34,53.75
+L01-0384,2024-03-18,assay out of specification,True,233,15.75,69.05
+L01-0395,2024-03-22,assay out of specification,False,88,17.66,63.49
+L01-0396,2024-03-21,assay out of specification,False,358,14.72,60.55
+L01-0398,2024-03-22,assay out of specification,False,56,18.71,61.1
+L01-0406,2024-03-20,pH deviation,False,115,14.17,59.54
+L02-0262,2024-03-22,pH deviation,False,88,16.18,60.27
+L03-0328,2024-03-19,assay out of specification,False,211,15.29,71.97
+L03-0334,2024-03-19,pH deviation,False,372,21.68,66.15
+L01-0409,2024-03-18,pH deviation,False,115,15.7,63.23
+L01-0412,2024-03-22,microbial contamination,True,183,20.65,59.34
+L02-0278,2024-03-19,viscosity failure,True,81,21.17,60.79
+L02-0280,2024-03-22,particulate exceedance,True,294,14.82,54.99
+L02-0284,2024-03-22,pH deviation,False,269,19.79,49.03
+L03-0344,2024-03-22,viscosity failure,True,181,19.43,67.36
+L03-0348,2024-03-20,particulate exceedance,False,118,14.38,57.8
+L01-0437,2024-03-24,viscosity failure,True,108,21.18,64.82
+L01-0441,2024-03-24,viscosity failure,True,299,19.35,50.39
+L01-0446,2024-03-22,particulate exceedance,False,315,15.29,71.01
+L01-0450,2024-03-23,particulate exceedance,False,96,21.09,68.64
+L01-0456,2024-03-22,viscosity failure,False,324,19.3,53.51
+L01-0457,2024-03-20,microbial contamination,False,313,16.74,71.2
+L01-0461,2024-03-23,particulate exceedance,False,146,19.33,48.25
+L02-0294,2024-03-19,particulate exceedance,False,83,22.0,51.7
+L02-0302,2024-03-21,microbial contamination,False,224,17.76,51.8
+L02-0304,2024-03-21,particulate exceedance,True,362,17.31,57.73
+L02-0309,2024-03-21,assay out of specification,False,77,19.7,70.94
+L02-0311,2024-03-23,microbial contamination,False,109,18.9,52.03
+L03-0367,2024-03-22,assay out of specification,False,193,15.62,66.48
+L03-0369,2024-03-19,pH deviation,True,341,18.68,61.33
+L03-0378,2024-03-22,pH deviation,True,374,19.03,65.77
+L03-0383,2024-03-22,assay out of specification,False,138,19.24,66.59
+L03-0384,2024-03-23,assay out of specification,False,208,19.28,54.21
+L02-0327,2024-03-23,viscosity failure,False,96,15.28,68.46
+L03-0391,2024-03-22,microbial contamination,True,378,18.35,57.58
+L03-0393,2024-03-23,assay out of specification,False,111,15.88,51.71
+L03-0395,2024-03-25,assay out of specification,True,95,20.08,56.61
+L03-0398,2024-03-20,assay out of specification,True,226,19.22,57.68
+L01-0481,2024-03-26,microbial contamination,True,380,19.83,71.11
+L02-0334,2024-03-25,microbial contamination,False,194,15.59,57.73
+L02-0337,2024-03-21,assay out of specification,False,194,19.94,50.96
+L02-0338,2024-03-21,microbial contamination,False,97,21.85,71.75
+L03-0413,2024-03-25,assay out of specification,False,266,15.28,61.2
+L03-0416,2024-03-24,particulate exceedance,True,188,19.78,60.86
+L01-0521,2024-03-26,microbial contamination,False,159,17.24,48.99
+L01-0530,2024-03-25,pH deviation,True,96,20.03,53.99
+L01-0534,2024-03-23,pH deviation,False,357,20.68,68.27
+L02-0361,2024-03-24,pH deviation,False,141,15.96,71.42
+L03-0426,2024-03-24,particulate exceedance,True,92,14.72,68.54
+L03-0428,2024-03-24,pH deviation,False,213,19.31,60.8
+L03-0436,2024-03-22,viscosity failure,False,168,18.65,50.04
+L03-0452,2024-03-25,viscosity failure,False,390,21.15,50.44
+L03-0454,2024-03-28,viscosity failure,False,137,15.74,65.06
+L03-0455,2024-03-24,microbial contamination,True,124,16.6,59.24
+L03-0457,2024-03-24,viscosity failure,True,289,20.01,70.35
+L03-0462,2024-03-25,viscosity failure,True,62,18.94,59.44
+L01-0566,2024-03-26,microbial contamination,False,251,21.24,65.58
+L01-0576,2024-03-28,particulate exceedance,False,184,21.51,51.59
+L02-0379,2024-03-26,microbial contamination,False,223,20.76,69.46
+L02-0386,2024-03-25,microbial contamination,True,51,14.14,55.24
+L03-0487,2024-03-29,microbial contamination,False,84,17.15,63.04
+L01-0584,2024-03-30,particulate exceedance,True,148,16.51,56.96
+L01-0590,2024-03-28,microbial contamination,False,268,17.8,71.79
+L01-0602,2024-03-29,pH deviation,False,351,14.89,58.84
+L02-0388,2024-03-27,microbial contamination,False,309,18.69,59.47
+L02-0395,2024-03-30,pH deviation,False,342,19.31,65.84
+L02-0406,2024-03-26,viscosity failure,False,329,14.52,63.11
+L03-0490,2024-03-28,particulate exceedance,True,182,18.75,64.15
+L03-0514,2024-03-28,particulate exceedance,True,309,19.08,48.6
+L03-0515,2024-03-26,assay out of specification,False,306,17.92,62.17
+L03-0519,2024-03-29,pH deviation,False,187,14.3,48.57
+L03-0522,2024-03-28,viscosity failure,True,136,20.43,60.39
+L01-0607,2024-03-28,assay out of specification,True,299,14.5,60.06
+L01-0615,2024-03-29,pH deviation,False,268,14.86,57.52
+L01-0619,2024-03-29,assay out of specification,False,206,14.76,64.34
+L01-0623,2024-03-28,microbial contamination,False,277,15.77,63.76
+L02-0410,2024-03-31,pH deviation,True,173,20.85,69.37
+L02-0418,2024-03-28,pH deviation,False,214,19.92,56.14
+L03-0529,2024-03-29,assay out of specification,False,180,18.18,54.67
+L03-0534,2024-03-28,assay out of specification,False,374,17.56,61.31
+L03-0544,2024-03-27,assay out of specification,True,279,16.85,53.5
+L01-0633,2024-03-28,assay out of specification,True,229,19.23,54.02
+L01-0641,2024-04-01,viscosity failure,False,299,16.77,66.99
+L02-0423,2024-03-29,assay out of specification,False,159,17.43,68.95
+L02-0435,2024-03-30,particulate exceedance,True,90,19.59,63.37
+L03-0553,2024-03-30,pH deviation,False,110,19.12,51.71
+L03-0554,2024-03-29,pH deviation,False,97,18.8,48.84
+L03-0563,2024-04-01,pH deviation,True,286,21.79,59.6
+L03-0565,2024-03-29,particulate exceedance,True,357,17.75,71.13
+L01-0669,2024-04-02,viscosity failure,False,84,21.05,58.12
+L01-0670,2024-03-30,microbial contamination,True,257,19.45,64.85
+L01-0675,2024-03-31,assay out of specification,False,305,16.01,66.29
+L02-0445,2024-04-01,viscosity failure,True,165,21.8,66.58
+L02-0446,2024-04-02,microbial contamination,True,337,17.71,59.36
+L02-0449,2024-03-31,viscosity failure,False,298,17.09,58.18
+L03-0570,2024-03-29,viscosity failure,False,336,17.98,66.33
+L03-0578,2024-03-30,pH deviation,False,301,18.99,54.34
+L03-0581,2024-03-29,assay out of specification,False,186,20.1,55.86
+L01-0705,2024-04-02,viscosity failure,False,367,20.81,50.97
+L02-0470,2024-04-02,particulate exceedance,False,318,17.48,66.68
+L03-0588,2024-04-02,microbial contamination,True,153,20.64,58.62
+L03-0596,2024-03-31,pH deviation,False,326,15.71,69.78
+L01-0711,2024-04-02,assay out of specification,False,265,18.33,64.06
+L01-0718,2024-04-01,viscosity failure,False,273,20.82,66.33
+L01-0730,2024-03-30,particulate exceedance,True,85,17.52,61.89
+L03-0604,2024-04-03,pH deviation,False,197,18.5,65.23
+L03-0607,2024-04-04,microbial contamination,False,130,17.36,61.84
+L03-0617,2024-04-04,microbial contamination,True,306,19.3,55.93
+L01-0739,2024-04-02,microbial contamination,False,269,16.02,62.05
+L01-0741,2024-04-05,viscosity failure,False,398,17.37,64.65
+L01-0745,2024-04-01,particulate exceedance,False,311,21.94,57.11
+L01-0752,2024-04-01,viscosity failure,False,157,17.36,69.65
+L01-0754,2024-04-01,assay out of specification,False,128,19.65,61.12
+L01-0757,2024-04-01,particulate exceedance,False,240,20.48,61.19
+L01-0761,2024-04-04,viscosity failure,False,150,19.82,63.29
+L02-0507,2024-04-02,assay out of specification,True,109,19.78,54.73
+L03-0621,2024-04-02,viscosity failure,False,160,15.11,66.39
+L03-0625,2024-04-04,microbial contamination,False,144,21.27,65.91
+L03-0635,2024-04-03,microbial contamination,False,153,20.11,58.25
+L01-0764,2024-04-01,particulate exceedance,False,190,20.06,50.19
+L01-0783,2024-04-03,particulate exceedance,True,391,18.01,58.39
+L02-0508,2024-04-01,assay out of specification,True,217,16.26,69.43
+L02-0510,2024-04-01,particulate exceedance,True,314,17.2,63.41
+L03-0654,2024-04-02,viscosity failure,False,396,17.51,63.19
+L03-0668,2024-04-05,viscosity failure,True,238,21.07,68.32

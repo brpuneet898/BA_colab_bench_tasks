@@ -2,7 +2,7 @@ Build a Q1 2024 (January 1 – March 31) production quality compliance report fo
 
 A lot passes if every one of its quality test results is within the applicable specification limits. Where multiple results exist for the same lot and test, use only the most recently tested result for pass/fail determination. Specification limits per product-test combination are in `product_specifications.csv`; where multiple specification records exist for the same product-test pair, apply the record with the latest `effective_from` date that is on or before the sample's `tested_date`.
 
-Cost of poor quality (COPQ) applies only to lots that fail. Rejection events are recorded in `rejection_events.csv` with a `rework_possible` flag and separate per-unit cost columns for rework and disposal outcomes. Each rejection event includes a `rejection_date`; match each event to the failed lot whose `batch_end_datetime` (date portion) is the most recent date on or before `rejection_date`.
+Cost of poor quality (COPQ) applies only to lots that fail. Remediation details for each failed lot are recorded in `rejection_events.csv`, including per-unit remediation cost columns for rework and disposal outcomes. Each rejection event includes a `rejection_date`; match each event to the failed lot whose `batch_end_datetime` (date portion) is the most recent date on or before `rejection_date`.
 
 Mean specification deviation for a group is the average of `|measured_value_normalized − target_value| / ((upper_spec_limit − lower_spec_limit) / 2)` across all test results from lots in that group, using the most recently tested result per lot-test pair, where `measured_value_normalized` is the measured value expressed in the test's `reporting_unit`.
 
@@ -16,7 +16,7 @@ Input data:
 
 `/workspace/data/test_catalog.csv` — test_id, test_name, test_category, reporting_unit, unit_conversion_factor
 
-`/workspace/data/rejection_events.csv` — lot_id, rejection_date, rejection_reason, rework_possible, rework_cost_per_unit, disposal_cost_per_unit
+`/workspace/data/rejection_events.csv` — lot_id, rejection_date, rejection_reason, rework_possible, rejected_quantity, rework_cost_per_unit, disposal_cost_per_unit
 
 Required outputs:
 

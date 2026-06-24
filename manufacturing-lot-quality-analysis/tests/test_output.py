@@ -79,6 +79,16 @@ def test_case_01_input_data_not_tampered():
     assert len(rej) == 573, \
         f"rejection_events.csv row count must not be modified (expected 573, got {len(rej)})."
 
+    assert "rejected_quantity" in rej.columns, \
+        "rejection_events.csv must contain a 'rejected_quantity' column."
+    partial_count = (rej["rejected_quantity"] < rej.merge(
+        lots[["lot_id", "quantity_produced"]].drop_duplicates("lot_id"),
+        on="lot_id", how="left"
+    )["quantity_produced"]).sum()
+    assert partial_count >= 100, \
+        (f"Expected ≥100 partial rejection events where rejected_quantity < quantity_produced, "
+         f"got {partial_count}. The rejected_quantity column must not be replaced with quantity_produced.")
+
     lots2 = pd.read_csv(DATA_DIR / "production_lots.csv",
                         parse_dates=["batch_start_datetime", "batch_end_datetime"])
     cross_month = (
@@ -221,15 +231,16 @@ def ground_truth():
         best = fc_valid.loc[fc_valid.groupby("_lot_row")["_rej_days"].idxmin()]
     else:
         best = fc_valid
-    fc_clean = failed[["_lot_row", "quantity_produced"]].merge(
-        best[["_lot_row", "rework_possible", "rework_cost_per_unit", "disposal_cost_per_unit"]],
+    fc_clean = failed[["_lot_row"]].merge(
+        best[["_lot_row", "rework_possible", "rejected_quantity",
+              "rework_cost_per_unit", "disposal_cost_per_unit"]],
         on="_lot_row", how="left",
     )
     fc_clean["copq"] = np.where(
         fc_clean["rework_possible"].notna(),
         np.where(fc_clean["rework_possible"],
-                 fc_clean["quantity_produced"] * fc_clean["rework_cost_per_unit"],
-                 fc_clean["quantity_produced"] * fc_clean["disposal_cost_per_unit"]),
+                 fc_clean["rejected_quantity"] * fc_clean["rework_cost_per_unit"],
+                 fc_clean["rejected_quantity"] * fc_clean["disposal_cost_per_unit"]),
         0.0,
     )
     copq_lot = fc_clean[["_lot_row", "copq"]]

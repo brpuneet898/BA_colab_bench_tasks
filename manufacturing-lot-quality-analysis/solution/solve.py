@@ -139,16 +139,17 @@ def compute_copq(lots, lot_pass, rejection_events):
     else:
         best = fc_valid
 
-    fc_clean = failed[["_lot_row", "quantity_produced"]].merge(
-        best[["_lot_row", "rework_possible", "rework_cost_per_unit", "disposal_cost_per_unit"]],
+    fc_clean = failed[["_lot_row"]].merge(
+        best[["_lot_row", "rework_possible", "rejected_quantity",
+              "rework_cost_per_unit", "disposal_cost_per_unit"]],
         on="_lot_row", how="left",
     )
     fc_clean["copq"] = np.where(
         fc_clean["rework_possible"].notna(),
         np.where(
             fc_clean["rework_possible"],
-            fc_clean["quantity_produced"] * fc_clean["rework_cost_per_unit"],
-            fc_clean["quantity_produced"] * fc_clean["disposal_cost_per_unit"],
+            fc_clean["rejected_quantity"] * fc_clean["rework_cost_per_unit"],
+            fc_clean["rejected_quantity"] * fc_clean["disposal_cost_per_unit"],
         ),
         0.0,
     )
