@@ -21,6 +21,8 @@ Each account has a `Primary_AE`. Credit is divided as follows:
 2. If the deal's `product_line` is "Enterprise Suite" and the team includes an `Overlay_Specialist`, the Overlay receives 15%, the SDR (if present) receives 15%, and the `Primary_AE` receives the remainder (85% with no SDR, 70% with an SDR).
 3. If the `Primary_AE`'s home region in `reps.csv` is "EMEA", the Global VP (rep_id `R999`) takes 5% of the deal's accelerated ARR off the top. The remaining 95% is then divided among the account team using the rules above.
 
+A rep who holds more than one role on the same account receives the sum of each role's credit independently.
+
 Only `closed_won` deals count toward attainment. Where multiple `closed_won` records exist for the same `(region, deal_id)`, use only the record with the latest `close_date`.
 
 ARR is recognised in equal thirds over three consecutive months beginning in the close month. Month 1 and Month 2 each receive exactly `arr / 3`. Month 3 receives the remainder (`arr − 2 × (arr / 3)`).
@@ -31,7 +33,6 @@ ARR is recognised in equal thirds over three consecutive months beginning in the
 - The accounting cutoff is `2024-04-05`. Cancellations with `filed_date` after this date are ignored entirely.
 - If multiple valid (approved, pre-cutoff) cancellation records exist for the same deal, the one with the latest `filed_date` takes precedence.
 - When a cancellation applies, any unrecognised future tranches are voided and all tranches previously recognised within Q1 are clawed back. The clawback is recorded as a negative amount in the month of the `cancelled_date`.
-
 
 For each month in Q1, use the quota record in `quotas.csv` where `period_start` ≤ the first day of that month ≤ `period_end`. The base monthly quota equals `quota_usd` divided by the number of calendar months spanned by that record's period. If more than one record covers a given month, use the one with the latest `period_start`.
 
