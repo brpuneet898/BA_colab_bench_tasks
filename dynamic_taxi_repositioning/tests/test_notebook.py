@@ -18,9 +18,9 @@ issues that must be discovered and corrected:
      dropoff_datetime is stored in UTC.
      Correct repositioning chains require timezone normalization.
 
-  3. Zone naming drift.
-     Some taxi zone names changed mid-quarter.
-     Correct aggregation should use stable zone_id values.
+  3. Voided and reversed trip entries.
+     Some trips carry negative fare amounts representing billing reversals.
+     These are not real completed trips and must be excluded before reconstruction.
 
   4. Duplicate dispatch retries.
      Dispatch retries generate duplicate rows within 15 seconds.
@@ -147,6 +147,33 @@ def _build_driver_key(raw):
 
 
 # ============================================================
+# Trap 3 — Fare Reversal Filtering
+# ============================================================
+
+
+def _remove_cancelled_trips(trips):
+    """
+    Remove voided and reversed trip entries before reconstruction.
+
+    Negative fare_amount values represent billing cancellations or
+    reversals — not real completed passenger trips. Including them
+    distorts session boundaries, chain counts, and all downstream KPIs.
+    """
+
+    trips = trips.copy()
+
+    cancelled_count = int(
+        (trips["fare_amount"] < 0).sum()
+    )
+
+    trips = trips[
+        trips["fare_amount"] >= 0
+    ].copy()
+
+    return trips, cancelled_count
+
+
+# ============================================================
 # Trap 2 — Timestamp Normalization
 # ============================================================
 
@@ -268,6 +295,7 @@ def _remove_impossible_repositions(chains):
             & (chains["implied_speed_kmh"] <= 120)
         )
         | (chains["is_shared"])
+        | (chains["next_is_shared"])
     ].copy()
 
     return chains
@@ -380,6 +408,12 @@ def _build_trip_chains(trips):
         )["pickup_zone_id"].shift(-1)
     )
 
+    trips["next_is_shared"] = (
+        trips.groupby(
+            ["driver_key", "session_id"]
+        )["is_shared"].shift(-1).fillna(False)
+    )
+
     trips["idle_minutes"] = (
         trips["next_trip_pickup"] - trips["dropoff_utc"]
     ).dt.total_seconds() / 60
@@ -468,8 +502,7 @@ def _apply_airport_exemptions(raw, chains):
 
     exempt_ids = set(
         airport_check.loc[
-            (airport_check["idle_minutes"] >= IDLE_THRESHOLD_MINUTES)
-            & (airport_check["dropoff_utc"] >= airport_check["queue_start_utc"])
+            (airport_check["dropoff_utc"] >= airport_check["queue_start_utc"])
             & (airport_check["dropoff_utc"] <= airport_check["queue_end_utc"]),
             "trip_id",
         ]
@@ -514,8 +547,8 @@ def _compute_kpis(chains):
     )
 
     zone_summary = zone_summary.sort_values(
-        "inefficiency_rate",
-        ascending=False,
+        ["inefficiency_rate", "total_trips"],
+        ascending=[False, False],
     )
 
     return zone_summary
@@ -533,6 +566,8 @@ def ground_truth():
     raw = _load_raw()
 
     trips = _build_driver_key(raw)
+
+    trips, cancelled_count = _remove_cancelled_trips(trips)
 
     trips = _normalize_timestamps(trips)
 
@@ -558,6 +593,7 @@ def ground_truth():
 
     return {
         "trip_row_count": len(raw["trips"]),
+        "cancelled_trip_count": cancelled_count,
         "deduplicated_dispatch_count": len(dispatch),
         "negative_duration_trip_count": invalid_duration_count,
         "airport_exemption_count": int(
@@ -605,14 +641,26 @@ def summary_df():
 # ============================================================
 
 
-def test_trip_row_count(notebook_vars, ground_truth):
-    """Verify trips.csv loaded correctly."""
+def test_cancelled_trip_count(notebook_vars, ground_truth):
+    """
+    Verify voided and reversed trip entries were identified and excluded.
 
-    assert "trip_row_count" in notebook_vars
+    trips.csv contains negative fare_amount records representing
+    billing reversals. These are not real operational trips and must
+    be removed before session and chain reconstruction.
+    """
 
-    assert (
-        notebook_vars["trip_row_count"]
-        == ground_truth["trip_row_count"]
+    assert "cancelled_trip_count" in notebook_vars, (
+        "cancelled_trip_count not defined. "
+        "Check fare validation step in the reconstruction pipeline."
+    )
+
+    expected = ground_truth["cancelled_trip_count"]
+    actual = notebook_vars["cancelled_trip_count"]
+
+    assert actual == expected, (
+        f"Expected cancelled_trip_count={expected}, got {actual}. "
+        "Fare reversal filtering may be missing or applied incorrectly."
     )
 
 
@@ -719,13 +767,19 @@ def test_top_inefficient_zone(summary_df, ground_truth):
 
     expected = (
         ground_truth["summary"]
-        .sort_values("inefficiency_rate", ascending=False)
+        .sort_values(
+            ["inefficiency_rate", "total_trips"],
+            ascending=[False, False],
+        )
         .iloc[0]["reposition_from_zone"]
     )
 
     actual = (
         summary_df
-        .sort_values("inefficiency_rate", ascending=False)
+        .sort_values(
+            ["inefficiency_rate", "total_trips"],
+            ascending=[False, False],
+        )
         .iloc[0]["reposition_from_zone"]
     )
 

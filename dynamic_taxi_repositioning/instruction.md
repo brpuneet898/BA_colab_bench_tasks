@@ -220,12 +220,13 @@ Apply the following conventions consistently throughout the reconstruction pipel
 
 To verify the operational reconstruction pipeline, define the following top-level notebook variables:
 
-| Variable                       | Type  | Description                                                    |
-| ------------------------------ | ----- | -------------------------------------------------------------- |
-| `trip_row_count`               | `int` | Raw row count from `trips.csv`                                 |
-| `negative_duration_trip_count` | `int` | Number of invalid trip durations removed during reconstruction |
-| `deduplicated_dispatch_count`  | `int` | Remaining dispatch events after operational deduplication      |
-| `airport_exemption_count`      | `int` | Reposition chains classified as operationally airport exempt   |
+| Variable                       | Type  | Description                                                                       |
+| ------------------------------ | ----- | --------------------------------------------------------------------------------- |
+| `trip_row_count`               | `int` | Raw row count from `trips.csv`                                                    |
+| `cancelled_trip_count`         | `int` | Number of voided or reversed trip records identified and excluded from reconstruction |
+| `negative_duration_trip_count` | `int` | Number of invalid trip durations removed during reconstruction                    |
+| `deduplicated_dispatch_count`  | `int` | Remaining dispatch events after operational deduplication                         |
+| `airport_exemption_count`      | `int` | Reposition chains classified as operationally airport exempt                      |
 
 All variables must be JSON-serializable and defined in notebook global scope.
 
@@ -285,7 +286,7 @@ The CSV must contain the following columns:
 The final summary should:
 
 * contain one row per reposition origin zone,
-* be sorted in descending order of inefficiency rate,
+* be sorted primarily by `inefficiency_rate` descending; ties broken by `total_trips` descending,
 * exclude invalid operational chains,
 * and reflect operationally realistic sequencing behavior.
 
