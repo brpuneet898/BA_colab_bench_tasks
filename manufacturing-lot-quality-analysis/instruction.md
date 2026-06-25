@@ -1,14 +1,14 @@
 Build a Q1 2024 (January 1 – March 31) production quality compliance report for a contract manufacturer operating three production lines. For each combination of line, product, and calendar month that produced at least one lot, compute the pass rate, mean specification deviation, and cost of poor quality.
 
-A lot passes if every one of its quality test results is within the applicable specification limits. Where multiple results exist for the same lot and test, use only the most recently tested result for pass/fail determination. Specification limits per product-test combination are in `product_specifications.csv`; where multiple specification records exist for the same product-test pair, apply the record with the latest `effective_from` date that is on or before the sample's `tested_date`.
+A lot passes if every one of its quality test results is within the applicable specification limits. Where a lot has multiple results for the same quality test, the most recent result supersedes earlier measurements. Specification limits per product-test combination are in `product_specifications.csv`.
 
-Cost of poor quality (COPQ) applies only to lots that fail. Remediation details for each failed lot are recorded in `rejection_events.csv`, including per-unit remediation cost columns for rework and disposal outcomes. Each rejection event includes a `rejection_date`; match each event to the failed lot whose `batch_end_datetime` (date portion) is the most recent date on or before `rejection_date`.
+Cost of poor quality (COPQ) applies only to lots that fail. Remediation cost details for each failed lot are in `rejection_events.csv`. Each rejection event includes a `rejection_date`; match each event to the failed lot whose `batch_end_datetime` (date portion) is the most recent date on or before `rejection_date`.
 
-Mean specification deviation for a group is the average of `|measured_value_normalized − target_value| / ((upper_spec_limit − lower_spec_limit) / 2)` across all test results from lots in that group, using the most recently tested result per lot-test pair, where `measured_value_normalized` is the measured value expressed in the test's `reporting_unit`.
+Mean specification deviation for a group is the average of `|measured_value_normalized − target_value| / ((upper_spec_limit − lower_spec_limit) / 2)` across the applicable test results from lots in that group, where `measured_value_normalized` is the measured value expressed in the test's `reporting_unit`.
 
 Input data:
 
-`/workspace/data/production_lots.csv` — lot_id, product_id, line_id, batch_start_datetime, batch_end_datetime, quantity_produced; lot_id is assigned by each line's production controller and resets at the start of each calendar month, so the same lot_id can appear up to three times across Q1; attribute each lot to the calendar month of its production start (batch_start_datetime); match quality results to the lot whose batch_end_datetime (date portion) is the most recent date on or before tested_date (analytical testing follows batch completion, within five days)
+`/workspace/data/production_lots.csv` — lot_id, product_id, line_id, batch_start_datetime, batch_end_datetime, quantity_produced; lot_id is assigned by each line's production controller and resets at the start of each calendar month, so the same lot_id string can appear up to three times across Q1; attribute each lot to the calendar month of its production start (batch_start_datetime); analytical testing follows batch completion, and each record in `quality_results.csv` is linked to exactly one lot in this file through its lot_id and tested_date
 
 `/workspace/data/quality_results.csv` — result_id, lot_id, test_id, measured_value, units, analyst_id, tested_date
 

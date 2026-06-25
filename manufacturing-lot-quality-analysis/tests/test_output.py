@@ -4,16 +4,6 @@ Tests for the Q1 2024 manufacturing lot quality report.
 Contract (instruction.md): the deliverable is
     /workspace/quality_report.csv  — one row per (line_id, product_id, month)
     /workspace/summary.json        — six scalar keys
-
-Reasoning challenges embedded in the data:
-  1. lot_id resets monthly per line — the same string appears up to 3× across Q1;
-     results must be matched to the correct lot via batch_end_datetime proximity.
-  2. Some lots have a retest result for T01 (more recent than the original);
-     only the latest result per (lot, test) is used for pass/fail.
-  3. product_specifications has two versions per revised product; the version
-     effective at tested_date applies, not the version at production start.
-  4. Line L03 T01 results are in ppm; spec limits are in % (1% = 10,000 ppm).
-  5. Night-shift lots crossing midnight belong to the month of batch_start.
 """
 
 import json
@@ -131,9 +121,7 @@ def test_case_04_failed_lot_count(ground_truth):
         "failed_lot_count must be a plain int."
     expected = ground_truth["failed_lot_count"]
     assert s["failed_lot_count"] == expected, \
-        (f"failed_lot_count: got {s['failed_lot_count']}, expected {expected}. "
-         f"A lot fails if any quality-test result (using the most recently tested "
-         f"result per lot-test pair) falls outside the applicable specification limits.")
+        f"failed_lot_count: got {s['failed_lot_count']}, expected {expected}."
 
 
 # ── Output schema ─────────────────────────────────────────────────────────────
@@ -334,8 +322,7 @@ def test_case_08_revised_product_january_pass_rate(ground_truth):
 
     assert total > 0, "No revised-product January rows found in report."
     assert close >= int(total * 0.9), \
-        (f"Only {close}/{total} revised-product January pass rates within ±0.02 "
-         f"of ground truth — retest supersession or spec-version lookup may be incorrect.")
+        f"Only {close}/{total} revised-product January pass rates within ±0.02 of ground truth."
 
 
 # ── Hard test 5: unit conversion — L03 mean spec deviation ───────────────────
@@ -360,8 +347,7 @@ def test_case_09_l03_mean_spec_deviation(ground_truth):
 
     assert total > 0, "No L03 rows found in report."
     assert close >= int(total * 0.9), \
-        (f"Only {close}/{total} L03 mean_spec_deviation values within ±2% of "
-         f"ground truth — unit conversion from ppm to % likely not applied.")
+        f"Only {close}/{total} L03 mean_spec_deviation values within ±2% of ground truth."
 
 
 # ── Medium test: summary scalar identifiers ───────────────────────────────────
