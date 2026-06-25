@@ -78,7 +78,7 @@ Columns:
 
 * `dispatch_id`
 * `driver_id`
-* `service_month` — a small number of events have no recorded service month due to a telemetry gap during infrastructure migration; these events must be included in the deduplication process, grouped independently from any named service month
+* `service_month`
 * `offered_trip_ts`
 * `pickup_zone_id`
 

@@ -51,9 +51,12 @@ issues that must be discovered and corrected:
      causing all NaN-service_month events to appear non-duplicate.
 
   10. Phantom duplicate zone pairs in zone_adjacency.csv.
-      Some zone pairs appear more than once due to multiple data source ingestion.
-      A naive left merge on the non-unique adjacency table creates duplicate chain rows,
-      inflating total_trips and distorting all per-zone KPI averages.
+      Some zone pairs appear more than once with inflated wrong distances due to
+      secondary data source ingestion.  A dict-based distance lookup retains the
+      last (inflated) value, overstating avg_reposition_km for affected zones.
+      A naive left merge creates duplicate chain rows with mixed distances, also
+      inflating avg_reposition_km.  Correct solution: drop_duplicates on join keys
+      before merging, retaining the first (correct) occurrence.
 
 The analyst must produce:
   - operational KPI variables
@@ -886,7 +889,13 @@ def test_inefficiency_rate(summary_df, ground_truth):
 
 def test_reposition_distance_logic(summary_df, ground_truth):
     """
-    Verify reposition distance inference is approximately correct.
+    Verify reposition distance inference is correct across all zones.
+
+    The zone_adjacency reference table must be deduplicated on
+    (from_zone_id, to_zone_id) before joining.  Duplicate entries
+    caused by secondary data source ingestion carry inflated distance
+    values; failing to remove them causes avg_reposition_km to be
+    overstated for affected zones.
     """
 
     expected = (
@@ -901,13 +910,11 @@ def test_reposition_distance_logic(summary_df, ground_truth):
 
     overlap = expected.index.intersection(actual.index)
 
-    sample = overlap[:10]
-
-    for zone in sample:
+    for zone in overlap:
         exp_val = expected.loc[zone, "avg_reposition_km"]
         act_val = actual.loc[zone, "avg_reposition_km"]
 
-        assert abs(exp_val - act_val) < 1.0, (
+        assert abs(exp_val - act_val) < 0.5, (
             f"avg_reposition_km mismatch for zone {zone}: "
             f"expected ~{exp_val:.2f}, got {act_val:.2f}"
         )
