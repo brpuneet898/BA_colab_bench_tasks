@@ -155,9 +155,10 @@ def _remove_cancelled_trips(trips):
     """
     Remove voided and reversed trip entries before reconstruction.
 
-    Negative fare_amount values represent billing cancellations or
-    reversals — not real completed passenger trips. Including them
-    distorts session boundaries, chain counts, and all downstream KPIs.
+    Negative fare_amount values represent billing reversals.
+    Each reversal shares the same trip_id as the original trip it voids.
+    Netting requires excluding ALL records for any trip_id that appears
+    with a negative fare — both the reversal and its paired original.
     """
 
     trips = trips.copy()
@@ -166,8 +167,12 @@ def _remove_cancelled_trips(trips):
         (trips["fare_amount"] < 0).sum()
     )
 
+    reversed_trip_ids = set(
+        trips.loc[trips["fare_amount"] < 0, "trip_id"]
+    )
+
     trips = trips[
-        trips["fare_amount"] >= 0
+        ~trips["trip_id"].isin(reversed_trip_ids)
     ].copy()
 
     return trips, cancelled_count
@@ -567,13 +572,17 @@ def ground_truth():
 
     trips = _build_driver_key(raw)
 
-    trips, cancelled_count = _remove_cancelled_trips(trips)
-
+    # Normalize timestamps before any filtering so negative_duration_trip_count
+    # is computed from the full dataset — order-independent of fare filtering.
     trips = _normalize_timestamps(trips)
 
-    trips, invalid_duration_count = (
-        _remove_invalid_trip_durations(trips)
+    invalid_duration_count = int(
+        (trips["trip_duration_minutes"] < 0).sum()
     )
+
+    trips, cancelled_count = _remove_cancelled_trips(trips)
+
+    trips = trips[trips["trip_duration_minutes"] >= 0].copy()
 
     trips = _valid_trip_rows(raw, trips)
 

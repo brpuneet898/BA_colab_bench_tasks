@@ -39,7 +39,7 @@ Columns:
 * `dropoff_datetime` — recorded in **UTC**
 * `pickup_zone_id`
 * `dropoff_zone_id`
-* `fare_amount`
+* `fare_amount` — negative values represent system-generated billing reversals; zero values represent complimentary or promotional rides
 * `passenger_count`
 
 > **Driver identity:** `driver_id` values reset at the beginning of each service month. The globally unique driver entity key for this analysis is (`driver_id`, `service_month`). Apply this composite key consistently when reconstructing activity sequences, building sessions, and deduplicating dispatch events.
@@ -223,7 +223,7 @@ To verify the operational reconstruction pipeline, define the following top-leve
 | Variable                       | Type  | Description                                                                       |
 | ------------------------------ | ----- | --------------------------------------------------------------------------------- |
 | `trip_row_count`               | `int` | Raw row count from `trips.csv`                                                    |
-| `cancelled_trip_count`         | `int` | Number of voided or reversed trip records identified and excluded from reconstruction |
+| `cancelled_trip_count`         | `int` | Number of billing reversal entries identified and excluded from reconstruction |
 | `negative_duration_trip_count` | `int` | Number of invalid trip durations removed during reconstruction                    |
 | `deduplicated_dispatch_count`  | `int` | Remaining dispatch events after operational deduplication                         |
 | `airport_exemption_count`      | `int` | Reposition chains classified as operationally airport exempt                      |
