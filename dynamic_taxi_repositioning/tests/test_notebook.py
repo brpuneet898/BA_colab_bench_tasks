@@ -44,6 +44,17 @@ issues that must be discovered and corrected:
      Chains from those trips must appear in the summary under zone code 0.
      A naive groupby silently drops NaN keys, causing zone 0 to vanish.
 
+  9. NaN service_month dispatch events.
+     A small number of dispatch events have no recorded service_month.
+     These must be deduplicated as their own independent group.
+     pandas groupby() silently drops NaN keys by default (dropna=True),
+     causing all NaN-service_month events to appear non-duplicate.
+
+  10. Phantom duplicate zone pairs in zone_adjacency.csv.
+      Some zone pairs appear more than once due to multiple data source ingestion.
+      A naive left merge on the non-unique adjacency table creates duplicate chain rows,
+      inflating total_trips and distorting all per-zone KPI averages.
+
 The analyst must produce:
   - operational KPI variables
   - zone-level inefficiency metrics
@@ -328,8 +339,11 @@ def _deduplicate_dispatches(raw):
 
     Duplicate dispatches occur within 15 seconds for the same:
       - driver
+      - service_month (including NaN — treated as its own independent group)
       - pickup zone
-      - passenger request
+
+    dropna=False is required so that events with no recorded service_month
+    are deduplicated within their own NaN group rather than silently dropped.
     """
 
     dispatch = raw["dispatch"].copy()
@@ -338,15 +352,10 @@ def _deduplicate_dispatches(raw):
 
     dispatch = dispatch.sort_values("offered_ts")
 
-    dispatch["driver_key"] = (
-        dispatch["driver_id"].astype(str)
-        + "_"
-        + dispatch["service_month"].astype(str)
-    )
-
     dispatch["delta"] = (
         dispatch.groupby(
-            ["driver_key", "pickup_zone_id"]
+            ["driver_id", "service_month", "pickup_zone_id"],
+            dropna=False,
         )["offered_ts"]
         .diff()
         .dt.total_seconds()
@@ -437,9 +446,17 @@ def _build_trip_chains(trips):
 def _attach_reposition_distance(raw, chains):
     """
     Infer deadhead reposition distance from adjacency table.
+
+    zone_adjacency.csv may contain duplicate (from_zone_id, to_zone_id) pairs
+    from multiple data source ingestion runs.  The reference table must be
+    deduplicated on its join keys before the merge; a non-unique right-hand
+    table creates phantom duplicate chain rows that inflate KPI aggregates.
     """
 
     adj = raw["adj"].copy()
+
+    # Deduplicate adjacency table before merge to prevent phantom duplicate rows
+    adj = adj.drop_duplicates(subset=["from_zone_id", "to_zone_id"])
 
     merged = chains.merge(
         adj,

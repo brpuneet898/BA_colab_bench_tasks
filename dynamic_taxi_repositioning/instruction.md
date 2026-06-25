@@ -78,7 +78,7 @@ Columns:
 
 * `dispatch_id`
 * `driver_id`
-* `service_month`
+* `service_month` — a small number of events have no recorded service month due to a telemetry gap during infrastructure migration; these events must be included in the deduplication process, grouped independently from any named service month
 * `offered_trip_ts`
 * `pickup_zone_id`
 
@@ -212,7 +212,7 @@ Apply the following conventions consistently throughout the reconstruction pipel
 | Dispatch deduplication key | Group by (`driver_id`, `service_month`, `pickup_zone_id`); retain the first event in each group; drop any subsequent event within 15 seconds of the previous |
 | Missing repositioning distance | If a zone pair is absent from `zone_adjacency.csv`, treat the repositioning distance as **0 km** |
 | Airport exemption window | Closed interval — `queue_start ≤ dropoff_datetime (UTC) ≤ queue_end` |
-| Shared-ride temporal overlap | Trips registered in `shared_rides.csv` may appear temporally overlapping with another trip; these are legitimate pooled rides and must not be excluded by the max-speed filter |
+| Shared-ride temporal overlap | Repositioning chains that involve a shared ride — either as the departing trip or as the next pickup — must not be excluded based on implied speed or temporal overlap (negative idle time) |
 
 ---
 
@@ -223,10 +223,10 @@ To verify the operational reconstruction pipeline, define the following top-leve
 | Variable                       | Type  | Description                                                                       |
 | ------------------------------ | ----- | --------------------------------------------------------------------------------- |
 | `trip_row_count`               | `int` | Raw row count from `trips.csv`                                                    |
-| `cancelled_trip_count`         | `int` | Number of billing reversal entries identified and excluded from reconstruction |
-| `negative_duration_trip_count` | `int` | Number of invalid trip durations counted from the timestamp-normalized dataset **before** any fare-based filtering, then removed |
+| `cancelled_trip_count`         | `int` | Number of billing reversal entries in the timestamp-normalized dataset, counted before any duration or fare-based record exclusion |
+| `negative_duration_trip_count` | `int` | Number of invalid trip durations in the timestamp-normalized dataset, counted before any duration or fare-based record exclusion, then removed |
 | `deduplicated_dispatch_count`  | `int` | Remaining dispatch events after operational deduplication                         |
-| `airport_exemption_count`      | `int` | Reposition chains classified as operationally airport exempt                      |
+| `airport_exemption_count`      | `int` | Count of reposition chains meeting the airport queue exemption criteria, regardless of idle duration |
 
 All variables must be JSON-serializable and defined in notebook global scope.
 
