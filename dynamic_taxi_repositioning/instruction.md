@@ -38,7 +38,7 @@ Columns:
 * `pickup_datetime` — recorded in **America/New_York (Eastern) local time**
 * `dropoff_datetime` — recorded in **UTC**
 * `pickup_zone_id`
-* `dropoff_zone_id`
+* `dropoff_zone_id` — the taxi zone where the trip ended; a small number of trips have no recorded dropoff zone due to GPS signal loss
 * `fare_amount` — negative values represent system-generated billing reversals; zero values represent complimentary or promotional rides
 * `passenger_count`
 
@@ -224,7 +224,7 @@ To verify the operational reconstruction pipeline, define the following top-leve
 | ------------------------------ | ----- | --------------------------------------------------------------------------------- |
 | `trip_row_count`               | `int` | Raw row count from `trips.csv`                                                    |
 | `cancelled_trip_count`         | `int` | Number of billing reversal entries identified and excluded from reconstruction |
-| `negative_duration_trip_count` | `int` | Number of invalid trip durations removed during reconstruction                    |
+| `negative_duration_trip_count` | `int` | Number of invalid trip durations counted from the timestamp-normalized dataset **before** any fare-based filtering, then removed |
 | `deduplicated_dispatch_count`  | `int` | Remaining dispatch events after operational deduplication                         |
 | `airport_exemption_count`      | `int` | Reposition chains classified as operationally airport exempt                      |
 
@@ -234,7 +234,7 @@ All variables must be JSON-serializable and defined in notebook global scope.
 
 # KPI Definitions
 
-Construct a zone-level repositioning summary grouped by the originating reposition zone.
+Construct a zone-level repositioning summary grouped by the originating reposition zone. The originating zone for a repositioning chain is the `dropoff_zone_id` of the departing trip. When `dropoff_zone_id` is absent (GPS signal loss at dropoff), assign the chain to **zone code `0`** in the summary; do not discard it.
 
 For each zone compute:
 

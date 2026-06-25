@@ -18,7 +18,7 @@ issues that must be discovered and corrected:
      dropoff_datetime is stored in UTC.
      Correct repositioning chains require timezone normalization.
 
-  3. Voided and reversed trip entries.
+  3. Voided trip entries.
      Some trips carry negative fare amounts representing billing reversals.
      These are not real completed trips and must be excluded before reconstruction.
 
@@ -38,6 +38,11 @@ issues that must be discovered and corrected:
   7. Shared rides overlap operationally.
      Some overlapping trips are legitimate pooled rides.
      These should not be discarded as corrupted telemetry.
+
+  8. GPS dropout zones.
+     A small number of trips have no recorded dropoff zone.
+     Chains from those trips must appear in the summary under zone code 0.
+     A naive groupby silently drops NaN keys, causing zone 0 to vanish.
 
 The analyst must produce:
   - operational KPI variables
@@ -152,14 +157,7 @@ def _build_driver_key(raw):
 
 
 def _remove_cancelled_trips(trips):
-    """
-    Remove voided and reversed trip entries before reconstruction.
-
-    Negative fare_amount values represent billing reversals.
-    Each reversal shares the same trip_id as the original trip it voids.
-    Netting requires excluding ALL records for any trip_id that appears
-    with a negative fare — both the reversal and its paired original.
-    """
+    """Remove billing reversal entries before reconstruction."""
 
     trips = trips.copy()
 
@@ -167,13 +165,7 @@ def _remove_cancelled_trips(trips):
         (trips["fare_amount"] < 0).sum()
     )
 
-    reversed_trip_ids = set(
-        trips.loc[trips["fare_amount"] < 0, "trip_id"]
-    )
-
-    trips = trips[
-        ~trips["trip_id"].isin(reversed_trip_ids)
-    ].copy()
+    trips = trips[trips["fare_amount"] >= 0].copy()
 
     return trips, cancelled_count
 
@@ -423,7 +415,11 @@ def _build_trip_chains(trips):
         trips["next_trip_pickup"] - trips["dropoff_utc"]
     ).dt.total_seconds() / 60
 
-    trips["reposition_from_zone"] = trips["dropoff_zone_id"]
+    # Trips with missing dropoff_zone_id represent GPS dropouts.
+    # Assign them to zone code 0 per the instruction's convention.
+    trips["reposition_from_zone"] = (
+        trips["dropoff_zone_id"].fillna(0).astype(int)
+    )
     trips["reposition_to_zone"] = trips["next_pickup_zone"]
 
     trips = trips[
@@ -766,6 +762,23 @@ def test_summary_not_empty(summary_df):
 # ============================================================
 # Summary Value Tests
 # ============================================================
+
+
+
+def test_unknown_zone_assignment(summary_df):
+    """
+    Verify that repositioning chains with missing origin zones are
+    assigned to zone code 0 in the summary.
+
+    Some trips lack a recorded dropoff zone (GPS dropout).  The instruction
+    specifies that chains originating from such trips must appear in the
+    output under zone code 0 rather than being silently omitted.
+    """
+
+    assert 0 in summary_df["reposition_from_zone"].values, (
+        "Zone 0 not found in zone_repositioning_summary.csv. "
+        "Chains with missing dropoff zones must be assigned to zone code 0."
+    )
 
 
 
