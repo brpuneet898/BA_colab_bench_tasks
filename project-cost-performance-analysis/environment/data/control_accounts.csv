@@ -1,0 +1,41 @@
+control_account_id,project_id,control_account_name,responsible_manager,discipline,budget_usd,ca_phase,risk_rating,wbs_level,reporting_frequency
+CA-P001-01,P001,Infrastructure Control Account 01,CAM-P001-01,Civil,4050616.0,Construction,Medium,2,Monthly
+CA-P001-02,P001,Infrastructure Control Account 02,CAM-P001-02,Electrical,4406112.0,Preliminary Design,High,2,Monthly
+CA-P001-03,P001,Infrastructure Control Account 03,CAM-P001-03,Structural,1195544.0,Construction,Critical,2,Monthly
+CA-P001-04,P001,Infrastructure Control Account 04,CAM-P001-04,Environmental,3996787.0,Testing & Commissioning,Critical,2,Monthly
+CA-P001-05,P001,Infrastructure Control Account 05,CAM-P001-05,I&C,1338077.0,Close-Out,Medium,2,Monthly
+CA-P001-06,P001,Infrastructure Control Account 06,CAM-P001-06,I&C,2357352.0,Detailed Design,Critical,2,Monthly
+CA-P001-07,P001,Infrastructure Control Account 07,CAM-P001-07,Geotechnical,3504234.0,Procurement,Critical,2,Monthly
+CA-P001-08,P001,Infrastructure Control Account 08,CAM-P001-08,I&C,2662340.0,Procurement,Low,2,Monthly
+CA-P002-01,P002,Utilities Control Account 01,CAM-P002-01,Civil,3129256.0,Close-Out,Low,2,Monthly
+CA-P002-02,P002,Utilities Control Account 02,CAM-P002-02,Geotechnical,4276051.0,Detailed Design,High,2,Monthly
+CA-P002-03,P002,Utilities Control Account 03,CAM-P002-03,Structural,3983969.0,Testing & Commissioning,Medium,2,Monthly
+CA-P002-04,P002,Utilities Control Account 04,CAM-P002-04,Civil,4876932.0,Procurement,Critical,2,Monthly
+CA-P002-05,P002,Utilities Control Account 05,CAM-P002-05,Environmental,4069211.0,Testing & Commissioning,Low,2,Monthly
+CA-P002-06,P002,Utilities Control Account 06,CAM-P002-06,Mechanical,2760228.0,Procurement,Low,2,Monthly
+CA-P002-07,P002,Utilities Control Account 07,CAM-P002-07,I&C,1448016.0,Testing & Commissioning,High,2,Monthly
+CA-P002-08,P002,Utilities Control Account 08,CAM-P002-08,Architectural,3928001.0,Procurement,Critical,2,Monthly
+CA-P003-01,P003,Facilities Control Account 01,CAM-P003-01,Electrical,2168466.0,Close-Out,Medium,2,Monthly
+CA-P003-02,P003,Facilities Control Account 02,CAM-P003-02,Civil,2772134.0,Testing & Commissioning,Low,2,Monthly
+CA-P003-03,P003,Facilities Control Account 03,CAM-P003-03,Electrical,1345670.0,Testing & Commissioning,Medium,2,Monthly
+CA-P003-04,P003,Facilities Control Account 04,CAM-P003-04,Mechanical,1753019.0,Construction,High,2,Monthly
+CA-P003-05,P003,Facilities Control Account 05,CAM-P003-05,Architectural,2636038.0,Preliminary Design,Critical,2,Monthly
+CA-P003-06,P003,Facilities Control Account 06,CAM-P003-06,Environmental,3741114.0,Preliminary Design,Medium,2,Monthly
+CA-P003-07,P003,Facilities Control Account 07,CAM-P003-07,Geotechnical,4295491.0,Procurement,Critical,2,Monthly
+CA-P003-08,P003,Facilities Control Account 08,CAM-P003-08,Geotechnical,2427409.0,Close-Out,Medium,2,Monthly
+CA-P004-01,P004,Transportation Control Account 01,CAM-P004-01,Structural,3666481.0,Construction,Low,2,Monthly
+CA-P004-02,P004,Transportation Control Account 02,CAM-P004-02,Geotechnical,1639614.0,Testing & Commissioning,Low,2,Monthly
+CA-P004-03,P004,Transportation Control Account 03,CAM-P004-03,Geotechnical,4105083.0,Testing & Commissioning,High,2,Monthly
+CA-P004-04,P004,Transportation Control Account 04,CAM-P004-04,Electrical,3761695.0,Detailed Design,Critical,2,Monthly
+CA-P004-05,P004,Transportation Control Account 05,CAM-P004-05,I&C,2727446.0,Construction,High,2,Monthly
+CA-P004-06,P004,Transportation Control Account 06,CAM-P004-06,Civil,1387147.0,Detailed Design,Low,2,Monthly
+CA-P004-07,P004,Transportation Control Account 07,CAM-P004-07,Electrical,3607293.0,Construction,Medium,2,Monthly
+CA-P004-08,P004,Transportation Control Account 08,CAM-P004-08,Geotechnical,3173992.0,Preliminary Design,Critical,2,Monthly
+CA-P005-01,P005,Energy Control Account 01,CAM-P005-01,I&C,3465817.0,Construction,High,2,Monthly
+CA-P005-02,P005,Energy Control Account 02,CAM-P005-02,Civil,3148670.0,Testing & Commissioning,Medium,2,Monthly
+CA-P005-03,P005,Energy Control Account 03,CAM-P005-03,I&C,929434.0,Procurement,Medium,2,Monthly
+CA-P005-04,P005,Energy Control Account 04,CAM-P005-04,Architectural,1701255.0,Detailed Design,Medium,2,Monthly
+CA-P005-05,P005,Energy Control Account 05,CAM-P005-05,Architectural,4384293.0,Preliminary Design,Low,2,Monthly
+CA-P005-06,P005,Energy Control Account 06,CAM-P005-06,Geotechnical,1044871.0,Close-Out,Medium,2,Monthly
+CA-P005-07,P005,Energy Control Account 07,CAM-P005-07,Architectural,2033094.0,Procurement,High,2,Monthly
+CA-P005-08,P005,Energy Control Account 08,CAM-P005-08,Structural,3139535.0,Construction,Critical,2,Monthly

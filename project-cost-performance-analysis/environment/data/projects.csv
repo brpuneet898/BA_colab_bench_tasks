@@ -1,0 +1,6 @@
+project_id,project_name,client_name,sector,delivery_model,contract_type,prime_contractor,region,project_manager,planned_start,planned_completion,contract_value_usd,contingency_pct,priority,funding_source
+P001,Highway Bridge Rehabilitation Programme,State Department of Transportation,Infrastructure,Design-Build,Lump Sum,BridgeCorp Engineering,AMER,Sandra Okonkwo,2023-10-01,2024-12-31,45200000,0.1,High,Federal Highway Fund
+P002,Water Treatment Plant Expansion Phase II,Metro Utilities Authority,Utilities,Engineer-Procure-Construct,Cost-Plus,AquaBuild Solutions,EMEA,James Whitfield,2023-10-01,2024-12-31,28750000,0.12,Critical,Municipal Bond
+P003,Corporate Campus Electrical Infrastructure Upgrade,GlobalTech Industries,Facilities,Design-Bid-Build,Fixed Price,PowerGrid Contractors,APAC,Li Wei Chen,2023-10-01,2024-09-30,12400000,0.08,Medium,Corporate CapEx
+P004,Rail Yard Automation and Control System,National Rail Authority,Transportation,Integrated Project Delivery,GMP,RailTech Systems Ltd,EMEA,Fatima Al-Rashid,2023-10-01,2025-03-31,67900000,0.15,Critical,Government Grant
+P005,Pipeline Integrity and Rehabilitation Program,Continental Energy Partners,Energy,Managing Contractor,Reimbursable,PipeSafe Engineering,AMER,Derek Nwosu,2023-10-01,2024-10-31,33600000,0.1,High,Private Equity
