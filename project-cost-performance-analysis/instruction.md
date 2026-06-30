@@ -41,7 +41,7 @@ Use the `percent_complete` value from `progress_entries.csv` for `reporting_peri
 The `ev_technique` field in `work_packages.csv` determines the EV measurement method:
 
 - `percent_complete`: `ev_usd = (percent_complete / 100) × bac_usd`
-- `0_100`: `ev_usd = bac_usd` if the work package was completed by the reporting date (2024-03-31), otherwise `ev_usd = 0`. The `completion_date` field records the date on which each work package was formally closed.
+- `0_100`: `ev_usd = bac_usd` if the work package had been formally completed as of the reporting date (2024-03-31), otherwise `ev_usd = 0`.
 
 ### Planned Value (PV)
 

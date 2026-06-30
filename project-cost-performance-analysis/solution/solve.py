@@ -60,10 +60,6 @@ applicable_bac  = valid_baselines.drop_duplicates(
 # ---------------------------------------------------------------------------
 # AC: sum cost_amount_usd per (project_id, work_package_id)
 #     where billing_period_date <= REPORTING_DATE
-#
-# billing_period_date is the accounting period of the cost.  entry_date is
-# when the invoice was posted — subcontract invoices often arrive 30–60 days
-# later and must not be used for period assignment.
 # ---------------------------------------------------------------------------
 
 actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
@@ -79,14 +75,9 @@ ac_df = (
 # Progress (percent_complete as of 2024-03)
 # ---------------------------------------------------------------------------
 
-# For WPs with multiple March entries (initial + revision), use the latest submitted_date
-mar_progress = progress[progress["reporting_period"] == "2024-03"].copy()
-mar_progress["submitted_date"] = pd.to_datetime(mar_progress["submitted_date"])
-mar_progress = (
-    mar_progress
-    .sort_values("submitted_date", ascending=False)
-    .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
-)[["project_id", "work_package_id", "percent_complete"]]
+mar_progress = progress[progress["reporting_period"] == "2024-03"][
+    ["project_id", "work_package_id", "percent_complete"]
+]
 
 # ---------------------------------------------------------------------------
 # Planned Value (cumulative PV for 2024-03)
@@ -120,10 +111,8 @@ df["pv_usd"]           = df["pv_usd"].fillna(0.0)
 
 def compute_ev(row):
     if row["ev_technique"] == "0_100":
-        # EV = BAC only if the WP was formally closed ON OR BEFORE the reporting date.
-        # completion_status reflects current state at data export — not the point-in-time status.
         comp_date = row["completion_date"]
-        if row["completion_status"] == "complete" and pd.notna(comp_date) and comp_date <= REPORTING_DATE:
+        if pd.notna(comp_date) and comp_date <= REPORTING_DATE:
             return float(row["bac_usd"])
         return 0.0
     return (float(row["percent_complete"]) / 100.0) * float(row["bac_usd"])
