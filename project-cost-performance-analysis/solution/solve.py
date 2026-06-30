@@ -44,6 +44,7 @@ pv_schedule   = pd.read_csv(DATA_DIR / "planned_value_schedule.csv")
 baselines["baseline_effective_from"] = pd.to_datetime(baselines["baseline_effective_from"])
 open_ended = baselines["baseline_effective_to"].isna()
 baselines["baseline_effective_to"]   = pd.to_datetime(baselines["baseline_effective_to"])
+work_packages["completion_date"]     = pd.to_datetime(work_packages["completion_date"])
 
 valid_baselines = baselines[
     (baselines["baseline_effective_from"] <= REPORTING_DATE) &
@@ -78,9 +79,14 @@ ac_df = (
 # Progress (percent_complete as of 2024-03)
 # ---------------------------------------------------------------------------
 
-mar_progress = progress[progress["reporting_period"] == "2024-03"][
-    ["project_id", "work_package_id", "percent_complete"]
-]
+# For WPs with multiple March entries (initial + revision), use the latest submitted_date
+mar_progress = progress[progress["reporting_period"] == "2024-03"].copy()
+mar_progress["submitted_date"] = pd.to_datetime(mar_progress["submitted_date"])
+mar_progress = (
+    mar_progress
+    .sort_values("submitted_date", ascending=False)
+    .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+)[["project_id", "work_package_id", "percent_complete"]]
 
 # ---------------------------------------------------------------------------
 # Planned Value (cumulative PV for 2024-03)
@@ -96,7 +102,8 @@ mar_pv = pv_schedule[pv_schedule["reporting_period"] == "2024-03"][
 
 df = (
     work_packages[["project_id", "work_package_id", "work_package_name",
-                   "control_account_id", "ev_technique", "completion_status"]]
+                   "control_account_id", "ev_technique", "completion_status",
+                   "completion_date"]]
     .merge(applicable_bac, on=["project_id", "work_package_id"], how="left")
     .merge(ac_df,          on=["project_id", "work_package_id"], how="left")
     .merge(mar_progress,   on=["project_id", "work_package_id"], how="left")
@@ -113,7 +120,12 @@ df["pv_usd"]           = df["pv_usd"].fillna(0.0)
 
 def compute_ev(row):
     if row["ev_technique"] == "0_100":
-        return float(row["bac_usd"]) if row["completion_status"] == "complete" else 0.0
+        # EV = BAC only if the WP was formally closed ON OR BEFORE the reporting date.
+        # completion_status reflects current state at data export — not the point-in-time status.
+        comp_date = row["completion_date"]
+        if row["completion_status"] == "complete" and pd.notna(comp_date) and comp_date <= REPORTING_DATE:
+            return float(row["bac_usd"])
+        return 0.0
     return (float(row["percent_complete"]) / 100.0) * float(row["bac_usd"])
 
 df["ev_usd"] = df.apply(compute_ev, axis=1)

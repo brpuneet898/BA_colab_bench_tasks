@@ -26,7 +26,7 @@ Include all 200 work packages from `work_packages.csv`. The reporting date is **
 
 ### Budget at Completion (BAC)
 
-The applicable BAC is the one from the baseline record in `baselines.csv` whose `baseline_effective_from` is the most recent date on or before the reporting date. Use this record's `bac_usd` as the BAC for all subsequent calculations.
+Each row in `baselines.csv` defines the approved Budget at Completion for a work package over a validity period. Use the baseline record that was in effect on the reporting date. Where a work package has been re-baselined and multiple records could apply, use the most recently approved.
 
 ### Actual Cost (AC)
 
@@ -41,7 +41,7 @@ Use the `percent_complete` value from `progress_entries.csv` for `reporting_peri
 The `ev_technique` field in `work_packages.csv` determines the EV measurement method:
 
 - `percent_complete`: `ev_usd = (percent_complete / 100) × bac_usd`
-- `0_100`: `ev_usd = bac_usd` if `completion_status = "complete"`, otherwise `ev_usd = 0`
+- `0_100`: `ev_usd = bac_usd` if the work package was completed by the reporting date (2024-03-31), otherwise `ev_usd = 0`. The `completion_date` field records the date on which each work package was formally closed.
 
 ### Planned Value (PV)
 
