@@ -83,9 +83,14 @@ mar_progress = progress[progress["reporting_period"] == "2024-03"][
 # Planned Value (cumulative PV for 2024-03)
 # ---------------------------------------------------------------------------
 
-mar_pv = pv_schedule[pv_schedule["reporting_period"] == "2024-03"][
-    ["project_id", "work_package_id", "cumulative_pv_usd"]
-].rename(columns={"cumulative_pv_usd": "pv_usd"})
+pv_schedule["schedule_effective_from"] = pd.to_datetime(pv_schedule["schedule_effective_from"])
+mar_pv = (
+    pv_schedule[pv_schedule["reporting_period"] == "2024-03"]
+    .sort_values("schedule_effective_from", ascending=False)
+    .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+    [["project_id", "work_package_id", "cumulative_pv_usd"]]
+    .rename(columns={"cumulative_pv_usd": "pv_usd"})
+)
 
 # ---------------------------------------------------------------------------
 # Merge

@@ -13,11 +13,12 @@ Headroom mechanisms tested:
             A model checking completion_status instead of completion_date fails
             in both directions.
 
-  Trap 2 — Pre-period actuals excluded by Q1-only date filter.
-            25 WPs have cost transactions with billing_period_date in Q4 2023
-            (Oct–Dec). EVM AC is cumulative-to-date; correct filter is
-            billing_period_date <= 2024-03-31. A model scoping actuals to
-            Q1 2024 only silently understates AC for those WPs.
+  Trap 2 — Dual PV schedule for re-baselined WPs (CSV order != schedule precedence).
+            10 dual-baseline WPs have two planned value schedule rows per month:
+            original schedule (lower PV, FIRST in CSV) and revised schedule
+            (higher PV, SECOND in CSV). Naive merge creates 210 rows; naive
+            drop_duplicates(keep='first') picks original (wrong) PV.
+            Correct: sort by schedule_effective_from desc, then dedup.
 
   Trap 3 — Dual-baseline renegotiation (CSV order != effective-date precedence).
             10 WPs have two approved baseline rows; original lower-BAC written FIRST.
@@ -100,13 +101,23 @@ def _compute_ev(row):
     return (float(row["percent_complete"]) / 100.0) * float(row["bac_usd"])
 
 
+def _get_march_pv(pv_schedule):
+    pv = pv_schedule.copy()
+    pv["schedule_effective_from"] = pd.to_datetime(pv["schedule_effective_from"])
+    return (
+        pv[pv["reporting_period"] == "2024-03"]
+        .sort_values("schedule_effective_from", ascending=False)
+        .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+        [["project_id", "work_package_id", "cumulative_pv_usd"]]
+        .rename(columns={"cumulative_pv_usd": "pv_usd"})
+    )
+
+
 def _build_expected(work_packages, baselines, actuals, progress, pv_schedule):
     bac_df  = _get_applicable_baseline(baselines)
     ac_df   = _compute_ac(actuals)
     prog_df = _get_march_progress(progress)
-    mar_pv  = pv_schedule[pv_schedule["reporting_period"] == "2024-03"][
-        ["project_id", "work_package_id", "cumulative_pv_usd"]
-    ].rename(columns={"cumulative_pv_usd": "pv_usd"})
+    mar_pv  = _get_march_pv(pv_schedule)
 
     df = (
         work_packages[["project_id", "work_package_id", "work_package_name",
@@ -203,11 +214,11 @@ def test_01_input_sentinels(raw_data):
     dual_count = (bl.groupby(["project_id", "work_package_id"]).size() > 1).sum()
     assert dual_count == 10, f"Trap 3: expected 10 dual-baseline WPs, got {dual_count}"
 
-    preperiod_rows = (
-        pd.to_datetime(ac["billing_period_date"]) < pd.Timestamp("2024-01-01")
+    dual_pv = (
+        pv.groupby(["project_id", "work_package_id", "reporting_period"]).size() > 1
     ).sum()
-    assert preperiod_rows >= 400, (
-        f"Trap 2: expected >=400 Q4 2023 billing rows, got {preperiod_rows}"
+    assert dual_pv >= 10, (
+        f"Trap 2: expected >=10 WP-period combos with dual PV schedules, got {dual_pv}"
     )
 
     neg_rows = (ac["cost_amount_usd"] < 0).sum()
@@ -338,60 +349,52 @@ def test_05_trap2_portfolio_ev_not_zero(agent_summary, expected):
 
 
 # ---------------------------------------------------------------------------
-# Test 06 — [Trap 2] AC must include Q4 2023 pre-period costs
+# Test 06 — [Trap 2] Dual-baseline WPs must use the revised PV schedule
 # ---------------------------------------------------------------------------
 
-def test_06_trap2_preperiod_ac_included(agent_report, expected, raw_data):
+def test_06_trap2_pv_dual_schedule_revised_used(agent_report, expected, raw_data):
     """
-    Trap 2 — 25 WPs have cost transactions with billing_period_date in Q4 2023
-    (Oct–Dec). Projects started 2023-10-01 and these are legitimate costs incurred
-    before the Q1 2024 reporting period. EVM AC is cumulative-to-date; correct
-    filter is billing_period_date <= 2024-03-31. A model scoping to Q1 2024 only
-    silently excludes all Q4 costs, understating AC for those WPs.
+    Trap 2 — The 10 re-baselined WPs have two PV schedule rows per reporting
+    period: original schedule (lower cumulative_pv_usd, FIRST in CSV) and revised
+    schedule (higher cumulative_pv_usd, SECOND in CSV). A naive merge creates
+    phantom duplicate rows; drop_duplicates(keep='first') silently picks the
+    original (wrong) PV. Correct: sort by schedule_effective_from descending,
+    then dedup on (project_id, work_package_id, reporting_period), keep='first'.
+    Wrong PV produces incorrect schedule variance and portfolio SPI.
     """
-    _, _, actuals, _, _ = raw_data
-    actuals = actuals.copy()
-    actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-
-    q4_cutoff = pd.Timestamp("2024-01-01")
-    preperiod_wps = (
-        actuals[actuals["billing_period_date"] < q4_cutoff]
-        [["project_id", "work_package_id"]]
-        .drop_duplicates()
-    )
-    spot = preperiod_wps.head(10)
+    _, bl, _, _, pv = raw_data
+    dual_mask = bl.groupby(["project_id", "work_package_id"])["baseline_id"].transform("count") > 1
+    dual_wps  = bl[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
 
     failures = []
-    for _, key in spot.iterrows():
+    for _, key in dual_wps.iterrows():
         pid, wp_id = key["project_id"], key["work_package_id"]
-        exp_ac = float(
+        exp_pv = float(
             expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
-            ["ac_usd"].iloc[0]
+            ["pv_usd"].iloc[0]
         )
-        q1_only_ac = float(
-            actuals[
-                (actuals["project_id"] == pid) &
-                (actuals["work_package_id"] == wp_id) &
-                (actuals["billing_period_date"] >= q4_cutoff) &
-                (actuals["billing_period_date"] <= REPORTING_DATE)
-            ]["cost_amount_usd"].sum()
-        )
+        orig_rows = pv[
+            (pv["project_id"] == pid) & (pv["work_package_id"] == wp_id) &
+            (pv["reporting_period"] == "2024-03") & (pv["schedule_revision"] == "original")
+        ]
+        orig_pv = float(orig_rows["cumulative_pv_usd"].iloc[0]) if not orig_rows.empty else None
+
         act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
         if act.empty:
             failures.append(f"({pid}, {wp_id}): not found")
             continue
-        act_ac = float(act["ac_usd"].iloc[0])
-        if math.isclose(act_ac, q1_only_ac, rel_tol=0.03) and not math.isclose(act_ac, exp_ac, rel_tol=0.03):
+        act_pv = float(act["pv_usd"].iloc[0])
+        if orig_pv is not None and math.isclose(act_pv, orig_pv, rel_tol=0.01):
             failures.append(
-                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f} matches Q1-only total "
-                f"({q1_only_ac:,.2f}) but expected cumulative AC={exp_ac:,.2f}. "
-                "AC is cumulative to date — include all billing_period_date <= 2024-03-31."
+                f"({pid}, {wp_id}): pv_usd={act_pv:,.2f} matches original schedule "
+                f"({orig_pv:,.2f}); expected revised schedule PV {exp_pv:,.2f}. "
+                "Sort by schedule_effective_from descending before deduplicating."
             )
-        elif not math.isclose(act_ac, exp_ac, rel_tol=0.03):
+        elif not math.isclose(act_pv, exp_pv, rel_tol=0.01):
             failures.append(
-                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f}, expected {exp_ac:,.2f}."
+                f"({pid}, {wp_id}): pv_usd={act_pv:,.2f}, expected {exp_pv:,.2f}."
             )
     assert not failures, "\n".join(failures)
 
