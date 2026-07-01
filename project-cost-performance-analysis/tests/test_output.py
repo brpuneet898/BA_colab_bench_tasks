@@ -13,12 +13,14 @@ Headroom mechanisms tested:
             A model checking completion_status instead of completion_date fails
             in both directions.
 
-  Trap 2 — Open-ended baselines (NaT baseline_effective_to).
-            pandas `reporting_date <= NaT` returns False, silently excluding
-            all 200 active baselines. NaT must be treated as "no expiry".
+  Trap 2 — Pre-period actuals excluded by Q1-only date filter.
+            25 WPs have cost transactions with billing_period_date in Q4 2023
+            (Oct–Dec). EVM AC is cumulative-to-date; correct filter is
+            billing_period_date <= 2024-03-31. A model scoping actuals to
+            Q1 2024 only silently understates AC for those WPs.
 
   Trap 3 — Dual-baseline renegotiation (CSV order != effective-date precedence).
-            10 WPs have two baseline rows; original lower-BAC written FIRST.
+            10 WPs have two approved baseline rows; original lower-BAC written FIRST.
             Correct rule: most recently approved baseline_effective_from wins.
 
   Trap 4 — Cost reversals inflate AC when negatives are filtered.
@@ -196,10 +198,17 @@ def test_01_input_sentinels(raw_data):
     assert len(early) >= 3, f"Trap 1b: expected >=3 early-closed 0_100 WPs, got {len(early)}"
 
     nat_count = bl["baseline_effective_to"].isna().sum()
-    assert nat_count == 200, f"Trap 2: expected 200 NaT baseline_effective_to, got {nat_count}"
+    assert nat_count == 200, f"Trap 2/3: expected 200 NaT baseline_effective_to, got {nat_count}"
 
     dual_count = (bl.groupby(["project_id", "work_package_id"]).size() > 1).sum()
     assert dual_count == 10, f"Trap 3: expected 10 dual-baseline WPs, got {dual_count}"
+
+    preperiod_rows = (
+        pd.to_datetime(ac["billing_period_date"]) < pd.Timestamp("2024-01-01")
+    ).sum()
+    assert preperiod_rows >= 400, (
+        f"Trap 2: expected >=400 Q4 2023 billing rows, got {preperiod_rows}"
+    )
 
     neg_rows = (ac["cost_amount_usd"] < 0).sum()
     assert neg_rows >= 40, f"Trap 4: expected >=40 negative cost rows, got {neg_rows}"
@@ -329,39 +338,60 @@ def test_05_trap2_portfolio_ev_not_zero(agent_summary, expected):
 
 
 # ---------------------------------------------------------------------------
-# Test 06 — [Trap 2] BAC accuracy for single-baseline WPs
+# Test 06 — [Trap 2] AC must include Q4 2023 pre-period costs
 # ---------------------------------------------------------------------------
 
-def test_06_trap2_bac_single_baseline_wps(agent_report, expected, raw_data):
-    """Trap 2 — Single-baseline WPs have NaT effective_to; must not be excluded."""
-    _, bl, _, _, _ = raw_data
-    dual_keys = set(
-        map(tuple,
-            bl.groupby(["project_id", "work_package_id"])
-              .filter(lambda g: len(g) > 1)[["project_id", "work_package_id"]]
-              .drop_duplicates().values.tolist()
-        )
+def test_06_trap2_preperiod_ac_included(agent_report, expected, raw_data):
+    """
+    Trap 2 — 25 WPs have cost transactions with billing_period_date in Q4 2023
+    (Oct–Dec). Projects started 2023-10-01 and these are legitimate costs incurred
+    before the Q1 2024 reporting period. EVM AC is cumulative-to-date; correct
+    filter is billing_period_date <= 2024-03-31. A model scoping to Q1 2024 only
+    silently excludes all Q4 costs, understating AC for those WPs.
+    """
+    _, _, actuals, _, _ = raw_data
+    actuals = actuals.copy()
+    actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
+
+    q4_cutoff = pd.Timestamp("2024-01-01")
+    preperiod_wps = (
+        actuals[actuals["billing_period_date"] < q4_cutoff]
+        [["project_id", "work_package_id"]]
+        .drop_duplicates()
     )
-    single_exp = expected[
-        ~expected.apply(
-            lambda r: (r["project_id"], r["work_package_id"]) in dual_keys, axis=1)
-    ].head(5)
+    spot = preperiod_wps.head(10)
 
     failures = []
-    for _, row in single_exp.iterrows():
-        pid, wp_id = row["project_id"], row["work_package_id"]
+    for _, key in spot.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
+        exp_ac = float(
+            expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
+            ["ac_usd"].iloc[0]
+        )
+        q1_only_ac = float(
+            actuals[
+                (actuals["project_id"] == pid) &
+                (actuals["work_package_id"] == wp_id) &
+                (actuals["billing_period_date"] >= q4_cutoff) &
+                (actuals["billing_period_date"] <= REPORTING_DATE)
+            ]["cost_amount_usd"].sum()
+        )
         act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
         if act.empty:
             failures.append(f"({pid}, {wp_id}): not found")
             continue
-        act_bac = float(act["bac_usd"].iloc[0])
-        if act_bac <= 0 or pd.isna(act_bac):
-            failures.append(f"({pid}, {wp_id}): bac_usd={act_bac} — baseline excluded.")
-        elif not math.isclose(act_bac, float(row["bac_usd"]), rel_tol=0.01):
+        act_ac = float(act["ac_usd"].iloc[0])
+        if math.isclose(act_ac, q1_only_ac, rel_tol=0.03) and not math.isclose(act_ac, exp_ac, rel_tol=0.03):
             failures.append(
-                f"({pid}, {wp_id}): bac_usd {act_bac:,.2f} != expected {row['bac_usd']:,.2f}"
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f} matches Q1-only total "
+                f"({q1_only_ac:,.2f}) but expected cumulative AC={exp_ac:,.2f}. "
+                "AC is cumulative to date — include all billing_period_date <= 2024-03-31."
+            )
+        elif not math.isclose(act_ac, exp_ac, rel_tol=0.03):
+            failures.append(
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f}, expected {exp_ac:,.2f}."
             )
     assert not failures, "\n".join(failures)
 
