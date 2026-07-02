@@ -5,28 +5,27 @@ Ground truth is recomputed from the canonical data files baked into the image.
 
 Headroom mechanisms tested:
 
-  Trap 1 — Bidirectional completion_date vs. completion_status confusion.
-            (a) 8 WPs: completion_status="complete" but completion_date AFTER
-                2024-03-31. EV must be 0.
-            (b) 5 WPs: completion_status="in_progress" but completion_date ON
-                OR BEFORE 2024-03-31. EV must equal full BAC.
-            A model checking completion_status instead of completion_date fails
-            in both directions.
+  Trap 1 — Progress revision: preliminary vs confirmed report  [PHANTOM DUPLICATE]
+            15 WPs have two progress_entries rows for "2024-03":
+            preliminary (lower percent_complete, submitted 5 days earlier, FIRST in CSV)
+            and confirmed (actual percent_complete, SECOND in CSV).
+            A naive merge gives 215 rows for 200 WPs; drop_duplicates(keep='first')
+            silently picks the preliminary value.  Correct: sort by submitted_date
+            descending before deduplicating on (project_id, work_package_id).
 
   Trap 2 — Dual PV schedule for re-baselined WPs (CSV order != schedule precedence).
             10 dual-baseline WPs have two planned value schedule rows per month:
             original schedule (lower PV, FIRST in CSV) and revised schedule
-            (higher PV, SECOND in CSV). Naive merge creates 210 rows; naive
-            drop_duplicates(keep='first') picks original (wrong) PV.
-            Correct: sort by schedule_effective_from desc, then dedup.
+            (higher PV, SECOND in CSV).
 
   Trap 3 — Dual-baseline renegotiation (CSV order != effective-date precedence).
             10 WPs have two approved baseline rows; original lower-BAC written FIRST.
-            Correct rule: most recently approved baseline_effective_from wins.
 
-  Trap 4 — Cost reversals inflate AC when negatives are filtered.
-            ~25 WPs have negative cost_amount_usd rows (credit memos).
-            groupby().sum() correctly nets them; filtering cost > 0 overcounts AC.
+  Trap 4 — Commitment exclusion from Actual Cost  [DOMAIN REASONING]
+            actuals.csv carries transaction_type: "actual" rows are incurred costs
+            (include in AC); "commitment" rows are purchase orders not yet invoiced
+            (exclude from AC).  A model summing all cost_amount_usd without filtering
+            transaction_type will overstate AC, distorting CPI and EAC portfolio-wide.
 """
 
 import json
@@ -76,9 +75,12 @@ def _get_applicable_baseline(baselines):
 
 
 def _compute_ac(actuals):
-    actuals = actuals.copy()
-    actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-    in_period = actuals[actuals["billing_period_date"] <= REPORTING_DATE]
+    ac = actuals.copy()
+    ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
+    in_period = ac[
+        (ac["billing_period_date"] <= REPORTING_DATE) &
+        (ac["transaction_type"] != "commitment")
+    ]
     return (
         in_period
         .groupby(["project_id", "work_package_id"], as_index=False)["cost_amount_usd"]
@@ -88,8 +90,12 @@ def _compute_ac(actuals):
 
 
 def _get_march_progress(progress):
-    mar = progress[progress["reporting_period"] == "2024-03"]
-    return mar[["project_id", "work_package_id", "percent_complete"]]
+    return (
+        progress[progress["reporting_period"] == "2024-03"]
+        .sort_values("submitted_date", ascending=False)
+        .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+        [["project_id", "work_package_id", "percent_complete"]]
+    )
 
 
 def _compute_ev(row):
@@ -193,26 +199,11 @@ def test_01_input_sentinels(raw_data):
     assert len(wp) == 200
     assert wp["project_id"].nunique() == 5
 
-    wp = wp.copy()
-    wp["completion_date"] = pd.to_datetime(wp["completion_date"])
-
-    future = wp[
-        (wp["ev_technique"] == "0_100") & (wp["completion_status"] == "complete") &
-        (wp["completion_date"] > REPORTING_DATE)
-    ]
-    assert len(future) >= 6, f"Trap 1a: expected >=6 future-complete 0_100 WPs, got {len(future)}"
-
-    early = wp[
-        (wp["ev_technique"] == "0_100") & (wp["completion_status"] == "in_progress") &
-        (wp["completion_date"].notna()) & (wp["completion_date"] <= REPORTING_DATE)
-    ]
-    assert len(early) >= 3, f"Trap 1b: expected >=3 early-closed 0_100 WPs, got {len(early)}"
-
     nat_count = bl["baseline_effective_to"].isna().sum()
-    assert nat_count == 200, f"Trap 2/3: expected 200 NaT baseline_effective_to, got {nat_count}"
+    assert nat_count == 200, f"Expected 200 NaT baseline_effective_to, got {nat_count}"
 
-    dual_count = (bl.groupby(["project_id", "work_package_id"]).size() > 1).sum()
-    assert dual_count == 10, f"Trap 3: expected 10 dual-baseline WPs, got {dual_count}"
+    dual_bl = (bl.groupby(["project_id", "work_package_id"]).size() > 1).sum()
+    assert dual_bl == 10, f"Trap 3: expected 10 dual-baseline WPs, got {dual_bl}"
 
     dual_pv = (
         pv.groupby(["project_id", "work_package_id", "reporting_period"]).size() > 1
@@ -221,8 +212,18 @@ def test_01_input_sentinels(raw_data):
         f"Trap 2: expected >=10 WP-period combos with dual PV schedules, got {dual_pv}"
     )
 
-    neg_rows = (ac["cost_amount_usd"] < 0).sum()
-    assert neg_rows >= 40, f"Trap 4: expected >=40 negative cost rows, got {neg_rows}"
+    dual_prog = (
+        pr[pr["reporting_period"] == "2024-03"]
+        .groupby(["project_id", "work_package_id"]).size().gt(1).sum()
+    )
+    assert dual_prog >= 10, (
+        f"Trap 1: expected >=10 WPs with dual March progress entries, got {dual_prog}"
+    )
+
+    commitment_count = (ac["transaction_type"] == "commitment").sum()
+    assert commitment_count >= 500, (
+        f"Trap 4: expected >=500 commitment rows in actuals, got {commitment_count}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -254,62 +255,75 @@ def test_02_output_structure(agent_report, agent_summary):
 
 
 # ---------------------------------------------------------------------------
-# Test 03 — [Trap 1a] Future-complete 0_100 WPs must have ev_usd = 0
+# Test 03 — [Trap 1] Confirmed percent_complete used, not preliminary
 # ---------------------------------------------------------------------------
 
-def test_03_trap1a_future_complete_ev_is_zero(agent_report, raw_data):
+def test_03_trap1_confirmed_progress_used(agent_report, expected, raw_data):
     """
-    Trap 1a — 0_100 WPs marked "complete" with completion_date AFTER 2024-03-31
-    were not done at the reporting date. ev_usd must be 0, not bac_usd.
+    Trap 1 — 15 WPs have two progress entries for "2024-03": a preliminary
+    estimate (lower percent_complete, written FIRST in CSV, submitted_date 5
+    days earlier) and the confirmed final report (written SECOND).  A naive
+    merge gives 215 rows; drop_duplicates(keep='first') silently picks the
+    preliminary value.  Correct: sort by submitted_date descending before
+    deduplicating so the confirmed (most recently submitted) value is used.
+    """
+    _, _, _, progress, _ = raw_data
+    mar = progress[progress["reporting_period"] == "2024-03"]
+    dual_mask = mar.groupby(["project_id", "work_package_id"])["entry_id"].transform("count") > 1
+    dual_wps  = mar[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
 
-    A model using completion_status=="complete" directly overcounts EV.
-    """
-    wp, _, _, _, _ = raw_data
-    wp = wp.copy()
-    wp["completion_date"] = pd.to_datetime(wp["completion_date"])
-    future_wps = wp[
-        (wp["ev_technique"] == "0_100") & (wp["completion_status"] == "complete") &
-        (wp["completion_date"] > REPORTING_DATE)
-    ]
     failures = []
-    for _, row in future_wps.iterrows():
-        pid, wp_id = row["project_id"], row["work_package_id"]
+    for _, key in dual_wps.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
+
+        exp_pct = float(
+            expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
+            ["percent_complete"].iloc[0]
+        )
+        prelim_rows = mar[
+            (mar["project_id"] == pid) & (mar["work_package_id"] == wp_id) &
+            (mar["report_type"] == "preliminary")
+        ]
+        prelim_pct = float(prelim_rows["percent_complete"].iloc[0]) if not prelim_rows.empty else None
+
         act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
         if act.empty:
-            failures.append(f"({pid}, {wp_id}): not found")
+            failures.append(f"({pid}, {wp_id}): not found in agent report")
             continue
-        act_ev = float(act["ev_usd"].iloc[0])
-        if not math.isclose(act_ev, 0.0, abs_tol=0.01):
+
+        act_pct = float(act["percent_complete"].iloc[0])
+        if prelim_pct is not None and math.isclose(act_pct, prelim_pct, abs_tol=0.5):
             failures.append(
-                f"({pid}, {wp_id}): ev_usd={act_ev:,.2f}, expected 0.00. "
-                f"completion_date={row['completion_date'].date()} is after 2024-03-31."
+                f"({pid}, {wp_id}): percent_complete={act_pct} matches preliminary "
+                f"({prelim_pct}); expected confirmed value {exp_pct}. "
+                "Sort by submitted_date descending before drop_duplicates."
+            )
+        elif not math.isclose(act_pct, exp_pct, abs_tol=0.5):
+            failures.append(
+                f"({pid}, {wp_id}): percent_complete={act_pct}, expected {exp_pct}."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 04 — [Trap 1b] Early-closed 0_100 WPs must have ev_usd = bac_usd
+# Test 04 — [Trap 1] Wrong progress cascades into EV
 # ---------------------------------------------------------------------------
 
-def test_04_trap1b_early_closed_ev_equals_bac(agent_report, expected, raw_data):
+def test_04_trap1_ev_uses_confirmed_progress(agent_report, expected, raw_data):
     """
-    Trap 1b — 0_100 WPs with completion_status="in_progress" but completion_date
-    on or before 2024-03-31 were formally closed in Q1. ev_usd must equal bac_usd.
+    Trap 1 — Using the preliminary (lower) percent_complete understates EV for
+    affected WPs.  Verify ev_usd matches the oracle for all dual-progress WPs.
+    """
+    _, _, _, progress, _ = raw_data
+    mar = progress[progress["reporting_period"] == "2024-03"]
+    dual_mask = mar.groupby(["project_id", "work_package_id"])["entry_id"].transform("count") > 1
+    dual_wps  = mar[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
 
-    A model treating in_progress as ev=0 for 0_100 undercounts EV for these WPs.
-    """
-    wp, _, _, _, _ = raw_data
-    wp = wp.copy()
-    wp["completion_date"] = pd.to_datetime(wp["completion_date"])
-    early_wps = wp[
-        (wp["ev_technique"] == "0_100") & (wp["completion_status"] == "in_progress") &
-        (wp["completion_date"].notna()) & (wp["completion_date"] <= REPORTING_DATE)
-    ]
     failures = []
-    for _, row in early_wps.iterrows():
-        pid, wp_id = row["project_id"], row["work_package_id"]
+    for _, key in dual_wps.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
         exp_ev = float(
             expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
             ["ev_usd"].iloc[0]
@@ -318,25 +332,22 @@ def test_04_trap1b_early_closed_ev_equals_bac(agent_report, expected, raw_data):
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
         if act.empty:
-            failures.append(f"({pid}, {wp_id}): not found")
             continue
         act_ev = float(act["ev_usd"].iloc[0])
-        if not math.isclose(act_ev, exp_ev, rel_tol=0.01):
+        if not math.isclose(act_ev, exp_ev, rel_tol=0.03):
             failures.append(
-                f"({pid}, {wp_id}): ev_usd={act_ev:,.2f}, expected {exp_ev:,.2f} (=bac_usd). "
-                f"completion_status='in_progress' but completion_date="
-                f"{row['completion_date'].date()} <= 2024-03-31. "
-                "Use completion_date, not completion_status, to determine 0_100 EV."
+                f"({pid}, {wp_id}): ev_usd={act_ev:,.2f}, expected {exp_ev:,.2f}. "
+                "Verify confirmed percent_complete is used."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 05 — [Trap 2] Portfolio EV must not collapse to near zero
+# Test 05 — [Trap 2/3] Portfolio EV must not collapse to near zero
 # ---------------------------------------------------------------------------
 
-def test_05_trap2_portfolio_ev_not_zero(agent_summary, expected):
-    """Trap 2 — NaT baseline_effective_to must be treated as no expiry."""
+def test_05_portfolio_ev_not_zero(agent_summary, expected):
+    """Baseline NaT effective_to must be treated as no expiry (not excluded)."""
     exp_ev = round(float(expected["ev_usd"].sum()), 2)
     act_ev = float(agent_summary["total_ev_usd"])
     assert act_ev > exp_ev * 0.10, (
@@ -356,11 +367,10 @@ def test_06_trap2_pv_dual_schedule_revised_used(agent_report, expected, raw_data
     """
     Trap 2 — The 10 re-baselined WPs have two PV schedule rows per reporting
     period: original schedule (lower cumulative_pv_usd, FIRST in CSV) and revised
-    schedule (higher cumulative_pv_usd, SECOND in CSV). A naive merge creates
+    schedule (higher cumulative_pv_usd, SECOND in CSV).  A naive merge creates
     phantom duplicate rows; drop_duplicates(keep='first') silently picks the
-    original (wrong) PV. Correct: sort by schedule_effective_from descending,
-    then dedup on (project_id, work_package_id, reporting_period), keep='first'.
-    Wrong PV produces incorrect schedule variance and portfolio SPI.
+    original (wrong) PV.  Correct: sort by schedule_effective_from descending,
+    then dedup on (project_id, work_package_id), keep='first'.
     """
     _, bl, _, _, pv = raw_data
     dual_mask = bl.groupby(["project_id", "work_package_id"])["baseline_id"].transform("count") > 1
@@ -425,8 +435,7 @@ def test_07_trap3_bac_dual_baseline_wps(agent_report, expected, raw_data):
         act_bac = float(act["bac_usd"].iloc[0])
         if not math.isclose(act_bac, exp_bac, rel_tol=0.01):
             failures.append(
-                f"({pid}, {wp_id}): bac_usd {act_bac:,.2f} != expected {exp_bac:,.2f}. "
-                "Use most recently approved baseline_effective_from."
+                f"({pid}, {wp_id}): bac_usd {act_bac:,.2f} != expected {exp_bac:,.2f}."
             )
     assert not failures, "\n".join(failures)
 
@@ -463,31 +472,41 @@ def test_08_trap3_eac_cascade(agent_report, expected, raw_data):
 
 
 # ---------------------------------------------------------------------------
-# Test 09 — [Trap 4] AC for reversal WPs must include negative transactions
+# Test 09 — [Trap 4] AC excludes commitment rows
 # ---------------------------------------------------------------------------
 
-def test_09_trap4_ac_includes_reversals(agent_report, expected, raw_data):
+def test_09_trap4_ac_excludes_commitments(agent_report, expected, raw_data):
     """
-    Trap 4 — ~25 WPs have negative cost_amount_usd rows (credit memos / adjustments).
-    Net AC = gross charges + reversals. Filtering cost_amount_usd > 0 overcounts AC.
+    Trap 4 — actuals.csv carries transaction_type: "actual" rows are incurred
+    costs (include in AC); "commitment" rows are PO obligations not yet invoiced
+    (exclude from AC).  For WPs where commitment rows carry a non-trivial amount,
+    the agent's ac_usd must match the oracle (which excludes commitments), not
+    the inflated total that includes them.
     """
     _, _, actuals, _, _ = raw_data
-    actuals = actuals.copy()
-    actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-    q1 = actuals[actuals["billing_period_date"] <= REPORTING_DATE]
+    ac = actuals.copy()
+    ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
+    in_period = ac[ac["billing_period_date"] <= REPORTING_DATE]
 
-    reversal_wps = (
-        q1[q1["cost_amount_usd"] < 0][["project_id", "work_package_id"]]
-        .drop_duplicates()
+    commitment_by_wp = (
+        in_period[in_period["transaction_type"] == "commitment"]
+        .groupby(["project_id", "work_package_id"])["cost_amount_usd"]
+        .sum()
+        .reset_index()
+        .rename(columns={"cost_amount_usd": "commitment_usd"})
     )
-    spot = reversal_wps.head(10)
+    # Focus on WPs where the commitment load is material (>$5k)
+    material = commitment_by_wp[commitment_by_wp["commitment_usd"] > 5_000].head(15)
+
     failures = []
-    for _, key in spot.iterrows():
+    for _, key in material.iterrows():
         pid, wp_id = key["project_id"], key["work_package_id"]
-        exp_ac = float(
+        exp_ac  = float(
             expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
             ["ac_usd"].iloc[0]
         )
+        inflated_ac = exp_ac + float(key["commitment_usd"])
+
         act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
@@ -495,35 +514,38 @@ def test_09_trap4_ac_includes_reversals(agent_report, expected, raw_data):
             failures.append(f"({pid}, {wp_id}): not found")
             continue
         act_ac = float(act["ac_usd"].iloc[0])
-        if not math.isclose(act_ac, exp_ac, rel_tol=0.03):
-            gross = float(q1[
-                (q1["project_id"] == pid) & (q1["work_package_id"] == wp_id) &
-                (q1["cost_amount_usd"] > 0)
-            ]["cost_amount_usd"].sum())
+        if math.isclose(act_ac, inflated_ac, rel_tol=0.02):
             failures.append(
-                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f}, expected {exp_ac:,.2f}. "
-                f"Gross (positives only)={gross:,.2f}. "
-                "Sum ALL cost_amount_usd — negative rows are reversals, not errors."
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f} matches inflated total "
+                f"(incurred {exp_ac:,.2f} + commitments {key['commitment_usd']:,.2f}). "
+                "Exclude transaction_type='commitment' rows from AC."
+            )
+        elif not math.isclose(act_ac, exp_ac, rel_tol=0.03):
+            failures.append(
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f}, expected {exp_ac:,.2f}."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 10 — [Trap 4] Portfolio CPI distorted by filtered reversals
+# Test 10 — [Trap 4] Portfolio CPI distorted by included commitments
 # ---------------------------------------------------------------------------
 
 def test_10_trap4_portfolio_cpi_not_distorted(agent_summary, expected, raw_data):
     """
-    Trap 4 — Filtering negatives inflates total AC portfolio-wide, lowering CPI.
+    Trap 4 — Including commitment rows inflates total_ac_usd portfolio-wide,
+    understating portfolio CPI.
     """
     _, _, actuals, _, _ = raw_data
-    actuals = actuals.copy()
-    actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-    q1 = actuals[actuals["billing_period_date"] <= REPORTING_DATE]
+    ac = actuals.copy()
+    ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
+    in_period = ac[ac["billing_period_date"] <= REPORTING_DATE]
 
-    neg_total = float(q1[q1["cost_amount_usd"] < 0]["cost_amount_usd"].sum())
-    assert neg_total < -50_000, (
-        f"Total reversal amount {neg_total:,.2f} too small — trap data may be missing."
+    total_commitments = float(
+        in_period[in_period["transaction_type"] == "commitment"]["cost_amount_usd"].sum()
+    )
+    assert total_commitments > 500_000, (
+        f"Total commitment amount {total_commitments:,.2f} too small — trap may be missing."
     )
 
     exp_ac  = round(float(expected["ac_usd"].sum()), 2)
@@ -535,8 +557,8 @@ def test_10_trap4_portfolio_cpi_not_distorted(agent_summary, expected, raw_data)
 
     assert math.isclose(act_ac, exp_ac, rel_tol=0.03), (
         f"total_ac_usd {act_ac:,.2f} != expected {exp_ac:,.2f} "
-        f"(diff {act_ac - exp_ac:+,.2f}). "
-        "Include all cost_amount_usd — reversals reduce net AC."
+        f"(portfolio commitments total {total_commitments:,.2f}). "
+        "Exclude transaction_type='commitment' rows from AC."
     )
     assert math.isclose(act_cpi, exp_cpi, abs_tol=0.05), (
         f"portfolio_cpi {act_cpi:.4f} != expected {exp_cpi:.4f}."

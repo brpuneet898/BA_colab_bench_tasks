@@ -1,27 +1,27 @@
 rate_id,resource_type_id,resource_category,resource_description,cost_rate_usd,rate_unit,rate_effective_from,rate_effective_to,currency,approved_by,rate_revision,overhead_included,fringe_rate_pct,notes
-RR-0001,RT-L01,Labor,Senior Engineer,132.94,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.271,Superseded
-RR-0002,RT-L01,Labor,Senior Engineer,145.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.222,Current approved rate
-RR-0003,RT-L02,Labor,Project Engineer,96.38,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.218,Superseded
-RR-0004,RT-L02,Labor,Project Engineer,110.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.225,Current approved rate
-RR-0005,RT-L03,Labor,Site Supervisor,85.19,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.309,Superseded
-RR-0006,RT-L03,Labor,Site Supervisor,95.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.334,Current approved rate
-RR-0007,RT-L04,Labor,Construction Manager,135.86,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.248,Superseded
-RR-0008,RT-L04,Labor,Construction Manager,165.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.271,Current approved rate
-RR-0009,RT-L05,Labor,QA Inspector,81.79,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.245,Superseded
-RR-0010,RT-L05,Labor,QA Inspector,88.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.308,Current approved rate
-RR-0011,RT-L06,Labor,Drafter / Designer,73.44,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.314,Superseded
-RR-0012,RT-L06,Labor,Drafter / Designer,82.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.298,Current approved rate
-RR-0013,RT-L07,Labor,Safety Officer,78.0,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.227,Superseded
-RR-0014,RT-L07,Labor,Safety Officer,90.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.224,Current approved rate
-RR-0015,RT-L08,Labor,Document Controller,66.32,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.312,Superseded
-RR-0016,RT-L08,Labor,Document Controller,72.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.241,Current approved rate
-RR-0017,RT-E01,Equipment,Crane — Mobile 100T,2114.12,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.0,Superseded
-RR-0018,RT-E01,Equipment,Crane — Mobile 100T,2400.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.0,Current approved rate
-RR-0019,RT-E02,Equipment,Excavator — 30T,851.45,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.0,Superseded
-RR-0020,RT-E02,Equipment,Excavator — 30T,980.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.0,Current approved rate
-RR-0021,RT-E03,Equipment,Concrete Pump,651.2,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.0,Superseded
+RR-0001,RT-L01,Labor,Senior Engineer,133.16,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.317,Superseded
+RR-0002,RT-L01,Labor,Senior Engineer,145.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.312,Current approved rate
+RR-0003,RT-L02,Labor,Project Engineer,90.48,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.27,Superseded
+RR-0004,RT-L02,Labor,Project Engineer,110.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.338,Current approved rate
+RR-0005,RT-L03,Labor,Site Supervisor,82.54,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.225,Superseded
+RR-0006,RT-L03,Labor,Site Supervisor,95.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.208,Current approved rate
+RR-0007,RT-L04,Labor,Construction Manager,151.23,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.239,Superseded
+RR-0008,RT-L04,Labor,Construction Manager,165.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.28,Current approved rate
+RR-0009,RT-L05,Labor,QA Inspector,72.32,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.277,Superseded
+RR-0010,RT-L05,Labor,QA Inspector,88.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.227,Current approved rate
+RR-0011,RT-L06,Labor,Drafter / Designer,73.78,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.289,Superseded
+RR-0012,RT-L06,Labor,Drafter / Designer,82.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.228,Current approved rate
+RR-0013,RT-L07,Labor,Safety Officer,75.42,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.204,Superseded
+RR-0014,RT-L07,Labor,Safety Officer,90.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.335,Current approved rate
+RR-0015,RT-L08,Labor,Document Controller,66.82,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.286,Superseded
+RR-0016,RT-L08,Labor,Document Controller,72.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.324,Current approved rate
+RR-0017,RT-E01,Equipment,Crane — Mobile 100T,2041.72,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.0,Superseded
+RR-0018,RT-E01,Equipment,Crane — Mobile 100T,2400.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.0,Current approved rate
+RR-0019,RT-E02,Equipment,Excavator — 30T,808.81,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.0,Superseded
+RR-0020,RT-E02,Equipment,Excavator — 30T,980.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.0,Current approved rate
+RR-0021,RT-E03,Equipment,Concrete Pump,703.92,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.0,Superseded
 RR-0022,RT-E03,Equipment,Concrete Pump,750.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.0,Current approved rate
-RR-0023,RT-E04,Equipment,Generator — 500kVA,352.63,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.0,Superseded
+RR-0023,RT-E04,Equipment,Generator — 500kVA,365.22,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.0,Superseded
 RR-0024,RT-E04,Equipment,Generator — 500kVA,420.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.0,Current approved rate
-RR-0025,RT-E05,Equipment,Surveying Total Station,160.11,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,True,0.0,Superseded
-RR-0026,RT-E05,Equipment,Surveying Total Station,180.0,per hour,2023-10-01,,USD,Finance Director,v2,True,0.0,Current approved rate
+RR-0025,RT-E05,Equipment,Surveying Total Station,148.07,per hour,2023-01-01,2023-09-30,USD,Finance Director,v1,False,0.0,Superseded
+RR-0026,RT-E05,Equipment,Surveying Total Station,180.0,per hour,2023-10-01,,USD,Finance Director,v2,False,0.0,Current approved rate

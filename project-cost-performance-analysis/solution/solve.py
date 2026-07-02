@@ -59,11 +59,17 @@ applicable_bac  = valid_baselines.drop_duplicates(
 
 # ---------------------------------------------------------------------------
 # AC: sum cost_amount_usd per (project_id, work_package_id)
-#     where billing_period_date <= REPORTING_DATE
+#     where billing_period_date <= REPORTING_DATE and transaction_type != "commitment"
+#
+# Commitments are purchase orders not yet invoiced — future obligations, not
+# incurred costs.  EVM AC excludes them.
 # ---------------------------------------------------------------------------
 
 actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-in_period = actuals[actuals["billing_period_date"] <= REPORTING_DATE]
+in_period = actuals[
+    (actuals["billing_period_date"] <= REPORTING_DATE) &
+    (actuals["transaction_type"] != "commitment")
+]
 ac_df = (
     in_period
     .groupby(["project_id", "work_package_id"], as_index=False)["cost_amount_usd"]
@@ -73,11 +79,18 @@ ac_df = (
 
 # ---------------------------------------------------------------------------
 # Progress (percent_complete as of 2024-03)
+#
+# Some WPs have two entries for "2024-03" — a preliminary estimate filed first
+# and the confirmed final report filed later.  Sort by submitted_date descending
+# before deduplicating to ensure the confirmed (most recent) value is used.
 # ---------------------------------------------------------------------------
 
-mar_progress = progress[progress["reporting_period"] == "2024-03"][
-    ["project_id", "work_package_id", "percent_complete"]
-]
+mar_progress = (
+    progress[progress["reporting_period"] == "2024-03"]
+    .sort_values("submitted_date", ascending=False)
+    .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+    [["project_id", "work_package_id", "percent_complete"]]
+)
 
 # ---------------------------------------------------------------------------
 # Planned Value (cumulative PV for 2024-03)
