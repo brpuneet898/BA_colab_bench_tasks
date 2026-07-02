@@ -3,7 +3,7 @@ version = "1.0"
 [metadata]
 expert_time_estimate_hours = 2.0
 category = "Project Analytics"
-tags = ["earned-value-management", "composite-key", "nat-filter", "billing-lag", "dual-baseline", "evm"]
+tags = ["earned-value-management", "completion-date-temporal", "nat-baseline", "dual-baseline", "cost-reversals", "evm"]
 
 [verifier]
 timeout_sec = 1200.0

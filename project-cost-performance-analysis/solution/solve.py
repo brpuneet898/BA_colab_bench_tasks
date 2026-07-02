@@ -44,6 +44,7 @@ pv_schedule   = pd.read_csv(DATA_DIR / "planned_value_schedule.csv")
 baselines["baseline_effective_from"] = pd.to_datetime(baselines["baseline_effective_from"])
 open_ended = baselines["baseline_effective_to"].isna()
 baselines["baseline_effective_to"]   = pd.to_datetime(baselines["baseline_effective_to"])
+work_packages["completion_date"]     = pd.to_datetime(work_packages["completion_date"])
 
 valid_baselines = baselines[
     (baselines["baseline_effective_from"] <= REPORTING_DATE) &
@@ -58,15 +59,17 @@ applicable_bac  = valid_baselines.drop_duplicates(
 
 # ---------------------------------------------------------------------------
 # AC: sum cost_amount_usd per (project_id, work_package_id)
-#     where billing_period_date <= REPORTING_DATE
+#     where billing_period_date <= REPORTING_DATE and transaction_type != "commitment"
 #
-# billing_period_date is the accounting period of the cost.  entry_date is
-# when the invoice was posted — subcontract invoices often arrive 30–60 days
-# later and must not be used for period assignment.
+# Commitments are purchase orders not yet invoiced — future obligations, not
+# incurred costs.  EVM AC excludes them.
 # ---------------------------------------------------------------------------
 
 actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-in_period = actuals[actuals["billing_period_date"] <= REPORTING_DATE]
+in_period = actuals[
+    (actuals["billing_period_date"] <= REPORTING_DATE) &
+    (actuals["transaction_type"] != "commitment")
+]
 ac_df = (
     in_period
     .groupby(["project_id", "work_package_id"], as_index=False)["cost_amount_usd"]
@@ -76,19 +79,31 @@ ac_df = (
 
 # ---------------------------------------------------------------------------
 # Progress (percent_complete as of 2024-03)
+#
+# Some WPs have two entries for "2024-03" — a preliminary estimate filed first
+# and the confirmed final report filed later.  Sort by submitted_date descending
+# before deduplicating to ensure the confirmed (most recent) value is used.
 # ---------------------------------------------------------------------------
 
-mar_progress = progress[progress["reporting_period"] == "2024-03"][
-    ["project_id", "work_package_id", "percent_complete"]
-]
+mar_progress = (
+    progress[progress["reporting_period"] == "2024-03"]
+    .sort_values("submitted_date", ascending=False)
+    .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+    [["project_id", "work_package_id", "percent_complete"]]
+)
 
 # ---------------------------------------------------------------------------
 # Planned Value (cumulative PV for 2024-03)
 # ---------------------------------------------------------------------------
 
-mar_pv = pv_schedule[pv_schedule["reporting_period"] == "2024-03"][
-    ["project_id", "work_package_id", "cumulative_pv_usd"]
-].rename(columns={"cumulative_pv_usd": "pv_usd"})
+pv_schedule["schedule_effective_from"] = pd.to_datetime(pv_schedule["schedule_effective_from"])
+mar_pv = (
+    pv_schedule[pv_schedule["reporting_period"] == "2024-03"]
+    .sort_values("schedule_effective_from", ascending=False)
+    .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+    [["project_id", "work_package_id", "cumulative_pv_usd"]]
+    .rename(columns={"cumulative_pv_usd": "pv_usd"})
+)
 
 # ---------------------------------------------------------------------------
 # Merge
@@ -96,7 +111,8 @@ mar_pv = pv_schedule[pv_schedule["reporting_period"] == "2024-03"][
 
 df = (
     work_packages[["project_id", "work_package_id", "work_package_name",
-                   "control_account_id", "ev_technique", "completion_status"]]
+                   "control_account_id", "ev_technique", "completion_status",
+                   "completion_date"]]
     .merge(applicable_bac, on=["project_id", "work_package_id"], how="left")
     .merge(ac_df,          on=["project_id", "work_package_id"], how="left")
     .merge(mar_progress,   on=["project_id", "work_package_id"], how="left")
@@ -113,7 +129,10 @@ df["pv_usd"]           = df["pv_usd"].fillna(0.0)
 
 def compute_ev(row):
     if row["ev_technique"] == "0_100":
-        return float(row["bac_usd"]) if row["completion_status"] == "complete" else 0.0
+        comp_date = row["completion_date"]
+        if pd.notna(comp_date) and comp_date <= REPORTING_DATE:
+            return float(row["bac_usd"])
+        return 0.0
     return (float(row["percent_complete"]) / 100.0) * float(row["bac_usd"])
 
 df["ev_usd"] = df.apply(compute_ev, axis=1)

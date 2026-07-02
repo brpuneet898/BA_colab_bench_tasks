@@ -5,34 +5,27 @@ Ground truth is recomputed from the canonical data files baked into the image.
 
 Headroom mechanisms tested:
 
-  Trap 1 — (project_id, work_package_id) composite key.
-            work_package_id values WP-001 through WP-040 repeat independently
-            across all five projects. Joining actuals or baselines on
-            work_package_id alone creates phantom cross-project matches,
-            inflating AC and EV by up to 5× per work package.
+  Trap 1 — Progress revision: preliminary vs confirmed report  [PHANTOM DUPLICATE]
+            15 WPs have two progress_entries rows for "2024-03":
+            preliminary (lower percent_complete, submitted 5 days earlier, FIRST in CSV)
+            and confirmed (actual percent_complete, SECOND in CSV).
+            A naive merge gives 215 rows for 200 WPs; drop_duplicates(keep='first')
+            silently picks the preliminary value.  Correct: sort by submitted_date
+            descending before deduplicating on (project_id, work_package_id).
 
-  Trap 2 — Open-ended baselines (NaT baseline_effective_to).
-            Every currently active baseline has no expiry date —
-            baseline_effective_to is blank (NaT). A pandas date comparison of
-            the form `reporting_date <= NaT` returns False, silently excluding
-            all 200 current baselines. The correct implementation treats NaT as
-            "no expiry": the baseline remains valid indefinitely after its
-            baseline_effective_from.
+  Trap 2 — Dual PV schedule for re-baselined WPs (CSV order != schedule precedence).
+            10 dual-baseline WPs have two planned value schedule rows per month:
+            original schedule (lower PV, FIRST in CSV) and revised schedule
+            (higher PV, SECOND in CSV).
 
-  Trap 3 — Dual-baseline renegotiation (CSV order ≠ effective-date precedence).
-            Ten work packages have two baseline rows: the original lower-BAC
-            baseline written first in the CSV, and the revised higher-BAC
-            baseline written second. After correctly handling Trap 2, both rows
-            match the reporting date filter. A model iterating in file order
-            picks the lower BAC. The correct rule: where multiple baselines are
-            valid, use the one with the most recent baseline_effective_from.
+  Trap 3 — Dual-baseline renegotiation (CSV order != effective-date precedence).
+            10 WPs have two approved baseline rows; original lower-BAC written FIRST.
 
-  Trap 4 — Subcontractor billing lag (billing_period_date vs entry_date).
-            ~40% of March subcontract cost rows have entry_date in April or May
-            2024. AC must be based on billing_period_date (the accounting period
-            of the cost), not entry_date (when the invoice was posted). A model
-            filtering on entry_date <= 2024-03-31 silently drops those rows,
-            understating Q1 AC for subcontract-heavy work packages.
+  Trap 4 — Commitment exclusion from Actual Cost  [DOMAIN REASONING]
+            actuals.csv carries transaction_type: "actual" rows are incurred costs
+            (include in AC); "commitment" rows are purchase orders not yet invoiced
+            (exclude from AC).  A model summing all cost_amount_usd without filtering
+            transaction_type will overstate AC, distorting CPI and EAC portfolio-wide.
 """
 
 import json
@@ -64,105 +57,103 @@ SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
 REPORTING_DATE = pd.Timestamp("2024-03-31")
 
 # ---------------------------------------------------------------------------
-# Ground-truth helpers  (replicate oracle logic exactly)
+# Ground-truth helpers
 # ---------------------------------------------------------------------------
 
-def _get_applicable_baseline(baselines: pd.DataFrame) -> pd.DataFrame:
-    """
-    For each (project_id, work_package_id), return the baseline row whose
-    baseline_effective_from is the most recent date on or before REPORTING_DATE.
-
-    NaT in baseline_effective_to means the baseline has no expiry and is always
-    valid after its baseline_effective_from. The comparison
-    `REPORTING_DATE <= NaT` evaluates to False in pandas, so NaT must be
-    handled explicitly: treat it as "always in effect after effective_from".
-    """
+def _get_applicable_baseline(baselines):
     bl = baselines.copy()
     bl["baseline_effective_from"] = pd.to_datetime(bl["baseline_effective_from"])
-
     open_ended = bl["baseline_effective_to"].isna()
     bl["baseline_effective_to"] = pd.to_datetime(bl["baseline_effective_to"])
-
     valid = bl[
         (bl["baseline_effective_from"] <= REPORTING_DATE) &
         (open_ended | (REPORTING_DATE <= bl["baseline_effective_to"]))
     ].copy()
-
-    # Where multiple rows are valid, keep the most recently approved (highest effective_from)
     valid = valid.sort_values("baseline_effective_from", ascending=False)
     valid = valid.drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
     return valid[["project_id", "work_package_id", "bac_usd"]]
 
 
-def _compute_ac(actuals: pd.DataFrame) -> pd.DataFrame:
-    """
-    Sum cost_amount_usd per (project_id, work_package_id) where
-    billing_period_date <= REPORTING_DATE.
-    billing_period_date is the accounting period of the cost — not entry_date.
-    """
-    actuals = actuals.copy()
-    actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-    in_period = actuals[actuals["billing_period_date"] <= REPORTING_DATE]
-    ac = (
+def _compute_ac(actuals):
+    ac = actuals.copy()
+    ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
+    in_period = ac[
+        (ac["billing_period_date"] <= REPORTING_DATE) &
+        (ac["transaction_type"] != "commitment")
+    ]
+    return (
         in_period
         .groupby(["project_id", "work_package_id"], as_index=False)["cost_amount_usd"]
         .sum()
         .rename(columns={"cost_amount_usd": "ac_usd"})
     )
-    return ac
 
 
-def _compute_ev(row) -> float:
-    """EV based on ev_technique: percent_complete (linear) or 0_100."""
+def _get_march_progress(progress):
+    return (
+        progress[progress["reporting_period"] == "2024-03"]
+        .sort_values("submitted_date", ascending=False)
+        .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+        [["project_id", "work_package_id", "percent_complete"]]
+    )
+
+
+def _compute_ev(row):
     if row["ev_technique"] == "0_100":
-        return float(row["bac_usd"]) if row["completion_status"] == "complete" else 0.0
-    else:
-        return (float(row["percent_complete"]) / 100.0) * float(row["bac_usd"])
+        comp_date = pd.to_datetime(row["completion_date"])
+        if pd.notna(comp_date) and comp_date <= REPORTING_DATE:
+            return float(row["bac_usd"])
+        return 0.0
+    return (float(row["percent_complete"]) / 100.0) * float(row["bac_usd"])
+
+
+def _get_march_pv(pv_schedule):
+    pv = pv_schedule.copy()
+    pv["schedule_effective_from"] = pd.to_datetime(pv["schedule_effective_from"])
+    return (
+        pv[pv["reporting_period"] == "2024-03"]
+        .sort_values("schedule_effective_from", ascending=False)
+        .drop_duplicates(subset=["project_id", "work_package_id"], keep="first")
+        [["project_id", "work_package_id", "cumulative_pv_usd"]]
+        .rename(columns={"cumulative_pv_usd": "pv_usd"})
+    )
 
 
 def _build_expected(work_packages, baselines, actuals, progress, pv_schedule):
-    bac_df = _get_applicable_baseline(baselines)
-    ac_df  = _compute_ac(actuals)
-
-    mar_progress = progress[progress["reporting_period"] == "2024-03"][
-        ["project_id", "work_package_id", "percent_complete"]
-    ]
-    mar_pv = pv_schedule[pv_schedule["reporting_period"] == "2024-03"][
-        ["project_id", "work_package_id", "cumulative_pv_usd"]
-    ].rename(columns={"cumulative_pv_usd": "pv_usd"})
+    bac_df  = _get_applicable_baseline(baselines)
+    ac_df   = _compute_ac(actuals)
+    prog_df = _get_march_progress(progress)
+    mar_pv  = _get_march_pv(pv_schedule)
 
     df = (
         work_packages[["project_id", "work_package_id", "work_package_name",
-                       "control_account_id", "ev_technique", "completion_status"]]
-        .merge(bac_df,        on=["project_id", "work_package_id"], how="left")
-        .merge(ac_df,         on=["project_id", "work_package_id"], how="left")
-        .merge(mar_progress,  on=["project_id", "work_package_id"], how="left")
-        .merge(mar_pv,        on=["project_id", "work_package_id"], how="left")
+                       "control_account_id", "ev_technique", "completion_status",
+                       "completion_date"]]
+        .merge(bac_df,   on=["project_id", "work_package_id"], how="left")
+        .merge(ac_df,    on=["project_id", "work_package_id"], how="left")
+        .merge(prog_df,  on=["project_id", "work_package_id"], how="left")
+        .merge(mar_pv,   on=["project_id", "work_package_id"], how="left")
     )
-    df["ac_usd"]          = df["ac_usd"].fillna(0.0)
+    df["ac_usd"]           = df["ac_usd"].fillna(0.0)
     df["percent_complete"] = df["percent_complete"].fillna(0.0)
-    df["pv_usd"]          = df["pv_usd"].fillna(0.0)
+    df["pv_usd"]           = df["pv_usd"].fillna(0.0)
+    df["completion_date"]  = pd.to_datetime(df["completion_date"])
 
     df["ev_usd"] = df.apply(_compute_ev, axis=1)
-
     df["cv_usd"] = df["ev_usd"] - df["ac_usd"]
     df["sv_usd"] = df["ev_usd"] - df["pv_usd"]
-    df["cpi"]    = df.apply(
+    df["cpi"] = df.apply(
         lambda r: round(r["ev_usd"] / r["ac_usd"], 4) if r["ac_usd"] > 0 else None, axis=1)
-    df["spi"]    = df.apply(
+    df["spi"] = df.apply(
         lambda r: round(r["ev_usd"] / r["pv_usd"], 4) if r["pv_usd"] > 0 else None, axis=1)
     df["eac_usd"] = df.apply(
         lambda r: round(r["bac_usd"] / r["cpi"], 2)
         if (r["cpi"] is not None and r["cpi"] > 0) else round(r["bac_usd"], 2), axis=1)
-
     for col in ["bac_usd", "pv_usd", "ev_usd", "ac_usd", "cv_usd", "sv_usd"]:
         df[col] = df[col].round(2)
-
     df["etc_usd"] = (df["eac_usd"] - df["ac_usd"]).round(2)
     df["vac_usd"] = (df["bac_usd"] - df["eac_usd"]).round(2)
-
-    df = df.sort_values(["project_id", "work_package_id"]).reset_index(drop=True)
-    return df
+    return df.sort_values(["project_id", "work_package_id"]).reset_index(drop=True)
 
 
 # ---------------------------------------------------------------------------
@@ -172,8 +163,7 @@ def _build_expected(work_packages, baselines, actuals, progress, pv_schedule):
 @pytest.fixture(scope="module")
 def raw_data():
     work_packages = pd.read_csv(DATA_DIR / "work_packages.csv")
-    baselines     = pd.read_csv(DATA_DIR / "baselines.csv",
-                                parse_dates=["baseline_effective_from"])
+    baselines     = pd.read_csv(DATA_DIR / "baselines.csv")
     actuals       = pd.read_csv(DATA_DIR / "actuals.csv")
     progress      = pd.read_csv(DATA_DIR / "progress_entries.csv")
     pv_schedule   = pd.read_csv(DATA_DIR / "planned_value_schedule.csv")
@@ -200,52 +190,40 @@ def agent_summary():
 
 
 # ---------------------------------------------------------------------------
-# Test 01 — Input sentinel
+# Test 01 — Input sentinels
 # ---------------------------------------------------------------------------
 
 def test_01_input_sentinels(raw_data):
-    """Verify input files were not tampered with and all trap signals are present."""
+    """Verify canonical inputs and all four trap signals are present."""
     wp, bl, ac, pr, pv = raw_data
+    assert len(wp) == 200
+    assert wp["project_id"].nunique() == 5
 
-    assert len(wp) == 200, f"work_packages.csv must have 200 rows, got {len(wp)}"
-    assert wp["project_id"].nunique() == 5, "Expected 5 projects"
-
-    # Trap 1 signal: WP-IDs repeat across projects
-    wp_id_project_counts = wp.groupby("work_package_id")["project_id"].nunique()
-    repeated = (wp_id_project_counts > 1).sum()
-    assert repeated == 40, (
-        f"Expected all 40 WP-IDs to appear in multiple projects (composite key trap), "
-        f"got {repeated}"
-    )
-
-    # Trap 2 signal: active baselines have NaT effective_to
     nat_count = bl["baseline_effective_to"].isna().sum()
-    assert nat_count == 200, (
-        f"baselines.csv must have exactly 200 rows with NaT baseline_effective_to "
-        f"(open-ended active baselines), got {nat_count}"
+    assert nat_count == 200, f"Expected 200 NaT baseline_effective_to, got {nat_count}"
+
+    dual_bl = (bl.groupby(["project_id", "work_package_id"]).size() > 1).sum()
+    assert dual_bl == 10, f"Trap 3: expected 10 dual-baseline WPs, got {dual_bl}"
+
+    dual_pv = (
+        pv.groupby(["project_id", "work_package_id", "reporting_period"]).size() > 1
+    ).sum()
+    assert dual_pv >= 10, (
+        f"Trap 2: expected >=10 WP-period combos with dual PV schedules, got {dual_pv}"
     )
 
-    # Trap 3 signal: 10 WPs have dual baseline rows
-    dual_count = (bl.groupby(["project_id", "work_package_id"]).size() > 1).sum()
-    assert dual_count == 10, (
-        f"baselines.csv must have exactly 10 dual-baseline work packages, got {dual_count}"
+    dual_prog = (
+        pr[pr["reporting_period"] == "2024-03"]
+        .groupby(["project_id", "work_package_id"]).size().gt(1).sum()
+    )
+    assert dual_prog >= 10, (
+        f"Trap 1: expected >=10 WPs with dual March progress entries, got {dual_prog}"
     )
 
-    # Trap 4 signal: March subcontract rows with April+ entry_date
-    ac_parsed = ac.copy()
-    ac_parsed["billing_period_date"] = pd.to_datetime(ac_parsed["billing_period_date"])
-    ac_parsed["entry_date"]          = pd.to_datetime(ac_parsed["entry_date"])
-    march_sub = ac_parsed[
-        (ac_parsed["cost_type"] == "subcontract") &
-        (ac_parsed["billing_period_date"] == pd.Timestamp("2024-03-01"))
-    ]
-    lagged = march_sub[march_sub["entry_date"] > pd.Timestamp("2024-03-31")]
-    assert len(lagged) >= 100, (
-        f"actuals.csv must contain at least 100 March subcontract rows with "
-        f"entry_date in April+ (billing lag trap), got {len(lagged)}"
+    commitment_count = (ac["transaction_type"] == "commitment").sum()
+    assert commitment_count >= 500, (
+        f"Trap 4: expected >=500 commitment rows in actuals, got {commitment_count}"
     )
-
-    assert len(pr) == 600, f"progress_entries.csv must have 600 rows, got {len(pr)}"
 
 
 # ---------------------------------------------------------------------------
@@ -253,7 +231,6 @@ def test_01_input_sentinels(raw_data):
 # ---------------------------------------------------------------------------
 
 def test_02_output_structure(agent_report, agent_summary):
-    """Both output files exist with correct schema and row count."""
     assert REPORT_PATH.exists(),  "evm_report.csv not found in /workspace"
     assert SUMMARY_PATH.exists(), "summary.json not found in /workspace"
     assert agent_report is not None
@@ -265,11 +242,8 @@ def test_02_output_structure(agent_report, agent_summary):
         "cv_usd", "sv_usd", "cpi", "spi", "eac_usd", "etc_usd", "vac_usd",
     ]
     for col in required_cols:
-        assert col in agent_report.columns, f"Missing column in evm_report.csv: {col}"
-
-    assert len(agent_report) == 200, (
-        f"evm_report.csv must have 200 rows (one per work package), got {len(agent_report)}"
-    )
+        assert col in agent_report.columns, f"Missing column: {col}"
+    assert len(agent_report) == 200
 
     required_keys = [
         "reporting_date", "total_bac_usd", "total_ev_usd", "total_ac_usd",
@@ -281,158 +255,167 @@ def test_02_output_structure(agent_report, agent_summary):
 
 
 # ---------------------------------------------------------------------------
-# Test 03 — [Trap 1] AC per project (phantom joins inflate AC)
+# Test 03 — [Trap 1] Confirmed percent_complete used, not preliminary
 # ---------------------------------------------------------------------------
 
-def test_03_trap1_ac_per_project(agent_report, expected):
+def test_03_trap1_confirmed_progress_used(agent_report, expected, raw_data):
     """
-    Trap 1 — Joining actuals on work_package_id alone creates phantom cross-project
-    cost matches, inflating AC by up to 5× per work package.
-
-    Spot-checks total ac_usd for the 3 projects with the most actuals rows.
-    A model with the correct (project_id, work_package_id) join key will match
-    ground truth; a model with a work_package_id-only join will be significantly
-    over by a factor approaching 5.
+    Trap 1 — 15 WPs have two progress entries for "2024-03": a preliminary
+    estimate (lower percent_complete, written FIRST in CSV, submitted_date 5
+    days earlier) and the confirmed final report (written SECOND).  A naive
+    merge gives 215 rows; drop_duplicates(keep='first') silently picks the
+    preliminary value.  Correct: sort by submitted_date descending before
+    deduplicating so the confirmed (most recently submitted) value is used.
     """
-    exp_by_project = expected.groupby("project_id")["ac_usd"].sum()
-    spot = exp_by_project.nlargest(3).index.tolist()
+    _, _, _, progress, _ = raw_data
+    mar = progress[progress["reporting_period"] == "2024-03"]
+    dual_mask = mar.groupby(["project_id", "work_package_id"])["entry_id"].transform("count") > 1
+    dual_wps  = mar[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
 
     failures = []
-    for pid in spot:
-        exp_ac = float(exp_by_project[pid])
-        act_ac = float(
-            agent_report[agent_report["project_id"] == pid]["ac_usd"].sum()
+    for _, key in dual_wps.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
+
+        exp_pct = float(
+            expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
+            ["percent_complete"].iloc[0]
         )
-        if not math.isclose(act_ac, exp_ac, rel_tol=0.02):
-            failures.append(
-                f"{pid}: total ac_usd {act_ac:,.2f} != expected {exp_ac:,.2f} "
-                f"(ratio {act_ac/max(exp_ac,1):.2f}×). "
-                "Join actuals using (project_id, work_package_id) — "
-                "work_package_id is not globally unique."
-            )
-    assert not failures, "\n".join(failures)
+        prelim_rows = mar[
+            (mar["project_id"] == pid) & (mar["work_package_id"] == wp_id) &
+            (mar["report_type"] == "preliminary")
+        ]
+        prelim_pct = float(prelim_rows["percent_complete"].iloc[0]) if not prelim_rows.empty else None
 
-
-# ---------------------------------------------------------------------------
-# Test 04 — [Trap 1] EV per project (phantom BAC matches inflate EV)
-# ---------------------------------------------------------------------------
-
-def test_04_trap1_ev_per_project(agent_report, expected):
-    """
-    Trap 1 — A work_package_id-only join to baselines creates phantom BAC matches
-    from other projects, inflating EV by up to 5× per work package.
-
-    Spot-checks total ev_usd for the same 3 projects.
-    """
-    exp_by_project = expected.groupby("project_id")["ev_usd"].sum()
-    spot = exp_by_project.nlargest(3).index.tolist()
-
-    failures = []
-    for pid in spot:
-        exp_ev = float(exp_by_project[pid])
-        act_ev = float(
-            agent_report[agent_report["project_id"] == pid]["ev_usd"].sum()
-        )
-        if not math.isclose(act_ev, exp_ev, rel_tol=0.02):
-            failures.append(
-                f"{pid}: total ev_usd {act_ev:,.2f} != expected {exp_ev:,.2f}. "
-                "EV depends on BAC from the correct project-scoped baseline. "
-                "Use (project_id, work_package_id) as the join key."
-            )
-    assert not failures, "\n".join(failures)
-
-
-# ---------------------------------------------------------------------------
-# Test 05 — [Trap 2] Portfolio EV must not collapse
-# ---------------------------------------------------------------------------
-
-def test_05_trap2_portfolio_ev_not_zero(agent_summary, expected):
-    """
-    Trap 2 — If NaT baseline_effective_to rows are silently excluded by a
-    pandas date-range filter, all 200 work packages have no matched BAC and
-    EV collapses to zero or NaN across the entire portfolio.
-
-    Verifies that total_ev_usd is within 5% of the correct ground truth.
-    """
-    exp_total_ev = round(float(expected["ev_usd"].sum()), 2)
-    act_total_ev = float(agent_summary["total_ev_usd"])
-
-    assert act_total_ev > exp_total_ev * 0.10, (
-        f"total_ev_usd {act_total_ev:,.2f} is implausibly low "
-        f"(expected ~{exp_total_ev:,.2f}). "
-        "NaT in baseline_effective_to must be treated as 'no expiry', not excluded. "
-        "The pandas comparison `reporting_date <= NaT` returns False — "
-        "handle NaT explicitly before applying the date-range filter."
-    )
-    assert math.isclose(act_total_ev, exp_total_ev, rel_tol=0.05), (
-        f"total_ev_usd {act_total_ev:,.2f} != expected {exp_total_ev:,.2f}"
-    )
-
-
-# ---------------------------------------------------------------------------
-# Test 06 — [Trap 2] BAC accuracy for single-baseline work packages
-# ---------------------------------------------------------------------------
-
-def test_06_trap2_bac_single_baseline_wps(agent_report, expected, raw_data):
-    """
-    Trap 2 — Single-baseline work packages have their active baseline_effective_to
-    set to NaT. A pandas date filter of the form
-    `reporting_date <= NaT` returns False, silently dropping these rows and
-    leaving the work package with no BAC → ev_usd = 0 or NaN.
-
-    Spot-checks bac_usd for 5 single-baseline work packages (those NOT in the
-    dual-baseline set).
-    """
-    _, bl, _, _, _ = raw_data
-    dual_keys = set(
-        zip(*[bl.groupby(["project_id", "work_package_id"]).filter(lambda g: len(g) > 1)
-              [col].tolist() for col in ["project_id", "work_package_id"]])
-    )
-    single_exp = expected[
-        ~expected.apply(lambda r: (r["project_id"], r["work_package_id"]) in dual_keys, axis=1)
-    ].head(5)
-
-    failures = []
-    for _, row in single_exp.iterrows():
-        pid, wp_id = row["project_id"], row["work_package_id"]
-        exp_bac = float(row["bac_usd"])
-        act_rows = agent_report[
+        act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
-        if act_rows.empty:
-            failures.append(f"({pid}, {wp_id}): not found in evm_report.csv")
+        if act.empty:
+            failures.append(f"({pid}, {wp_id}): not found in agent report")
             continue
-        act_bac = float(act_rows["bac_usd"].iloc[0])
-        if act_bac <= 0 or pd.isna(act_bac):
+
+        act_pct = float(act["percent_complete"].iloc[0])
+        if prelim_pct is not None and math.isclose(act_pct, prelim_pct, abs_tol=0.5):
             failures.append(
-                f"({pid}, {wp_id}): bac_usd = {act_bac}, expected {exp_bac:,.2f}. "
-                "Open-ended baselines (NaT baseline_effective_to) must not be excluded."
+                f"({pid}, {wp_id}): percent_complete={act_pct} matches preliminary "
+                f"({prelim_pct}); expected confirmed value {exp_pct}. "
+                "Sort by submitted_date descending before drop_duplicates."
             )
-        elif not math.isclose(act_bac, exp_bac, rel_tol=0.01):
+        elif not math.isclose(act_pct, exp_pct, abs_tol=0.5):
             failures.append(
-                f"({pid}, {wp_id}): bac_usd {act_bac:,.2f} != expected {exp_bac:,.2f}"
+                f"({pid}, {wp_id}): percent_complete={act_pct}, expected {exp_pct}."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 07 — [Trap 3] BAC for dual-baseline work packages
+# Test 04 — [Trap 1] Wrong progress cascades into EV
+# ---------------------------------------------------------------------------
+
+def test_04_trap1_ev_uses_confirmed_progress(agent_report, expected, raw_data):
+    """
+    Trap 1 — Using the preliminary (lower) percent_complete understates EV for
+    affected WPs.  Verify ev_usd matches the oracle for all dual-progress WPs.
+    """
+    _, _, _, progress, _ = raw_data
+    mar = progress[progress["reporting_period"] == "2024-03"]
+    dual_mask = mar.groupby(["project_id", "work_package_id"])["entry_id"].transform("count") > 1
+    dual_wps  = mar[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
+
+    failures = []
+    for _, key in dual_wps.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
+        exp_ev = float(
+            expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
+            ["ev_usd"].iloc[0]
+        )
+        act = agent_report[
+            (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
+        ]
+        if act.empty:
+            continue
+        act_ev = float(act["ev_usd"].iloc[0])
+        if not math.isclose(act_ev, exp_ev, rel_tol=0.03):
+            failures.append(
+                f"({pid}, {wp_id}): ev_usd={act_ev:,.2f}, expected {exp_ev:,.2f}. "
+                "Verify confirmed percent_complete is used."
+            )
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 05 — [Trap 2/3] Portfolio EV must not collapse to near zero
+# ---------------------------------------------------------------------------
+
+def test_05_portfolio_ev_not_zero(agent_summary, expected):
+    """Baseline NaT effective_to must be treated as no expiry (not excluded)."""
+    exp_ev = round(float(expected["ev_usd"].sum()), 2)
+    act_ev = float(agent_summary["total_ev_usd"])
+    assert act_ev > exp_ev * 0.10, (
+        f"total_ev_usd {act_ev:,.2f} implausibly low (~{exp_ev:,.2f} expected). "
+        "pandas `reporting_date <= NaT` returns False — handle NaT explicitly."
+    )
+    assert math.isclose(act_ev, exp_ev, rel_tol=0.05), (
+        f"total_ev_usd {act_ev:,.2f} != expected {exp_ev:,.2f}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 06 — [Trap 2] Dual-baseline WPs must use the revised PV schedule
+# ---------------------------------------------------------------------------
+
+def test_06_trap2_pv_dual_schedule_revised_used(agent_report, expected, raw_data):
+    """
+    Trap 2 — The 10 re-baselined WPs have two PV schedule rows per reporting
+    period: original schedule (lower cumulative_pv_usd, FIRST in CSV) and revised
+    schedule (higher cumulative_pv_usd, SECOND in CSV).  A naive merge creates
+    phantom duplicate rows; drop_duplicates(keep='first') silently picks the
+    original (wrong) PV.  Correct: sort by schedule_effective_from descending,
+    then dedup on (project_id, work_package_id), keep='first'.
+    """
+    _, bl, _, _, pv = raw_data
+    dual_mask = bl.groupby(["project_id", "work_package_id"])["baseline_id"].transform("count") > 1
+    dual_wps  = bl[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
+
+    failures = []
+    for _, key in dual_wps.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
+        exp_pv = float(
+            expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
+            ["pv_usd"].iloc[0]
+        )
+        orig_rows = pv[
+            (pv["project_id"] == pid) & (pv["work_package_id"] == wp_id) &
+            (pv["reporting_period"] == "2024-03") & (pv["schedule_revision"] == "original")
+        ]
+        orig_pv = float(orig_rows["cumulative_pv_usd"].iloc[0]) if not orig_rows.empty else None
+
+        act = agent_report[
+            (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
+        ]
+        if act.empty:
+            failures.append(f"({pid}, {wp_id}): not found")
+            continue
+        act_pv = float(act["pv_usd"].iloc[0])
+        if orig_pv is not None and math.isclose(act_pv, orig_pv, rel_tol=0.01):
+            failures.append(
+                f"({pid}, {wp_id}): pv_usd={act_pv:,.2f} matches original schedule "
+                f"({orig_pv:,.2f}); expected revised schedule PV {exp_pv:,.2f}. "
+                "Sort by schedule_effective_from descending before deduplicating."
+            )
+        elif not math.isclose(act_pv, exp_pv, rel_tol=0.01):
+            failures.append(
+                f"({pid}, {wp_id}): pv_usd={act_pv:,.2f}, expected {exp_pv:,.2f}."
+            )
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 07 — [Trap 3] Dual-baseline WPs use the revised (higher) BAC
 # ---------------------------------------------------------------------------
 
 def test_07_trap3_bac_dual_baseline_wps(agent_report, expected, raw_data):
-    """
-    Trap 3 — 10 work packages have two baseline rows. The original (lower-BAC)
-    row appears first in baselines.csv; the revised (higher-BAC) row appears
-    second. A model iterating in CSV order without sorting by
-    baseline_effective_from picks the original lower BAC.
-
-    Verifies bac_usd for all 10 re-baselined work packages matches the revised
-    (higher) BAC from the most recently approved baseline.
-    """
+    """Trap 3 — Original lower-BAC row is written first; revised row must win."""
     _, bl, _, _, _ = raw_data
-    bl["baseline_effective_from"] = pd.to_datetime(bl["baseline_effective_from"])
-
-    # Identify the 10 dual-baseline WP keys
     dual_mask = bl.groupby(["project_id", "work_package_id"])["baseline_id"].transform("count") > 1
     dual_wps  = bl[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
 
@@ -443,162 +426,140 @@ def test_07_trap3_bac_dual_baseline_wps(agent_report, expected, raw_data):
             expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
             ["bac_usd"].iloc[0]
         )
-        act_rows = agent_report[
+        act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
-        if act_rows.empty:
-            failures.append(f"({pid}, {wp_id}): not found in evm_report.csv")
+        if act.empty:
+            failures.append(f"({pid}, {wp_id}): not found")
             continue
-        act_bac = float(act_rows["bac_usd"].iloc[0])
+        act_bac = float(act["bac_usd"].iloc[0])
         if not math.isclose(act_bac, exp_bac, rel_tol=0.01):
             failures.append(
-                f"({pid}, {wp_id}): bac_usd {act_bac:,.2f} != expected {exp_bac:,.2f}. "
-                "When multiple baselines are valid, apply the one with the most recent "
-                "baseline_effective_from — the revised baseline supersedes the original."
+                f"({pid}, {wp_id}): bac_usd {act_bac:,.2f} != expected {exp_bac:,.2f}."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 08 — [Trap 3] CPI and EAC cascade for dual-baseline WPs
+# Test 08 — [Trap 3] Wrong BAC cascades into EAC
 # ---------------------------------------------------------------------------
 
-def test_08_trap3_cpi_eac_cascade(agent_report, expected, raw_data):
-    """
-    Trap 3 — A wrong (lower) BAC from the original baseline propagates into EV,
-    CPI (= EV/AC), and EAC (= BAC/CPI), making the work package appear more
-    efficient than it is and understating the forecast final cost.
-
-    Spot-checks cpi and eac_usd for the 5 dual-baseline WPs with the largest
-    BAC revision (where the error is most visible).
-    """
+def test_08_trap3_eac_cascade(agent_report, expected, raw_data):
+    """Trap 3 — Wrong (lower) BAC cascades into wrong EV -> wrong CPI and EAC."""
     _, bl, _, _, _ = raw_data
-    bl["baseline_effective_from"] = pd.to_datetime(bl["baseline_effective_from"])
-
     dual_mask = bl.groupby(["project_id", "work_package_id"])["baseline_id"].transform("count") > 1
     dual_wps  = bl[dual_mask][["project_id", "work_package_id"]].drop_duplicates()
-
-    exp_sub = expected.merge(dual_wps, on=["project_id", "work_package_id"])
-    spot = exp_sub.nlargest(5, "bac_usd")[["project_id", "work_package_id"]].values.tolist()
+    exp_sub   = expected.merge(dual_wps, on=["project_id", "work_package_id"])
+    spot      = exp_sub.nlargest(5, "bac_usd")[["project_id", "work_package_id"]].values.tolist()
 
     failures = []
     for pid, wp_id in spot:
-        exp_row = expected[
-            (expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)
-        ].iloc[0]
-        act_rows = agent_report[
+        exp_eac = float(
+            expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
+            ["eac_usd"].iloc[0]
+        )
+        act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
-        if act_rows.empty:
+        if act.empty:
             continue
-        act_row = act_rows.iloc[0]
-
-        exp_cpi = exp_row["cpi"]
-        if exp_cpi is not None and not pd.isna(exp_cpi):
-            act_cpi_raw = act_row["cpi"]
-            act_cpi = float(act_cpi_raw) if not pd.isna(act_cpi_raw) else None
-            if act_cpi is not None and not math.isclose(act_cpi, float(exp_cpi), abs_tol=0.05):
-                failures.append(
-                    f"({pid}, {wp_id}): cpi {act_cpi:.4f} != expected {float(exp_cpi):.4f}. "
-                    "Wrong BAC cascades into EV → wrong CPI."
-                )
-
-        exp_eac = float(exp_row["eac_usd"])
-        act_eac = float(act_row["eac_usd"])
+        act_eac = float(act["eac_usd"].iloc[0])
         if not math.isclose(act_eac, exp_eac, rel_tol=0.05):
             failures.append(
-                f"({pid}, {wp_id}): eac_usd {act_eac:,.2f} != expected {exp_eac:,.2f}. "
-                "Wrong BAC (from original baseline) cascades into EAC = BAC / CPI."
+                f"({pid}, {wp_id}): eac_usd {act_eac:,.2f} != expected {exp_eac:,.2f}."
             )
-
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 09 — [Trap 4] AC for subcontract-heavy work packages
+# Test 09 — [Trap 4] AC excludes commitment rows
 # ---------------------------------------------------------------------------
 
-def test_09_trap4_ac_subcontract_billing_lag(agent_report, expected, raw_data):
+def test_09_trap4_ac_excludes_commitments(agent_report, expected, raw_data):
     """
-    Trap 4 — ~40% of March subcontract cost rows have entry_date in April or
-    May 2024. A model filtering actuals on entry_date <= 2024-03-31 misses
-    these rows, understating Q1 AC for subcontract-heavy work packages.
-
-    Identifies the 5 work packages with the most lagged March subcontract rows
-    and verifies their ac_usd matches the ground truth (which uses billing_period_date).
+    Trap 4 — actuals.csv carries transaction_type: "actual" rows are incurred
+    costs (include in AC); "commitment" rows are PO obligations not yet invoiced
+    (exclude from AC).  For WPs where commitment rows carry a non-trivial amount,
+    the agent's ac_usd must match the oracle (which excludes commitments), not
+    the inflated total that includes them.
     """
     _, _, actuals, _, _ = raw_data
-    actuals = actuals.copy()
-    actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
-    actuals["entry_date"]          = pd.to_datetime(actuals["entry_date"])
+    ac = actuals.copy()
+    ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
+    in_period = ac[ac["billing_period_date"] <= REPORTING_DATE]
 
-    lagged = actuals[
-        (actuals["cost_type"] == "subcontract") &
-        (actuals["billing_period_date"] == pd.Timestamp("2024-03-01")) &
-        (actuals["entry_date"] > pd.Timestamp("2024-03-31"))
-    ]
-    lagged_cost = (
-        lagged
+    commitment_by_wp = (
+        in_period[in_period["transaction_type"] == "commitment"]
         .groupby(["project_id", "work_package_id"])["cost_amount_usd"]
         .sum()
-        .sort_values(ascending=False)
+        .reset_index()
+        .rename(columns={"cost_amount_usd": "commitment_usd"})
     )
-    spot = lagged_cost.index[:5].tolist()
+    # Focus on WPs where the commitment load is material (>$5k)
+    material = commitment_by_wp[commitment_by_wp["commitment_usd"] > 5_000].head(15)
 
     failures = []
-    for pid, wp_id in spot:
-        exp_ac = float(
+    for _, key in material.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
+        exp_ac  = float(
             expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
             ["ac_usd"].iloc[0]
         )
-        act_rows = agent_report[
+        inflated_ac = exp_ac + float(key["commitment_usd"])
+
+        act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
         ]
-        if act_rows.empty:
-            failures.append(f"({pid}, {wp_id}): not found in evm_report.csv")
+        if act.empty:
+            failures.append(f"({pid}, {wp_id}): not found")
             continue
-        act_ac = float(act_rows["ac_usd"].iloc[0])
-        missed = float(lagged_cost.get((pid, wp_id), 0))
-        if not math.isclose(act_ac, exp_ac, rel_tol=0.02):
+        act_ac = float(act["ac_usd"].iloc[0])
+        if math.isclose(act_ac, inflated_ac, rel_tol=0.02):
             failures.append(
-                f"({pid}, {wp_id}): ac_usd {act_ac:,.2f} != expected {exp_ac:,.2f} "
-                f"(diff {act_ac - exp_ac:+,.2f}, lagged subcontract cost: {missed:,.2f}). "
-                "Filter actuals on billing_period_date, not entry_date. "
-                "Subcontract invoices are posted 30–60 days after the billing period."
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f} matches inflated total "
+                f"(incurred {exp_ac:,.2f} + commitments {key['commitment_usd']:,.2f}). "
+                "Exclude transaction_type='commitment' rows from AC."
+            )
+        elif not math.isclose(act_ac, exp_ac, rel_tol=0.03):
+            failures.append(
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f}, expected {exp_ac:,.2f}."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 10 — [Trap 4 + All] Portfolio AC aggregate
+# Test 10 — [Trap 4] Portfolio CPI distorted by included commitments
 # ---------------------------------------------------------------------------
 
-def test_10_portfolio_ac_aggregate(agent_summary, expected):
+def test_10_trap4_portfolio_cpi_not_distorted(agent_summary, expected, raw_data):
     """
-    Portfolio total_ac_usd in summary.json must include all costs where
-    billing_period_date <= 2024-03-31, regardless of entry_date.
-
-    This test is sensitive to all four traps:
-    - Trap 1 phantom joins inflate AC
-    - Trap 4 billing lag omission deflates AC
-    - Traps 2 & 3 affect EV and CPI but not AC directly; portfolio_cpi is
-      also checked here as a compound metric.
+    Trap 4 — Including commitment rows inflates total_ac_usd portfolio-wide,
+    understating portfolio CPI.
     """
-    exp_total_ac = round(float(expected["ac_usd"].sum()), 2)
-    act_total_ac = float(agent_summary["total_ac_usd"])
+    _, _, actuals, _, _ = raw_data
+    ac = actuals.copy()
+    ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
+    in_period = ac[ac["billing_period_date"] <= REPORTING_DATE]
 
-    assert math.isclose(act_total_ac, exp_total_ac, rel_tol=0.02), (
-        f"total_ac_usd {act_total_ac:,.2f} != expected {exp_total_ac:,.2f} "
-        f"(diff {act_total_ac - exp_total_ac:+,.2f}). "
-        "Use billing_period_date (not entry_date) for period filtering, and "
-        "(project_id, work_package_id) as the join key."
+    total_commitments = float(
+        in_period[in_period["transaction_type"] == "commitment"]["cost_amount_usd"].sum()
+    )
+    assert total_commitments > 500_000, (
+        f"Total commitment amount {total_commitments:,.2f} too small — trap may be missing."
     )
 
-    exp_ev = round(float(expected["ev_usd"].sum()), 2)
-    exp_cpi = round(exp_ev / exp_total_ac, 4) if exp_total_ac > 0 else 0.0
+    exp_ac  = round(float(expected["ac_usd"].sum()), 2)
+    exp_ev  = round(float(expected["ev_usd"].sum()), 2)
+    exp_cpi = round(exp_ev / exp_ac, 4) if exp_ac > 0 else 0.0
+
+    act_ac  = float(agent_summary["total_ac_usd"])
     act_cpi = float(agent_summary["portfolio_cpi"])
 
+    assert math.isclose(act_ac, exp_ac, rel_tol=0.03), (
+        f"total_ac_usd {act_ac:,.2f} != expected {exp_ac:,.2f} "
+        f"(portfolio commitments total {total_commitments:,.2f}). "
+        "Exclude transaction_type='commitment' rows from AC."
+    )
     assert math.isclose(act_cpi, exp_cpi, abs_tol=0.05), (
-        f"portfolio_cpi {act_cpi:.4f} != expected {exp_cpi:.4f}. "
-        "CPI = total_ev / total_ac; errors in EV (Traps 2, 3) or AC (Traps 1, 4) both affect this."
+        f"portfolio_cpi {act_cpi:.4f} != expected {exp_cpi:.4f}."
     )
