@@ -30,21 +30,54 @@ def _collision_facility_ids():
     return set(counts[counts > 1].index)
 
 
+def _reacquired_pairs():
+    """(business_unit_id, facility_id) pairs with two facilities.csv rows —
+    divested then reacquired within FY2024."""
+    facilities = pd.read_csv(DATA_DIR / "facilities.csv")
+    counts = facilities.groupby(["business_unit_id", "facility_id"]).size()
+    return set(counts[counts > 1].index)
+
+
+def _restatement_affected_keys():
+    """(business_unit_id, facility_id, quarter) triples containing at least
+    one emission_restatement row, scoped to ownership windows."""
+    facilities = pd.read_csv(
+        DATA_DIR / "facilities.csv",
+        parse_dates=["ownership_start", "ownership_end"],
+    )
+    ledger = pd.read_csv(DATA_DIR / "emissions_ledger.csv", parse_dates=["reporting_date"])
+    merged = ledger.merge(
+        facilities[["business_unit_id", "facility_id", "ownership_start", "ownership_end"]],
+        on=["business_unit_id", "facility_id"], how="inner",
+    )
+    in_window = (
+        (merged["reporting_date"] >= merged["ownership_start"]) &
+        (merged["ownership_end"].isna() | (merged["reporting_date"] <= merged["ownership_end"]))
+    )
+    scoped = merged[in_window].copy()
+    scoped["quarter"] = "2024-Q" + ((scoped["reporting_date"].dt.month - 1) // 3 + 1).astype(str)
+    restated = scoped[scoped["transaction_type"] == "emission_restatement"]
+    return set(zip(restated["business_unit_id"], restated["facility_id"], restated["quarter"]))
+
+
 COLLISION_FACILITY_IDS = _collision_facility_ids()
+REACQUIRED_PAIRS = _reacquired_pairs()
+RESTATEMENT_AFFECTED_KEYS = _restatement_affected_keys()
 
 
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
     """Sentinel: exact row counts, NaT ownership_end count, facility_id
-    collision count, and offset/REC sign convention."""
+    collision count, reacquired-pair count, restatement linkage integrity,
+    and offset/REC/restatement sign conventions."""
     bu  = pd.read_csv(DATA_DIR / "business_units.csv")
     fac = pd.read_csv(DATA_DIR / "facilities.csv")
     led = pd.read_csv(DATA_DIR / "emissions_ledger.csv")
 
     assert len(bu) == 12, "business_units.csv row count must not be modified."
-    assert len(fac) == 132, "facilities.csv row count must not be modified."
-    assert len(led) == 11_015, "emissions_ledger.csv row count must not be modified."
+    assert len(fac) == 144, "facilities.csv row count must not be modified."
+    assert len(led) == 12_977, "emissions_ledger.csv row count must not be modified."
 
     nat_count = fac["ownership_end"].isna().sum()
     assert nat_count == 112, \
@@ -55,16 +88,34 @@ def test_case_01_input_data_not_tampered():
     assert n_collisions == 15, \
         f"Expected 15 facility_id values reused across business units, got {n_collisions}."
 
+    reacquired_counts = fac.groupby(["business_unit_id", "facility_id"]).size()
+    n_reacquired = (reacquired_counts > 1).sum()
+    assert n_reacquired == 12, \
+        f"Expected 12 (business_unit_id, facility_id) pairs with two ownership-window rows, got {n_reacquired}."
+
     offset_rec = led[led["transaction_type"].isin(
         ["purchased_offset", "renewable_energy_certificate"])]
-    assert len(offset_rec) > 400, \
-        f"Expected >400 offset/REC ledger rows, got {len(offset_rec)}."
+    assert len(offset_rec) == 533, \
+        f"Expected 533 offset/REC ledger rows, got {len(offset_rec)}."
     assert (offset_rec["quantity_tco2e"] < 0).all(), \
         "purchased_offset/renewable_energy_certificate rows must carry negative quantity_tco2e."
 
     verified = led[led["transaction_type"] == "verified_emission"]
     assert (verified["quantity_tco2e"] > 0).all(), \
         "verified_emission rows must carry positive quantity_tco2e."
+
+    restatements = led[led["transaction_type"] == "emission_restatement"]
+    assert len(restatements) == 936, \
+        f"Expected 936 emission_restatement ledger rows, got {len(restatements)}."
+    assert (restatements["quantity_tco2e"] > 0).all(), \
+        "emission_restatement rows must carry positive quantity_tco2e."
+    assert restatements["original_entry_id"].notna().all(), \
+        "Every emission_restatement row must reference an original_entry_id."
+    non_restatements = led[led["transaction_type"] != "emission_restatement"]
+    assert non_restatements["original_entry_id"].isna().all(), \
+        "Only emission_restatement rows may carry a non-null original_entry_id."
+    assert set(restatements["original_entry_id"]).issubset(set(verified["entry_id"])), \
+        "Every emission_restatement.original_entry_id must reference a real verified_emission entry_id."
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -76,7 +127,7 @@ def test_case_02_report_exists_and_shape():
                 "gross_scope1_tco2e", "gross_scope2_tco2e", "total_gross_tco2e"}
     missing = required - set(df.columns)
     assert not missing, f"Missing columns: {missing}"
-    assert len(df) >= 400, f"Expected at least 400 rows, got {len(df)}."
+    assert len(df) >= 350, f"Expected at least 350 rows, got {len(df)}."
 
 
 def test_case_03_report_sort_order():
@@ -112,7 +163,13 @@ def ground_truth():
     scoped = merged[in_window].copy()
     scoped["quarter"] = "2024-Q" + ((scoped["reporting_date"].dt.month - 1) // 3 + 1).astype(str)
 
-    gross = scoped[scoped["transaction_type"] == "verified_emission"]
+    # Restated entries: the correction supersedes the stale original.
+    restated_ids = set(
+        scoped.loc[scoped["transaction_type"] == "emission_restatement", "original_entry_id"].dropna()
+    )
+    is_verified = scoped["transaction_type"] == "verified_emission"
+    is_restatement = scoped["transaction_type"] == "emission_restatement"
+    gross = scoped[(is_verified & ~scoped["entry_id"].isin(restated_ids)) | is_restatement]
     pivot = (
         gross.groupby(["business_unit_id", "facility_id", "quarter", "scope"])["quantity_tco2e"]
         .sum().unstack("scope").fillna(0.0)
@@ -130,10 +187,7 @@ def ground_truth():
 
     gross_total = float(round(report["total_gross_tco2e"].sum(), 2))
 
-    facility_count = int(
-        scoped[scoped["transaction_type"] == "verified_emission"]
-        .drop_duplicates(["business_unit_id", "facility_id"]).shape[0]
-    )
+    facility_count = int(report[["business_unit_id", "facility_id"]].drop_duplicates().shape[0])
 
     bu_totals = report.groupby("business_unit_id")["total_gross_tco2e"].sum()
     worst_bu = str(bu_totals.idxmax())
@@ -236,9 +290,64 @@ def test_case_08_composite_key_facility_rows(ground_truth):
         f"Only {close}/{total} colliding-facility rows within ±10% of ground truth."
 
 
-# ── Hard test 5: business-unit aggregate totals ───────────────────────────────
+# ── Hard test 5: multi-interval ownership (divested then reacquired) ─────────
 
-def test_case_09_business_unit_totals(ground_truth):
+def test_case_09_multi_interval_ownership(ground_truth):
+    """(business_unit_id, facility_id) pairs divested and later reacquired
+    within FY2024 carry two facilities.csv rows sharing the same composite
+    key. The quarter(s) in the gap between the two ownership windows must be
+    excluded; quarters covered by either window must be included. A naive
+    single-row lookup (e.g. deduplicating facilities.csv on the composite key
+    before joining) silently drops one window's quarters."""
+    report = pd.read_csv(REPORT_PATH)
+    gt = ground_truth["report"]
+
+    assert len(REACQUIRED_PAIRS) > 0, "No multi-interval facilities found in facilities.csv."
+
+    close, total = 0, 0
+    for bu, fac in REACQUIRED_PAIRS:
+        gt_quarters = set(gt[(gt["business_unit_id"] == bu) & (gt["facility_id"] == fac)]["quarter"])
+        got_quarters = set(report[(report["business_unit_id"] == bu) & (report["facility_id"] == fac)]["quarter"])
+        total += 1
+        if got_quarters == gt_quarters:
+            close += 1
+
+    assert close >= int(total * 0.7), \
+        f"Only {close}/{total} multi-interval facilities had the correct set of quarters included."
+
+
+# ── Hard test 6: restatement netting ──────────────────────────────────────────
+
+def test_case_10_restatement_netting(ground_truth):
+    """Facility-quarters containing a restated verified_emission entry must
+    reflect the corrected figure, not the stale original (and not both summed
+    together). ≥70% of affected (business_unit_id, facility_id, quarter) rows
+    must be within ±3% of ground truth."""
+    report = pd.read_csv(REPORT_PATH)
+    gt = ground_truth["report"]
+
+    assert len(RESTATEMENT_AFFECTED_KEYS) > 0, "No restatement-affected facility-quarter rows found."
+
+    gt_sub = gt.set_index(["business_unit_id", "facility_id", "quarter"])
+    got_sub = report.set_index(["business_unit_id", "facility_id", "quarter"])
+
+    close, total = 0, 0
+    for key in RESTATEMENT_AFFECTED_KEYS:
+        if key not in gt_sub.index:
+            continue
+        total += 1
+        exp = float(gt_sub.loc[key, "total_gross_tco2e"])
+        got = float(got_sub.loc[key, "total_gross_tco2e"]) if key in got_sub.index else 0.0
+        if math.isclose(got, exp, rel_tol=0.03):
+            close += 1
+
+    assert close >= int(total * 0.7), \
+        f"Only {close}/{total} restatement-affected facility-quarter rows within ±3% of ground truth."
+
+
+# ── Hard test 7: business-unit aggregate totals ───────────────────────────────
+
+def test_case_11_business_unit_totals(ground_truth):
     """≥90% of business units' aggregate gross emissions must be within ±2% of
     ground truth. Holistic check that fails if any trap is mishandled."""
     report = pd.read_csv(REPORT_PATH)
@@ -260,7 +369,7 @@ def test_case_09_business_unit_totals(ground_truth):
 
 # ── Final gate: summary scalars ───────────────────────────────────────────────
 
-def test_case_10_summary_scalars(ground_truth):
+def test_case_12_summary_scalars(ground_truth):
     """Company-wide gross emissions (±1%) and the highest-emitting business
     unit (exact) must match ground truth."""
     with open(SUMMARY_PATH) as f:

@@ -1,29 +1,41 @@
 """
 FY2024 ESG Performance Tracking Report.
 
-facility_id in facilities.csv is only unique within a business_unit_id — five
-facility codes are reused by two different business units each. Joining
-emissions_ledger.csv to facilities.csv on facility_id alone would create
-phantom cross-business-unit matches (row duplication, and ownership dates
-borrowed from the wrong business unit's facility). The join key must be
+facility_id in facilities.csv is only unique within a business_unit_id —
+several facility codes are reused by two different business units each.
+Joining emissions_ledger.csv to facilities.csv on facility_id alone would
+create phantom cross-business-unit matches (row duplication, and ownership
+dates borrowed from the wrong business unit's facility). The join key must be
 ["business_unit_id", "facility_id"].
+
+A subset of (business_unit_id, facility_id) pairs were divested early in
+FY2024 and reacquired later in the same year — they appear as TWO rows in
+facilities.csv sharing the same composite key, each with its own
+ownership_start/ownership_end. The join must NOT deduplicate facilities.csv
+on (business_unit_id, facility_id) before merging: keeping both rows and
+letting the ownership-window filter apply per row naturally unions the two
+windows and excludes the gap quarter between them.
 
 emissions_ledger.csv is a continuous facility-meter feed for all of FY2024,
 independent of who owned the facility when — it is not pre-scoped to any
-business unit's ownership window. facilities.csv separately carries
-ownership_start/ownership_end for each (business_unit_id, facility_id) pair;
-currently-owned facilities have an open-ended (NaT) ownership_end. Emissions
-attributable to a business unit must be restricted to ledger rows whose
-reporting_date falls within [ownership_start, ownership_end or open]. A plain
-`reporting_date <= ownership_end` comparison evaluates to False for every NaT
-row, so the NaT case must be handled explicitly
+business unit's ownership window. Emissions attributable to a business unit
+must be restricted to ledger rows whose reporting_date falls within
+[ownership_start, ownership_end or open]. A plain `reporting_date <=
+ownership_end` comparison evaluates to False for every NaT row, so the NaT
+case must be handled explicitly
 (`ownership_end.isna() | (reporting_date <= ownership_end)`).
 
-"Gross" Scope 1 / Scope 2 emissions (GHG Protocol terminology) means before
-any offsets or renewable energy certificates are netted in. transaction_type
-== "purchased_offset" / "renewable_energy_certificate" rows carry negative
-quantity_tco2e values; they must be excluded from the gross figure, not
-summed together with verified_emission rows.
+Some verified_emission entries are later corrected by a companion
+emission_restatement row that references the original entry via
+original_entry_id. The corrected figure supersedes the original for gross
+emissions purposes — the stale original must be dropped once a correction
+exists, and the two must never be summed together.
+
+"Gross" Scope 1 / Scope 2 emissions means before any offsets or renewable
+energy certificates are netted in. transaction_type == "purchased_offset" /
+"renewable_energy_certificate" rows carry negative quantity_tco2e values;
+they must be excluded from the gross figure, not summed together with
+verified_emission/emission_restatement rows.
 """
 
 import json
@@ -75,7 +87,14 @@ def build_report(scoped_ledger):
     df = scoped_ledger.copy()
     df["quarter"] = "2024-Q" + ((df["reporting_date"].dt.month - 1) // 3 + 1).astype(str)
 
-    gross = df[df["transaction_type"] == "verified_emission"].copy()
+    # Entries later corrected by a restatement must use the corrected figure,
+    # not the stale original — and never both.
+    restated_ids = set(
+        df.loc[df["transaction_type"] == "emission_restatement", "original_entry_id"].dropna()
+    )
+    is_verified = df["transaction_type"] == "verified_emission"
+    is_restatement = df["transaction_type"] == "emission_restatement"
+    gross = df[(is_verified & ~df["entry_id"].isin(restated_ids)) | is_restatement].copy()
     pivot = (
         gross.groupby(["business_unit_id", "facility_id", "quarter", "scope"])["quantity_tco2e"]
         .sum().unstack("scope").fillna(0.0)
@@ -108,9 +127,7 @@ def build_summary(scoped_ledger, report):
     offset_total = float(round(offsets["quantity_tco2e"].abs().sum(), 2))
 
     facility_count = int(
-        scoped_ledger[scoped_ledger["transaction_type"] == "verified_emission"]
-        .drop_duplicates(["business_unit_id", "facility_id"])
-        .shape[0]
+        report[["business_unit_id", "facility_id"]].drop_duplicates().shape[0]
     )
 
     bu_totals = report.groupby("business_unit_id")["total_gross_tco2e"].sum()
