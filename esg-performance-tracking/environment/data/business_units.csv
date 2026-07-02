@@ -1,0 +1,13 @@
+business_unit_id,business_unit_name,hq_country,industry_segment,parent_company_id
+BU-01,Meridian Industrial Group,United States,Industrial Manufacturing,HOLDCO-GLOBAL-01
+BU-02,Northgate Materials Corp,United States,Building Materials,HOLDCO-GLOBAL-01
+BU-03,Solvant Chemicals Ltd,Germany,Specialty Chemicals,HOLDCO-GLOBAL-01
+BU-04,Cascade Foods International,Canada,Food & Beverage,HOLDCO-GLOBAL-01
+BU-05,Ferroline Metals,Brazil,Metals & Mining,HOLDCO-GLOBAL-01
+BU-06,Vantex Logistics Group,Netherlands,Transportation & Logistics,HOLDCO-GLOBAL-01
+BU-07,Halewood Consumer Brands,United Kingdom,Consumer Packaged Goods,HOLDCO-GLOBAL-01
+BU-08,Corvane Pharmaceuticals,Switzerland,Pharmaceuticals,HOLDCO-GLOBAL-01
+BU-09,Ridgemont Textiles,India,Textiles & Apparel,HOLDCO-GLOBAL-01
+BU-10,Boreal Paper & Packaging,Sweden,Pulp & Paper,HOLDCO-GLOBAL-01
+BU-11,Altiplano Mining Corp,Chile,Metals & Mining,HOLDCO-GLOBAL-01
+BU-12,Sundance Energy Partners,Australia,Energy & Utilities,HOLDCO-GLOBAL-01
