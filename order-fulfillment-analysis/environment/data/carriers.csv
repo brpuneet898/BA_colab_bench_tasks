@@ -1,0 +1,21 @@
+carrier_id,carrier_name,service_level,on_time_pct_target,contact_email,contract_start_date
+CAR-01,Carrier 01 Logistics,Ground,0.9071,ops01@carrier01.example.com,2022-03-28
+CAR-02,Carrier 02 Logistics,Express,0.9407,ops02@carrier02.example.com,2022-09-14
+CAR-03,Carrier 03 Logistics,Ground,0.9768,ops03@carrier03.example.com,2018-07-08
+CAR-04,Carrier 04 Logistics,Freight,0.9522,ops04@carrier04.example.com,2022-03-03
+CAR-05,Carrier 05 Logistics,Express,0.9086,ops05@carrier05.example.com,2018-09-14
+CAR-06,Carrier 06 Logistics,Express,0.9705,ops06@carrier06.example.com,2020-01-12
+CAR-07,Carrier 07 Logistics,Freight,0.957,ops07@carrier07.example.com,2021-07-11
+CAR-08,Carrier 08 Logistics,Express,0.8795,ops08@carrier08.example.com,2020-06-05
+CAR-09,Carrier 09 Logistics,Ground,0.8583,ops09@carrier09.example.com,2021-01-14
+CAR-10,Carrier 10 Logistics,Freight,0.9321,ops10@carrier10.example.com,2022-07-14
+CAR-11,Carrier 11 Logistics,Ground,0.8961,ops11@carrier11.example.com,2022-02-25
+CAR-12,Carrier 12 Logistics,Ground,0.9661,ops12@carrier12.example.com,2023-04-26
+CAR-13,Carrier 13 Logistics,Freight,0.8753,ops13@carrier13.example.com,2022-04-06
+CAR-14,Carrier 14 Logistics,Express,0.8557,ops14@carrier14.example.com,2020-07-22
+CAR-15,Carrier 15 Logistics,Express,0.9388,ops15@carrier15.example.com,2018-11-05
+CAR-16,Carrier 16 Logistics,Freight,0.9758,ops16@carrier16.example.com,2022-01-29
+CAR-17,Carrier 17 Logistics,Express,0.8982,ops17@carrier17.example.com,2019-10-14
+CAR-18,Carrier 18 Logistics,Ground,0.8746,ops18@carrier18.example.com,2020-07-28
+CAR-19,Carrier 19 Logistics,Express,0.9118,ops19@carrier19.example.com,2018-09-17
+CAR-20,Carrier 20 Logistics,Ground,0.9371,ops20@carrier20.example.com,2019-03-30
