@@ -36,8 +36,8 @@ def test_case_01_input_data_not_tampered():
 
     assert len(orders) == 18_000, \
         f"orders.csv row count must not be modified (expected 18,000, got {len(orders)})."
-    assert len(order_lines) == 29_662, \
-        f"order_lines.csv row count must not be modified (expected 29,662, got {len(order_lines)})."
+    assert len(order_lines) == 31_737, \
+        f"order_lines.csv row count must not be modified (expected 31,737, got {len(order_lines)})."
     assert len(shipments) == 39_491, \
         f"shipments.csv row count must not be modified (expected 39,491, got {len(shipments)})."
 
@@ -52,6 +52,19 @@ def test_case_01_input_data_not_tampered():
         f"Expected >1,000 Return events, got {type_counts.get('Return', 0)}."
     assert type_counts.get("Cancellation", 0) > 500, \
         f"Expected >500 Cancellation events, got {type_counts.get('Cancellation', 0)}."
+
+
+def test_case_10_order_lines_amendment_sentinel():
+    """Sentinel: order_lines.csv contains amended (superseded + current) line pairs."""
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+
+    dup_pairs = order_lines.groupby(["order_id", "line_id"]).size()
+    assert (dup_pairs > 1).sum() > 1_500, \
+        (f"Expected >1,500 (order_id, line_id) pairs with more than one row in "
+         f"order_lines.csv, got {(dup_pairs > 1).sum()}. "
+         f"Amended lines must not be treated as one row per (order_id, line_id).")
+    assert order_lines["line_status"].value_counts().get("Superseded", 0) > 1_500, \
+        f"Expected >1,500 'Superseded' rows in order_lines.csv."
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -93,8 +106,13 @@ def test_case_04_summary_schema():
 def ground_truth():
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
-    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv", parse_dates=["created_at"])
     shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
+
+    # Amendments: (order_id, line_id) pairs with a superseded row must collapse
+    # to their single most-recent row (by created_at) before aggregating.
+    current_idx = order_lines.groupby(["order_id", "line_id"])["created_at"].idxmax()
+    order_lines = order_lines.loc[current_idx].reset_index(drop=True)
 
     # Scope: Q1 2024 orders, tagged with fulfillment region via assigned_warehouse_id
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
@@ -139,11 +157,13 @@ def ground_truth():
     }
 
 
-# ── Hard test 1: quantity ordered (basic scope, no trap contamination) ────────
+# ── Hard test 1: quantity ordered (amendment resolution, no other trap) ───────
 
 def test_case_05_total_quantity_ordered_exact(ground_truth):
-    """quantity_ordered depends only on Q1 scoping and warehouse->region mapping,
-    not on either trap; must match exactly."""
+    """quantity_ordered depends only on Q1 scoping, warehouse->region mapping,
+    and resolving amended order lines to their current row; must match exactly.
+    Summing quantity_ordered without resolving amendments double-counts every
+    amended line and overstates this figure."""
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     assert s["total_quantity_ordered"] == ground_truth["total_quantity_ordered"], \
@@ -214,3 +234,55 @@ def test_case_09_best_worst_region(ground_truth):
     assert s["worst_performing_region"] == ground_truth["worst_performing_region"], \
         (f"worst_performing_region: got {s['worst_performing_region']!r}, "
          f"expected {ground_truth['worst_performing_region']!r}")
+
+
+# ── Hard test 5: amendment resolution — per-region quantity ordered ───────────
+
+def test_case_11_region_quantity_ordered_exact(ground_truth):
+    """Each region's quantity_ordered must match exactly, not just the total.
+
+    A partial or region-blind amendment fix could still land close on the
+    overall total by coincidence; checking every region individually closes
+    that gap.
+    """
+    report = pd.read_csv(REPORT_PATH).set_index("region")
+    gt = ground_truth["report"]
+    for region in gt.index:
+        assert region in report.index, f"Missing region '{region}' in report."
+        exp = int(gt.loc[region, "quantity_ordered"])
+        got = int(report.loc[region, "quantity_ordered"])
+        assert got == exp, \
+            f"quantity_ordered for region {region}: got {got}, expected {exp}."
+
+
+# ── Hard test 6: amendment resolution — rejects the double-counted total ──────
+
+@pytest.fixture(scope="module")
+def naive_total_ordered():
+    """quantity_ordered if every order_lines.csv row is summed as-is, without
+    resolving amended (order_id, line_id) pairs to their current row."""
+    warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
+    orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+
+    q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
+    q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
+                                 left_on="assigned_warehouse_id", right_on="warehouse_id")
+    scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
+    return int(scoped["quantity_ordered"].sum())
+
+
+def test_case_12_quantity_ordered_rejects_naive_double_count(ground_truth, naive_total_ordered):
+    """total_quantity_ordered must not land near the naive double-counted
+    figure obtained by summing order_lines.csv without resolving amended
+    lines to their current row (~7% higher than the correct total)."""
+    with open(SUMMARY_PATH) as f:
+        s = json.load(f)
+    got = s["total_quantity_ordered"]
+    exp = ground_truth["total_quantity_ordered"]
+    rel_err_from_naive = abs(got - naive_total_ordered) / naive_total_ordered
+    assert rel_err_from_naive > 0.03, \
+        (f"total_quantity_ordered ({got}) is suspiciously close to the naive, "
+         f"double-counted total ({naive_total_ordered}); amended order lines "
+         f"must be resolved to their current row before summing. "
+         f"Correct total is {exp}.")

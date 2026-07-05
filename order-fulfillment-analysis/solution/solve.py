@@ -15,6 +15,12 @@ overstate what the customer actually retained.
 Fulfillment region is the region of the warehouse assigned to the order
 (orders.assigned_warehouse_id -> warehouses.region), not the customer's own
 region column.
+
+order_lines.csv also contains amended lines: some (order_id, line_id) pairs
+appear twice, an earlier superseded row followed by the current row, always
+in that file order. Loading the file as-is and summing quantity_ordered
+double-counts every amended line. Each (order_id, line_id) must be resolved
+to its single most-recent row (by created_at) before aggregating.
 """
 
 import json
@@ -38,13 +44,20 @@ REPORT_AS_OF = pd.Timestamp("2024-04-15")
 def load_data():
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
-    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv", parse_dates=["created_at"])
     shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
     return warehouses, orders, order_lines, shipments
 
 
+def resolve_current_lines(order_lines):
+    """Collapse amended (order_id, line_id) pairs to their most-recent row."""
+    idx = order_lines.groupby(["order_id", "line_id"])["created_at"].idxmax()
+    return order_lines.loc[idx].reset_index(drop=True)
+
+
 def scope_order_lines(orders, order_lines, warehouses):
     """Order lines belonging to Q1-2024 orders, tagged with fulfillment region."""
+    order_lines = resolve_current_lines(order_lines)
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
     q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
                                  left_on="assigned_warehouse_id", right_on="warehouse_id")

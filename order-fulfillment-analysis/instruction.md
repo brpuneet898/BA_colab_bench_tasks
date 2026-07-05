@@ -13,8 +13,8 @@ All input files are located in `/workspace/data/`:
 | `products.csv` | Product catalog (reference only) |
 | `carriers.csv` | Carrier master data (reference only) |
 | `orders.csv` | Orders placed between 2023-10-01 and 2024-06-30, each assigned to a fulfilling warehouse via `assigned_warehouse_id` |
-| `order_lines.csv` | Line items for each order in `orders.csv`, identified by `order_id` and a `line_id` line number |
-| `shipments.csv` | All shipment, return, and cancellation events recorded against order lines, each carrying a `transaction_type` (`Shipment`, `Return`, or `Cancellation`), a signed `quantity`, and an `event_date` |
+| `order_lines.csv` | Line items for each order in `orders.csv`, with a `line_id`, `product_id`, and `quantity_ordered` |
+| `shipments.csv` | Shipment, return, and cancellation events recorded against order lines, each carrying a `transaction_type`, a `quantity`, and an `event_date` |
 
 ## Scope
 
@@ -28,7 +28,7 @@ Compute the following for each region in `warehouses.csv`.
 
 **Quantity ordered**: the sum of `quantity_ordered` across all order lines belonging to in-scope orders assigned to warehouses in that region.
 
-**Quantity fulfilled (net)**: for each in-scope order line, the algebraic sum of `quantity` across every shipment, return, and cancellation event recorded against that line (through the 2024-04-15 cutoff) — this reflects what the customer actually retains, net of anything returned or cancelled. Sum this across all in-scope order lines belonging to that region.
+**Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer ends up keeping as of the 2024-04-15 cutoff, considering every shipment, return, and cancellation event recorded against it through that date. Sum this across all in-scope order lines belonging to that region.
 
 **Fill rate** = quantity fulfilled (net) / quantity ordered, rounded to 4 decimal places.
 
