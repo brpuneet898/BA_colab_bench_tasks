@@ -13,7 +13,7 @@ All input files are located in `/workspace/data/`:
 | `products.csv` | Product catalog (reference only) |
 | `carriers.csv` | Carrier master data (reference only) |
 | `orders.csv` | Orders placed between 2023-10-01 and 2024-06-30, each assigned to a fulfilling warehouse via `assigned_warehouse_id` |
-| `order_lines.csv` | Line items for each order in `orders.csv`, with a `line_id`, `product_id`, and `quantity_ordered` |
+| `order_lines.csv` | Line items for each order in `orders.csv`. Columns: `order_id`, `line_id`, `product_id`, `quantity_ordered`, `unit_price`, `discount_pct`, `line_status`, `created_at` |
 | `shipments.csv` | Shipment, return, and cancellation events recorded against order lines, each carrying a `transaction_type`, a `quantity`, and an `event_date` |
 
 ## Scope
