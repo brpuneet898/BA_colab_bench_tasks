@@ -4,6 +4,23 @@ Tests for the Q1 2024 order fulfillment rate report.
 Contract (instruction.md): the deliverable is
     /workspace/region_fulfillment_report.csv — one row per region
     /workspace/summary.json                  — five scalar keys
+
+Reasoning challenges this suite exercises:
+  1. Composite key — line_id resets per order, so shipments.csv must be
+     joined to order_lines.csv on (order_id, line_id), never line_id alone.
+  2. Netting — quantity_fulfilled_net is the net of every shipment, return,
+     and cancellation event for a line, not just positive Shipment rows.
+  3. Reporting cutoff — only events with event_date <= 2024-04-15 count,
+     regardless of order_date.
+  4. Amendment resolution — some (order_id, line_id) pairs in
+     order_lines.csv appear more than once (a superseded row plus a current
+     row); quantity_ordered must resolve each pair to a single row before
+     summing, or it double-counts.
+
+test_case_01/10 are anti-tamper sentinels on the input data, not graded
+reasoning. test_case_02-04 check output structure/schema. test_case_05-08
+and 11-12 are hard, ground-truth-derived checks tied to challenges 1-4
+above; test_case_09 checks the derived best/worst region labels.
 """
 
 import json

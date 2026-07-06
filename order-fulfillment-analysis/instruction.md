@@ -26,7 +26,7 @@ This report is generated as of **2024-04-15**. For each in-scope order line, onl
 
 Compute the following for each region in `warehouses.csv`.
 
-**Quantity ordered**: the sum of `quantity_ordered` across all order lines belonging to in-scope orders assigned to warehouses in that region.
+**Quantity ordered**: for each in-scope order line, its `quantity_ordered`. Sum this across all in-scope order lines belonging to that region.
 
 **Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer ends up keeping as of the 2024-04-15 cutoff, considering every shipment, return, and cancellation event recorded against it through that date. Sum this across all in-scope order lines belonging to that region.
 
