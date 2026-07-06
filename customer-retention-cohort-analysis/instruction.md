@@ -9,7 +9,7 @@ All input files are located in `/workspace/data/`:
 | File | Description |
 |------|-------------|
 | `customers.csv` | Customer account master data (reference only) |
-| `signups.csv` | One record per signup event. A record is written to this file each time a customer begins a subscription, keyed by `signup_id`, with the customer identified by `customer_id` and the event dated by `signup_date`. |
+| `signups.csv` | Signup events, identified by `signup_id`. A record is written to this file each time a customer begins a subscription, with the customer identified by `customer_id` and the event dated by `signup_date`. |
 | `subscriptions.csv` | Subscription billing history tied to `signup_id` (reference only) |
 | `activity_logs.csv` | Product activity events, one row per event, identified by `customer_id`, with an `event_date`, `event_type`, and `event_category`. |
 
