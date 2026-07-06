@@ -1,0 +1,19 @@
+version = "1.0"
+
+[metadata]
+expert_time_estimate_hours = 2.0
+category = "Product Analytics"
+tags = ["user-retention-cohorts", "customer-identity-resolution", "amendment-resolution", "domain-category-gap", "saas"]
+
+[verifier]
+timeout_sec = 1200.0
+
+[agent]
+timeout_sec = 10800.0
+
+[environment]
+allow_internet = false
+build_timeout_sec = 690.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
