@@ -29,7 +29,23 @@ Some verified_emission entries are later corrected by a companion
 emission_restatement row that references the original entry via
 original_entry_id. The corrected figure supersedes the original for gross
 emissions purposes — the stale original must be dropped once a correction
-exists, and the two must never be summed together.
+exists, and the two must never be summed together. A further subset of
+those restatements are themselves later corrected by a SECOND restatement,
+whose original_entry_id points at the first restatement's entry_id rather
+than at the original verified_emission entry. Excluding only entries
+referenced by a restatement's original_entry_id where the excluded row is
+itself a verified_emission misses this — an intermediate restatement that
+has since been superseded must also be dropped. The correct rule excludes
+ANY ledger row (verified_emission or emission_restatement) whose entry_id
+appears anywhere in the original_entry_id column, regardless of chain depth.
+
+Every Scope 2 verified_emission entry has a companion row for the same
+facility, month, and emission source, distinguished only by a `method`
+column: one `location_based`, one `market_based`. These are two GHG
+Protocol accountings of the same physical activity, not two additive
+quantities — summing both roughly doubles Scope 2. Only the location-based
+method (or Scope 1 entries, which have no method distinction) counts toward
+the gross figure.
 
 "Gross" Scope 1 / Scope 2 emissions means before any offsets or renewable
 energy certificates are netted in. transaction_type == "purchased_offset" /
@@ -88,13 +104,23 @@ def build_report(scoped_ledger):
     df["quarter"] = "2024-Q" + ((df["reporting_date"].dt.month - 1) // 3 + 1).astype(str)
 
     # Entries later corrected by a restatement must use the corrected figure,
-    # not the stale original — and never both.
-    restated_ids = set(
+    # not the stale original — and never both. A restatement can itself be
+    # superseded by a further restatement, so exclusion is not limited to
+    # verified_emission rows: drop ANY row (of either type) whose entry_id
+    # appears as someone else's original_entry_id, at any chain depth.
+    superseded_ids = set(
         df.loc[df["transaction_type"] == "emission_restatement", "original_entry_id"].dropna()
     )
     is_verified = df["transaction_type"] == "verified_emission"
     is_restatement = df["transaction_type"] == "emission_restatement"
-    gross = df[(is_verified & ~df["entry_id"].isin(restated_ids)) | is_restatement].copy()
+    gross_candidates = df[(is_verified | is_restatement) & ~df["entry_id"].isin(superseded_ids)].copy()
+
+    # Scope 2 is reported under two GHG Protocol methods (location-based and
+    # market-based) for the same physical activity — only one counts toward
+    # the gross figure. Scope 1 rows have no method distinction (NaN).
+    is_gross_method = gross_candidates["method"].isna() | (gross_candidates["method"] == "location_based")
+    gross = gross_candidates[is_gross_method]
+
     pivot = (
         gross.groupby(["business_unit_id", "facility_id", "quarter", "scope"])["quantity_tco2e"]
         .sum().unstack("scope").fillna(0.0)
