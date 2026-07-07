@@ -39,13 +39,17 @@ has since been superseded must also be dropped. The correct rule excludes
 ANY ledger row (verified_emission or emission_restatement) whose entry_id
 appears anywhere in the original_entry_id column, regardless of chain depth.
 
-Every Scope 2 verified_emission entry has a companion row for the same
+Most Scope 2 verified_emission entries have a companion row for the same
 facility, month, and emission source, distinguished only by a `method`
 column: one `location_based`, one `market_based`. These are two GHG
 Protocol accountings of the same physical activity, not two additive
 quantities — summing both roughly doubles Scope 2. Only the location-based
-method (or Scope 1 entries, which have no method distinction) counts toward
-the gross figure.
+method (or entries with no method value at all) counts toward the gross
+figure. A subset of facilities do not do dual-method reporting at all —
+their Scope 2 entries carry no method value, same convention as Scope 1.
+Filtering with a literal `method == "location_based"` (rather than
+`method.isna() | (method == "location_based")`) silently drops these
+facilities' entire Scope 2 figure.
 
 "Gross" Scope 1 / Scope 2 emissions means before any offsets or renewable
 energy certificates are netted in. transaction_type == "purchased_offset" /

@@ -2,13 +2,15 @@ Build an FY2024 (January 1 – December 31) ESG performance report for a multina
 
 Each entry in `emissions_ledger.csv` is linked to a facility in `facilities.csv` through its `business_unit_id` and `facility_id`. A facility is considered owned by a business unit for the portion of FY2024 between its `ownership_start` and `ownership_end`; emissions ledger entries outside that ownership period are not attributable to the business unit.
 
+Scope 2 entries may specify a reporting method in the `method` column — `location_based` or `market_based`, GHG Protocol's two accounting methods for the same physical activity. Entries reported under the market-based method are a separate accounting of that same activity and must be excluded from gross Scope 2 emissions, not summed in alongside it. Scope 1 entries are not subject to this distinction.
+
 Input data:
 
 `/workspace/data/business_units.csv` — business_unit_id, business_unit_name
 
 `/workspace/data/facilities.csv` — business_unit_id, facility_id, region, ownership_start, ownership_end
 
-`/workspace/data/emissions_ledger.csv` — entry_id, business_unit_id, facility_id, reporting_date, scope (`Scope 1` or `Scope 2`), transaction_type, quantity_tco2e; attribute each entry to the fiscal quarter of its `reporting_date`
+`/workspace/data/emissions_ledger.csv` — entry_id, business_unit_id, facility_id, reporting_date, scope (`Scope 1` or `Scope 2`), transaction_type, quantity_tco2e, method (`location_based` or `market_based`, where applicable); attribute each entry to the fiscal quarter of its `reporting_date`
 
 Required outputs:
 
