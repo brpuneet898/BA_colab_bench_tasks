@@ -6,21 +6,25 @@ Contract (instruction.md): the deliverable is
     /workspace/summary.json                  — five scalar keys
 
 Reasoning challenges this suite exercises:
-  1. Composite key — line_id resets per order, so shipments.csv must be
-     joined to order_lines.csv on (order_id, line_id), never line_id alone.
-  2. Netting — quantity_fulfilled_net is the net of every Shipment, Return,
-     and Cancellation event for a line, not just positive Shipment rows.
-  3. Reporting cutoff — only events with event_date <= 2024-04-15 count,
+  1. Composite key, order side — line_id resets per order, so
+     shipment_line_items.csv must be joined to order_lines.csv on
+     (order_id, line_id), never line_id alone.
+  2. Composite key, shipment side — shipment_id in shipment_line_items.csv
+     repeats across warehouses (each warehouse numbers its own shipments
+     independently), so it must be joined to shipment_headers.csv on
+     (warehouse_id, shipment_id), never shipment_id alone.
+  3. Netting — quantity_fulfilled_net is the net of every Shipment, Return,
+     and Cancellation header for a line, not just positive Shipment rows.
+  4. Reporting cutoff — only headers with event_date <= 2024-04-15 count,
      regardless of order_date.
-  4. Domain knowledge gap — shipments.csv carries a fourth transaction_type,
-     Backorder, recording quantity still awaiting fulfillment. It has a
-     positive quantity like a Shipment row, but nothing has gone out against
-     it. Summing quantity across every transaction_type row instead of
-     restricting to Shipment/Return/Cancellation overstates fulfillment.
+  5. Domain knowledge gap — shipment_headers.csv carries a fourth
+     transaction_type, Backorder, recording quantity still awaiting
+     fulfillment. It has a positive quantity like a Shipment row, but
+     nothing has gone out against it, and must be excluded.
 
 test_case_01/10 are anti-tamper sentinels on the input data, not graded
 reasoning. test_case_02-04 check output structure/schema. test_case_05-08
-and 11-12 are hard, ground-truth-derived checks tied to challenges 1-4
+and 11-12 are hard, ground-truth-derived checks tied to challenges 1-5
 above; test_case_09 checks the derived best/worst region labels.
 """
 
@@ -45,7 +49,7 @@ REPORT_AS_OF = pd.Timestamp("2024-04-15")
 
 ORDERS_ROWS = 18_000
 ORDER_LINES_ROWS = 29_662
-SHIPMENTS_ROWS = 43_818
+SHIPMENT_ROWS = 43_818
 
 
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
@@ -54,14 +58,17 @@ def test_case_01_input_data_not_tampered():
     """Sentinel: order/line/shipment counts, line_id collision, transaction_type mix."""
     orders = pd.read_csv(DATA_DIR / "orders.csv")
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
-    shipments = pd.read_csv(DATA_DIR / "shipments.csv")
+    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv")
+    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
 
     assert len(orders) == ORDERS_ROWS, \
         f"orders.csv row count must not be modified (expected {ORDERS_ROWS}, got {len(orders)})."
     assert len(order_lines) == ORDER_LINES_ROWS, \
         f"order_lines.csv row count must not be modified (expected {ORDER_LINES_ROWS}, got {len(order_lines)})."
-    assert len(shipments) == SHIPMENTS_ROWS, \
-        f"shipments.csv row count must not be modified (expected {SHIPMENTS_ROWS}, got {len(shipments)})."
+    assert len(headers) == SHIPMENT_ROWS, \
+        f"shipment_headers.csv row count must not be modified (expected {SHIPMENT_ROWS}, got {len(headers)})."
+    assert len(line_items) == SHIPMENT_ROWS, \
+        f"shipment_line_items.csv row count must not be modified (expected {SHIPMENT_ROWS}, got {len(line_items)})."
 
     orders_per_line1 = order_lines[order_lines["line_id"] == 1]["order_id"].nunique()
     assert orders_per_line1 > 15_000, \
@@ -69,21 +76,35 @@ def test_case_01_input_data_not_tampered():
          f"by {orders_per_line1} distinct orders, expected >15,000). "
          f"line_id must not be treated as a globally unique identifier.")
 
-    type_counts = shipments["transaction_type"].value_counts()
+    type_counts = headers["transaction_type"].value_counts()
     assert type_counts.get("Return", 0) > 1_000, \
-        f"Expected >1,000 Return events, got {type_counts.get('Return', 0)}."
+        f"Expected >1,000 Return headers, got {type_counts.get('Return', 0)}."
     assert type_counts.get("Cancellation", 0) > 500, \
-        f"Expected >500 Cancellation events, got {type_counts.get('Cancellation', 0)}."
+        f"Expected >500 Cancellation headers, got {type_counts.get('Cancellation', 0)}."
 
 
-def test_case_10_shipments_backorder_sentinel():
-    """Sentinel: shipments.csv contains a fourth transaction_type, Backorder."""
-    shipments = pd.read_csv(DATA_DIR / "shipments.csv")
-    type_counts = shipments["transaction_type"].value_counts()
+def test_case_10_shipment_id_and_backorder_sentinel():
+    """Sentinel: shipment_id repeats across warehouses (not globally unique),
+    and shipment_headers.csv contains a fourth transaction_type, Backorder."""
+    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv")
+    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+
+    warehouses_per_id = headers.groupby("shipment_id")["warehouse_id"].nunique()
+    assert (warehouses_per_id > 10).mean() > 0.9, \
+        (f"shipment_id is expected to repeat across essentially every warehouse "
+         f"(most shipment_id values shared by >10 distinct warehouses). "
+         f"shipment_id must not be treated as a globally unique identifier.")
+
+    type_counts = headers["transaction_type"].value_counts()
     assert type_counts.get("Backorder", 0) > 3_000, \
-        f"Expected >3,000 Backorder events, got {type_counts.get('Backorder', 0)}."
-    assert (shipments[shipments["transaction_type"] == "Backorder"]["quantity"] > 0).all(), \
-        "Backorder rows are expected to carry a positive quantity."
+        f"Expected >3,000 Backorder headers, got {type_counts.get('Backorder', 0)}."
+
+    backorder_events = line_items.merge(
+        headers[headers["transaction_type"] == "Backorder"][["warehouse_id", "shipment_id"]],
+        on=["warehouse_id", "shipment_id"],
+    )
+    assert (backorder_events["quantity"] > 0).all(), \
+        "Backorder line items are expected to carry a positive quantity."
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -126,7 +147,8 @@ def ground_truth():
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
-    shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
+    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
+    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
 
     # Scope: Q1 2024 orders, tagged with fulfillment region via assigned_warehouse_id
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
@@ -134,13 +156,15 @@ def ground_truth():
                                  left_on="assigned_warehouse_id", right_on="warehouse_id")
     scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
 
-    # Net fulfilled quantity per (order_id, line_id) -- composite key join, cutoff
-    # applied, and restricted to Shipment/Return/Cancellation (Backorder excluded:
-    # it records quantity still awaiting fulfillment, not quantity the customer
-    # has actually received).
-    in_window = shipments[
-        (shipments["event_date"] <= REPORT_AS_OF)
-        & (shipments["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
+    # shipment_id repeats across warehouses -- line_items must be joined to
+    # headers on (warehouse_id, shipment_id), never shipment_id alone -- then
+    # filtered to the cutoff and restricted to Shipment/Return/Cancellation
+    # (Backorder excluded: it records quantity still awaiting fulfillment,
+    # not quantity the customer has actually received).
+    events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
+    in_window = events[
+        (events["event_date"] <= REPORT_AS_OF)
+        & (events["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
     ]
     matched = scoped[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
@@ -280,18 +304,21 @@ def test_case_11_region_quantity_fulfilled_net_exact(ground_truth):
 @pytest.fixture(scope="module")
 def naive_total_fulfilled_with_backorder():
     """quantity_fulfilled_net if every transaction_type row within the cutoff
-    is summed as-is, without restricting to Shipment/Return/Cancellation."""
+    is summed as-is, without restricting to Shipment/Return/Cancellation
+    (headers/line_items still joined correctly on (warehouse_id, shipment_id))."""
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
-    shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
+    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
+    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
 
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
     q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
                                  left_on="assigned_warehouse_id", right_on="warehouse_id")
     scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
 
-    in_window = shipments[shipments["event_date"] <= REPORT_AS_OF]
+    events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
+    in_window = events[events["event_date"] <= REPORT_AS_OF]
     matched = scoped[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
     )
