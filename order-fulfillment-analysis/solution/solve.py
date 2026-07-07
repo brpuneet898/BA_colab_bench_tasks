@@ -8,19 +8,21 @@ create a many-to-many match across unrelated orders. The join key used
 throughout is always the (order_id, line_id) pair.
 
 Quantity fulfilled (net) per order line is the algebraic sum of every
-shipment, return, and cancellation event recorded against that line, filtered
-to event_date <= REPORT_AS_OF. Summing only positive (Shipment) rows would
-overstate what the customer actually retained.
+Shipment, Return, and Cancellation event recorded against that line,
+filtered to event_date <= REPORT_AS_OF. Summing only positive (Shipment)
+rows would overstate what the customer actually retained.
+
+shipments.csv also contains a fourth transaction_type, Backorder, recording
+quantity still awaiting fulfillment. It carries a positive quantity like a
+Shipment row, but represents goods not yet sent -- the customer has not
+received or kept anything against it. It must be excluded from quantity
+fulfilled (net); summing quantity across every transaction_type row instead
+of restricting to Shipment/Return/Cancellation overstates fulfillment by
+whatever was backordered.
 
 Fulfillment region is the region of the warehouse assigned to the order
 (orders.assigned_warehouse_id -> warehouses.region), not the customer's own
 region column.
-
-order_lines.csv also contains amended lines: some (order_id, line_id) pairs
-appear twice, an earlier superseded row followed by the current row, always
-in that file order. Loading the file as-is and summing quantity_ordered
-double-counts every amended line. Each (order_id, line_id) must be resolved
-to its single most-recent row (by created_at) before aggregating.
 """
 
 import json
@@ -44,20 +46,13 @@ REPORT_AS_OF = pd.Timestamp("2024-04-15")
 def load_data():
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
-    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv", parse_dates=["created_at"])
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
     return warehouses, orders, order_lines, shipments
 
 
-def resolve_current_lines(order_lines):
-    """Collapse amended (order_id, line_id) pairs to their most-recent row."""
-    idx = order_lines.groupby(["order_id", "line_id"])["created_at"].idxmax()
-    return order_lines.loc[idx].reset_index(drop=True)
-
-
 def scope_order_lines(orders, order_lines, warehouses):
     """Order lines belonging to Q1-2024 orders, tagged with fulfillment region."""
-    order_lines = resolve_current_lines(order_lines)
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
     q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
                                  left_on="assigned_warehouse_id", right_on="warehouse_id")
@@ -67,7 +62,10 @@ def scope_order_lines(orders, order_lines, warehouses):
 
 def net_fulfilled_by_line(scoped_lines, shipments):
     """Net fulfilled quantity per (order_id, line_id), joined on the composite key."""
-    in_window = shipments[shipments["event_date"] <= REPORT_AS_OF]
+    in_window = shipments[
+        (shipments["event_date"] <= REPORT_AS_OF)
+        & (shipments["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
+    ]
     matched = scoped_lines[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
     )

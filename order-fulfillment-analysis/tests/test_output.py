@@ -4,6 +4,24 @@ Tests for the Q1 2024 order fulfillment rate report.
 Contract (instruction.md): the deliverable is
     /workspace/region_fulfillment_report.csv — one row per region
     /workspace/summary.json                  — five scalar keys
+
+Reasoning challenges this suite exercises:
+  1. Composite key — line_id resets per order, so shipments.csv must be
+     joined to order_lines.csv on (order_id, line_id), never line_id alone.
+  2. Netting — quantity_fulfilled_net is the net of every Shipment, Return,
+     and Cancellation event for a line, not just positive Shipment rows.
+  3. Reporting cutoff — only events with event_date <= 2024-04-15 count,
+     regardless of order_date.
+  4. Domain knowledge gap — shipments.csv carries a fourth transaction_type,
+     Backorder, recording quantity still awaiting fulfillment. It has a
+     positive quantity like a Shipment row, but nothing has gone out against
+     it. Summing quantity across every transaction_type row instead of
+     restricting to Shipment/Return/Cancellation overstates fulfillment.
+
+test_case_01/10 are anti-tamper sentinels on the input data, not graded
+reasoning. test_case_02-04 check output structure/schema. test_case_05-08
+and 11-12 are hard, ground-truth-derived checks tied to challenges 1-4
+above; test_case_09 checks the derived best/worst region labels.
 """
 
 import json
@@ -25,6 +43,10 @@ Q1_START = pd.Timestamp("2024-01-01")
 Q1_END = pd.Timestamp("2024-03-31")
 REPORT_AS_OF = pd.Timestamp("2024-04-15")
 
+ORDERS_ROWS = 18_000
+ORDER_LINES_ROWS = 29_662
+SHIPMENTS_ROWS = 43_818
+
 
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
 
@@ -34,12 +56,12 @@ def test_case_01_input_data_not_tampered():
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     shipments = pd.read_csv(DATA_DIR / "shipments.csv")
 
-    assert len(orders) == 18_000, \
-        f"orders.csv row count must not be modified (expected 18,000, got {len(orders)})."
-    assert len(order_lines) == 31_737, \
-        f"order_lines.csv row count must not be modified (expected 31,737, got {len(order_lines)})."
-    assert len(shipments) == 39_491, \
-        f"shipments.csv row count must not be modified (expected 39,491, got {len(shipments)})."
+    assert len(orders) == ORDERS_ROWS, \
+        f"orders.csv row count must not be modified (expected {ORDERS_ROWS}, got {len(orders)})."
+    assert len(order_lines) == ORDER_LINES_ROWS, \
+        f"order_lines.csv row count must not be modified (expected {ORDER_LINES_ROWS}, got {len(order_lines)})."
+    assert len(shipments) == SHIPMENTS_ROWS, \
+        f"shipments.csv row count must not be modified (expected {SHIPMENTS_ROWS}, got {len(shipments)})."
 
     orders_per_line1 = order_lines[order_lines["line_id"] == 1]["order_id"].nunique()
     assert orders_per_line1 > 15_000, \
@@ -54,17 +76,14 @@ def test_case_01_input_data_not_tampered():
         f"Expected >500 Cancellation events, got {type_counts.get('Cancellation', 0)}."
 
 
-def test_case_10_order_lines_amendment_sentinel():
-    """Sentinel: order_lines.csv contains amended (superseded + current) line pairs."""
-    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
-
-    dup_pairs = order_lines.groupby(["order_id", "line_id"]).size()
-    assert (dup_pairs > 1).sum() > 1_500, \
-        (f"Expected >1,500 (order_id, line_id) pairs with more than one row in "
-         f"order_lines.csv, got {(dup_pairs > 1).sum()}. "
-         f"Amended lines must not be treated as one row per (order_id, line_id).")
-    assert order_lines["line_status"].value_counts().get("Superseded", 0) > 1_500, \
-        f"Expected >1,500 'Superseded' rows in order_lines.csv."
+def test_case_10_shipments_backorder_sentinel():
+    """Sentinel: shipments.csv contains a fourth transaction_type, Backorder."""
+    shipments = pd.read_csv(DATA_DIR / "shipments.csv")
+    type_counts = shipments["transaction_type"].value_counts()
+    assert type_counts.get("Backorder", 0) > 3_000, \
+        f"Expected >3,000 Backorder events, got {type_counts.get('Backorder', 0)}."
+    assert (shipments[shipments["transaction_type"] == "Backorder"]["quantity"] > 0).all(), \
+        "Backorder rows are expected to carry a positive quantity."
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -106,13 +125,8 @@ def test_case_04_summary_schema():
 def ground_truth():
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
-    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv", parse_dates=["created_at"])
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
-
-    # Amendments: (order_id, line_id) pairs with a superseded row must collapse
-    # to their single most-recent row (by created_at) before aggregating.
-    current_idx = order_lines.groupby(["order_id", "line_id"])["created_at"].idxmax()
-    order_lines = order_lines.loc[current_idx].reset_index(drop=True)
 
     # Scope: Q1 2024 orders, tagged with fulfillment region via assigned_warehouse_id
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
@@ -120,8 +134,14 @@ def ground_truth():
                                  left_on="assigned_warehouse_id", right_on="warehouse_id")
     scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
 
-    # Net fulfilled quantity per (order_id, line_id) -- composite key join, cutoff applied
-    in_window = shipments[shipments["event_date"] <= REPORT_AS_OF]
+    # Net fulfilled quantity per (order_id, line_id) -- composite key join, cutoff
+    # applied, and restricted to Shipment/Return/Cancellation (Backorder excluded:
+    # it records quantity still awaiting fulfillment, not quantity the customer
+    # has actually received).
+    in_window = shipments[
+        (shipments["event_date"] <= REPORT_AS_OF)
+        & (shipments["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
+    ]
     matched = scoped[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
     )
@@ -157,13 +177,11 @@ def ground_truth():
     }
 
 
-# ── Hard test 1: quantity ordered (amendment resolution, no other trap) ───────
+# ── Hard test 1: quantity ordered (Q1 scoping + region mapping) ───────────────
 
 def test_case_05_total_quantity_ordered_exact(ground_truth):
-    """quantity_ordered depends only on Q1 scoping, warehouse->region mapping,
-    and resolving amended order lines to their current row; must match exactly.
-    Summing quantity_ordered without resolving amendments double-counts every
-    amended line and overstates this figure."""
+    """quantity_ordered depends only on Q1 scoping and warehouse->region
+    mapping; must match exactly."""
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     assert s["total_quantity_ordered"] == ground_truth["total_quantity_ordered"], \
@@ -177,8 +195,9 @@ def test_case_06_region_fill_rate_within_tolerance(ground_truth):
     """Each region's fill_rate must be within +/-0.01 of ground truth.
 
     A line_id-only join (ignoring order_id) inflates fulfilled quantity by
-    orders of magnitude; ignoring returns/cancellations overstates it by
-    roughly 9%. Either failure blows well past this tolerance.
+    orders of magnitude; ignoring returns/cancellations, or including
+    Backorder quantity, each overstates it enough to blow past this
+    tolerance.
     """
     report = pd.read_csv(REPORT_PATH).set_index("region")
     gt = ground_truth["report"]
@@ -195,8 +214,9 @@ def test_case_06_region_fill_rate_within_tolerance(ground_truth):
 def test_case_07_total_quantity_fulfilled_net(ground_truth):
     """Total net fulfilled quantity must be within +/-1% of ground truth.
 
-    A naive sum of positive Shipment rows only (ignoring Return/Cancellation)
-    overstates this figure by ~9%, well outside this tolerance.
+    Including Backorder quantity (goods not yet sent) alongside Shipment/
+    Return/Cancellation overstates this figure by several percent, well
+    outside this tolerance.
     """
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
@@ -236,53 +256,65 @@ def test_case_09_best_worst_region(ground_truth):
          f"expected {ground_truth['worst_performing_region']!r}")
 
 
-# ── Hard test 5: amendment resolution — per-region quantity ordered ───────────
+# ── Hard test 5: Backorder exclusion — per-region quantity fulfilled ──────────
 
-def test_case_11_region_quantity_ordered_exact(ground_truth):
-    """Each region's quantity_ordered must match exactly, not just the total.
+def test_case_11_region_quantity_fulfilled_net_exact(ground_truth):
+    """Each region's quantity_fulfilled_net must match exactly, not just the
+    total.
 
-    A partial or region-blind amendment fix could still land close on the
-    overall total by coincidence; checking every region individually closes
-    that gap.
+    A region-blind Backorder exclusion could still land close on the overall
+    total by coincidence; checking every region individually closes that gap.
     """
     report = pd.read_csv(REPORT_PATH).set_index("region")
     gt = ground_truth["report"]
     for region in gt.index:
         assert region in report.index, f"Missing region '{region}' in report."
-        exp = int(gt.loc[region, "quantity_ordered"])
-        got = int(report.loc[region, "quantity_ordered"])
+        exp = int(gt.loc[region, "quantity_fulfilled_net"])
+        got = int(report.loc[region, "quantity_fulfilled_net"])
         assert got == exp, \
-            f"quantity_ordered for region {region}: got {got}, expected {exp}."
+            f"quantity_fulfilled_net for region {region}: got {got}, expected {exp}."
 
 
-# ── Hard test 6: amendment resolution — rejects the double-counted total ──────
+# ── Hard test 6: Backorder exclusion — rejects naive inclusion ────────────────
 
 @pytest.fixture(scope="module")
-def naive_total_ordered():
-    """quantity_ordered if every order_lines.csv row is summed as-is, without
-    resolving amended (order_id, line_id) pairs to their current row."""
+def naive_total_fulfilled_with_backorder():
+    """quantity_fulfilled_net if every transaction_type row within the cutoff
+    is summed as-is, without restricting to Shipment/Return/Cancellation."""
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+    shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
 
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
     q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
                                  left_on="assigned_warehouse_id", right_on="warehouse_id")
     scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
-    return int(scoped["quantity_ordered"].sum())
+
+    in_window = shipments[shipments["event_date"] <= REPORT_AS_OF]
+    matched = scoped[["order_id", "line_id"]].merge(
+        in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
+    )
+    fulfilled = matched.groupby(["order_id", "line_id"])["quantity"].sum().reset_index(
+        name="quantity_fulfilled_net"
+    )
+    lines = scoped.merge(fulfilled, on=["order_id", "line_id"], how="left")
+    lines["quantity_fulfilled_net"] = lines["quantity_fulfilled_net"].fillna(0)
+    return int(lines["quantity_fulfilled_net"].sum())
 
 
-def test_case_12_quantity_ordered_rejects_naive_double_count(ground_truth, naive_total_ordered):
-    """total_quantity_ordered must not land near the naive double-counted
-    figure obtained by summing order_lines.csv without resolving amended
-    lines to their current row (~7% higher than the correct total)."""
+def test_case_12_quantity_fulfilled_net_rejects_backorder_inclusion(
+    ground_truth, naive_total_fulfilled_with_backorder
+):
+    """total_quantity_fulfilled_net must not land near the naive figure
+    obtained by summing every transaction_type row (including Backorder)
+    within the cutoff."""
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
-    got = s["total_quantity_ordered"]
-    exp = ground_truth["total_quantity_ordered"]
-    rel_err_from_naive = abs(got - naive_total_ordered) / naive_total_ordered
+    got = s["total_quantity_fulfilled_net"]
+    exp = ground_truth["total_quantity_fulfilled_net"]
+    rel_err_from_naive = abs(got - naive_total_fulfilled_with_backorder) / naive_total_fulfilled_with_backorder
     assert rel_err_from_naive > 0.03, \
-        (f"total_quantity_ordered ({got}) is suspiciously close to the naive, "
-         f"double-counted total ({naive_total_ordered}); amended order lines "
-         f"must be resolved to their current row before summing. "
-         f"Correct total is {exp}.")
+        (f"total_quantity_fulfilled_net ({got}) is suspiciously close to the naive "
+         f"figure that includes Backorder quantity ({naive_total_fulfilled_with_backorder}); "
+         f"Backorder rows must be excluded before summing. Correct total is {exp}.")

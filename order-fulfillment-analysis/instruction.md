@@ -13,8 +13,8 @@ All input files are located in `/workspace/data/`:
 | `products.csv` | Product catalog (reference only) |
 | `carriers.csv` | Carrier master data (reference only) |
 | `orders.csv` | Orders placed between 2023-10-01 and 2024-06-30, each assigned to a fulfilling warehouse via `assigned_warehouse_id` |
-| `order_lines.csv` | Line items for each order in `orders.csv`, with a `line_id`, `product_id`, and `quantity_ordered` |
-| `shipments.csv` | Shipment, return, and cancellation events recorded against order lines, each carrying a `transaction_type`, a `quantity`, and an `event_date` |
+| `order_lines.csv` | Line items for each order in `orders.csv`. Columns: `order_id`, `line_id`, `product_id`, `quantity_ordered`, `unit_price`, `discount_pct`, `line_status`, `created_at` |
+| `shipments.csv` | Fulfillment-related events recorded against order lines, each carrying a `transaction_type`, a `quantity`, and an `event_date` |
 
 ## Scope
 
@@ -26,7 +26,7 @@ This report is generated as of **2024-04-15**. For each in-scope order line, onl
 
 Compute the following for each region in `warehouses.csv`.
 
-**Quantity ordered**: the sum of `quantity_ordered` across all order lines belonging to in-scope orders assigned to warehouses in that region.
+**Quantity ordered**: for each in-scope order line, its `quantity_ordered`. Sum this across all in-scope order lines belonging to that region.
 
 **Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer ends up keeping as of the 2024-04-15 cutoff, considering every shipment, return, and cancellation event recorded against it through that date. Sum this across all in-scope order lines belonging to that region.
 
