@@ -13,8 +13,12 @@ Reasoning challenges this suite exercises:
      repeats across warehouses (each warehouse numbers its own shipments
      independently), so it must be joined to shipment_headers.csv on
      (warehouse_id, shipment_id), never shipment_id alone.
-  3. Netting — quantity_fulfilled_net is the net of every Shipment, Return,
-     and Cancellation header for a line, not just positive Shipment rows.
+  3. Netting — quantity in shipment_line_items.csv is always a positive
+     count regardless of transaction_type; whether a row adds to or
+     subtracts from what the customer kept depends on transaction_type
+     (Shipment adds, Return/Cancellation subtract), not the sign of the
+     number. Summing quantity as-is treats returns/cancellations as
+     further shipments and overstates fulfillment.
   4. Reporting cutoff — only headers with event_date <= 2024-04-15 count,
      regardless of order_date.
   5. Domain knowledge gap — shipment_headers.csv carries a fourth
@@ -24,7 +28,7 @@ Reasoning challenges this suite exercises:
 
 test_case_01/10 are anti-tamper sentinels on the input data, not graded
 reasoning. test_case_02-04 check output structure/schema. test_case_05-08
-and 11-12 are hard, ground-truth-derived checks tied to challenges 1-5
+and 11-13 are hard, ground-truth-derived checks tied to challenges 1-5
 above; test_case_09 checks the derived best/worst region labels.
 """
 
@@ -49,7 +53,7 @@ REPORT_AS_OF = pd.Timestamp("2024-04-15")
 
 ORDERS_ROWS = 18_000
 ORDER_LINES_ROWS = 29_662
-SHIPMENT_ROWS = 43_818
+SHIPMENT_ROWS = 40_284
 
 
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
@@ -81,6 +85,15 @@ def test_case_01_input_data_not_tampered():
         f"Expected >1,000 Return headers, got {type_counts.get('Return', 0)}."
     assert type_counts.get("Cancellation", 0) > 500, \
         f"Expected >500 Cancellation headers, got {type_counts.get('Cancellation', 0)}."
+
+    adj_events = line_items.merge(
+        headers[headers["transaction_type"].isin(["Return", "Cancellation"])][
+            ["warehouse_id", "shipment_id"]
+        ],
+        on=["warehouse_id", "shipment_id"],
+    )
+    assert (adj_events["quantity"] > 0).all(), \
+        "Return/Cancellation line items are expected to carry a positive quantity."
 
 
 def test_case_10_shipment_id_and_backorder_sentinel():
@@ -158,18 +171,23 @@ def ground_truth():
 
     # shipment_id repeats across warehouses -- line_items must be joined to
     # headers on (warehouse_id, shipment_id), never shipment_id alone -- then
-    # filtered to the cutoff and restricted to Shipment/Return/Cancellation
-    # (Backorder excluded: it records quantity still awaiting fulfillment,
-    # not quantity the customer has actually received).
+    # filtered to the cutoff. quantity is always positive regardless of
+    # transaction_type, so each row must be signed by what its
+    # transaction_type means for the customer (Shipment adds, Return/
+    # Cancellation subtract) before summing; Backorder rows (no entry in
+    # NET_SIGN) are dropped entirely -- they record quantity still awaiting
+    # fulfillment, not quantity the customer has actually received.
+    NET_SIGN = {"Shipment": 1, "Return": -1, "Cancellation": -1}
     events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
-    in_window = events[
-        (events["event_date"] <= REPORT_AS_OF)
-        & (events["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
-    ]
+    in_window = events[events["event_date"] <= REPORT_AS_OF].copy()
+    in_window["sign"] = in_window["transaction_type"].map(NET_SIGN)
+    in_window = in_window.dropna(subset=["sign"])
+    in_window["signed_quantity"] = in_window["quantity"] * in_window["sign"]
+
     matched = scoped[["order_id", "line_id"]].merge(
-        in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
+        in_window[["order_id", "line_id", "signed_quantity"]], on=["order_id", "line_id"]
     )
-    fulfilled_by_line = matched.groupby(["order_id", "line_id"])["quantity"].sum().reset_index(
+    fulfilled_by_line = matched.groupby(["order_id", "line_id"])["signed_quantity"].sum().reset_index(
         name="quantity_fulfilled_net"
     )
 
@@ -345,3 +363,57 @@ def test_case_12_quantity_fulfilled_net_rejects_backorder_inclusion(
         (f"total_quantity_fulfilled_net ({got}) is suspiciously close to the naive "
          f"figure that includes Backorder quantity ({naive_total_fulfilled_with_backorder}); "
          f"Backorder rows must be excluded before summing. Correct total is {exp}.")
+
+
+# ── Hard test 7: netting sign — rejects treating every row as additive ────────
+
+@pytest.fixture(scope="module")
+def naive_total_fulfilled_sign_blind():
+    """quantity_fulfilled_net if Shipment/Return/Cancellation rows within the
+    cutoff are correctly restricted (Backorder excluded) but summed as-is,
+    without recognizing that Return/Cancellation quantity subtracts from
+    what the customer kept rather than adding to it."""
+    warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
+    orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
+    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+
+    q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
+    q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
+                                 left_on="assigned_warehouse_id", right_on="warehouse_id")
+    scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
+
+    events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
+    in_window = events[
+        (events["event_date"] <= REPORT_AS_OF)
+        & (events["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
+    ]
+    matched = scoped[["order_id", "line_id"]].merge(
+        in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
+    )
+    fulfilled = matched.groupby(["order_id", "line_id"])["quantity"].sum().reset_index(
+        name="quantity_fulfilled_net"
+    )
+    lines = scoped.merge(fulfilled, on=["order_id", "line_id"], how="left")
+    lines["quantity_fulfilled_net"] = lines["quantity_fulfilled_net"].fillna(0)
+    return int(lines["quantity_fulfilled_net"].sum())
+
+
+def test_case_13_quantity_fulfilled_net_rejects_sign_blind_summation(
+    ground_truth, naive_total_fulfilled_sign_blind
+):
+    """total_quantity_fulfilled_net must not land near the naive figure
+    obtained by summing Shipment/Return/Cancellation quantity as-is, without
+    subtracting Return/Cancellation quantity from what the customer kept."""
+    with open(SUMMARY_PATH) as f:
+        s = json.load(f)
+    got = s["total_quantity_fulfilled_net"]
+    exp = ground_truth["total_quantity_fulfilled_net"]
+    rel_err_from_naive = abs(got - naive_total_fulfilled_sign_blind) / naive_total_fulfilled_sign_blind
+    assert rel_err_from_naive > 0.03, \
+        (f"total_quantity_fulfilled_net ({got}) is suspiciously close to the naive "
+         f"figure obtained by summing Return/Cancellation quantity as additive rather "
+         f"than subtracting it ({naive_total_fulfilled_sign_blind}); quantity's sign is "
+         f"not given by the data, it must be derived from transaction_type. "
+         f"Correct total is {exp}.")
