@@ -94,6 +94,28 @@ def _offset_affected_keys():
     return set(zip(offsets["business_unit_id"], offsets["facility_id"], offsets["quarter"]))
 
 
+def _gap_quarter_keys():
+    """(business_unit_id, facility_id, quarter) triples with at least one
+    attributable ledger entry that quarter but zero entries that survive into
+    the gross figure — e.g. the quarter's only activity is an offset/REC row,
+    a fully-superseded restatement chain, or a market-based-only Scope 2
+    entry. These quarters still satisfy the report's row-inclusion rule and
+    must appear with gross figures at 0.0, not be silently absent."""
+    scoped = _scope_ledger_to_ownership()
+    superseded_ids = set(
+        scoped.loc[scoped["transaction_type"] == "emission_restatement", "original_entry_id"].dropna()
+    )
+    is_verified = scoped["transaction_type"] == "verified_emission"
+    is_restatement = scoped["transaction_type"] == "emission_restatement"
+    gross_candidates = scoped[(is_verified | is_restatement) & ~scoped["entry_id"].isin(superseded_ids)]
+    is_gross_method = gross_candidates["method"].isna() | (gross_candidates["method"] == "location_based")
+    gross = gross_candidates[is_gross_method]
+
+    all_keys = set(zip(scoped["business_unit_id"], scoped["facility_id"], scoped["quarter"]))
+    gross_keys = set(zip(gross["business_unit_id"], gross["facility_id"], gross["quarter"]))
+    return all_keys - gross_keys
+
+
 def _single_method_facility_keys():
     """(business_unit_id, facility_id, quarter) triples for facilities whose
     Scope 2 verified_emission/emission_restatement entries carry no method
@@ -116,6 +138,7 @@ RESTATEMENT_AFFECTED_KEYS = _restatement_affected_keys()
 CHAIN_AFFECTED_KEYS = _chain_affected_keys()
 SINGLE_METHOD_FACILITY_KEYS = _single_method_facility_keys()
 OFFSET_AFFECTED_KEYS = _offset_affected_keys()
+GAP_QUARTER_KEYS = _gap_quarter_keys()
 
 
 # ── Anti-cheat sentinels ──────────────────────────────────────────────────────
@@ -131,7 +154,7 @@ def test_case_01_input_data_not_tampered():
 
     assert len(bu) == 12, "business_units.csv row count must not be modified."
     assert len(fac) == 144, "facilities.csv row count must not be modified."
-    assert len(led) == 15_646, "emissions_ledger.csv row count must not be modified."
+    assert len(led) == 15_227, "emissions_ledger.csv row count must not be modified."
 
     nat_count = fac["ownership_end"].isna().sum()
     assert nat_count == 112, \
@@ -149,8 +172,8 @@ def test_case_01_input_data_not_tampered():
 
     offset_rec = led[led["transaction_type"].isin(
         ["purchased_offset", "renewable_energy_certificate"])]
-    assert len(offset_rec) == 501, \
-        f"Expected 501 offset/REC ledger rows, got {len(offset_rec)}."
+    assert len(offset_rec) == 513, \
+        f"Expected 513 offset/REC ledger rows, got {len(offset_rec)}."
     assert (offset_rec["quantity_tco2e"] < 0).all(), \
         "purchased_offset/renewable_energy_certificate rows must carry negative quantity_tco2e."
     assert offset_rec["method"].isna().all(), \
@@ -161,8 +184,8 @@ def test_case_01_input_data_not_tampered():
         "verified_emission rows must carry positive quantity_tco2e."
 
     restatements = led[led["transaction_type"] == "emission_restatement"]
-    assert len(restatements) == 1_009, \
-        f"Expected 1009 emission_restatement ledger rows, got {len(restatements)}."
+    assert len(restatements) == 998, \
+        f"Expected 998 emission_restatement ledger rows, got {len(restatements)}."
     assert (restatements["quantity_tco2e"] > 0).all(), \
         "emission_restatement rows must carry positive quantity_tco2e."
     assert restatements["original_entry_id"].notna().all(), \
@@ -175,8 +198,8 @@ def test_case_01_input_data_not_tampered():
 
     restatement_entry_ids = set(restatements["entry_id"])
     n_chained = restatements["original_entry_id"].isin(restatement_entry_ids).sum()
-    assert n_chained == 153, \
-        f"Expected 153 second-level (chained) restatements, got {n_chained}."
+    assert n_chained == 152, \
+        f"Expected 152 second-level (chained) restatements, got {n_chained}."
     assert (restatements["method"] != "market_based").all(), \
         "No emission_restatement row may carry method == 'market_based'."
 
@@ -188,9 +211,9 @@ def test_case_01_input_data_not_tampered():
     n_location = (verified_scope2["method"] == "location_based").sum()
     n_market = (verified_scope2["method"] == "market_based").sum()
     n_no_method = verified_scope2["method"].isna().sum()
-    assert n_location == 3636 and n_market == 3636 and n_location == n_market, \
+    assert n_location == 3510 and n_market == 3510 and n_location == n_market, \
         (f"Expected equal location_based/market_based verified Scope 2 rows "
-         f"(3636 each), got {n_location} location_based, {n_market} market_based.")
+         f"(3510 each), got {n_location} location_based, {n_market} market_based.")
     assert n_no_method == 864, \
         (f"Expected 864 verified Scope 2 rows with no method value (single-method "
          f"facilities), got {n_no_method}.")
@@ -201,6 +224,10 @@ def test_case_01_input_data_not_tampered():
     assert len(single_method_keys) == 24, \
         (f"Expected 24 facilities with no Scope 2 dual-method reporting at all, "
          f"got {len(single_method_keys)}.")
+
+    assert len(GAP_QUARTER_KEYS) == 14, \
+        (f"Expected 14 attributable-but-gross-empty facility-quarters, "
+         f"got {len(GAP_QUARTER_KEYS)}.")
 
 
 # ── Output file structure ─────────────────────────────────────────────────────
@@ -285,7 +312,17 @@ def ground_truth():
     for col in ("gross_scope1_tco2e", "gross_scope2_tco2e"):
         if col not in pivot.columns:
             pivot[col] = 0.0
-    report = pivot.reset_index()
+
+    # Row existence follows the full attributable set, not the gross-filtered
+    # one: a quarter whose only attributable activity is an offset/REC row (or
+    # a fully-superseded chain, or a market-based-only Scope 2 entry) still
+    # qualifies for a report row, with gross figures at 0.0.
+    scaffold = scoped[["business_unit_id", "facility_id", "quarter"]].drop_duplicates()
+    report = scaffold.merge(
+        pivot.reset_index(), on=["business_unit_id", "facility_id", "quarter"], how="left"
+    )
+    report["gross_scope1_tco2e"] = report["gross_scope1_tco2e"].fillna(0.0)
+    report["gross_scope2_tco2e"] = report["gross_scope2_tco2e"].fillna(0.0)
     report["total_gross_tco2e"] = (report["gross_scope1_tco2e"] + report["gross_scope2_tco2e"]).round(2)
 
     offsets = scoped[scoped["transaction_type"].isin(
@@ -547,9 +584,40 @@ def test_case_10_single_method_facility_inclusion(ground_truth):
         f"Only {close}/{total} single-method facility-quarter rows had gross_scope2_tco2e within ±10% of ground truth."
 
 
+# ── Hard test 9c: attributable-but-gross-empty quarters (row completeness) ───
+
+def test_case_11_gap_quarter_row_completeness(ground_truth):
+    """A subset of facility-quarters have at least one attributable
+    emissions_ledger.csv entry (e.g. an offset/REC row) but zero entries that
+    survive into the gross figure. Per instruction.md's row-inclusion rule
+    ("at least one emissions_ledger.csv entry attributable... in that
+    quarter"), these quarters must still appear as explicit esg_report.csv
+    rows with gross_scope1_tco2e = gross_scope2_tco2e = 0.00. Deriving row
+    existence from the gross-filtered data alone (e.g. pivoting only the
+    gross-eligible rows and treating that as the row set) silently drops
+    them instead. ≥70% of these facility-quarters must appear as explicit
+    rows with total_gross_tco2e at (or within 0.01 of) zero."""
+    report = pd.read_csv(REPORT_PATH)
+    got_sub = report.set_index(["business_unit_id", "facility_id", "quarter"])
+
+    assert len(GAP_QUARTER_KEYS) > 0, "No attributable-but-gross-empty facility-quarters found."
+
+    close, total = 0, 0
+    for key in GAP_QUARTER_KEYS:
+        total += 1
+        if key in got_sub.index and math.isclose(
+            float(got_sub.loc[key, "total_gross_tco2e"]), 0.0, abs_tol=0.01
+        ):
+            close += 1
+
+    assert close >= int(total * 0.7), \
+        (f"Only {close}/{total} attributable-but-gross-empty facility-quarters appeared as "
+         f"explicit report rows with zero gross emissions.")
+
+
 # ── Hard test 9: business-unit aggregate totals ───────────────────────────────
 
-def test_case_11_business_unit_totals(ground_truth):
+def test_case_12_business_unit_totals(ground_truth):
     """≥90% of business units' aggregate gross emissions must be within ±2% of
     ground truth. Holistic check that fails if any trap is mishandled."""
     report = pd.read_csv(REPORT_PATH)
@@ -571,7 +639,7 @@ def test_case_11_business_unit_totals(ground_truth):
 
 # ── Final gate: summary scalars ───────────────────────────────────────────────
 
-def test_case_12_summary_scalars(ground_truth):
+def test_case_13_summary_scalars(ground_truth):
     """Company-wide gross emissions (±1%) and the highest-emitting business
     unit (exact) must match ground truth."""
     with open(SUMMARY_PATH) as f:
