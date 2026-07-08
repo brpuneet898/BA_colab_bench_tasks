@@ -576,3 +576,41 @@ def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_d
 
     assert not failures, "\n".join(failures)
 
+
+# ---------------------------------------------------------------------------
+# Test 11 — Scorecard sort order
+# ---------------------------------------------------------------------------
+
+def test_case_11_scorecard_sort_order(agent_scorecard):
+    """
+    The instruction mandates supplier_scorecard.csv be sorted by composite_score
+    ascending (nulls last), with supplier_id ascending as a tiebreaker within
+    the same score. This test reads the CSV in physical row order and verifies
+    the sort — value-correctness tests do not check row order.
+    """
+    assert agent_scorecard is not None
+    df = agent_scorecard.reset_index(drop=True)
+
+    null_indices     = df.index[df["composite_score"].isna()].tolist()
+    non_null_indices = df.index[df["composite_score"].notna()].tolist()
+
+    if null_indices and non_null_indices:
+        assert min(null_indices) > max(non_null_indices), (
+            "Rows with null composite_score must appear after all non-null rows "
+            "(nulls last). Found a null-score row before a non-null-score row."
+        )
+
+    non_null = df[df["composite_score"].notna()].reset_index(drop=True)
+    actual_order   = non_null["supplier_id"].tolist()
+    expected_order = (
+        non_null
+        .sort_values(["composite_score", "supplier_id"], ascending=[True, True])
+        ["supplier_id"]
+        .tolist()
+    )
+
+    assert actual_order == expected_order, (
+        "supplier_scorecard.csv is not sorted by composite_score ascending "
+        "(supplier_id ascending as tiebreaker). "
+        "The procurement team's worst-suppliers-first review depends on correct row order."
+    )
