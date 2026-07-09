@@ -2,23 +2,39 @@
 Q1 2024 Order Fulfillment Rate Report.
 
 line_id in order_lines.csv is a line number that resets to 1 within every
-order, so it is not globally unique across the dataset. shipments.csv
-references lines via (order_id, line_id) — joining on line_id alone would
+order, so it is not globally unique across the dataset. shipment_line_items
+references lines via (order_id, line_id) -- joining on line_id alone would
 create a many-to-many match across unrelated orders. The join key used
 throughout is always the (order_id, line_id) pair.
 
-Quantity fulfilled (net) per order line is the algebraic sum of every
-Shipment, Return, and Cancellation event recorded against that line,
-filtered to event_date <= REPORT_AS_OF. Summing only positive (Shipment)
-rows would overstate what the customer actually retained.
+Shipment activity is split across two files the way a real WMS documents
+it: shipment_headers.csv (one row per physical document -- warehouse,
+carrier, transaction_type, event_date) and shipment_line_items.csv (the
+order-line-level quantity detail), joined on shipment_id. shipment_id is
+only unique within a warehouse (each warehouse's system numbers its own
+shipments independently, restarting at 1), not globally -- joining on
+shipment_id alone fans line items out across every warehouse sharing that
+number. The join key is always (warehouse_id, shipment_id).
 
-shipments.csv also contains a fourth transaction_type, Backorder, recording
-quantity still awaiting fulfillment. It carries a positive quantity like a
-Shipment row, but represents goods not yet sent -- the customer has not
-received or kept anything against it. It must be excluded from quantity
-fulfilled (net); summing quantity across every transaction_type row instead
-of restricting to Shipment/Return/Cancellation overstates fulfillment by
-whatever was backordered.
+Quantity fulfilled (net) per order line nets every Shipment, Return, and
+Cancellation header recorded against that line, filtered to
+event_date <= REPORT_AS_OF. quantity in shipment_line_items.csv is always
+recorded as a positive count regardless of transaction_type (a WMS logs
+"12 units shipped" and "4 units returned" the same way), so whether a row
+adds to or subtracts from what the customer kept depends on
+transaction_type, not the sign of quantity itself: Shipment rows add,
+Return and Cancellation rows subtract. Summing quantity as-is (treating
+every row as additive) double-counts returns/cancellations as if they
+were further shipments and overstates what the customer actually
+retained.
+
+shipment_headers.csv also contains a fourth transaction_type, Backorder,
+recording quantity still awaiting fulfillment. It carries a positive
+quantity like a Shipment row, but represents goods not yet sent -- the
+customer has not received or kept anything against it. It must be excluded
+from quantity fulfilled (net); summing quantity across every
+transaction_type instead of restricting to Shipment/Return/Cancellation
+overstates fulfillment by whatever was backordered.
 
 Fulfillment region is the region of the warehouse assigned to the order
 (orders.assigned_warehouse_id -> warehouses.region), not the customer's own
@@ -47,8 +63,9 @@ def load_data():
     warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
-    shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["event_date"])
-    return warehouses, orders, order_lines, shipments
+    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
+    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+    return warehouses, orders, order_lines, headers, line_items
 
 
 def scope_order_lines(orders, order_lines, warehouses):
@@ -60,16 +77,30 @@ def scope_order_lines(orders, order_lines, warehouses):
     return scoped
 
 
-def net_fulfilled_by_line(scoped_lines, shipments):
-    """Net fulfilled quantity per (order_id, line_id), joined on the composite key."""
-    in_window = shipments[
-        (shipments["event_date"] <= REPORT_AS_OF)
-        & (shipments["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
-    ]
+NET_SIGN = {"Shipment": 1, "Return": -1, "Cancellation": -1}
+
+
+def net_fulfilled_by_line(scoped_lines, headers, line_items):
+    """Net fulfilled quantity per (order_id, line_id).
+
+    line_items is joined to headers on the composite (warehouse_id,
+    shipment_id) key -- shipment_id alone repeats across warehouses -- to
+    recover transaction_type and event_date, then filtered to the cutoff.
+    quantity is always positive regardless of transaction_type, so each
+    row is signed according to what its transaction_type means for the
+    customer (Shipment adds, Return/Cancellation subtract) before summing;
+    Backorder rows are dropped entirely (NET_SIGN has no entry for them).
+    """
+    events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
+    in_window = events[events["event_date"] <= REPORT_AS_OF].copy()
+    in_window["sign"] = in_window["transaction_type"].map(NET_SIGN)
+    in_window = in_window.dropna(subset=["sign"])
+    in_window["signed_quantity"] = in_window["quantity"] * in_window["sign"]
+
     matched = scoped_lines[["order_id", "line_id"]].merge(
-        in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
+        in_window[["order_id", "line_id", "signed_quantity"]], on=["order_id", "line_id"]
     )
-    return matched.groupby(["order_id", "line_id"])["quantity"].sum().reset_index(
+    return matched.groupby(["order_id", "line_id"])["signed_quantity"].sum().reset_index(
         name="quantity_fulfilled_net"
     )
 
@@ -94,10 +125,10 @@ def build_report(scoped_lines, fulfilled_by_line, warehouses):
 
 
 def main():
-    warehouses, orders, order_lines, shipments = load_data()
+    warehouses, orders, order_lines, headers, line_items = load_data()
 
     scoped_lines = scope_order_lines(orders, order_lines, warehouses)
-    fulfilled_by_line = net_fulfilled_by_line(scoped_lines, shipments)
+    fulfilled_by_line = net_fulfilled_by_line(scoped_lines, headers, line_items)
     report = build_report(scoped_lines, fulfilled_by_line, warehouses)
 
     report.to_csv(WORKSPACE_DIR / "region_fulfillment_report.csv", index=False)

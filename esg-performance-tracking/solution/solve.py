@@ -39,19 +39,36 @@ has since been superseded must also be dropped. The correct rule excludes
 ANY ledger row (verified_emission or emission_restatement) whose entry_id
 appears anywhere in the original_entry_id column, regardless of chain depth.
 
-Every Scope 2 verified_emission entry has a companion row for the same
+Most Scope 2 verified_emission entries have a companion row for the same
 facility, month, and emission source, distinguished only by a `method`
 column: one `location_based`, one `market_based`. These are two GHG
 Protocol accountings of the same physical activity, not two additive
 quantities — summing both roughly doubles Scope 2. Only the location-based
-method (or Scope 1 entries, which have no method distinction) counts toward
-the gross figure.
+method (or entries with no method value at all) counts toward the gross
+figure. A subset of facilities do not do dual-method reporting at all —
+their Scope 2 entries carry no method value, same convention as Scope 1.
+Filtering with a literal `method == "location_based"` (rather than
+`method.isna() | (method == "location_based")`) silently drops these
+facilities' entire Scope 2 figure.
 
 "Gross" Scope 1 / Scope 2 emissions means before any offsets or renewable
 energy certificates are netted in. transaction_type == "purchased_offset" /
 "renewable_energy_certificate" rows carry negative quantity_tco2e values;
 they must be excluded from the gross figure, not summed together with
 verified_emission/emission_restatement rows.
+
+A (business_unit_id, facility_id, quarter) combination qualifies for a report
+row whenever it has at least one attributable emissions_ledger.csv entry that
+quarter — not whenever it has at least one entry that survives into the gross
+figure. A quarter whose only attributable activity is an offset/REC row (or a
+fully-superseded restatement chain, or a market-based-only Scope 2 entry with
+no location-based/null companion) still qualifies, with gross_scope1_tco2e
+and gross_scope2_tco2e reported as 0.00. Deriving row existence straight from
+the gross-filtered dataframe (e.g. pivoting only the gross rows and treating
+that as the row set) silently drops these quarters instead of emitting an
+explicit zero row — the row scaffold must be built from the full attributable
+set, with the gross pivot left-joined onto it and missing values filled with
+0.0.
 """
 
 import json
@@ -130,7 +147,18 @@ def build_report(scoped_ledger):
         if col not in pivot.columns:
             pivot[col] = 0.0
 
-    report = pivot.reset_index()
+    # Row existence is governed by the full attributable set, not the
+    # gross-filtered one: a quarter whose only attributable activity is an
+    # offset/REC row (or a fully-superseded chain, or a market-based-only
+    # Scope 2 entry) has zero gross-eligible rows but still qualifies for an
+    # explicit report row. Scaffold from every attributable (bu, facility,
+    # quarter) combination and left-join the gross figures onto it.
+    scaffold = df[["business_unit_id", "facility_id", "quarter"]].drop_duplicates()
+    report = scaffold.merge(
+        pivot.reset_index(), on=["business_unit_id", "facility_id", "quarter"], how="left"
+    )
+    report["gross_scope1_tco2e"] = report["gross_scope1_tco2e"].fillna(0.0)
+    report["gross_scope2_tco2e"] = report["gross_scope2_tco2e"].fillna(0.0)
     report["total_gross_tco2e"] = report["gross_scope1_tco2e"] + report["gross_scope2_tco2e"]
 
     for col in ("gross_scope1_tco2e", "gross_scope2_tco2e", "total_gross_tco2e"):

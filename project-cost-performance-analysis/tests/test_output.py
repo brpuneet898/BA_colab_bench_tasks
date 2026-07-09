@@ -21,11 +21,16 @@ Headroom mechanisms tested:
   Trap 3 — Dual-baseline renegotiation (CSV order != effective-date precedence).
             10 WPs have two approved baseline rows; original lower-BAC written FIRST.
 
-  Trap 4 — Commitment exclusion from Actual Cost  [DOMAIN REASONING]
-            actuals.csv carries transaction_type: "actual" rows are incurred costs
-            (include in AC); "commitment" rows are purchase orders not yet invoiced
-            (exclude from AC).  A model summing all cost_amount_usd without filtering
-            transaction_type will overstate AC, distorting CPI and EAC portfolio-wide.
+  Trap 4a — Superseded invoice double-count  [SILENT DOUBLE-SUM]
+            actuals.csv carries revision_status: "current" (valid) vs "superseded"
+            (original erroneous entry, since replaced). 40 pairs share the same
+            invoice_number. A naive groupby().sum() includes both rows, inflating AC.
+            Correct: filter revision_status == "current" before aggregating.
+
+  Trap 4b — Cancelled postings included in net cost  [SILENT INFLATION]
+            actuals.csv carries posting_status: "posted" (active) vs "cancelled"
+            (voided before execution). ~35 rows are cancelled. A naive sum includes
+            them, overstating AC. Correct: filter posting_status == "posted".
 """
 
 import json
@@ -79,7 +84,8 @@ def _compute_ac(actuals):
     ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
     in_period = ac[
         (ac["billing_period_date"] <= REPORTING_DATE) &
-        (ac["transaction_type"] != "commitment")
+        (ac["revision_status"] == "current") &
+        (ac["posting_status"] == "posted")
     ]
     return (
         in_period
@@ -194,7 +200,7 @@ def agent_summary():
 # ---------------------------------------------------------------------------
 
 def test_01_input_sentinels(raw_data):
-    """Verify canonical inputs and all four trap signals are present."""
+    """Verify canonical inputs and all trap signals are present."""
     wp, bl, ac, pr, pv = raw_data
     assert len(wp) == 200
     assert wp["project_id"].nunique() == 5
@@ -220,9 +226,14 @@ def test_01_input_sentinels(raw_data):
         f"Trap 1: expected >=10 WPs with dual March progress entries, got {dual_prog}"
     )
 
-    commitment_count = (ac["transaction_type"] == "commitment").sum()
-    assert commitment_count >= 500, (
-        f"Trap 4: expected >=500 commitment rows in actuals, got {commitment_count}"
+    superseded_count = (ac["revision_status"] == "superseded").sum()
+    assert superseded_count >= 30, (
+        f"Trap 4a: expected >=30 superseded invoice rows in actuals, got {superseded_count}"
+    )
+
+    cancelled_count = (ac["posting_status"] == "cancelled").sum()
+    assert cancelled_count >= 25, (
+        f"Trap 4b: expected >=25 cancelled posting rows in actuals, got {cancelled_count}"
     )
 
 
@@ -472,40 +483,40 @@ def test_08_trap3_eac_cascade(agent_report, expected, raw_data):
 
 
 # ---------------------------------------------------------------------------
-# Test 09 — [Trap 4] AC excludes commitment rows
+# Test 09 — [Trap 4a] AC excludes superseded invoice rows
 # ---------------------------------------------------------------------------
 
-def test_09_trap4_ac_excludes_commitments(agent_report, expected, raw_data):
+def test_09_trap4a_ac_excludes_superseded_invoices(agent_report, expected, raw_data):
     """
-    Trap 4 — actuals.csv carries transaction_type: "actual" rows are incurred
-    costs (include in AC); "commitment" rows are PO obligations not yet invoiced
-    (exclude from AC).  For WPs where commitment rows carry a non-trivial amount,
-    the agent's ac_usd must match the oracle (which excludes commitments), not
-    the inflated total that includes them.
+    Trap 4a — actuals.csv carries revision_status: "superseded" rows are the
+    original erroneous submissions that were replaced by a corrected "current"
+    entry sharing the same invoice_number.  Both rows appear in the file; a naive
+    groupby().sum() double-counts the superseded amount, inflating AC.
+    Correct: filter revision_status == "current" before aggregating.
+    This test spot-checks WPs where the superseded invoice load is material.
     """
     _, _, actuals, _, _ = raw_data
     ac = actuals.copy()
     ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
     in_period = ac[ac["billing_period_date"] <= REPORTING_DATE]
 
-    commitment_by_wp = (
-        in_period[in_period["transaction_type"] == "commitment"]
+    sup_by_wp = (
+        in_period[in_period["revision_status"] == "superseded"]
         .groupby(["project_id", "work_package_id"])["cost_amount_usd"]
         .sum()
         .reset_index()
-        .rename(columns={"cost_amount_usd": "commitment_usd"})
+        .rename(columns={"cost_amount_usd": "superseded_usd"})
     )
-    # Focus on WPs where the commitment load is material (>$5k)
-    material = commitment_by_wp[commitment_by_wp["commitment_usd"] > 5_000].head(15)
+    material = sup_by_wp[sup_by_wp["superseded_usd"] > 3_000].head(15)
 
     failures = []
     for _, key in material.iterrows():
         pid, wp_id = key["project_id"], key["work_package_id"]
-        exp_ac  = float(
+        exp_ac = float(
             expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
             ["ac_usd"].iloc[0]
         )
-        inflated_ac = exp_ac + float(key["commitment_usd"])
+        inflated_ac = exp_ac + float(key["superseded_usd"])
 
         act = agent_report[
             (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
@@ -514,13 +525,15 @@ def test_09_trap4_ac_excludes_commitments(agent_report, expected, raw_data):
             failures.append(f"({pid}, {wp_id}): not found")
             continue
         act_ac = float(act["ac_usd"].iloc[0])
-        if math.isclose(act_ac, inflated_ac, rel_tol=0.02):
+        if math.isclose(act_ac, exp_ac, rel_tol=0.001):
+            pass  # correct
+        elif math.isclose(act_ac, inflated_ac, rel_tol=0.02):
             failures.append(
-                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f} matches inflated total "
-                f"(incurred {exp_ac:,.2f} + commitments {key['commitment_usd']:,.2f}). "
-                "Exclude transaction_type='commitment' rows from AC."
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f} matches double-counted total "
+                f"(net {exp_ac:,.2f} + superseded {key['superseded_usd']:,.2f}). "
+                "Filter revision_status='current' before summing."
             )
-        elif not math.isclose(act_ac, exp_ac, rel_tol=0.03):
+        else:
             failures.append(
                 f"({pid}, {wp_id}): ac_usd={act_ac:,.2f}, expected {exp_ac:,.2f}."
             )
@@ -528,38 +541,81 @@ def test_09_trap4_ac_excludes_commitments(agent_report, expected, raw_data):
 
 
 # ---------------------------------------------------------------------------
-# Test 10 — [Trap 4] Portfolio CPI distorted by included commitments
+# Test 10 — [Trap 4b] AC excludes cancelled posting rows; portfolio CPI net
 # ---------------------------------------------------------------------------
 
-def test_10_trap4_portfolio_cpi_not_distorted(agent_summary, expected, raw_data):
+def test_10_trap4b_ac_excludes_cancelled_and_portfolio_cpi(
+        agent_report, agent_summary, expected, raw_data):
     """
-    Trap 4 — Including commitment rows inflates total_ac_usd portfolio-wide,
-    understating portfolio CPI.
+    Trap 4b — actuals.csv carries posting_status: "cancelled" rows represent
+    postings that were voided before execution and must not appear in net AC.
+    A naive sum includes them, overstating AC and suppressing portfolio CPI.
+    This test verifies both WP-level AC exclusion and portfolio-level accuracy.
     """
     _, _, actuals, _, _ = raw_data
     ac = actuals.copy()
     ac["billing_period_date"] = pd.to_datetime(ac["billing_period_date"])
     in_period = ac[ac["billing_period_date"] <= REPORTING_DATE]
 
-    total_commitments = float(
-        in_period[in_period["transaction_type"] == "commitment"]["cost_amount_usd"].sum()
+    cancel_by_wp = (
+        in_period[in_period["posting_status"] == "cancelled"]
+        .groupby(["project_id", "work_package_id"])["cost_amount_usd"]
+        .sum()
+        .reset_index()
+        .rename(columns={"cost_amount_usd": "cancelled_usd"})
     )
-    assert total_commitments > 500_000, (
-        f"Total commitment amount {total_commitments:,.2f} too small — trap may be missing."
+    total_cancelled = float(cancel_by_wp["cancelled_usd"].sum())
+    assert total_cancelled > 100_000, (
+        f"Total cancelled amount {total_cancelled:,.2f} too small — trap may be missing."
     )
 
+    # WP-level spot-check
+    material = cancel_by_wp[cancel_by_wp["cancelled_usd"] > 5_000].head(15)
+    failures = []
+    for _, key in material.iterrows():
+        pid, wp_id = key["project_id"], key["work_package_id"]
+        exp_ac = float(
+            expected[(expected["project_id"] == pid) & (expected["work_package_id"] == wp_id)]
+            ["ac_usd"].iloc[0]
+        )
+        inflated_ac = exp_ac + float(key["cancelled_usd"])
+
+        act = agent_report[
+            (agent_report["project_id"] == pid) & (agent_report["work_package_id"] == wp_id)
+        ]
+        if act.empty:
+            failures.append(f"({pid}, {wp_id}): not found")
+            continue
+        act_ac = float(act["ac_usd"].iloc[0])
+        if math.isclose(act_ac, exp_ac, rel_tol=0.001):
+            pass  # correct
+        elif math.isclose(act_ac, inflated_ac, rel_tol=0.02):
+            failures.append(
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f} matches inflated total "
+                f"(net {exp_ac:,.2f} + cancelled {key['cancelled_usd']:,.2f}). "
+                "Filter posting_status='posted' before summing."
+            )
+        else:
+            failures.append(
+                f"({pid}, {wp_id}): ac_usd={act_ac:,.2f}, expected {exp_ac:,.2f}."
+            )
+
+    # Portfolio-level check
     exp_ac  = round(float(expected["ac_usd"].sum()), 2)
     exp_ev  = round(float(expected["ev_usd"].sum()), 2)
     exp_cpi = round(exp_ev / exp_ac, 4) if exp_ac > 0 else 0.0
-
     act_ac  = float(agent_summary["total_ac_usd"])
     act_cpi = float(agent_summary["portfolio_cpi"])
 
-    assert math.isclose(act_ac, exp_ac, rel_tol=0.03), (
-        f"total_ac_usd {act_ac:,.2f} != expected {exp_ac:,.2f} "
-        f"(portfolio commitments total {total_commitments:,.2f}). "
-        "Exclude transaction_type='commitment' rows from AC."
-    )
-    assert math.isclose(act_cpi, exp_cpi, abs_tol=0.05), (
-        f"portfolio_cpi {act_cpi:.4f} != expected {exp_cpi:.4f}."
-    )
+    if not math.isclose(act_ac, exp_ac, rel_tol=0.03):
+        failures.append(
+            f"total_ac_usd {act_ac:,.2f} != expected {exp_ac:,.2f} "
+            f"(cancelled postings total {total_cancelled:,.2f}). "
+            "Exclude posting_status='cancelled' rows from AC."
+        )
+    if not math.isclose(act_cpi, exp_cpi, abs_tol=0.05):
+        failures.append(
+            f"portfolio_cpi {act_cpi:.4f} != expected {exp_cpi:.4f}."
+        )
+
+    assert not failures, "\n".join(failures)

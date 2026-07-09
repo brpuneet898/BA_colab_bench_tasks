@@ -14,13 +14,14 @@ All input files are located in `/workspace/data/`:
 | `carriers.csv` | Carrier master data (reference only) |
 | `orders.csv` | Orders placed between 2023-10-01 and 2024-06-30, each assigned to a fulfilling warehouse via `assigned_warehouse_id` |
 | `order_lines.csv` | Line items for each order in `orders.csv`. Columns: `order_id`, `line_id`, `product_id`, `quantity_ordered`, `unit_price`, `discount_pct`, `line_status`, `created_at` |
-| `shipments.csv` | Fulfillment-related events recorded against order lines, each carrying a `transaction_type`, a `quantity`, and an `event_date` |
+| `shipment_headers.csv` | One row per fulfillment document. Columns: `warehouse_id`, `shipment_id`, `carrier_id`, `transaction_type`, `event_date`, `tracking_number`, `freight_cost`, `carrier_service_level`, `created_at` |
+| `shipment_line_items.csv` | Order-line-level quantity detail for documents in `shipment_headers.csv`. Columns: `warehouse_id`, `shipment_id`, `order_id`, `line_id`, `quantity` |
 
 ## Scope
 
 Include all orders where `order_date` falls within Q1 2024 (2024-01-01 to 2024-03-31, inclusive). A fulfillment region is the `region` of the warehouse assigned to the order via `assigned_warehouse_id`.
 
-This report is generated as of **2024-04-15**. For each in-scope order line, only shipment, return, and cancellation events with `event_date` on or before 2024-04-15 are reflected — activity recorded after that date is not yet part of this report.
+This report is generated as of **2024-04-15**. For each in-scope order line, only fulfillment activity with `event_date` on or before 2024-04-15 is reflected — activity recorded after that date is not yet part of this report.
 
 ## Metrics
 
@@ -28,7 +29,7 @@ Compute the following for each region in `warehouses.csv`.
 
 **Quantity ordered**: for each in-scope order line, its `quantity_ordered`. Sum this across all in-scope order lines belonging to that region.
 
-**Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer ends up keeping as of the 2024-04-15 cutoff, considering every shipment, return, and cancellation event recorded against it through that date. Sum this across all in-scope order lines belonging to that region.
+**Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer has actually received and kept as of the 2024-04-15 cutoff, net of anything later returned or cancelled. Sum this across all in-scope order lines belonging to that region.
 
 **Fill rate** = quantity fulfilled (net) / quantity ordered, rounded to 4 decimal places.
 

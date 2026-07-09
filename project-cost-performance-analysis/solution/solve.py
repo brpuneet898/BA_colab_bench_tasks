@@ -59,16 +59,16 @@ applicable_bac  = valid_baselines.drop_duplicates(
 
 # ---------------------------------------------------------------------------
 # AC: sum cost_amount_usd per (project_id, work_package_id)
-#     where billing_period_date <= REPORTING_DATE and transaction_type != "commitment"
-#
-# Commitments are purchase orders not yet invoiced — future obligations, not
-# incurred costs.  EVM AC excludes them.
+#     where billing_period_date <= REPORTING_DATE
+#       AND revision_status == "current"   (exclude superseded / replaced invoices)
+#       AND posting_status  == "posted"    (exclude cancelled / voided postings)
 # ---------------------------------------------------------------------------
 
 actuals["billing_period_date"] = pd.to_datetime(actuals["billing_period_date"])
 in_period = actuals[
     (actuals["billing_period_date"] <= REPORTING_DATE) &
-    (actuals["transaction_type"] != "commitment")
+    (actuals["revision_status"] == "current") &
+    (actuals["posting_status"] == "posted")
 ]
 ac_df = (
     in_period
