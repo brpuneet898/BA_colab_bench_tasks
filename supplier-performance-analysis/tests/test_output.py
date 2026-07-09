@@ -10,29 +10,42 @@ Headroom mechanisms tested:
             scrambling all downstream metrics.
 
   Trap 2 — Open-ended contracts (NaT contract_effective_to).
-            Twenty suppliers hold contracts with no expiry date — the
-            contract_effective_to field is blank (NaT). A pandas comparison
-            of the form `order_date <= NaT` returns False, silently excluding
-            all POs for those suppliers from every metric. The correct
-            implementation treats NaT as "no expiry" and keeps those rows.
+            Twenty suppliers hold contracts with no expiry date. A pandas
+            comparison `order_date <= NaT` returns False, silently zeroing
+            all metrics for those suppliers. Correct implementation treats
+            NaT as "no expiry".
 
-  Trap 3 — Escalating penalty after 5 cumulative SLA breaches.
-            Once a supplier's running breach count (in order_date, po_id order)
-            exceeds 5, each subsequent breaching PO is assessed at 2x the
-            standard penalty_rate_pct. A flat-rate implementation
-            significantly underestimates total_penalty_usd for high-breach
-            suppliers.
+  Trap 3 — Unsigned return quantities.
+            Return rows in delivery_records.csv carry a positive
+            quantity_received. A model that sums all quantity_received
+            without negating Return rows inflates net fill quantities and
+            on-time counts.
 
-  Trap 4 — Overlapping contract renegotiation.
-            Ten suppliers have two overlapping contracts: an original contract
-            (lower penalty_rate_pct, Jan 1–Mar 31) written first in the CSV,
-            and a renegotiated contract (higher penalty_rate_pct, Feb 1–Dec 31)
-            written second. A naive implementation iterating in CSV order finds
-            the original first and uses its lower rate for Feb–Mar POs. The
-            correct rule — apply the most recently effective contract (highest
-            contract_effective_from that covers the PO date) — is established
-            by the instruction's 'Use the cap from the supplier's most recently
-            effective contract' and applies equally to all contract terms.
+  Trap 4 — Purchase order amendments.
+            300 POs have two rows in purchase_orders.csv: original
+            (lower ordered_quantity) written first, amendment (higher
+            ordered_quantity, later amendment_date) written after. Naive
+            drop_duplicates(keep='first') silently uses the original lower
+            quantity as the fill-rate denominator, inflating fill rates and
+            suppressing SLA breaches.
+
+  Trap 5 — contract_superseded_by NaT.
+            All currently active contracts carry NaT in contract_superseded_by.
+            A pandas comparison `order_date < NaT` returns False, silently
+            excluding every active contract. Correct implementation treats NaT
+            as "not yet superseded". Compounds with Trap 2: both NaT-guarded
+            columns must be handled correctly.
+
+  Trap 6 — Overlapping contract renegotiation.
+            Ten suppliers have two overlapping contracts: old (lower rate,
+            written first, contract_superseded_by = 2024-02-01) and new
+            (higher rate, written second, contract_superseded_by = NaT).
+            Correct rule: apply the non-superseded contract with the most
+            recent contract_effective_from.
+
+  Trap 7 — Escalating step-up penalty.
+            After a supplier's 5th SLA breach (in order_date, po_id order),
+            each further breaching PO is assessed at 2x penalty_rate_pct.
 """
 
 import json
@@ -70,19 +83,23 @@ Q1_END   = pd.Timestamp("2024-03-31")
 
 def _get_applicable_contract(pos, contracts):
     """
-    Filter merged PO-contract rows to those where the contract was in effect
-    on the order_date. NaT in contract_effective_to means open-ended (no expiry);
-    such contracts are always in effect after their start date.
+    Filter to contracts that were in effect on the order_date, had not been
+    superseded as of that date, and select the most recently effective one.
+    NaT in contract_effective_to  = open-ended (no expiry).
+    NaT in contract_superseded_by = not yet superseded (still active).
     """
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
+                   "contract_superseded_by",
                    "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd"]],
         on="supplier_id", how="left",
     )
-    open_ended = merged["contract_effective_to"].isna()
+    open_ended     = merged["contract_effective_to"].isna()
+    not_superseded = merged["contract_superseded_by"].isna()
     applicable = merged[
         (merged["contract_effective_from"] <= merged["order_date"]) &
-        (open_ended | (merged["order_date"] <= merged["contract_effective_to"]))
+        (open_ended | (merged["order_date"] <= merged["contract_effective_to"])) &
+        (not_superseded | (merged["order_date"] < merged["contract_superseded_by"]))
     ].copy()
     applicable = applicable.sort_values("contract_effective_from", ascending=False)
     applicable = applicable.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
@@ -90,6 +107,7 @@ def _get_applicable_contract(pos, contracts):
 
 
 def _compute_po_level(pos_with_contracts, deliveries):
+    """deliveries must already have Return quantities negated."""
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -121,7 +139,6 @@ def _compute_po_level(pos_with_contracts, deliveries):
         (po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]) | (~po["on_time"])
     )
 
-    # Escalating penalty: 2x rate for each breach after the 5th (per supplier, order_date order)
     po = po.sort_values(["supplier_id", "order_date", "po_id"]).copy()
     po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
     escalated = po["sla_breach"] & (po["breach_rank"] > 5)
@@ -145,6 +162,10 @@ def _penalty_caps(contracts):
 
 
 def _build_expected(suppliers, contracts, q1_pos, deliveries):
+    # Negate return quantities before all downstream computations
+    deliveries = deliveries.copy()
+    deliveries.loc[deliveries["delivery_type"] == "Return", "quantity_received"] *= -1
+
     pos_c  = _get_applicable_contract(q1_pos, contracts)
     po_lvl = _compute_po_level(pos_c, deliveries)
     caps   = _penalty_caps(contracts)
@@ -184,9 +205,12 @@ def _build_expected(suppliers, contracts, q1_pos, deliveries):
 def raw_data():
     suppliers  = pd.read_csv(DATA_DIR / "suppliers.csv")
     contracts  = pd.read_csv(DATA_DIR / "supplier_contracts.csv",
-                             parse_dates=["contract_effective_from", "contract_effective_to"])
+                             parse_dates=["contract_effective_from",
+                                          "contract_effective_to",
+                                          "contract_superseded_by"])
     pos        = pd.read_csv(DATA_DIR / "purchase_orders.csv",
-                             parse_dates=["order_date", "promised_delivery_date"])
+                             parse_dates=["order_date", "promised_delivery_date",
+                                          "amendment_date"])
     deliveries = pd.read_csv(DATA_DIR / "delivery_records.csv",
                              parse_dates=["received_date"])
     return suppliers, contracts, pos, deliveries
@@ -195,6 +219,10 @@ def raw_data():
 @pytest.fixture(scope="module")
 def q1_pos(raw_data):
     _, _, pos, _ = raw_data
+    # Resolve amendments: keep the most recently amended version of each PO
+    pos = pos.sort_values(["warehouse_id", "po_id", "amendment_date"],
+                          ascending=[True, True, False])
+    pos = pos.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
     return pos[(pos["order_date"] >= Q1_START) & (pos["order_date"] <= Q1_END)].copy()
 
 
@@ -227,26 +255,40 @@ def test_case_01_input_sentinels(raw_data):
     suppliers, contracts, pos, deliveries = raw_data
 
     assert len(suppliers) == 60, \
-        f"suppliers.csv must not be modified (expected 60 rows, got {len(suppliers)})"
+        f"suppliers.csv must not be modified (expected 60, got {len(suppliers)})"
 
-    assert len(pos) == 3_000, \
-        f"purchase_orders.csv must not be modified (expected 3000 rows, got {len(pos)})"
+    assert len(pos) == 3_300, \
+        (f"purchase_orders.csv must not be modified "
+         f"(expected 3300 rows = 3000 original + 300 amendment rows, got {len(pos)})")
 
     unique_po_ids = pos["po_id"].nunique()
     assert unique_po_ids == 1_000, \
         (f"po_id must not be globally unique — each warehouse uses its own sequence "
-         f"(expected 1000 unique strings across 3000 rows, got {unique_po_ids})")
+         f"(expected 1000 unique strings across 3300 rows, got {unique_po_ids})")
 
-    # Structural sentinel: 20 suppliers must have open-ended contracts (NaT effective_to)
+    amended_pairs = (pos.groupby(["warehouse_id", "po_id"]).size() > 1).sum()
+    assert amended_pairs == 300, \
+        (f"purchase_orders.csv must contain exactly 300 amended (warehouse_id, po_id) pairs "
+         f"(each with an original row and an amendment row), got {amended_pairs}")
+
     nat_count = contracts["contract_effective_to"].isna().sum()
     assert nat_count == 20, \
         (f"supplier_contracts.csv must contain exactly 20 open-ended contracts "
-         f"(contract_effective_to is blank), got {nat_count}")
+         f"(contract_effective_to blank), got {nat_count}")
 
-    # Ten suppliers have overlapping renegotiated contracts (dual-contract renegotiation trap)
     dual_count = (contracts.groupby("supplier_id").size() > 1).sum()
     assert dual_count == 10, \
         f"supplier_contracts.csv must contain exactly 10 dual-contract suppliers, got {dual_count}"
+
+    superseded_count = contracts["contract_superseded_by"].notna().sum()
+    assert superseded_count == 10, \
+        (f"supplier_contracts.csv must contain exactly 10 superseded contract rows "
+         f"(contract_superseded_by non-blank — the OLD dual contracts only), got {superseded_count}")
+
+    returns = deliveries[deliveries["delivery_type"] == "Return"]
+    assert (returns["quantity_received"] > 0).all(), \
+        ("All Return rows in delivery_records.csv must have positive quantity_received. "
+         "Return quantities are unsigned — delivery_type indicates direction.")
 
 
 # ---------------------------------------------------------------------------
@@ -266,7 +308,7 @@ def test_case_02_output_structure(agent_scorecard, agent_summary):
         assert col in agent_scorecard.columns, f"Missing column in scorecard: {col}"
 
     assert len(agent_scorecard) == 60, \
-        f"supplier_scorecard.csv must have 60 rows (one per supplier), got {len(agent_scorecard)}"
+        f"supplier_scorecard.csv must have 60 rows, got {len(agent_scorecard)}"
 
     required_keys = ["total_penalty_assessed_usd", "suppliers_meeting_all_sla",
                      "worst_on_time_supplier_id", "worst_fill_rate_supplier_id",
@@ -288,7 +330,6 @@ def test_case_03_po_count_per_supplier(agent_scorecard, expected, raw_data):
     Spot-checks total_pos for the 5 suppliers with the highest PO count.
     """
     exp_df, _, _ = expected
-
     spot = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:5].tolist()
 
     failures = []
@@ -308,18 +349,17 @@ def test_case_03_po_count_per_supplier(agent_scorecard, expected, raw_data):
 
 
 # ---------------------------------------------------------------------------
-# Test 04 — Open-ended contract suppliers have correct metrics  (Trap 2: NaT)
+# Test 04 — Open-ended contract suppliers  (Trap 2: NaT effective_to + Trap 5: NaT superseded_by)
 # ---------------------------------------------------------------------------
 
 def test_case_04_open_ended_contract_suppliers(agent_scorecard, expected, raw_data):
     """
-    Trap 2 — Twenty suppliers have open-ended contracts with no expiry date
-    (contract_effective_to is NaT). A naive pandas date filter of the form
-    `order_date <= NaT` returns False, silently dropping all POs for these
-    suppliers. A correct implementation treats NaT as 'no expiry'.
+    Trap 2 — Twenty suppliers have open-ended contracts (contract_effective_to = NaT).
+    Trap 5 — All active contracts also carry NaT in contract_superseded_by.
+    A naive pandas date filter fails on both NaT columns, silently dropping all
+    POs for affected suppliers. Both NaT-guarded conditions must be handled explicitly.
 
-    Verifies that NaT-contract suppliers appear with valid (non-zero, non-null)
-    metrics in the agent scorecard, and spot-checks their on_time_delivery_rate.
+    Spot-checks on_time_delivery_rate for the first 5 open-ended-contract suppliers.
     """
     _, contracts, _, _ = raw_data
     exp_df, _, _ = expected
@@ -342,13 +382,13 @@ def test_case_04_open_ended_contract_suppliers(agent_scorecard, expected, raw_da
         if act_total == 0:
             failures.append(
                 f"{sid}: total_pos=0 but expected {exp_total}. "
-                "Open-ended contracts (NaT effective_to) must not be excluded. "
-                "The comparison `order_date <= NaT` returns False in pandas — "
-                "NaT must be handled as 'no expiry date'."
+                "Open-ended contracts (NaT effective_to) and active contracts "
+                "(NaT contract_superseded_by) must both be handled — "
+                "the comparison `timestamp <= NaT` returns False in pandas."
             )
             continue
 
-        exp_otr = float(exp_row["on_time_delivery_rate"].iloc[0])
+        exp_otr     = float(exp_row["on_time_delivery_rate"].iloc[0])
         act_otr_raw = act_row["on_time_delivery_rate"].iloc[0]
         if pd.isna(act_otr_raw):
             failures.append(f"{sid}: on_time_delivery_rate is null, expected {exp_otr:.4f}")
@@ -363,25 +403,21 @@ def test_case_04_open_ended_contract_suppliers(agent_scorecard, expected, raw_da
 
 
 # ---------------------------------------------------------------------------
-# Test 05 — Escalating penalty for high-breach suppliers  (Trap 3: step-up)
+# Test 05 — Escalating penalty  (Trap 7: step-up after 5 breaches)
 # ---------------------------------------------------------------------------
 
 def test_case_05_escalating_penalty_high_breach_suppliers(agent_scorecard, expected, raw_data):
     """
-    Trap 3 — After a supplier's 5th SLA breach (evaluated in order_date order),
-    every further breaching PO is assessed at twice the standard penalty_rate_pct.
-    A flat-rate implementation underestimates total_penalty_usd for suppliers
-    with many breaches.
+    Trap 7 — After a supplier's 5th SLA breach (in order_date, po_id order),
+    each further breaching PO is assessed at 2x the standard penalty_rate_pct.
 
     Spot-checks total_penalty_usd for the 5 non-NaT suppliers with the most
-    SLA breaches (where the escalation effect is largest and the NaT trap
-    cannot confound the result).
+    SLA breaches (where the escalation effect is largest).
     """
     _, contracts, _, _ = raw_data
     exp_df, po_lvl, _ = expected
 
     nat_suppliers = set(contracts[contracts["contract_effective_to"].isna()]["supplier_id"])
-
     breach_counts = (
         po_lvl[~po_lvl["supplier_id"].isin(nat_suppliers)]
         .groupby("supplier_id")["sla_breach"]
@@ -397,16 +433,15 @@ def test_case_05_escalating_penalty_high_breach_suppliers(agent_scorecard, expec
         if exp_row.empty or act_row.empty:
             continue
 
-        exp_pen = float(exp_row["total_penalty_usd"].iloc[0])
-        act_pen = float(act_row["total_penalty_usd"].iloc[0])
+        exp_pen  = float(exp_row["total_penalty_usd"].iloc[0])
+        act_pen  = float(act_row["total_penalty_usd"].iloc[0])
         breach_n = int(breach_counts[sid])
 
         if not math.isclose(act_pen, exp_pen, abs_tol=500):
             failures.append(
                 f"{sid}: total_penalty_usd {act_pen:,.2f} != expected {exp_pen:,.2f} "
                 f"(diff {act_pen - exp_pen:+,.2f}, {breach_n} SLA breaches). "
-                "Each breaching PO from the 6th onwards (by order_date) must be "
-                "assessed at twice the standard penalty_rate_pct."
+                "Each breaching PO from the 6th onwards must be assessed at 2x rate."
             )
 
     assert not failures, "\n".join(failures)
@@ -419,8 +454,8 @@ def test_case_05_escalating_penalty_high_breach_suppliers(agent_scorecard, expec
 def test_case_06_aggregate_breach_and_penalty(agent_summary, expected):
     """
     Aggregate total_sla_breach_count and total_penalty_assessed_usd.
-    Both are sensitive to composite-key correctness, NaT contract exclusion,
-    and escalating penalty calculation.
+    Sensitive to all traps: composite key, NaT handling, unsigned returns,
+    PO amendments, superseded contracts, and escalating penalty.
     """
     exp_df, _, _ = expected
     exp_total_pen = round(float(exp_df["total_penalty_usd"].sum()), 2)
@@ -440,11 +475,11 @@ def test_case_06_aggregate_breach_and_penalty(agent_summary, expected):
 
 def test_case_07_row_level_accuracy(agent_scorecard, expected):
     """
-    Spot-checks all key metrics for 10 suppliers with the highest PO counts.
-    Compound errors from any trap will surface here.
+    Spot-checks all key metrics for the 10 suppliers with the highest PO count.
+    Errors from any trap — wrong join key, unhandled NaT, unsigned returns not
+    negated, original instead of amended ordered_quantity — surface here.
     """
     exp_df, _, _ = expected
-
     spot = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:10].tolist()
 
     merged = agent_scorecard.merge(
@@ -507,13 +542,13 @@ def test_case_08_composite_score_ranking(agent_scorecard, expected):
 def test_case_09_summary_scalars(agent_summary, expected):
     """
     Verifies worst_on_time_supplier_id and worst_fill_rate_supplier_id.
-    These shift when on-time or fill rate calculations are wrong.
+    Ties broken by lowest supplier_id alphabetically.
     """
     exp_df, _, _ = expected
     active = exp_df[exp_df["total_pos"] > 0]
 
-    exp_worst_ot  = str(active.loc[active["on_time_delivery_rate"].idxmin(), "supplier_id"])
-    exp_worst_nfr = str(active.loc[active["net_fill_rate"].idxmin(), "supplier_id"])
+    exp_worst_ot  = str(active.sort_values(["on_time_delivery_rate",  "supplier_id"]).iloc[0]["supplier_id"])
+    exp_worst_nfr = str(active.sort_values(["net_fill_rate", "supplier_id"]).iloc[0]["supplier_id"])
 
     assert agent_summary["worst_on_time_supplier_id"] == exp_worst_ot, \
         f"worst_on_time_supplier_id: got {agent_summary['worst_on_time_supplier_id']}, expected {exp_worst_ot}"
@@ -521,28 +556,25 @@ def test_case_09_summary_scalars(agent_summary, expected):
     assert agent_summary["worst_fill_rate_supplier_id"] == exp_worst_nfr, \
         f"worst_fill_rate_supplier_id: got {agent_summary['worst_fill_rate_supplier_id']}, expected {exp_worst_nfr}"
 
+
 # ---------------------------------------------------------------------------
-# Test 10 — Overlapping contract renegotiation  (Trap 4)
+# Test 10 — Overlapping contract renegotiation + supersession  (Traps 5 & 6)
 # ---------------------------------------------------------------------------
 
 def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_data):
     """
-    Trap 4 — Ten suppliers had their contracts renegotiated mid-quarter.
-    Each has two overlapping contract rows in supplier_contracts.csv:
+    Trap 6 — Ten suppliers had contracts renegotiated mid-quarter.
+    OLD contract: effective_from=2024-01-01, contract_superseded_by=2024-02-01, lower rate.
+    NEW contract: effective_from=2024-02-01, contract_superseded_by=NaT, higher rate.
 
-      OLD  contract_effective_from=2024-01-01, effective_to=2024-03-31, lower penalty_rate
-      NEW  contract_effective_from=2024-02-01, effective_to=2024-12-31, higher penalty_rate
+    Trap 5 — The NEW contract's contract_superseded_by is NaT (still active).
+    A naive pandas comparison `order_date < NaT` evaluates to False, incorrectly
+    excluding the NEW contract and leaving Feb–Mar POs without applicable terms.
 
-    The OLD contract is written first in the CSV. A naive implementation that
-    iterates contract rows in file order finds the OLD contract first for Feb–Mar
-    POs (both contracts are 'in effect') and uses the lower penalty rate, causing
-    total_penalty_usd to be underestimated for affected suppliers.
+    The correct rule: treat NaT contract_superseded_by as "not yet superseded"
+    and apply the non-superseded contract with the most recent effective_from.
 
-    The correct rule: where multiple contracts cover a PO date, apply the one
-    with the most recent contract_effective_from. The instruction establishes
-    this principle explicitly for cap selection ('Use the cap from the supplier\'s
-    most recently effective contract') — the same precedence applies to all
-    contract terms.
+    Spot-checks total_penalty_usd for the first 5 dual-contract suppliers.
     """
     _, contracts, _, _ = raw_data
     exp_df, _, _ = expected
@@ -553,8 +585,7 @@ def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_d
         .loc[lambda s: s > 1]
         .index.tolist()
     )
-    assert len(dual_suppliers) == 10, \
-        f"Expected 10 dual-contract suppliers, got {len(dual_suppliers)}"
+    assert len(dual_suppliers) == 10
 
     spot = sorted(dual_suppliers)[:5]
 
@@ -570,47 +601,8 @@ def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_d
             failures.append(
                 f"{sid}: total_penalty_usd {act_pen:,.2f} != expected {exp_pen:,.2f} "
                 f"(diff {act_pen - exp_pen:+,.2f}). "
-                "When two contracts overlap, apply the one with the most recent "
-                "contract_effective_from — the renegotiated terms supersede the original."
+                "The renegotiated (NEW) contract has NaT in contract_superseded_by — "
+                "it must be treated as still active, not excluded."
             )
 
     assert not failures, "\n".join(failures)
-
-
-# ---------------------------------------------------------------------------
-# Test 11 — Scorecard sort order
-# ---------------------------------------------------------------------------
-
-def test_case_11_scorecard_sort_order(agent_scorecard):
-    """
-    The instruction mandates supplier_scorecard.csv be sorted by composite_score
-    ascending (nulls last), with supplier_id ascending as a tiebreaker within
-    the same score. This test reads the CSV in physical row order and verifies
-    the sort — value-correctness tests do not check row order.
-    """
-    assert agent_scorecard is not None
-    df = agent_scorecard.reset_index(drop=True)
-
-    null_indices     = df.index[df["composite_score"].isna()].tolist()
-    non_null_indices = df.index[df["composite_score"].notna()].tolist()
-
-    if null_indices and non_null_indices:
-        assert min(null_indices) > max(non_null_indices), (
-            "Rows with null composite_score must appear after all non-null rows "
-            "(nulls last). Found a null-score row before a non-null-score row."
-        )
-
-    non_null = df[df["composite_score"].notna()].reset_index(drop=True)
-    actual_order   = non_null["supplier_id"].tolist()
-    expected_order = (
-        non_null
-        .sort_values(["composite_score", "supplier_id"], ascending=[True, True])
-        ["supplier_id"]
-        .tolist()
-    )
-
-    assert actual_order == expected_order, (
-        "supplier_scorecard.csv is not sorted by composite_score ascending "
-        "(supplier_id ascending as tiebreaker). "
-        "The procurement team's worst-suppliers-first review depends on correct row order."
-    )

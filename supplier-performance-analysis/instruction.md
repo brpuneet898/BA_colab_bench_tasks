@@ -9,9 +9,9 @@ All input files are located in `/workspace/data/`:
 | File | Description |
 |------|-------------|
 | `suppliers.csv` | Master list of all suppliers |
-| `supplier_contracts.csv` | Contract terms per supplier, including SLA thresholds, penalty rates, and effective dates |
-| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC |
-| `delivery_records.csv` | All delivery events against purchase orders, including returns; each row carries a `delivery_type` column (`Primary` or `Return`) indicating the nature of the event |
+| `supplier_contracts.csv` | Contract terms per supplier, including SLA thresholds, penalty rates, effective dates, and supersession dates |
+| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC. Where a purchase order has been amended, the file contains one row per version; each row carries an `amendment_date` recording when those terms were established. Apply the terms from the most recently amended version of each purchase order. |
+| `delivery_records.csv` | All delivery events against purchase orders, including returns; each row carries a `delivery_type` column (`Primary` or `Return`) indicating the nature of the event. Both `Primary` and `Return` events record the physical units moved as a positive `quantity_received` value. |
 | `quality_inspections.csv` | Quality inspection results per delivery (reference only) |
 | `supplier_contacts.csv` | Supplier contact details (reference only) |
 | `warehouse_metadata.csv` | Warehouse reference data (reference only) |
@@ -26,7 +26,7 @@ Compute the following metrics per supplier across all Q1 purchase orders assigne
 
 ### On-Time Delivery Rate
 
-A purchase order is **on time** if the total quantity received on or before the `promised_delivery_date` meets or exceeds the `ordered_quantity`.
+A purchase order is **on time** if the net quantity received on or before the `promised_delivery_date` meets or exceeds the `ordered_quantity`.
 
 `on_time_delivery_rate` = count of on-time POs / total Q1 POs for the supplier, rounded to 4 decimal places.
 
@@ -34,7 +34,7 @@ Suppliers with no Q1 POs: set to `null`.
 
 ### Net Fill Rate
 
-The net quantity received for a purchase order is the algebraic sum of all `quantity_received` values across every delivery record for that order — this accounts for returns and all other quantity adjustments, regardless of when they occurred.
+The net quantity received for a purchase order is the running on-hand quantity across all delivery events for that order — Primary deliveries increase it and Return deliveries decrease it — regardless of when those events occurred.
 
 `net_fill_rate` = sum of net quantities received across all Q1 POs / sum of `ordered_quantity` across all Q1 POs, rounded to 4 decimal places.
 
@@ -42,7 +42,7 @@ Suppliers with no Q1 POs: set to `null`.
 
 ### SLA Breaches and Penalty
 
-Use the contract terms in effect at the time of each purchase order to determine the applicable `fill_rate_sla_threshold` and `penalty_rate_pct`. Where a supplier has more than one contract record, apply the terms from the contract that was in effect on the purchase order's `order_date` and has the most recent `contract_effective_from` as of that date. A purchase order has an **SLA breach** if either condition holds:
+Use the contract terms in effect at the time of each purchase order to determine the applicable `fill_rate_sla_threshold` and `penalty_rate_pct`. Where a supplier has more than one contract record, apply the terms from the contract that was in effect on the purchase order's `order_date`, has not been superseded as of that date (recorded in `contract_superseded_by`), and has the most recent `contract_effective_from` as of that date. A purchase order has an **SLA breach** if either condition holds:
 
 - The PO was not delivered on time (as defined above), or
 - The net fill rate for that individual PO falls below `fill_rate_sla_threshold`
@@ -86,8 +86,8 @@ Sort by `composite_score` ascending (nulls last), then by `supplier_id` ascendin
 {
   "total_penalty_assessed_usd": <float, sum of total_penalty_usd across all suppliers, rounded to 2 dp>,
   "suppliers_meeting_all_sla": <integer, count of suppliers with sla_breach_count == 0 AND total_pos > 0>,
-  "worst_on_time_supplier_id": <string, supplier_id with the lowest on_time_delivery_rate among suppliers with total_pos > 0>,
-  "worst_fill_rate_supplier_id": <string, supplier_id with the lowest net_fill_rate among suppliers with total_pos > 0>,
+  "worst_on_time_supplier_id": <string, supplier_id with the lowest on_time_delivery_rate among suppliers with total_pos > 0; ties broken by lowest supplier_id alphabetically>,
+  "worst_fill_rate_supplier_id": <string, supplier_id with the lowest net_fill_rate among suppliers with total_pos > 0; ties broken by lowest supplier_id alphabetically>,
   "total_sla_breach_count": <integer, sum of sla_breach_count across all suppliers>
 }
 ```

@@ -18,31 +18,62 @@ Q1_END   = pd.Timestamp("2024-03-31")
 def load_data():
     suppliers  = pd.read_csv(DATA_DIR / "suppliers.csv")
     contracts  = pd.read_csv(DATA_DIR / "supplier_contracts.csv",
-                             parse_dates=["contract_effective_from", "contract_effective_to"])
+                             parse_dates=["contract_effective_from",
+                                          "contract_effective_to",
+                                          "contract_superseded_by"])
     pos        = pd.read_csv(DATA_DIR / "purchase_orders.csv",
-                             parse_dates=["order_date", "promised_delivery_date"])
+                             parse_dates=["order_date", "promised_delivery_date",
+                                          "amendment_date"])
     deliveries = pd.read_csv(DATA_DIR / "delivery_records.csv",
                              parse_dates=["received_date"])
     return suppliers, contracts, pos, deliveries
 
 
-def get_applicable_contract(pos, contracts):
-    """Attach the contract row in effect on each PO's order_date.
+def resolve_amendments(pos):
+    """
+    purchase_orders.csv may contain multiple rows per (warehouse_id, po_id)
+    when a PO has been amended. Each row carries an amendment_date recording
+    when those terms were established. Keep the most recently amended version.
+    """
+    pos = pos.sort_values(
+        ["warehouse_id", "po_id", "amendment_date"],
+        ascending=[True, True, False],
+    )
+    return pos.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first").copy()
 
-    Open-ended contracts have contract_effective_to = NaT (no expiry).
-    Pandas evaluates `order_date <= NaT` as False, so NaT must be handled
-    explicitly: treat it as always in effect after contract_effective_from.
+
+def sign_returns(deliveries):
+    """
+    delivery_records.csv stores Return quantities as positive values (the physical
+    units moved back to the supplier). Negate them so all downstream sums produce
+    net on-hand quantities correctly.
+    """
+    deliveries = deliveries.copy()
+    deliveries.loc[deliveries["delivery_type"] == "Return", "quantity_received"] *= -1
+    return deliveries
+
+
+def get_applicable_contract(pos, contracts):
+    """
+    For each PO, find the contract that:
+      1. became effective on or before the order_date,
+      2. was still in effect on the order_date (NaT effective_to = open-ended), and
+      3. had not been superseded as of the order_date (NaT superseded_by = still active).
+    Among qualifying contracts, keep the one with the most recent effective_from.
     """
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
+                   "contract_superseded_by",
                    "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd"]],
         on="supplier_id",
         how="left",
     )
-    open_ended = merged["contract_effective_to"].isna()
+    open_ended     = merged["contract_effective_to"].isna()
+    not_superseded = merged["contract_superseded_by"].isna()
     applicable = merged[
         (merged["contract_effective_from"] <= merged["order_date"]) &
-        (open_ended | (merged["order_date"] <= merged["contract_effective_to"]))
+        (open_ended | (merged["order_date"] <= merged["contract_effective_to"])) &
+        (not_superseded | (merged["order_date"] < merged["contract_superseded_by"]))
     ].copy()
     applicable = applicable.sort_values("contract_effective_from", ascending=False)
     applicable = applicable.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
@@ -50,13 +81,14 @@ def get_applicable_contract(pos, contracts):
 
 
 def compute_po_level_metrics(pos_with_contracts, deliveries):
-    """Compute net fill rate, on-time flag, SLA breach, and penalty per PO.
-
-    Penalty uses an escalating rate: once a supplier's running SLA breach
-    count (sorted by order_date) exceeds 5, each further breaching PO is
-    assessed at 2x the standard penalty_rate_pct.
     """
-    # Net fill rate: algebraic sum of ALL delivery events regardless of date
+    Compute net fill rate, on-time flag, SLA breach, and penalty per PO.
+    deliveries must already have Return quantities negated (via sign_returns).
+
+    Escalating penalty: once a supplier's running SLA breach count (sorted by
+    order_date, po_id) exceeds 5, each further breaching PO is assessed at 2x
+    the standard penalty_rate_pct.
+    """
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -64,7 +96,6 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
         .rename(columns={"quantity_received": "net_qty_received"})
     )
 
-    # On-time: total received on or before promised_delivery_date >= ordered_quantity
     d_with_deadline = deliveries.merge(
         pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
                             "ordered_quantity"]].drop_duplicates(),
@@ -91,8 +122,6 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
     ontime_breach = ~po["on_time"]
     po["sla_breach"] = fill_breach | ontime_breach
 
-    # Escalating penalty: sort by supplier + order_date + po_id (tiebreaker),
-    # compute running breach count per supplier. Apply 2x rate after the 5th.
     po = po.sort_values(["supplier_id", "order_date", "po_id"]).copy()
     po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
     escalated = po["sla_breach"] & (po["breach_rank"] > 5)
@@ -167,14 +196,17 @@ def build_summary(scorecard):
     return {
         "total_penalty_assessed_usd": round(float(scorecard["total_penalty_usd"].sum()), 2),
         "suppliers_meeting_all_sla":  int((active["sla_breach_count"] == 0).sum()),
-        "worst_on_time_supplier_id":  str(active.loc[active["on_time_delivery_rate"].idxmin(), "supplier_id"]),
-        "worst_fill_rate_supplier_id": str(active.loc[active["net_fill_rate"].idxmin(), "supplier_id"]),
+        "worst_on_time_supplier_id":  str(active.sort_values(["on_time_delivery_rate", "supplier_id"]).iloc[0]["supplier_id"]),
+        "worst_fill_rate_supplier_id": str(active.sort_values(["net_fill_rate", "supplier_id"]).iloc[0]["supplier_id"]),
         "total_sla_breach_count":     int(scorecard["sla_breach_count"].sum()),
     }
 
 
 def main():
     suppliers, contracts, pos, deliveries = load_data()
+
+    pos        = resolve_amendments(pos)
+    deliveries = sign_returns(deliveries)
 
     q1_pos = pos[(pos["order_date"] >= Q1_START) & (pos["order_date"] <= Q1_END)].copy()
 
