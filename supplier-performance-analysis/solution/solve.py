@@ -44,11 +44,11 @@ def resolve_amendments(pos):
 
 def sign_returns(deliveries):
     """
-    delivery_records.csv stores Return quantities as positive values (the physical
-    units moved back to the supplier). Negate them so all downstream sums produce
-    net on-hand quantities correctly.
+    Retain only the delivery event types that contribute to net on-hand quantity
+    (Primary and Return), then negate Return quantities so downstream sums produce
+    net received. Rework events are internal quality events and are excluded.
     """
-    deliveries = deliveries.copy()
+    deliveries = deliveries[deliveries["delivery_type"].isin(["Primary", "Return"])].copy()
     deliveries.loc[deliveries["delivery_type"] == "Return", "quantity_received"] *= -1
     return deliveries
 

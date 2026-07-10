@@ -46,6 +46,16 @@ Headroom mechanisms tested:
   Trap 7 — Escalating step-up penalty.
             After a supplier's 5th SLA breach (in order_date, po_id order),
             each further breaching PO is assessed at 2x penalty_rate_pct.
+
+  Trap 8 — Rework delivery events.
+            ~80 rows in delivery_records.csv carry delivery_type="Rework" with
+            a positive quantity_received. These are internal quality events and
+            must not be counted toward net fill rate or on-time quantity. The
+            instruction defines the net quantity computation only for Primary
+            (increase) and Return (decrease); Rework has no assigned role.
+            A model that negates Returns then sums all quantity_received inflates
+            per-supplier NFR by 0.5–2% and produces ~5 extra phantom "no-breach"
+            POs, pushing total_sla_breach_count outside the abs_tol=3 tolerance.
 """
 
 import json
@@ -82,12 +92,6 @@ Q1_END   = pd.Timestamp("2024-03-31")
 # ---------------------------------------------------------------------------
 
 def _get_applicable_contract(pos, contracts):
-    """
-    Filter to contracts that were in effect on the order_date, had not been
-    superseded as of that date, and select the most recently effective one.
-    NaT in contract_effective_to  = open-ended (no expiry).
-    NaT in contract_superseded_by = not yet superseded (still active).
-    """
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
                    "contract_superseded_by",
@@ -107,7 +111,6 @@ def _get_applicable_contract(pos, contracts):
 
 
 def _compute_po_level(pos_with_contracts, deliveries):
-    """deliveries must already have Return quantities negated."""
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -162,8 +165,7 @@ def _penalty_caps(contracts):
 
 
 def _build_expected(suppliers, contracts, q1_pos, deliveries):
-    # Negate return quantities before all downstream computations
-    deliveries = deliveries.copy()
+    deliveries = deliveries[deliveries["delivery_type"].isin(["Primary", "Return"])].copy()
     deliveries.loc[deliveries["delivery_type"] == "Return", "quantity_received"] *= -1
 
     pos_c  = _get_applicable_contract(q1_pos, contracts)
@@ -219,7 +221,6 @@ def raw_data():
 @pytest.fixture(scope="module")
 def q1_pos(raw_data):
     _, _, pos, _ = raw_data
-    # Resolve amendments: keep the most recently amended version of each PO
     pos = pos.sort_values(["warehouse_id", "po_id", "amendment_date"],
                           ascending=[True, True, False])
     pos = pos.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
@@ -251,7 +252,12 @@ def agent_summary():
 # ---------------------------------------------------------------------------
 
 def test_case_01_input_sentinels(raw_data):
-    """Verify input files were not tampered with."""
+    """
+    Verifies canonical data fingerprints: row counts, po_id non-uniqueness across
+    warehouses (composite key trap), amendment pair count, open-ended contract count,
+    dual-contract count, superseded contract count, unsigned Return quantities, and
+    presence of Rework events.
+    """
     suppliers, contracts, pos, deliveries = raw_data
 
     assert len(suppliers) == 60, \
@@ -290,6 +296,11 @@ def test_case_01_input_sentinels(raw_data):
         ("All Return rows in delivery_records.csv must have positive quantity_received. "
          "Return quantities are unsigned — delivery_type indicates direction.")
 
+    rework_count = (deliveries["delivery_type"] == "Rework").sum()
+    assert rework_count >= 50, \
+        (f"delivery_records.csv must contain Rework events (internal quality remediation rows); "
+         f"expected at least 50, got {rework_count}")
+
 
 # ---------------------------------------------------------------------------
 # Test 02 — Output structure
@@ -323,9 +334,11 @@ def test_case_02_output_structure(agent_scorecard, agent_summary):
 
 def test_case_03_po_count_per_supplier(agent_scorecard, expected, raw_data):
     """
-    Trap 1 — Joining delivery_records to purchase_orders on po_id alone
-    inflates every supplier's PO count ~3x. The correct join key is
-    (warehouse_id, po_id).
+    Trap 1 — All three warehouses use the same po_id sequence (PO-00001…PO-01000),
+    so po_id is not globally unique. Joining purchase_orders to delivery_records on
+    po_id alone creates cross-warehouse phantom matches, inflating delivery quantities
+    ~3x. If the agent derives total_pos from a row count in the merged table it also
+    appears ~3x inflated; the correct join key is (warehouse_id, po_id).
 
     Spot-checks total_pos for the 5 suppliers with the highest PO count.
     """
@@ -455,7 +468,9 @@ def test_case_06_aggregate_breach_and_penalty(agent_summary, expected):
     """
     Aggregate total_sla_breach_count and total_penalty_assessed_usd.
     Sensitive to all traps: composite key, NaT handling, unsigned returns,
-    PO amendments, superseded contracts, and escalating penalty.
+    PO amendments, superseded contracts, escalating penalty, and Rework
+    events (Trap 8 inflates fill rates enough to suppress ~5 breaches,
+    pushing the count outside the abs_tol=3 tolerance).
     """
     exp_df, _, _ = expected
     exp_total_pen = round(float(exp_df["total_penalty_usd"].sum()), 2)
@@ -476,8 +491,10 @@ def test_case_06_aggregate_breach_and_penalty(agent_summary, expected):
 def test_case_07_row_level_accuracy(agent_scorecard, expected):
     """
     Spot-checks all key metrics for the 10 suppliers with the highest PO count.
-    Errors from any trap — wrong join key, unhandled NaT, unsigned returns not
-    negated, original instead of amended ordered_quantity — surface here.
+    Errors from any trap surface here: wrong join key (inflated delivery qty),
+    unhandled NaT (missing POs), unsigned returns not negated (inflated fill rate),
+    original instead of amended ordered_quantity (wrong denominator), or Rework
+    events included in net fill rate calculations (inflated NFR by 0.5–2%).
     """
     exp_df, _, _ = expected
     spot = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:10].tolist()
