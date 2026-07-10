@@ -9,28 +9,41 @@ Reasoning challenges this suite exercises:
   1. Composite key, order side — line_id resets per order, so
      shipment_line_items.csv must be joined to order_lines.csv on
      (order_id, line_id), never line_id alone.
-  2. Composite key, shipment side — shipment_id in shipment_line_items.csv
+  2. Effective-dated region assignment — a warehouse's fulfillment region
+     (warehouse_region_assignments.csv) can change over time. Region must
+     be resolved as of each order's order_date via a proper
+     effective_from/effective_to range match, treating a blank
+     effective_to as open-ended -- not by taking each warehouse's most
+     recent assignment regardless of order_date. Because this only moves
+     order lines between regions, every grand total is unaffected by it;
+     it is only visible in the per-region breakdown.
+  3. Composite key, shipment side — shipment_id in shipment_line_items.csv
      is a per-warehouse counter, not globally unique. It must be joined to
      shipment_headers.csv on (warehouse_id, shipment_id), never shipment_id
      alone. Cross-warehouse shipment_id collisions only affect a minority
      of rows, so a wrong join does not produce an obviously-impossible
      aggregate -- it must be caught by checking key uniqueness, not by
      eyeballing whether the final numbers look plausible.
-  3. Netting — quantity in shipment_line_items.csv is signed the way the
+  4. Netting — quantity in shipment_line_items.csv is signed the way the
      WMS records it (positive for Shipment, negative for Return/
      Cancellation), so it nets correctly with a plain sum once the row set
      is scoped correctly.
-  4. Reporting cutoff — only headers with event_date <= 2024-04-15 count,
+  5. Reporting cutoff — only headers with event_date <= 2024-04-15 count,
      regardless of order_date.
-  5. Domain knowledge gap — shipment_headers.csv carries a fourth
+  6. Domain knowledge gap — shipment_headers.csv carries a fourth
      transaction_type, Backorder, recording quantity still awaiting
      fulfillment. It has a positive quantity like a Shipment row, but
      nothing has gone out against it, and must be excluded.
 
-test_case_01/10 are anti-tamper sentinels on the input data, not graded
-reasoning. test_case_02-04 check output structure/schema. test_case_05-08
-and 11-13 are hard, ground-truth-derived checks tied to challenges 1-5
-above; test_case_09 checks the derived best/worst region labels.
+test_case_01 is a single anti-tamper sentinel on all input data, not graded
+reasoning. test_case_02-03 check output structure/schema. test_case_04-06
+are hard, ground-truth-derived checks tied to challenges 1-6 above (each
+checks both the total and the per-region breakdown, since the region trap
+in particular only shows up per-region); test_case_07 checks the derived
+best/worst region labels. test_case_08-10 each reject one specific naive
+mistake (Backorder inclusion, shipment_id-only join, current-only region
+assignment) by checking the reported figure isn't suspiciously close to
+what that specific mistake would produce.
 """
 
 import json
@@ -55,16 +68,21 @@ REPORT_AS_OF = pd.Timestamp("2024-04-15")
 ORDERS_ROWS = 18_000
 ORDER_LINES_ROWS = 29_662
 SHIPMENT_ROWS = 40_284
+ASSIGNMENT_ROWS = 23
 
 
-# ── Anti-cheat sentinels ──────────────────────────────────────────────────────
+# ── Anti-cheat sentinel ────────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
-    """Sentinel: order/line/shipment counts, line_id collision, transaction_type mix."""
+    """Sentinel over all five traps: row counts, line_id collision,
+    Return/Cancellation sign, shipment_id cross-warehouse collision,
+    Backorder presence/sign, and warehouse_region_assignments structure."""
     orders = pd.read_csv(DATA_DIR / "orders.csv")
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv")
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+    assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
+                               parse_dates=["effective_from", "effective_to"])
 
     assert len(orders) == ORDERS_ROWS, \
         f"orders.csv row count must not be modified (expected {ORDERS_ROWS}, got {len(orders)})."
@@ -74,6 +92,9 @@ def test_case_01_input_data_not_tampered():
         f"shipment_headers.csv row count must not be modified (expected {SHIPMENT_ROWS}, got {len(headers)})."
     assert len(line_items) == SHIPMENT_ROWS, \
         f"shipment_line_items.csv row count must not be modified (expected {SHIPMENT_ROWS}, got {len(line_items)})."
+    assert len(assignments) == ASSIGNMENT_ROWS, \
+        (f"warehouse_region_assignments.csv row count must not be modified "
+         f"(expected {ASSIGNMENT_ROWS}, got {len(assignments)}).")
 
     orders_per_line1 = order_lines[order_lines["line_id"] == 1]["order_id"].nunique()
     assert orders_per_line1 > 15_000, \
@@ -86,6 +107,8 @@ def test_case_01_input_data_not_tampered():
         f"Expected >1,000 Return headers, got {type_counts.get('Return', 0)}."
     assert type_counts.get("Cancellation", 0) > 500, \
         f"Expected >500 Cancellation headers, got {type_counts.get('Cancellation', 0)}."
+    assert type_counts.get("Backorder", 0) > 3_000, \
+        f"Expected >3,000 Backorder headers, got {type_counts.get('Backorder', 0)}."
 
     adj_events = line_items.merge(
         headers[headers["transaction_type"].isin(["Return", "Cancellation"])][
@@ -96,24 +119,6 @@ def test_case_01_input_data_not_tampered():
     assert (adj_events["quantity"] < 0).all(), \
         "Return/Cancellation line items are expected to carry a negative quantity."
 
-
-def test_case_10_shipment_id_and_backorder_sentinel():
-    """Sentinel: shipment_id is not globally unique (some values are shared
-    across warehouses), and shipment_headers.csv contains a fourth
-    transaction_type, Backorder."""
-    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv")
-    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
-
-    dup_rows = headers.duplicated(subset=["shipment_id"]).sum()
-    assert dup_rows > 1_000, \
-        (f"Expected >1,000 shipment_headers rows whose shipment_id also appears under "
-         f"another warehouse (got {dup_rows}). shipment_id must not be treated as a "
-         f"globally unique identifier.")
-
-    type_counts = headers["transaction_type"].value_counts()
-    assert type_counts.get("Backorder", 0) > 3_000, \
-        f"Expected >3,000 Backorder headers, got {type_counts.get('Backorder', 0)}."
-
     backorder_events = line_items.merge(
         headers[headers["transaction_type"] == "Backorder"][["warehouse_id", "shipment_id"]],
         on=["warehouse_id", "shipment_id"],
@@ -121,10 +126,29 @@ def test_case_10_shipment_id_and_backorder_sentinel():
     assert (backorder_events["quantity"] > 0).all(), \
         "Backorder line items are expected to carry a positive quantity."
 
+    dup_rows = headers.duplicated(subset=["shipment_id"]).sum()
+    assert dup_rows > 1_000, \
+        (f"Expected >1,000 shipment_headers rows whose shipment_id also appears under "
+         f"another warehouse (got {dup_rows}). shipment_id must not be treated as a "
+         f"globally unique identifier.")
+
+    segment_counts = assignments.groupby("warehouse_id").size()
+    n_reassigned = (segment_counts > 1).sum()
+    assert n_reassigned >= 3, \
+        (f"Expected at least 3 warehouses with more than one region-assignment "
+         f"segment, got {n_reassigned}. warehouse_id must not be treated as "
+         f"having a single, static region.")
+
+    n_open_ended = assignments["effective_to"].isna().sum()
+    assert n_open_ended == assignments["warehouse_id"].nunique(), \
+        (f"Expected exactly one open-ended (blank effective_to) segment per "
+         f"warehouse, got {n_open_ended} open-ended rows for "
+         f"{assignments['warehouse_id'].nunique()} warehouses.")
+
 
 # ── Output file structure ─────────────────────────────────────────────────────
 
-def test_case_02_report_exists_and_shape():
+def test_case_02_report_exists_shape_and_sort():
     assert REPORT_PATH.exists(), "region_fulfillment_report.csv not found in /workspace."
     df = pd.read_csv(REPORT_PATH)
     required = {"region", "quantity_ordered", "quantity_fulfilled_net", "fill_rate"}
@@ -132,15 +156,12 @@ def test_case_02_report_exists_and_shape():
     assert not missing, f"Missing columns: {missing}"
     assert len(df) == 5, f"Expected exactly 5 rows (one per region), got {len(df)}."
 
-
-def test_case_03_report_sort_order():
-    df = pd.read_csv(REPORT_PATH)
-    expected = df.sort_values("region").reset_index(drop=True)
-    assert list(df["region"]) == list(expected["region"]), \
+    expected_order = df.sort_values("region").reset_index(drop=True)
+    assert list(df["region"]) == list(expected_order["region"]), \
         "Report must be sorted by region ascending."
 
 
-def test_case_04_summary_schema():
+def test_case_03_summary_schema():
     assert SUMMARY_PATH.exists(), "summary.json not found in /workspace."
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
@@ -157,19 +178,34 @@ def test_case_04_summary_schema():
 
 # ── Ground-truth fixture ──────────────────────────────────────────────────────
 
+def _resolve_q1_order_regions(orders, assignments):
+    q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
+    merged = q1_orders[["order_id", "order_date", "assigned_warehouse_id"]].merge(
+        assignments, left_on="assigned_warehouse_id", right_on="warehouse_id"
+    )
+    in_effect = merged[
+        (merged["effective_from"] <= merged["order_date"])
+        & (merged["effective_to"].isna() | (merged["order_date"] <= merged["effective_to"]))
+    ]
+    return in_effect[["order_id", "region"]]
+
+
 @pytest.fixture(scope="module")
 def ground_truth():
-    warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
+    assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
+                               parse_dates=["effective_from", "effective_to"])
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
 
-    # Scope: Q1 2024 orders, tagged with fulfillment region via assigned_warehouse_id
-    q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
-    q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
-                                 left_on="assigned_warehouse_id", right_on="warehouse_id")
-    scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
+    # Scope: Q1 2024 orders, tagged with the fulfillment region in effect on
+    # each order's order_date. A warehouse's region can have more than one
+    # effective-dated segment; the active one is found by range-matching
+    # order_date against effective_from/effective_to, treating a blank
+    # effective_to as open-ended (still in effect) rather than excluding it.
+    order_regions = _resolve_q1_order_regions(orders, assignments)
+    scoped = order_lines.merge(order_regions, on="order_id")
 
     # shipment_id is a per-warehouse counter, not globally unique -- line_items
     # must be joined to headers on (warehouse_id, shipment_id), never
@@ -198,7 +234,7 @@ def ground_truth():
         quantity_ordered=("quantity_ordered", "sum"),
         quantity_fulfilled_net=("quantity_fulfilled_net", "sum"),
     )
-    all_regions = warehouses["region"].drop_duplicates().sort_values()
+    all_regions = assignments["region"].drop_duplicates().sort_values()
     agg = agg.reindex(all_regions, fill_value=0)
     agg["fill_rate"] = (agg["quantity_fulfilled_net"] / agg["quantity_ordered"]).round(4)
     agg = agg.reset_index().rename(columns={"index": "region"})
@@ -219,94 +255,46 @@ def ground_truth():
     }
 
 
-# ── Hard test 1: quantity ordered (Q1 scoping + region mapping) ───────────────
+# ── Hard test 1: quantity ordered — total and per-region exact ────────────────
 
-def test_case_05_total_quantity_ordered_exact(ground_truth):
-    """quantity_ordered depends only on Q1 scoping and warehouse->region
-    mapping; must match exactly."""
+def test_case_04_quantity_ordered_exact(ground_truth):
+    """quantity_ordered depends only on Q1 scoping and effective-dated region
+    resolution; must match exactly, both in total and per region.
+
+    Region reassignment only moves order lines between regions -- it never
+    changes the total -- so a region-blind mistake can only be caught by
+    checking each region's figure individually, not by checking the total.
+    """
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
     assert s["total_quantity_ordered"] == ground_truth["total_quantity_ordered"], \
         (f"total_quantity_ordered: got {s['total_quantity_ordered']}, "
          f"expected {ground_truth['total_quantity_ordered']}.")
 
-
-# ── Hard test 2: composite key + netting — region fill rates ──────────────────
-
-def test_case_06_region_fill_rate_within_tolerance(ground_truth):
-    """Each region's fill_rate must be within +/-0.01 of ground truth.
-
-    A line_id-only join (ignoring order_id) inflates fulfilled quantity by
-    orders of magnitude; ignoring returns/cancellations, or including
-    Backorder quantity, each overstates it enough to blow past this
-    tolerance.
-    """
     report = pd.read_csv(REPORT_PATH).set_index("region")
     gt = ground_truth["report"]
     for region in gt.index:
         assert region in report.index, f"Missing region '{region}' in report."
-        exp = float(gt.loc[region, "fill_rate"])
-        got = float(report.loc[region, "fill_rate"])
-        assert abs(got - exp) <= 0.01, \
-            f"fill_rate for region {region}: got {got}, expected {exp} (+/-0.01)."
+        exp = int(gt.loc[region, "quantity_ordered"])
+        got = int(report.loc[region, "quantity_ordered"])
+        assert got == exp, \
+            f"quantity_ordered for region {region}: got {got}, expected {exp}."
 
 
-# ── Hard test 3: netting — total fulfilled quantity ────────────────────────────
+# ── Hard test 2: quantity fulfilled (net) — total and per-region exact ────────
 
-def test_case_07_total_quantity_fulfilled_net(ground_truth):
-    """Total net fulfilled quantity must be within +/-1% of ground truth.
-
-    Including Backorder quantity (goods not yet sent) alongside Shipment/
-    Return/Cancellation overstates this figure by several percent, well
-    outside this tolerance.
+def test_case_05_quantity_fulfilled_net_exact(ground_truth):
+    """quantity_fulfilled_net must match exactly, both in total and per
+    region. A region-blind netting mistake could still land close on the
+    overall total by coincidence; checking every region individually closes
+    that gap.
     """
     with open(SUMMARY_PATH) as f:
         s = json.load(f)
-    exp = ground_truth["total_quantity_fulfilled_net"]
-    got = s["total_quantity_fulfilled_net"]
-    rel_err = abs(got - exp) / exp
-    assert rel_err <= 0.01, \
-        f"total_quantity_fulfilled_net: got {got}, expected {exp} (+/-1%)."
+    assert s["total_quantity_fulfilled_net"] == ground_truth["total_quantity_fulfilled_net"], \
+        (f"total_quantity_fulfilled_net: got {s['total_quantity_fulfilled_net']}, "
+         f"expected {ground_truth['total_quantity_fulfilled_net']}.")
 
-
-# ── Hard test 4: reporting cutoff — events after 2024-04-15 excluded ─────────
-
-def test_case_08_overall_fill_rate_reflects_cutoff(ground_truth):
-    """overall_fill_rate must be within +/-0.01 of ground truth.
-
-    Including Return/Cancellation events dated after the 2024-04-15 as-of
-    cutoff pulls this figure down by ~0.015, outside this tolerance.
-    """
-    with open(SUMMARY_PATH) as f:
-        s = json.load(f)
-    exp = ground_truth["overall_fill_rate"]
-    got = s["overall_fill_rate"]
-    assert abs(got - exp) <= 0.01, \
-        f"overall_fill_rate: got {got}, expected {exp} (+/-0.01)."
-
-
-# ── Medium test: best/worst region identifiers ────────────────────────────────
-
-def test_case_09_best_worst_region(ground_truth):
-    with open(SUMMARY_PATH) as f:
-        s = json.load(f)
-    assert s["best_performing_region"] == ground_truth["best_performing_region"], \
-        (f"best_performing_region: got {s['best_performing_region']!r}, "
-         f"expected {ground_truth['best_performing_region']!r}")
-    assert s["worst_performing_region"] == ground_truth["worst_performing_region"], \
-        (f"worst_performing_region: got {s['worst_performing_region']!r}, "
-         f"expected {ground_truth['worst_performing_region']!r}")
-
-
-# ── Hard test 5: Backorder exclusion — per-region quantity fulfilled ──────────
-
-def test_case_11_region_quantity_fulfilled_net_exact(ground_truth):
-    """Each region's quantity_fulfilled_net must match exactly, not just the
-    total.
-
-    A region-blind Backorder exclusion could still land close on the overall
-    total by coincidence; checking every region individually closes that gap.
-    """
     report = pd.read_csv(REPORT_PATH).set_index("region")
     gt = ground_truth["report"]
     for region in gt.index:
@@ -317,23 +305,63 @@ def test_case_11_region_quantity_fulfilled_net_exact(ground_truth):
             f"quantity_fulfilled_net for region {region}: got {got}, expected {exp}."
 
 
-# ── Hard test 6: Backorder exclusion — rejects naive inclusion ────────────────
+# ── Hard test 3: fill_rate — per-region and overall, within tolerance ─────────
+
+def test_case_06_fill_rate_within_tolerance(ground_truth):
+    """Each region's fill_rate, and overall_fill_rate, must be within +/-0.01
+    of ground truth.
+
+    A line_id-only join, ignoring returns/cancellations, including Backorder
+    quantity, or including activity dated after the 2024-04-15 cutoff, each
+    overstates or understates this figure enough to blow past this tolerance.
+    """
+    report = pd.read_csv(REPORT_PATH).set_index("region")
+    gt = ground_truth["report"]
+    for region in gt.index:
+        assert region in report.index, f"Missing region '{region}' in report."
+        exp = float(gt.loc[region, "fill_rate"])
+        got = float(report.loc[region, "fill_rate"])
+        assert abs(got - exp) <= 0.01, \
+            f"fill_rate for region {region}: got {got}, expected {exp} (+/-0.01)."
+
+    with open(SUMMARY_PATH) as f:
+        s = json.load(f)
+    exp_overall = ground_truth["overall_fill_rate"]
+    got_overall = s["overall_fill_rate"]
+    assert abs(got_overall - exp_overall) <= 0.01, \
+        f"overall_fill_rate: got {got_overall}, expected {exp_overall} (+/-0.01)."
+
+
+# ── Medium test: best/worst region identifiers ────────────────────────────────
+
+def test_case_07_best_worst_region(ground_truth):
+    with open(SUMMARY_PATH) as f:
+        s = json.load(f)
+    assert s["best_performing_region"] == ground_truth["best_performing_region"], \
+        (f"best_performing_region: got {s['best_performing_region']!r}, "
+         f"expected {ground_truth['best_performing_region']!r}")
+    assert s["worst_performing_region"] == ground_truth["worst_performing_region"], \
+        (f"worst_performing_region: got {s['worst_performing_region']!r}, "
+         f"expected {ground_truth['worst_performing_region']!r}")
+
+
+# ── Hard test 4: rejects naive Backorder inclusion ─────────────────────────────
 
 @pytest.fixture(scope="module")
 def naive_total_fulfilled_with_backorder():
     """quantity_fulfilled_net if every transaction_type row within the cutoff
     is summed as-is, without restricting to Shipment/Return/Cancellation
-    (headers/line_items still joined correctly on (warehouse_id, shipment_id))."""
-    warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
+    (headers/line_items still joined correctly on (warehouse_id, shipment_id),
+    and region still resolved correctly via effective-dating)."""
+    assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
+                               parse_dates=["effective_from", "effective_to"])
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
 
-    q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
-    q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
-                                 left_on="assigned_warehouse_id", right_on="warehouse_id")
-    scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
+    order_regions = _resolve_q1_order_regions(orders, assignments)
+    scoped = order_lines.merge(order_regions, on="order_id")
 
     events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
     in_window = events[events["event_date"] <= REPORT_AS_OF]
@@ -348,7 +376,7 @@ def naive_total_fulfilled_with_backorder():
     return int(lines["quantity_fulfilled_net"].sum())
 
 
-def test_case_12_quantity_fulfilled_net_rejects_backorder_inclusion(
+def test_case_08_quantity_fulfilled_net_rejects_backorder_inclusion(
     ground_truth, naive_total_fulfilled_with_backorder
 ):
     """total_quantity_fulfilled_net must not land near the naive figure
@@ -365,7 +393,7 @@ def test_case_12_quantity_fulfilled_net_rejects_backorder_inclusion(
          f"Backorder rows must be excluded before summing. Correct total is {exp}.")
 
 
-# ── Hard test 7: composite key — rejects shipment_id-only join ────────────────
+# ── Hard test 5: rejects naive shipment_id-only join ───────────────────────────
 
 @pytest.fixture(scope="module")
 def naive_total_fulfilled_shipment_id_only():
@@ -373,17 +401,17 @@ def naive_total_fulfilled_shipment_id_only():
     shipment_headers.csv on shipment_id alone, ignoring that shipment_id is
     only unique within a warehouse. A minority of shipment_id values collide
     across warehouses, so this fans a minority of line items out against the
-    wrong header's transaction_type/event_date."""
-    warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
+    wrong header's transaction_type/event_date. Region is still resolved
+    correctly via effective-dating."""
+    assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
+                               parse_dates=["effective_from", "effective_to"])
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
 
-    q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
-    q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
-                                 left_on="assigned_warehouse_id", right_on="warehouse_id")
-    scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
+    order_regions = _resolve_q1_order_regions(orders, assignments)
+    scoped = order_lines.merge(order_regions, on="order_id")
 
     events = line_items.merge(headers, on="shipment_id")
     in_window = events[
@@ -401,7 +429,7 @@ def naive_total_fulfilled_shipment_id_only():
     return int(lines["quantity_fulfilled_net"].sum())
 
 
-def test_case_13_quantity_fulfilled_net_rejects_shipment_id_only_join(
+def test_case_09_quantity_fulfilled_net_rejects_shipment_id_only_join(
     ground_truth, naive_total_fulfilled_shipment_id_only
 ):
     """total_quantity_fulfilled_net must not land near the naive figure
@@ -417,3 +445,54 @@ def test_case_13_quantity_fulfilled_net_rejects_shipment_id_only_join(
          f"figure obtained by joining on shipment_id alone ({naive_total_fulfilled_shipment_id_only}); "
          f"shipment_id is only unique within a warehouse, the join must also match on "
          f"warehouse_id. Correct total is {exp}.")
+
+
+# ── Hard test 6: rejects naive current-only region assignment ─────────────────
+
+@pytest.fixture(scope="module")
+def naive_quantity_ordered_by_region_current_only():
+    """quantity_ordered by region if each warehouse's fulfillment region is
+    taken as its single most recent assignment (sort by effective_from,
+    keep the last row per warehouse_id), ignoring whether that assignment
+    was actually in effect as of each order's order_date. This is correct
+    for warehouses whose region never changed, and for warehouses whose
+    only reassignment landed before Q1 2024 started -- but silently
+    misattributes Q1 orders for any warehouse reassigned during or after
+    Q1 to the wrong region."""
+    assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
+                               parse_dates=["effective_from", "effective_to"])
+    orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+
+    current = assignments.sort_values("effective_from").drop_duplicates(
+        subset="warehouse_id", keep="last"
+    )
+    q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
+    naive_orders = q1_orders.merge(
+        current[["warehouse_id", "region"]], left_on="assigned_warehouse_id", right_on="warehouse_id"
+    )
+    scoped = order_lines.merge(naive_orders[["order_id", "region"]], on="order_id")
+    return scoped.groupby("region")["quantity_ordered"].sum()
+
+
+def test_case_10_region_quantity_ordered_rejects_current_only_assignment(
+    ground_truth, naive_quantity_ordered_by_region_current_only
+):
+    """The per-region quantity_ordered breakdown must not land near the naive
+    figures obtained by taking each warehouse's single most recent region
+    assignment regardless of order_date."""
+    report = pd.read_csv(REPORT_PATH).set_index("region")
+    gt = ground_truth["report"]
+    naive = naive_quantity_ordered_by_region_current_only
+    total_ordered = ground_truth["total_quantity_ordered"]
+
+    total_abs_diff_from_naive = sum(
+        abs(int(report.loc[region, "quantity_ordered"]) - int(naive.get(region, 0)))
+        for region in gt.index
+    )
+    rel_err_from_naive = total_abs_diff_from_naive / total_ordered
+    assert rel_err_from_naive > 0.03, \
+        (f"Per-region quantity_ordered is suspiciously close to the naive breakdown "
+         f"obtained by taking each warehouse's single most recent region assignment "
+         f"regardless of order_date; region must be resolved as of each order's "
+         f"order_date. Correct per-region figures: {gt['quantity_ordered'].to_dict()}.")

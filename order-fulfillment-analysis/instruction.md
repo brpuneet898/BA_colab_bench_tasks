@@ -9,7 +9,8 @@ All input files are located in `/workspace/data/`:
 | File | Description |
 |------|-------------|
 | `customers.csv` | Customer master data |
-| `warehouses.csv` | Warehouse master data, including the `region` each warehouse serves |
+| `warehouses.csv` | Warehouse master data (facility attributes; does not include region — see `warehouse_region_assignments.csv`) |
+| `warehouse_region_assignments.csv` | Effective-dated `region` assignment for each warehouse. Columns: `warehouse_id`, `region`, `effective_from`, `effective_to`, `change_reason`, `recorded_at` |
 | `products.csv` | Product catalog (reference only) |
 | `carriers.csv` | Carrier master data (reference only) |
 | `orders.csv` | Orders placed between 2023-10-01 and 2024-06-30, each assigned to a fulfilling warehouse via `assigned_warehouse_id` |
@@ -19,13 +20,13 @@ All input files are located in `/workspace/data/`:
 
 ## Scope
 
-Include all orders where `order_date` falls within Q1 2024 (2024-01-01 to 2024-03-31, inclusive). A fulfillment region is the `region` of the warehouse assigned to the order via `assigned_warehouse_id`.
+Include all orders where `order_date` falls within Q1 2024 (2024-01-01 to 2024-03-31, inclusive). A fulfillment region is the region assigned to the order's `assigned_warehouse_id`, as recorded in `warehouse_region_assignments.csv`, in effect on the order's `order_date`.
 
 This report is generated as of **2024-04-15**. For each in-scope order line, only fulfillment activity with `event_date` on or before 2024-04-15 is reflected — activity recorded after that date is not yet part of this report.
 
 ## Metrics
 
-Compute the following for each region in `warehouses.csv`.
+Compute the following for each region in `warehouse_region_assignments.csv`.
 
 **Quantity ordered**: for each in-scope order line, its `quantity_ordered`. Sum this across all in-scope order lines belonging to that region.
 
@@ -37,7 +38,7 @@ Compute the following for each region in `warehouses.csv`.
 
 ### `/workspace/region_fulfillment_report.csv`
 
-One row per region in `warehouses.csv`. Columns in this exact order:
+One row per region in `warehouse_region_assignments.csv`. Columns in this exact order:
 
 | Column | Type | Notes |
 |--------|------|-------|

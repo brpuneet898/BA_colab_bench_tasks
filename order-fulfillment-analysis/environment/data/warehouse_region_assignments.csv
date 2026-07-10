@@ -1,0 +1,24 @@
+warehouse_id,region,effective_from,effective_to,change_reason,recorded_at
+WH-01,North,2015-05-18,,Initial Assignment,2020-06-01
+WH-02,North,2015-10-02,,Initial Assignment,2020-06-01
+WH-03,North,2016-02-16,2023-11-14,Initial Assignment,2020-06-01
+WH-04,South,2016-07-02,,Initial Assignment,2020-06-01
+WH-05,South,2016-11-16,,Initial Assignment,2020-06-01
+WH-06,South,2017-04-02,2024-02-09,Initial Assignment,2020-06-01
+WH-07,South,2017-08-17,,Initial Assignment,2020-06-01
+WH-08,East,2018-01-01,,Initial Assignment,2020-06-01
+WH-09,East,2018-05-18,,Initial Assignment,2020-06-01
+WH-10,East,2018-10-02,2024-04-30,Initial Assignment,2020-06-01
+WH-11,East,2019-02-16,,Initial Assignment,2020-06-01
+WH-12,West,2019-07-03,,Initial Assignment,2020-06-01
+WH-13,West,2019-11-17,2024-01-04,Initial Assignment,2020-06-01
+WH-14,West,2020-04-02,,Initial Assignment,2020-06-01
+WH-15,West,2020-08-17,,Initial Assignment,2020-06-01
+WH-16,Central,2021-01-01,,Initial Assignment,2020-06-01
+WH-17,Central,2021-05-18,2023-11-30,Initial Assignment,2020-06-01
+WH-18,Central,2021-10-02,,Initial Assignment,2020-06-01
+WH-03,South,2023-11-15,,Network Rebalance,2023-11-19
+WH-17,North,2023-12-01,,Distribution Footprint Update,2023-12-06
+WH-13,Central,2024-01-05,,Distribution Footprint Update,2024-01-07
+WH-06,East,2024-02-10,,Regional Realignment,2024-02-15
+WH-10,West,2024-05-01,,Regional Realignment,2024-05-06

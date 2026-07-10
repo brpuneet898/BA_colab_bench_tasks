@@ -33,9 +33,15 @@ transaction_type instead of restricting to Shipment/Return/Cancellation
 folds backordered (not-yet-sent) quantity in as if it were fulfilled and
 overstates fulfillment by whatever was backordered.
 
-Fulfillment region is the region of the warehouse assigned to the order
-(orders.assigned_warehouse_id -> warehouses.region), not the customer's own
-region column.
+Fulfillment region is the region assigned to the order's
+assigned_warehouse_id, as recorded in warehouse_region_assignments.csv, in
+effect on the order's order_date -- not the customer's own region column.
+A warehouse can have more than one effective-dated segment in that file if
+its assigned region changed over time; the currently-active segment for a
+warehouse has a blank effective_to. Resolving region requires matching each
+order's order_date against [effective_from, effective_to] per warehouse,
+treating a blank effective_to as open-ended (still in effect) rather than
+excluding it.
 """
 
 import json
@@ -57,20 +63,40 @@ REPORT_AS_OF = pd.Timestamp("2024-04-15")
 
 
 def load_data():
-    warehouses = pd.read_csv(DATA_DIR / "warehouses.csv")
+    assignments = pd.read_csv(
+        DATA_DIR / "warehouse_region_assignments.csv",
+        parse_dates=["effective_from", "effective_to"],
+    )
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
-    return warehouses, orders, order_lines, headers, line_items
+    return assignments, orders, order_lines, headers, line_items
 
 
-def scope_order_lines(orders, order_lines, warehouses):
+def resolve_order_regions(orders, assignments):
+    """Region in effect on each order's order_date, per assigned_warehouse_id.
+
+    A warehouse's region segments never overlap, so exactly one assignment
+    row matches per order once effective_from/effective_to are compared
+    against order_date -- but a blank effective_to must be treated as
+    open-ended (still active), not as failing the upper-bound check.
+    """
+    merged = orders[["order_id", "order_date", "assigned_warehouse_id"]].merge(
+        assignments, left_on="assigned_warehouse_id", right_on="warehouse_id"
+    )
+    in_effect = merged[
+        (merged["effective_from"] <= merged["order_date"])
+        & (merged["effective_to"].isna() | (merged["order_date"] <= merged["effective_to"]))
+    ]
+    return in_effect[["order_id", "region"]]
+
+
+def scope_order_lines(orders, order_lines, assignments):
     """Order lines belonging to Q1-2024 orders, tagged with fulfillment region."""
     q1_orders = orders[(orders["order_date"] >= Q1_START) & (orders["order_date"] <= Q1_END)]
-    q1_orders = q1_orders.merge(warehouses[["warehouse_id", "region"]],
-                                 left_on="assigned_warehouse_id", right_on="warehouse_id")
-    scoped = order_lines.merge(q1_orders[["order_id", "region"]], on="order_id")
+    order_regions = resolve_order_regions(q1_orders, assignments)
+    scoped = order_lines.merge(order_regions, on="order_id")
     return scoped
 
 
@@ -100,7 +126,7 @@ def net_fulfilled_by_line(scoped_lines, headers, line_items):
     )
 
 
-def build_report(scoped_lines, fulfilled_by_line, warehouses):
+def build_report(scoped_lines, fulfilled_by_line, assignments):
     lines = scoped_lines.merge(fulfilled_by_line, on=["order_id", "line_id"], how="left")
     lines["quantity_fulfilled_net"] = lines["quantity_fulfilled_net"].fillna(0)
 
@@ -109,7 +135,7 @@ def build_report(scoped_lines, fulfilled_by_line, warehouses):
         quantity_fulfilled_net=("quantity_fulfilled_net", "sum"),
     )
 
-    all_regions = warehouses["region"].drop_duplicates().sort_values()
+    all_regions = assignments["region"].drop_duplicates().sort_values()
     agg = agg.reindex(all_regions, fill_value=0)
 
     agg["fill_rate"] = (agg["quantity_fulfilled_net"] / agg["quantity_ordered"]).round(4)
@@ -120,11 +146,11 @@ def build_report(scoped_lines, fulfilled_by_line, warehouses):
 
 
 def main():
-    warehouses, orders, order_lines, headers, line_items = load_data()
+    assignments, orders, order_lines, headers, line_items = load_data()
 
-    scoped_lines = scope_order_lines(orders, order_lines, warehouses)
+    scoped_lines = scope_order_lines(orders, order_lines, assignments)
     fulfilled_by_line = net_fulfilled_by_line(scoped_lines, headers, line_items)
-    report = build_report(scoped_lines, fulfilled_by_line, warehouses)
+    report = build_report(scoped_lines, fulfilled_by_line, assignments)
 
     report.to_csv(WORKSPACE_DIR / "region_fulfillment_report.csv", index=False)
 
