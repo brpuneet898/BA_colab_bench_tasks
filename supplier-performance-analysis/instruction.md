@@ -10,8 +10,8 @@ All input files are located in `/workspace/data/`:
 |------|-------------|
 | `suppliers.csv` | Master list of all suppliers |
 | `supplier_contracts.csv` | Contract terms per supplier, including SLA thresholds, penalty rates, effective dates, and supersession dates |
-| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC. Where a purchase order has been amended, the file contains one row per version; each row carries an `amendment_date` recording when those terms were established. Apply the terms from the most recently amended version of each purchase order. |
-| `delivery_records.csv` | All delivery events against purchase orders; each row carries a `delivery_type` column (`Primary`, `Return`, or `Rework`) indicating the nature of the event. Both `Primary` and `Return` events record the physical units moved as a positive `quantity_received` value. `Rework` events record units identified for internal quality remediation. |
+| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC. Where a purchase order has been amended, the file contains one row per version; each row carries an `amendment_date` recording when those terms were established. |
+| `delivery_records.csv` | All delivery events against purchase orders; each row carries a `delivery_type` column (`Primary`, `Return`, or `Rework`) indicating the nature of the event. `Rework` events record units identified for internal quality remediation. |
 | `quality_inspections.csv` | Quality inspection results per delivery (reference only) |
 | `supplier_contacts.csv` | Supplier contact details (reference only) |
 | `warehouse_metadata.csv` | Warehouse reference data (reference only) |

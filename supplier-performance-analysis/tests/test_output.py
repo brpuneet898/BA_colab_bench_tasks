@@ -27,7 +27,8 @@ Headroom mechanisms tested:
             ordered_quantity, later amendment_date) written after. Naive
             drop_duplicates(keep='first') silently uses the original lower
             quantity as the fill-rate denominator, inflating fill rates and
-            suppressing SLA breaches.
+            suppressing SLA breaches. The instruction no longer prescribes
+            which version to apply; the model must determine this from data.
 
   Trap 5 — contract_superseded_by NaT.
             All currently active contracts carry NaT in contract_superseded_by.
@@ -54,8 +55,35 @@ Headroom mechanisms tested:
             instruction defines the net quantity computation only for Primary
             (increase) and Return (decrease); Rework has no assigned role.
             A model that negates Returns then sums all quantity_received inflates
-            per-supplier NFR by 0.5–2% and produces ~5 extra phantom "no-breach"
-            POs, pushing total_sla_breach_count outside the abs_tol=3 tolerance.
+            per-supplier NFR by 0.5–2% and produces extra phantom "no-breach"
+            POs.
+
+  Trap 9 — Pre-deadline Return events.
+            100 Return rows have received_date ≤ promised_delivery_date.
+            These represent goods that arrived before the deadline and were
+            immediately rejected on inspection. Return quantity is sized so
+            that net-before-deadline = 0.98 × ordered_quantity (below ordered,
+            above all SLA fill-rate thresholds). The PO was previously on-time
+            with no breach; the pre-deadline return makes it a pure on-time
+            breach. A model that evaluates on-time as "did primary delivery
+            arrive by the deadline?" ignores that pre-deadline Returns reduce
+            the net quantity before the deadline, producing an inflated
+            on_time_delivery_rate and a lower sla_breach_count.
+            The instruction states "net quantity received on or before the
+            promised_delivery_date" — "net" explicitly includes pre-deadline
+            Returns. The NFR definition's "regardless of when those events
+            occurred" applies only to fill-rate, not to the date-gated on-time
+            check.
+
+  Trap 10 — Post-Q1 Return events.
+            ~80 Return rows have received_date in April 2024, after both Q1
+            ends and after the PO's promised_delivery_date. The instruction
+            says net fill rate is computed "regardless of when those events
+            occurred." A model that scopes delivery events to Q1 dates before
+            aggregating silently omits these April returns, producing inflated
+            net_fill_rate values (pass instead of fill-rate breach) and a
+            lower sla_breach_count. The scope restriction in the instruction
+            applies to order_date only, not to delivery event dates.
 """
 
 import json
@@ -255,8 +283,8 @@ def test_case_01_input_sentinels(raw_data):
     """
     Verifies canonical data fingerprints: row counts, po_id non-uniqueness across
     warehouses (composite key trap), amendment pair count, open-ended contract count,
-    dual-contract count, superseded contract count, unsigned Return quantities, and
-    presence of Rework events.
+    dual-contract count, superseded contract count, unsigned Return quantities,
+    presence of Rework events, and pre-deadline Return events (early return trap).
     """
     suppliers, contracts, pos, deliveries = raw_data
 
@@ -300,6 +328,35 @@ def test_case_01_input_sentinels(raw_data):
     assert rework_count >= 50, \
         (f"delivery_records.csv must contain Rework events (internal quality remediation rows); "
          f"expected at least 50, got {rework_count}")
+
+    # Trap 9: pre-deadline Return events
+    # Resolve amendments to get each PO's current promised_delivery_date
+    pos_latest = (
+        pos.sort_values(["warehouse_id", "po_id", "amendment_date"],
+                        ascending=[True, True, False])
+        .drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
+    )
+    returns_with_deadline = returns.merge(
+        pos_latest[["warehouse_id", "po_id", "promised_delivery_date"]],
+        on=["warehouse_id", "po_id"],
+        how="left",
+    )
+    early_return_count = (
+        returns_with_deadline["received_date"] <= returns_with_deadline["promised_delivery_date"]
+    ).sum()
+    assert early_return_count >= 80, \
+        (f"delivery_records.csv must contain at least 80 pre-deadline Return events "
+         f"(received_date <= promised_delivery_date); got {early_return_count}. "
+         f"These are quality-rejection returns that arrive before the deadline and "
+         f"reduce net-before-deadline below ordered_quantity.")
+
+    # Trap 10: post-Q1 Return events (received_date in April)
+    post_q1_returns = (deliveries["delivery_type"] == "Return") & (deliveries["received_date"] > pd.Timestamp("2024-03-31"))
+    assert post_q1_returns.sum() >= 60, \
+        (f"delivery_records.csv must contain at least 60 post-Q1 Return events "
+         f"(received_date > 2024-03-31); got {post_q1_returns.sum()}. "
+         f"These April returns reduce net_fill_rate for Q1 POs per the instruction's "
+         f"'regardless of when those events occurred' clause.")
 
 
 # ---------------------------------------------------------------------------
