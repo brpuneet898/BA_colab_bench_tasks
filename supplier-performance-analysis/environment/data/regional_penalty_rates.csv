@@ -1,0 +1,10 @@
+warehouse_id,contract_tier,regional_penalty_multiplier
+AMER,A,1.0
+AMER,B,1.0
+AMER,C,1.0
+EMEA,A,1.3
+EMEA,B,1.25
+EMEA,C,1.2
+APAC,A,1.1
+APAC,B,1.1
+APAC,C,1.1

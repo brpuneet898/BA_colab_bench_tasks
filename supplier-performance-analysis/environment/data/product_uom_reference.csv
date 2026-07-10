@@ -1,0 +1,3 @@
+quantity_uom,units_per_ea_equivalent,description
+EA,1,Each unit (individual item)
+MT,1000,Metric tonne (1000 EA equivalent)

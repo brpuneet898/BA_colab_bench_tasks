@@ -26,7 +26,25 @@ def load_data():
                                           "amendment_date"])
     deliveries = pd.read_csv(DATA_DIR / "delivery_records.csv",
                              parse_dates=["received_date"])
-    return suppliers, contracts, pos, deliveries
+    regional_rates = pd.read_csv(DATA_DIR / "regional_penalty_rates.csv")
+    uom_ref        = pd.read_csv(DATA_DIR / "product_uom_reference.csv")
+    return suppliers, contracts, pos, deliveries, regional_rates, uom_ref
+
+
+def convert_po_quantities(pos, uom_ref):
+    """
+    Convert ordered_quantity to EA (base units) for Chemicals POs stored in MT.
+    The product_uom_reference.csv supplies the conversion factor (MT = 1000 EA).
+    """
+    if "quantity_uom" not in pos.columns:
+        return pos
+    uom_map = uom_ref.set_index("quantity_uom")["units_per_ea_equivalent"].to_dict()
+    pos = pos.copy()
+    pos["ordered_quantity"] = pos.apply(
+        lambda r: round(r["ordered_quantity"] * uom_map.get(r["quantity_uom"], 1)),
+        axis=1,
+    )
+    return pos
 
 
 def resolve_amendments(pos):
@@ -44,11 +62,16 @@ def resolve_amendments(pos):
 
 def sign_returns(deliveries):
     """
-    Retain only the delivery event types that contribute to net on-hand quantity
-    (Primary and Return), then negate Return quantities so downstream sums produce
-    net received. Rework events are internal quality events and are excluded.
+    Retain Primary events and Rejection returns only. Negate Rejection return
+    quantities so downstream sums produce net on-hand. Rework events and
+    Operational returns (buyer-initiated) do not affect the supplier's fill-rate
+    metrics and are excluded.
     """
-    deliveries = deliveries[deliveries["delivery_type"].isin(["Primary", "Return"])].copy()
+    keep = (deliveries["delivery_type"] == "Primary") | (
+        (deliveries["delivery_type"] == "Return") &
+        (deliveries["return_basis"] == "Rejection")
+    )
+    deliveries = deliveries[keep].copy()
     deliveries.loc[deliveries["delivery_type"] == "Return", "quantity_received"] *= -1
     return deliveries
 
@@ -63,8 +86,9 @@ def get_applicable_contract(pos, contracts):
     """
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
-                   "contract_superseded_by",
-                   "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd"]],
+                   "contract_superseded_by", "contract_tier",
+                   "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd",
+                   "grace_period_days"]],
         on="supplier_id",
         how="left",
     )
@@ -80,14 +104,20 @@ def get_applicable_contract(pos, contracts):
     return applicable
 
 
-def compute_po_level_metrics(pos_with_contracts, deliveries):
+def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
     """
     Compute net fill rate, on-time flag, SLA breach, and penalty per PO.
-    deliveries must already have Return quantities negated (via sign_returns).
+    deliveries must already have Rejection Return quantities negated (via sign_returns).
+
+    On-time uses promised_delivery_date + grace_period_days as the effective deadline.
+
+    Penalty = order_value_usd × penalty_rate_pct × regional_penalty_multiplier,
+    where the multiplier is sourced from regional_penalty_rates.csv using the
+    composite key (warehouse_id, contract_tier).
 
     Escalating penalty: once a supplier's running SLA breach count (sorted by
     order_date, po_id) exceeds 5, each further breaching PO is assessed at 2x
-    the standard penalty_rate_pct.
+    the effective (post-multiplier) rate.
     """
     net_qty = (
         deliveries
@@ -98,12 +128,17 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
 
     d_with_deadline = deliveries.merge(
         pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
-                            "ordered_quantity"]].drop_duplicates(),
+                            "ordered_quantity", "grace_period_days"]].drop_duplicates(),
         on=["warehouse_id", "po_id"],
         how="inner",
     )
+    d_with_deadline = d_with_deadline.copy()
+    d_with_deadline["effective_deadline"] = (
+        d_with_deadline["promised_delivery_date"] +
+        pd.to_timedelta(d_with_deadline["grace_period_days"].fillna(0).astype(int), unit="D")
+    )
     d_before = d_with_deadline[
-        d_with_deadline["received_date"] <= d_with_deadline["promised_delivery_date"]
+        d_with_deadline["received_date"] <= d_with_deadline["effective_deadline"]
     ]
     net_by_deadline = (
         d_before
@@ -122,11 +157,18 @@ def compute_po_level_metrics(pos_with_contracts, deliveries):
     ontime_breach = ~po["on_time"]
     po["sla_breach"] = fill_breach | ontime_breach
 
+    po = po.merge(
+        regional_rates[["warehouse_id", "contract_tier", "regional_penalty_multiplier"]],
+        on=["warehouse_id", "contract_tier"],
+        how="left",
+    )
+    po["regional_penalty_multiplier"] = po["regional_penalty_multiplier"].fillna(1.0)
+
     po = po.sort_values(["supplier_id", "order_date", "po_id"]).copy()
     po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
     escalated = po["sla_breach"] & (po["breach_rank"] > 5)
-    po["penalty_rate_eff"] = po["penalty_rate_pct"].where(~escalated,
-                                                           po["penalty_rate_pct"] * 2)
+    base_rate = po["penalty_rate_pct"] * po["regional_penalty_multiplier"]
+    po["penalty_rate_eff"] = base_rate.where(~escalated, base_rate * 2)
     po["penalty_po"] = po.apply(
         lambda r: r["order_value_usd"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
         axis=1,
@@ -203,15 +245,16 @@ def build_summary(scorecard):
 
 
 def main():
-    suppliers, contracts, pos, deliveries = load_data()
+    suppliers, contracts, pos, deliveries, regional_rates, uom_ref = load_data()
 
+    pos        = convert_po_quantities(pos, uom_ref)
     pos        = resolve_amendments(pos)
     deliveries = sign_returns(deliveries)
 
     q1_pos = pos[(pos["order_date"] >= Q1_START) & (pos["order_date"] <= Q1_END)].copy()
 
     pos_with_contracts = get_applicable_contract(q1_pos, contracts)
-    po_level           = compute_po_level_metrics(pos_with_contracts, deliveries)
+    po_level           = compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates)
     penalty_caps       = compute_penalty_cap(contracts)
 
     scorecard = build_scorecard(suppliers, po_level, penalty_caps)

@@ -27,8 +27,7 @@ Headroom mechanisms tested:
             ordered_quantity, later amendment_date) written after. Naive
             drop_duplicates(keep='first') silently uses the original lower
             quantity as the fill-rate denominator, inflating fill rates and
-            suppressing SLA breaches. The instruction no longer prescribes
-            which version to apply; the model must determine this from data.
+            suppressing SLA breaches.
 
   Trap 5 — contract_superseded_by NaT.
             All currently active contracts carry NaT in contract_superseded_by.
@@ -76,14 +75,38 @@ Headroom mechanisms tested:
             check.
 
   Trap 10 — Post-Q1 Return events.
-            ~80 Return rows have received_date in April 2024, after both Q1
-            ends and after the PO's promised_delivery_date. The instruction
-            says net fill rate is computed "regardless of when those events
-            occurred." A model that scopes delivery events to Q1 dates before
-            aggregating silently omits these April returns, producing inflated
-            net_fill_rate values (pass instead of fill-rate breach) and a
-            lower sla_breach_count. The scope restriction in the instruction
-            applies to order_date only, not to delivery event dates.
+            ~160 Return rows have received_date in April 2024 (includes both
+            dedicated post-Q1 returns and early-return rows for POs with an
+            April promised_delivery_date). The instruction says net fill rate
+            is computed "regardless of when those events occurred." A model
+            that scopes delivery events to Q1 dates before aggregating silently
+            omits these April returns, producing inflated net_fill_rate values
+            and a lower sla_breach_count. The scope restriction applies to
+            order_date only, not to delivery event dates.
+
+  Trap 11 — Return basis discrimination.
+            Return rows carry return_basis "Rejection" (supplier quality
+            failure) or "Operational" (buyer-initiated). The instruction's
+            NFR definition says "Return deliveries arising from non-conforming
+            goods decrease it" — Operational returns must be excluded from the
+            net quantity computation. A model that negates all Return rows
+            incorrectly reduces fill rates, pushing borderline POs across the
+            SLA threshold and inflating sla_breach_count.
+
+  Trap 12 — Regional penalty rate composite key.
+            regional_penalty_rates.csv has 9 rows indexed by
+            (warehouse_id, contract_tier). EMEA multipliers: 1.20–1.30;
+            APAC: 1.10; AMER: 1.00. Effective penalty = penalty_rate_pct ×
+            regional_penalty_multiplier. Joining on contract_tier alone fans
+            out 3× per PO; ignoring the file under-counts EMEA/APAC penalties.
+
+  Trap 13 — Chemicals unit mismatch (MT vs EA).
+            purchase_orders.csv stores ordered_quantity in MT for Chemicals
+            and in EA for all other categories (quantity_uom column).
+            delivery_records.csv always records quantity_received in EA.
+            product_uom_reference.csv provides the conversion: 1 MT = 1000 EA.
+            A model that skips conversion produces fill rates ~1000× too large
+            for Chemicals, suppressing all their SLA breaches.
 """
 
 import json
@@ -122,8 +145,9 @@ Q1_END   = pd.Timestamp("2024-03-31")
 def _get_applicable_contract(pos, contracts):
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
-                   "contract_superseded_by",
-                   "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd"]],
+                   "contract_superseded_by", "contract_tier",
+                   "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd",
+                   "grace_period_days"]],
         on="supplier_id", how="left",
     )
     open_ended     = merged["contract_effective_to"].isna()
@@ -138,7 +162,7 @@ def _get_applicable_contract(pos, contracts):
     return applicable
 
 
-def _compute_po_level(pos_with_contracts, deliveries):
+def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -148,11 +172,16 @@ def _compute_po_level(pos_with_contracts, deliveries):
 
     d_with_deadline = deliveries.merge(
         pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
-                            "ordered_quantity"]].drop_duplicates(),
+                            "ordered_quantity", "grace_period_days"]].drop_duplicates(),
         on=["warehouse_id", "po_id"], how="inner",
     )
+    d_with_deadline = d_with_deadline.copy()
+    d_with_deadline["effective_deadline"] = (
+        d_with_deadline["promised_delivery_date"] +
+        pd.to_timedelta(d_with_deadline["grace_period_days"].fillna(0).astype(int), unit="D")
+    )
     d_before = d_with_deadline[
-        d_with_deadline["received_date"] <= d_with_deadline["promised_delivery_date"]
+        d_with_deadline["received_date"] <= d_with_deadline["effective_deadline"]
     ]
     net_by_deadline = (
         d_before
@@ -170,11 +199,18 @@ def _compute_po_level(pos_with_contracts, deliveries):
         (po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]) | (~po["on_time"])
     )
 
+    po = po.merge(
+        regional_rates[["warehouse_id", "contract_tier", "regional_penalty_multiplier"]],
+        on=["warehouse_id", "contract_tier"],
+        how="left",
+    )
+    po["regional_penalty_multiplier"] = po["regional_penalty_multiplier"].fillna(1.0)
+
     po = po.sort_values(["supplier_id", "order_date", "po_id"]).copy()
     po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
     escalated = po["sla_breach"] & (po["breach_rank"] > 5)
-    po["penalty_rate_eff"] = po["penalty_rate_pct"].where(~escalated,
-                                                           po["penalty_rate_pct"] * 2)
+    base_rate = po["penalty_rate_pct"] * po["regional_penalty_multiplier"]
+    po["penalty_rate_eff"] = base_rate.where(~escalated, base_rate * 2)
     po["penalty_po"] = po.apply(
         lambda r: r["order_value_usd"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
         axis=1,
@@ -192,12 +228,16 @@ def _penalty_caps(contracts):
     return latest.set_index("supplier_id")["max_penalty_cap_usd"].to_dict()
 
 
-def _build_expected(suppliers, contracts, q1_pos, deliveries):
-    deliveries = deliveries[deliveries["delivery_type"].isin(["Primary", "Return"])].copy()
+def _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates):
+    keep = (deliveries["delivery_type"] == "Primary") | (
+        (deliveries["delivery_type"] == "Return") &
+        (deliveries["return_basis"] == "Rejection")
+    )
+    deliveries = deliveries[keep].copy()
     deliveries.loc[deliveries["delivery_type"] == "Return", "quantity_received"] *= -1
 
     pos_c  = _get_applicable_contract(q1_pos, contracts)
-    po_lvl = _compute_po_level(pos_c, deliveries)
+    po_lvl = _compute_po_level(pos_c, deliveries, regional_rates)
     caps   = _penalty_caps(contracts)
 
     records = []
@@ -243,12 +283,21 @@ def raw_data():
                                           "amendment_date"])
     deliveries = pd.read_csv(DATA_DIR / "delivery_records.csv",
                              parse_dates=["received_date"])
-    return suppliers, contracts, pos, deliveries
+    regional_rates = pd.read_csv(DATA_DIR / "regional_penalty_rates.csv")
+    uom_ref        = pd.read_csv(DATA_DIR / "product_uom_reference.csv")
+    return suppliers, contracts, pos, deliveries, regional_rates, uom_ref
 
 
 @pytest.fixture(scope="module")
 def q1_pos(raw_data):
-    _, _, pos, _ = raw_data
+    _, _, pos, _, _, uom_ref = raw_data
+    pos = pos.copy()
+    if "quantity_uom" in pos.columns:
+        uom_map = uom_ref.set_index("quantity_uom")["units_per_ea_equivalent"].to_dict()
+        pos["ordered_quantity"] = pos.apply(
+            lambda r: round(r["ordered_quantity"] * uom_map.get(r["quantity_uom"], 1)),
+            axis=1,
+        )
     pos = pos.sort_values(["warehouse_id", "po_id", "amendment_date"],
                           ascending=[True, True, False])
     pos = pos.drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
@@ -257,8 +306,8 @@ def q1_pos(raw_data):
 
 @pytest.fixture(scope="module")
 def expected(raw_data, q1_pos):
-    suppliers, contracts, _, deliveries = raw_data
-    df, po_lvl, caps = _build_expected(suppliers, contracts, q1_pos, deliveries)
+    suppliers, contracts, _, deliveries, regional_rates, _ = raw_data
+    df, po_lvl, caps = _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates)
     return df, po_lvl, caps
 
 
@@ -284,9 +333,10 @@ def test_case_01_input_sentinels(raw_data):
     Verifies canonical data fingerprints: row counts, po_id non-uniqueness across
     warehouses (composite key trap), amendment pair count, open-ended contract count,
     dual-contract count, superseded contract count, unsigned Return quantities,
-    presence of Rework events, and pre-deadline Return events (early return trap).
+    presence of Rework events, pre-deadline Return events (early return trap),
+    post-Q1 Return events, Chemicals MT unit mismatch, and regional penalty rates.
     """
-    suppliers, contracts, pos, deliveries = raw_data
+    suppliers, contracts, pos, deliveries, regional_rates, uom_ref = raw_data
 
     assert len(suppliers) == 60, \
         f"suppliers.csv must not be modified (expected 60, got {len(suppliers)})"
@@ -357,6 +407,30 @@ def test_case_01_input_sentinels(raw_data):
          f"(received_date > 2024-03-31); got {post_q1_returns.sum()}. "
          f"These April returns reduce net_fill_rate for Q1 POs per the instruction's "
          f"'regardless of when those events occurred' clause.")
+
+    # Trap 11: return_basis column distinguishes Rejection vs Operational
+    assert "return_basis" in deliveries.columns, \
+        "delivery_records.csv must have a return_basis column (Rejection / Operational)"
+    return_basis_vals = set(deliveries[deliveries["delivery_type"] == "Return"]["return_basis"].dropna().unique())
+    assert "Rejection" in return_basis_vals and "Operational" in return_basis_vals, \
+        (f"Return rows must have both Rejection and Operational in return_basis; "
+         f"got {return_basis_vals}")
+
+    # Trap 12: regional_penalty_rates.csv composite key (warehouse_id, contract_tier)
+    assert len(regional_rates) == 9, \
+        (f"regional_penalty_rates.csv must have 9 rows (3 warehouses × 3 tiers), "
+         f"got {len(regional_rates)}")
+    emea_min = regional_rates[regional_rates["warehouse_id"] == "EMEA"]["regional_penalty_multiplier"].min()
+    assert emea_min > 1.0, \
+        f"EMEA regional_penalty_multiplier must be > 1.0, got {emea_min}"
+
+    # Trap 13: Chemicals ordered_quantity in MT (unit mismatch)
+    assert "quantity_uom" in pos.columns, \
+        "purchase_orders.csv must have a quantity_uom column (EA or MT)"
+    mt_count = (pos["quantity_uom"] == "MT").sum()
+    assert mt_count > 0, \
+        (f"purchase_orders.csv must have MT-unit rows (Chemicals category); "
+         f"got {mt_count} MT rows")
 
 
 # ---------------------------------------------------------------------------
@@ -431,7 +505,7 @@ def test_case_04_open_ended_contract_suppliers(agent_scorecard, expected, raw_da
 
     Spot-checks on_time_delivery_rate for the first 5 open-ended-contract suppliers.
     """
-    _, contracts, _, _ = raw_data
+    _, contracts, _, _, _, _ = raw_data
     exp_df, _, _ = expected
 
     nat_suppliers = contracts[contracts["contract_effective_to"].isna()]["supplier_id"].tolist()
@@ -484,7 +558,7 @@ def test_case_05_escalating_penalty_high_breach_suppliers(agent_scorecard, expec
     Spot-checks total_penalty_usd for the 5 non-NaT suppliers with the most
     SLA breaches (where the escalation effect is largest).
     """
-    _, contracts, _, _ = raw_data
+    _, contracts, _, _, _, _ = raw_data
     exp_df, po_lvl, _ = expected
 
     nat_suppliers = set(contracts[contracts["contract_effective_to"].isna()]["supplier_id"])
@@ -650,7 +724,7 @@ def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_d
 
     Spot-checks total_penalty_usd for the first 5 dual-contract suppliers.
     """
-    _, contracts, _, _ = raw_data
+    _, contracts, _, _, _, _ = raw_data
     exp_df, _, _ = expected
 
     dual_suppliers = (
@@ -677,6 +751,116 @@ def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_d
                 f"(diff {act_pen - exp_pen:+,.2f}). "
                 "The renegotiated (NEW) contract has NaT in contract_superseded_by — "
                 "it must be treated as still active, not excluded."
+            )
+
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 11 — Chemicals unit conversion  (Trap 13: MT → EA)
+# ---------------------------------------------------------------------------
+
+def test_case_11_chemicals_unit_conversion(agent_scorecard, expected, raw_data):
+    """
+    Trap 13 — Chemicals ordered_quantity is stored in MT in purchase_orders.csv;
+    all other categories use EA. delivery_records.csv always records in EA.
+    A model that skips MT→EA conversion (× 1000 per product_uom_reference.csv)
+    produces fill rates ~1000× too large for Chemicals, suppressing their SLA breaches.
+
+    Spot-checks net_fill_rate for the 3 suppliers with the most Chemicals POs.
+    """
+    _, _, pos, _, _, uom_ref = raw_data
+    exp_df, _, _ = expected
+
+    uom_map = uom_ref.set_index("quantity_uom")["units_per_ea_equivalent"].to_dict()
+    pos_conv = pos.copy()
+    if "quantity_uom" in pos_conv.columns:
+        pos_conv["ordered_quantity"] = pos_conv.apply(
+            lambda r: round(r["ordered_quantity"] * uom_map.get(r["quantity_uom"], 1)), axis=1
+        )
+    pos_latest = (
+        pos_conv
+        .sort_values(["warehouse_id", "po_id", "amendment_date"], ascending=[True, True, False])
+        .drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
+    )
+    q1 = pos_latest[(pos_latest["order_date"] >= Q1_START) & (pos_latest["order_date"] <= Q1_END)]
+    chem_counts = (
+        q1[q1["product_category"] == "Chemicals"]
+        .groupby("supplier_id").size()
+        .sort_values(ascending=False)
+    )
+    spot = chem_counts.index[:3].tolist()
+
+    failures = []
+    for sid in spot:
+        exp_row = exp_df[exp_df["supplier_id"] == sid]
+        act_row = agent_scorecard[agent_scorecard["supplier_id"] == sid]
+        if exp_row.empty or act_row.empty:
+            continue
+        exp_nfr = float(exp_row["net_fill_rate"].iloc[0])
+        act_nfr_raw = act_row["net_fill_rate"].iloc[0]
+        if pd.isna(act_nfr_raw):
+            continue
+        act_nfr = float(act_nfr_raw)
+        if abs(act_nfr - exp_nfr) > 0.005:
+            failures.append(
+                f"{sid}: net_fill_rate {act_nfr:.4f} != expected {exp_nfr:.4f}. "
+                f"Chemicals ordered_quantity is in MT — convert via product_uom_reference.csv "
+                f"(1 MT = 1000 EA) before computing fill rates."
+            )
+
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 12 — Regional penalty multiplier  (Trap 12: composite key)
+# ---------------------------------------------------------------------------
+
+def test_case_12_regional_penalty_multiplier(agent_scorecard, expected, raw_data):
+    """
+    Trap 12 — regional_penalty_rates.csv applies compliance multipliers indexed by
+    (warehouse_id, contract_tier): EMEA 1.20–1.30, APAC 1.10, AMER 1.00.
+    A model joining on contract_tier alone fans out 3× per PO; one that ignores
+    the file uses base penalty_rate_pct without the regional uplift.
+
+    Spot-checks total_penalty_usd for the 5 non-open-ended EMEA/APAC suppliers
+    with the highest PO count.
+    """
+    _, contracts, pos, _, _, uom_ref = raw_data
+    exp_df, _, _ = expected
+
+    nat_suppliers = set(contracts[contracts["contract_effective_to"].isna()]["supplier_id"])
+    pos_conv = pos.copy()
+    if "quantity_uom" in pos_conv.columns:
+        uom_map = uom_ref.set_index("quantity_uom")["units_per_ea_equivalent"].to_dict()
+        pos_conv["ordered_quantity"] = pos_conv.apply(
+            lambda r: round(r["ordered_quantity"] * uom_map.get(r["quantity_uom"], 1)), axis=1
+        )
+    pos_latest = (
+        pos_conv
+        .sort_values(["warehouse_id", "po_id", "amendment_date"], ascending=[True, True, False])
+        .drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
+    )
+    q1 = pos_latest[(pos_latest["order_date"] >= Q1_START) & (pos_latest["order_date"] <= Q1_END)]
+    emea_apac = q1[
+        q1["warehouse_id"].isin(["EMEA", "APAC"]) & ~q1["supplier_id"].isin(nat_suppliers)
+    ]
+    spot = emea_apac.groupby("supplier_id").size().sort_values(ascending=False).index[:5].tolist()
+
+    failures = []
+    for sid in spot:
+        exp_row = exp_df[exp_df["supplier_id"] == sid]
+        act_row = agent_scorecard[agent_scorecard["supplier_id"] == sid]
+        if exp_row.empty or act_row.empty:
+            continue
+        exp_pen = float(exp_row["total_penalty_usd"].iloc[0])
+        act_pen = float(act_row["total_penalty_usd"].iloc[0])
+        if not math.isclose(act_pen, exp_pen, abs_tol=500):
+            failures.append(
+                f"{sid}: total_penalty_usd {act_pen:,.2f} != expected {exp_pen:,.2f} "
+                f"(diff {act_pen - exp_pen:+,.2f}). "
+                f"Join regional_penalty_rates.csv on (warehouse_id, contract_tier) — "
+                f"EMEA 1.20–1.30×, APAC 1.10×, AMER 1.00×."
             )
 
     assert not failures, "\n".join(failures)

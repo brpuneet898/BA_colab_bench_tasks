@@ -10,11 +10,13 @@ All input files are located in `/workspace/data/`:
 |------|-------------|
 | `suppliers.csv` | Master list of all suppliers |
 | `supplier_contracts.csv` | Contract terms per supplier, including SLA thresholds, penalty rates, effective dates, and supersession dates |
-| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC. Where a purchase order has been amended, the file contains one row per version; each row carries an `amendment_date` recording when those terms were established. |
-| `delivery_records.csv` | All delivery events against purchase orders; each row carries a `delivery_type` column (`Primary`, `Return`, or `Rework`) indicating the nature of the event. `Rework` events record units identified for internal quality remediation. |
+| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC. Where a purchase order has been amended, the file contains one row per version; each row carries an `amendment_date` recording when those terms were established. The `quantity_uom` column records the unit of measure for `ordered_quantity`. |
+| `delivery_records.csv` | All delivery events against purchase orders; each row carries a `delivery_type` column (`Primary`, `Return`, or `Rework`) indicating the nature of the event. `Rework` events record units identified for internal quality remediation. `Return` events carry a `return_basis` field recording the basis for the return. |
 | `quality_inspections.csv` | Quality inspection results per delivery (reference only) |
 | `supplier_contacts.csv` | Supplier contact details (reference only) |
 | `warehouse_metadata.csv` | Warehouse reference data (reference only) |
+| `regional_penalty_rates.csv` | Regional penalty adjustment multipliers, indexed by warehouse and contract tier |
+| `product_uom_reference.csv` | Unit-of-measure definitions and EA-equivalent conversion factors (reference only) |
 
 ## Scope
 
@@ -26,7 +28,7 @@ Compute the following metrics per supplier across all Q1 purchase orders assigne
 
 ### On-Time Delivery Rate
 
-A purchase order is **on time** if the net quantity received on or before the `promised_delivery_date` meets or exceeds the `ordered_quantity`.
+A purchase order is **on time** if the net quantity received by `promised_delivery_date + grace_period_days` meets or exceeds the `ordered_quantity`, where `grace_period_days` is the value from the applicable contract for that purchase order.
 
 `on_time_delivery_rate` = count of on-time POs / total Q1 POs for the supplier, rounded to 4 decimal places.
 
@@ -34,7 +36,7 @@ Suppliers with no Q1 POs: set to `null`.
 
 ### Net Fill Rate
 
-The net quantity received for a purchase order is the running on-hand quantity across all delivery events for that order — Primary deliveries increase it and Return deliveries decrease it — regardless of when those events occurred.
+The net quantity received for a purchase order is the running on-hand quantity across qualifying delivery events for that order — Primary deliveries increase it and Return deliveries arising from non-conforming goods decrease it — regardless of when those qualifying events occurred.
 
 `net_fill_rate` = sum of net quantities received across all Q1 POs / sum of `ordered_quantity` across all Q1 POs, rounded to 4 decimal places.
 
@@ -42,7 +44,7 @@ Suppliers with no Q1 POs: set to `null`.
 
 ### SLA Breaches and Penalty
 
-Use the contract terms in effect at the time of each purchase order to determine the applicable `fill_rate_sla_threshold` and `penalty_rate_pct`. Where a supplier has more than one contract record, apply the terms from the contract that was in effect on the purchase order's `order_date`, has not been superseded as of that date (recorded in `contract_superseded_by`), and has the most recent `contract_effective_from` as of that date. A purchase order has an **SLA breach** if either condition holds:
+Use the contract terms in effect at the time of each purchase order to determine the applicable `fill_rate_sla_threshold`, `penalty_rate_pct`, and `grace_period_days`. The effective penalty rate for each purchase order is the contract `penalty_rate_pct` multiplied by the regional adjustment from `regional_penalty_rates.csv`, indexed by the purchase order's `warehouse_id` and the applicable contract's `contract_tier`. Where a supplier has more than one contract record, apply the terms from the contract that was in effect on the purchase order's `order_date`, has not been superseded as of that date (recorded in `contract_superseded_by`), and has the most recent `contract_effective_from` as of that date. A purchase order has an **SLA breach** if either condition holds:
 
 - The PO was not delivered on time (as defined above), or
 - The net fill rate for that individual PO falls below `fill_rate_sla_threshold`
