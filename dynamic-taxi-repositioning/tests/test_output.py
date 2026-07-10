@@ -62,13 +62,11 @@ def test_input_data_not_tampered():
     )
     dup_pairs = int(adj.duplicated(subset=["from_zone_id", "to_zone_id"]).sum())
     assert dup_pairs == 48, (
-        f"zone_adjacency.csv must contain exactly 48 duplicate zone pairs "
-        f"(got {dup_pairs})."
+        f"zone_adjacency.csv data integrity check failed (expected 48, got {dup_pairs})."
     )
     nan_dispatch = int(dispatch["service_month"].isna().sum())
     assert nan_dispatch == 50, (
-        f"dispatch_events.csv must contain exactly 50 NaN service_month rows "
-        f"(got {nan_dispatch})."
+        f"dispatch_events.csv data integrity check failed (expected 50, got {nan_dispatch})."
     )
 
 
@@ -304,7 +302,7 @@ def test_deduplicated_dispatch_count(summary_json, ground_truth):
     actual   = summary_json["deduplicated_dispatch_count"]
     assert actual == expected, (
         f"Expected deduplicated_dispatch_count={expected}, got {actual}. "
-        "Check that NaN service_month events are deduplicated as their own group."
+        "Verify the deduplication grouping key is applied consistently across all records."
     )
 
 
