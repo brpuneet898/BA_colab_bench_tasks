@@ -207,8 +207,9 @@ Apply the following conventions consistently throughout the reconstruction pipel
 
 | Convention | Rule |
 | --- | --- |
-| Dispatch deduplication key | Group by (`driver_id`, `service_month`, `pickup_zone_id`); retain the first event in each group; drop any subsequent event within 15 seconds of the previous |
+| Dispatch deduplication key | Group by (`driver_id`, `service_month`, `pickup_zone_id`) across all dispatch records, including those where `service_month` is absent — absent values form their own group and must not be excluded; retain the first event in each group; drop any subsequent event within 15 seconds of the previous |
 | Missing repositioning distance | If a zone pair is absent from `zone_adjacency.csv`, treat the repositioning distance as **0 km** |
+| Duplicate zone distances | If `zone_adjacency.csv` contains more than one row for the same `(from_zone_id, to_zone_id)` pair, use the smaller `distance_km` value |
 | Airport exemption window | Closed interval — `queue_start ≤ dropoff_datetime (UTC) ≤ queue_end` |
 | Shared-ride temporal overlap | Repositioning chains that involve a shared ride — either as the departing trip or as the next pickup — must not be excluded based on implied speed or temporal overlap (negative idle time) |
 

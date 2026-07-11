@@ -152,7 +152,7 @@ def _build_chains(trips, shared_ids):
 
 
 def _attach_reposition_distance(raw, chains):
-    adj = raw["adj"].drop_duplicates(subset=["from_zone_id", "to_zone_id"])
+    adj = raw["adj"].groupby(["from_zone_id", "to_zone_id"], as_index=False)["distance_km"].min()
     chains = chains.merge(
         adj,
         left_on=["reposition_from_zone", "reposition_to_zone"],

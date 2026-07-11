@@ -1,34 +1,17 @@
 """
 Dynamic Taxi Repositioning Efficiency Analysis — reference solution.
 
-Data quality issues that must be handled:
-
-  1. Driver IDs reset every service month. The correct unique entity key is
-     (driver_id, service_month). Using driver_id alone merges activity across
-     different months/drivers.
-
-  2. pickup_datetime is in America/New_York local time; dropoff_datetime is in
-     UTC. Both must be converted to UTC before computing durations or idle gaps.
-     DST transitions are handled with ambiguous='NaT', nonexistent='NaT'.
-
-  3. Billing reversals (negative fare_amount) are not real trips and must be
-     removed before session reconstruction.
-
-  4. Dispatch retries produce duplicate rows within 15 seconds. NaN service_month
-     events must be deduplicated as their own independent group; pandas groupby
-     silently drops NaN keys by default (dropna=True), which leaves those retries
-     uncollapsed and inflates the deduplicated count.
-
-  5. zone_adjacency.csv contains 48 duplicate (from_zone_id, to_zone_id) pairs
-     from secondary data source ingestion, with inflated wrong distances. The
-     table must be deduplicated on join keys before merging; a naive merge
-     produces phantom duplicate chain rows and inflates avg_reposition_km.
-
-  6. GPS-dropout trips have no dropoff_zone_id. Those chains are assigned to
-     zone code 0 rather than dropped.
-
-  7. Airport queue periods at JFK (zone 132) and LGA (zone 138) represent
-     legitimate operational waiting and must not be counted as inefficient idle.
+Pipeline:
+  1. Composite driver key: (driver_id, service_month).
+  2. Normalize pickup_datetime (Eastern) and dropoff_datetime (UTC) to UTC;
+     DST boundaries handled with ambiguous='NaT', nonexistent='NaT'.
+  3. Remove billing reversals (negative fare_amount) and negative-duration trips.
+  4. Deduplicate dispatch events by (driver_id, service_month, pickup_zone_id)
+     with dropna=False so absent service_month rows form their own group.
+  5. Resolve zone adjacency to the minimum distance per pair before merging.
+  6. GPS-dropout chains (null dropoff_zone_id) are assigned to zone code 0.
+  7. Airport queue periods at JFK (132) and LGA (138) exempt chains from
+     the inefficiency flag regardless of idle duration.
 """
 
 import json
@@ -170,7 +153,7 @@ def build_chains(trips, shared_ids):
 # ---------------------------------------------------------------------------
 
 def attach_distance(chains, adj):
-    adj = adj.drop_duplicates(subset=["from_zone_id", "to_zone_id"])
+    adj = adj.groupby(["from_zone_id", "to_zone_id"], as_index=False)["distance_km"].min()
     chains = chains.merge(
         adj,
         left_on=["reposition_from_zone", "reposition_to_zone"],
