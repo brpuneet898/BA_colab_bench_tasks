@@ -33,6 +33,24 @@ transaction_type instead of restricting to Shipment/Return/Cancellation
 folds backordered (not-yet-sent) quantity in as if it were fulfilled and
 overstates fulfillment by whatever was backordered.
 
+carrier_fulfillment_agreements.csv is a sparse exceptions list: it only
+lists (carrier_id, warehouse_id) pairs shipping under FOB Origin freight
+terms, where fulfillment responsibility passes to the customer the moment
+goods leave the warehouse dock. Every pair absent from the file is FOB
+Destination (the default), where the warehouse's responsibility continues
+until delivery. Under FOB Origin, a later Return or Cancellation is a
+matter between the customer and the carrier, not a failure of the
+warehouse's own fulfillment -- it does not net against quantity fulfilled,
+the shipped quantity still counts in full. Under FOB Destination,
+Return/Cancellation nets against fulfillment as usual (unchanged from
+before this file existed). carrier_id alone is not a unique key into this
+table -- six carriers are FOB Origin at exactly two of the warehouses
+they serve, so the lookup must join on (warehouse_id, carrier_id), never
+carrier_id alone; collapsing a carrier's two FOB Origin rows down to one
+(e.g. via drop_duplicates(subset="carrier_id")) applies FOB Origin
+treatment to every warehouse that carrier serves, not just the two it
+actually applies to.
+
 Fulfillment region is the region assigned to the order's
 assigned_warehouse_id, as recorded in warehouse_region_assignments.csv, in
 effect on the order's order_date -- not the customer's own region column.
@@ -71,7 +89,8 @@ def load_data():
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
-    return assignments, orders, order_lines, headers, line_items
+    fulfillment_agreements = pd.read_csv(DATA_DIR / "carrier_fulfillment_agreements.csv")
+    return assignments, orders, order_lines, headers, line_items, fulfillment_agreements
 
 
 def resolve_order_regions(orders, assignments):
@@ -103,20 +122,41 @@ def scope_order_lines(orders, order_lines, assignments):
 FULFILLMENT_TYPES = ["Shipment", "Return", "Cancellation"]
 
 
-def net_fulfilled_by_line(scoped_lines, headers, line_items):
+def net_fulfilled_by_line(scoped_lines, headers, line_items, fulfillment_agreements):
     """Net fulfilled quantity per (order_id, line_id).
 
     line_items is joined to headers on the composite (warehouse_id,
     shipment_id) key -- shipment_id alone repeats across warehouses -- to
-    recover transaction_type and event_date, then filtered to the cutoff.
-    quantity is already signed correctly (positive for Shipment, negative
-    for Return/Cancellation), so summing nets Shipment/Return/Cancellation
-    for free; Backorder rows are dropped since they represent quantity not
-    yet sent, not something the customer received and kept.
+    recover transaction_type, carrier_id and event_date, then filtered to
+    the cutoff. quantity is already signed correctly (positive for
+    Shipment, negative for Return/Cancellation), so summing nets
+    Shipment/Return/Cancellation for free; Backorder rows are dropped since
+    they represent quantity not yet sent, not something the customer
+    received and kept.
+
+    freight_terms is then resolved via a left join on the composite
+    (warehouse_id, carrier_id) key into carrier_fulfillment_agreements --
+    carrier_id alone is not unique in that table -- defaulting to FOB
+    Destination for any pair absent from that (sparse, exceptions-only)
+    file. Under FOB Origin, a Return/Cancellation row is dropped before
+    netting (the warehouse's responsibility ended at shipment, so it
+    doesn't lose credit for a later return); the matching Shipment row is
+    untouched either way.
     """
     events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
     in_window = events[events["event_date"] <= REPORT_AS_OF].copy()
     in_window = in_window[in_window["transaction_type"].isin(FULFILLMENT_TYPES)]
+
+    in_window = in_window.merge(
+        fulfillment_agreements[["warehouse_id", "carrier_id", "freight_terms"]],
+        on=["warehouse_id", "carrier_id"], how="left",
+    )
+    in_window["freight_terms"] = in_window["freight_terms"].fillna("FOB Destination")
+    fob_origin_adjustment = (
+        (in_window["freight_terms"] == "FOB Origin")
+        & (in_window["transaction_type"] != "Shipment")
+    )
+    in_window = in_window[~fob_origin_adjustment]
 
     matched = scoped_lines[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
@@ -146,10 +186,10 @@ def build_report(scoped_lines, fulfilled_by_line, assignments):
 
 
 def main():
-    assignments, orders, order_lines, headers, line_items = load_data()
+    assignments, orders, order_lines, headers, line_items, fulfillment_agreements = load_data()
 
     scoped_lines = scope_order_lines(orders, order_lines, assignments)
-    fulfilled_by_line = net_fulfilled_by_line(scoped_lines, headers, line_items)
+    fulfilled_by_line = net_fulfilled_by_line(scoped_lines, headers, line_items, fulfillment_agreements)
     report = build_report(scoped_lines, fulfilled_by_line, assignments)
 
     report.to_csv(WORKSPACE_DIR / "region_fulfillment_report.csv", index=False)

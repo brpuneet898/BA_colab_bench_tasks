@@ -34,16 +34,28 @@ Reasoning challenges this suite exercises:
      transaction_type, Backorder, recording quantity still awaiting
      fulfillment. It has a positive quantity like a Shipment row, but
      nothing has gone out against it, and must be excluded.
+  7. Composite key + domain knowledge gap, combined — carrier_fulfillment_
+     agreements.csv is a sparse exceptions list of (carrier_id,
+     warehouse_id) pairs shipping under FOB Origin freight terms; every
+     absent pair is FOB Destination (the default). Under FOB Origin, a
+     later Return/Cancellation does not net against quantity fulfilled --
+     the warehouse's responsibility ended once the shipment left the dock,
+     so a subsequent return is the customer's and carrier's matter, not a
+     fulfillment failure -- but the Shipment quantity still counts in full
+     either way. carrier_id alone is not a unique key into this table:
+     six carriers are FOB Origin at exactly two of the warehouses they
+     serve, FOB Destination everywhere else.
 
 test_case_01 is a single anti-tamper sentinel on all input data, not graded
 reasoning. test_case_02-03 check output structure/schema. test_case_04-06
-are hard, ground-truth-derived checks tied to challenges 1-6 above (each
+are hard, ground-truth-derived checks tied to challenges 1-7 above (each
 checks both the total and the per-region breakdown, since the region trap
 in particular only shows up per-region); test_case_07 checks the derived
-best/worst region labels. test_case_08-10 each reject one specific naive
+best/worst region labels. test_case_08-11 each reject one specific naive
 mistake (Backorder inclusion, shipment_id-only join, current-only region
-assignment) by checking the reported figure isn't suspiciously close to
-what that specific mistake would produce.
+assignment, carrier_id-only fulfillment-agreement lookup) by checking the
+reported figure isn't suspiciously close to what that specific mistake
+would produce.
 """
 
 import json
@@ -66,23 +78,26 @@ Q1_END = pd.Timestamp("2024-03-31")
 REPORT_AS_OF = pd.Timestamp("2024-04-15")
 
 ORDERS_ROWS = 18_000
-ORDER_LINES_ROWS = 29_662
-SHIPMENT_ROWS = 40_284
+ORDER_LINES_ROWS = 29_657
+SHIPMENT_ROWS = 40_278
 ASSIGNMENT_ROWS = 23
+CARRIER_AGREEMENT_ROWS = 12
 
 
 # ── Anti-cheat sentinel ────────────────────────────────────────────────────────
 
 def test_case_01_input_data_not_tampered():
-    """Sentinel over all five traps: row counts, line_id collision,
+    """Sentinel over all seven traps: row counts, line_id collision,
     Return/Cancellation sign, shipment_id cross-warehouse collision,
-    Backorder presence/sign, and warehouse_region_assignments structure."""
+    Backorder presence/sign, warehouse_region_assignments structure, and
+    carrier_fulfillment_agreements structure."""
     orders = pd.read_csv(DATA_DIR / "orders.csv")
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv")
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
     assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
                                parse_dates=["effective_from", "effective_to"])
+    agreements = pd.read_csv(DATA_DIR / "carrier_fulfillment_agreements.csv")
 
     assert len(orders) == ORDERS_ROWS, \
         f"orders.csv row count must not be modified (expected {ORDERS_ROWS}, got {len(orders)})."
@@ -145,6 +160,32 @@ def test_case_01_input_data_not_tampered():
          f"warehouse, got {n_open_ended} open-ended rows for "
          f"{assignments['warehouse_id'].nunique()} warehouses.")
 
+    assert len(agreements) == CARRIER_AGREEMENT_ROWS, \
+        (f"carrier_fulfillment_agreements.csv row count must not be modified "
+         f"(expected {CARRIER_AGREEMENT_ROWS}, got {len(agreements)}).")
+
+    assert (agreements["freight_terms"] == "FOB Origin").all(), \
+        "carrier_fulfillment_agreements.csv is expected to list FOB Origin exceptions only."
+
+    rows_per_carrier = agreements.groupby("carrier_id").size()
+    n_multi_warehouse_carriers = (rows_per_carrier > 1).sum()
+    assert n_multi_warehouse_carriers >= 3, \
+        (f"Expected at least 3 carriers with FOB Origin terms at more than "
+         f"one warehouse, got {n_multi_warehouse_carriers}. carrier_id "
+         f"alone must not be treated as determining freight_terms.")
+
+    fob_origin_carriers = set(agreements["carrier_id"].unique())
+    shipments_from_fob_carriers = headers[
+        headers["carrier_id"].isin(fob_origin_carriers) & (headers["transaction_type"] == "Shipment")
+    ]
+    warehouses_served = shipments_from_fob_carriers.groupby("carrier_id")["warehouse_id"].nunique()
+    warehouses_listed = agreements.groupby("carrier_id")["warehouse_id"].nunique()
+    n_partial_coverage = (warehouses_served.reindex(warehouses_listed.index) > warehouses_listed).sum()
+    assert n_partial_coverage >= 3, \
+        (f"Expected all {len(fob_origin_carriers)} FOB Origin carriers to also ship from "
+         f"warehouses not listed in carrier_fulfillment_agreements.csv (got {n_partial_coverage} "
+         f"such carriers), so that a carrier_id-only lookup is a real, checkable mistake.")
+
 
 # ── Output file structure ─────────────────────────────────────────────────────
 
@@ -198,6 +239,7 @@ def ground_truth():
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+    agreements = pd.read_csv(DATA_DIR / "carrier_fulfillment_agreements.csv")
 
     # Scope: Q1 2024 orders, tagged with the fulfillment region in effect on
     # each order's order_date. A warehouse's region can have more than one
@@ -219,6 +261,23 @@ def ground_truth():
     events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
     in_window = events[events["event_date"] <= REPORT_AS_OF]
     in_window = in_window[in_window["transaction_type"].isin(FULFILLMENT_TYPES)]
+
+    # freight_terms is resolved via a left join on the composite
+    # (warehouse_id, carrier_id) key -- carrier_id alone is not unique in
+    # carrier_fulfillment_agreements.csv -- defaulting to FOB Destination
+    # for any pair absent from that (sparse, exceptions-only) file. Under
+    # FOB Origin, a Return/Cancellation does not net against fulfillment;
+    # the matching Shipment row is untouched either way.
+    in_window = in_window.merge(
+        agreements[["warehouse_id", "carrier_id", "freight_terms"]],
+        on=["warehouse_id", "carrier_id"], how="left",
+    )
+    in_window["freight_terms"] = in_window["freight_terms"].fillna("FOB Destination")
+    fob_origin_adjustment = (
+        (in_window["freight_terms"] == "FOB Origin")
+        & (in_window["transaction_type"] != "Shipment")
+    )
+    in_window = in_window[~fob_origin_adjustment]
 
     matched = scoped[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
@@ -352,19 +411,32 @@ def naive_total_fulfilled_with_backorder():
     """quantity_fulfilled_net if every transaction_type row within the cutoff
     is summed as-is, without restricting to Shipment/Return/Cancellation
     (headers/line_items still joined correctly on (warehouse_id, shipment_id),
-    and region still resolved correctly via effective-dating)."""
+    region still resolved correctly via effective-dating, and FOB Origin
+    Return/Cancellation events still correctly excluded from netting via the
+    composite (warehouse_id, carrier_id) agreement lookup)."""
     assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
                                parse_dates=["effective_from", "effective_to"])
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+    agreements = pd.read_csv(DATA_DIR / "carrier_fulfillment_agreements.csv")
 
     order_regions = _resolve_q1_order_regions(orders, assignments)
     scoped = order_lines.merge(order_regions, on="order_id")
 
     events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
-    in_window = events[events["event_date"] <= REPORT_AS_OF]
+    in_window = events[events["event_date"] <= REPORT_AS_OF].copy()
+    in_window = in_window.merge(
+        agreements[["warehouse_id", "carrier_id", "freight_terms"]],
+        on=["warehouse_id", "carrier_id"], how="left",
+    )
+    in_window["freight_terms"] = in_window["freight_terms"].fillna("FOB Destination")
+    fob_origin_adjustment = (
+        (in_window["freight_terms"] == "FOB Origin")
+        & (in_window["transaction_type"].isin(["Return", "Cancellation"]))
+    )
+    in_window = in_window[~fob_origin_adjustment]
     matched = scoped[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
     )
@@ -402,22 +474,39 @@ def naive_total_fulfilled_shipment_id_only():
     only unique within a warehouse. A minority of shipment_id values collide
     across warehouses, so this fans a minority of line items out against the
     wrong header's transaction_type/event_date. Region is still resolved
-    correctly via effective-dating."""
+    correctly via effective-dating, and FOB Origin Return/Cancellation
+    events are still correctly excluded from netting via the composite
+    (warehouse_id, carrier_id) agreement lookup (using the warehouse_id
+    carried on the wrongly-joined header row, since that's the only
+    warehouse_id available once the shipment_id-only join has already
+    discarded the line item's own)."""
     assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
                                parse_dates=["effective_from", "effective_to"])
     orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
     order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
     headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
     line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+    agreements = pd.read_csv(DATA_DIR / "carrier_fulfillment_agreements.csv")
 
     order_regions = _resolve_q1_order_regions(orders, assignments)
     scoped = order_lines.merge(order_regions, on="order_id")
 
-    events = line_items.merge(headers, on="shipment_id")
+    events = line_items.merge(headers, on="shipment_id", suffixes=("", "_header"))
     in_window = events[
         (events["event_date"] <= REPORT_AS_OF)
         & (events["transaction_type"].isin(["Shipment", "Return", "Cancellation"]))
-    ]
+    ].copy()
+    in_window = in_window.merge(
+        agreements[["warehouse_id", "carrier_id", "freight_terms"]],
+        left_on=["warehouse_id_header", "carrier_id"], right_on=["warehouse_id", "carrier_id"],
+        how="left",
+    )
+    in_window["freight_terms"] = in_window["freight_terms"].fillna("FOB Destination")
+    fob_origin_adjustment = (
+        (in_window["freight_terms"] == "FOB Origin")
+        & (in_window["transaction_type"] != "Shipment")
+    )
+    in_window = in_window[~fob_origin_adjustment]
     matched = scoped[["order_id", "line_id"]].merge(
         in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
     )
@@ -496,3 +585,83 @@ def test_case_10_region_quantity_ordered_rejects_current_only_assignment(
          f"obtained by taking each warehouse's single most recent region assignment "
          f"regardless of order_date; region must be resolved as of each order's "
          f"order_date. Correct per-region figures: {gt['quantity_ordered'].to_dict()}.")
+
+
+# ── Hard test 7: rejects naive carrier_id-only fulfillment-agreement join ──────
+
+@pytest.fixture(scope="module")
+def naive_total_fulfilled_carrier_id_only():
+    """quantity_fulfilled_net if carrier_fulfillment_agreements.csv is
+    reduced to one row per carrier_id (drop_duplicates(subset="carrier_id",
+    keep="first")) before being applied, ignoring that carrier_id alone
+    does not determine freight_terms -- only the (carrier_id, warehouse_id)
+    pair does. Collapsing a carrier's two FOB Origin rows down to one still
+    yields "FOB Origin" (both rows carry the same value), so the naive
+    lookup treats that carrier as FOB Origin everywhere it ships, not just
+    the two warehouses it actually applies to. Every other step (composite
+    shipment join, Backorder exclusion, region resolution) is done
+    correctly."""
+    assignments = pd.read_csv(DATA_DIR / "warehouse_region_assignments.csv",
+                               parse_dates=["effective_from", "effective_to"])
+    orders = pd.read_csv(DATA_DIR / "orders.csv", parse_dates=["order_date"])
+    order_lines = pd.read_csv(DATA_DIR / "order_lines.csv")
+    headers = pd.read_csv(DATA_DIR / "shipment_headers.csv", parse_dates=["event_date"])
+    line_items = pd.read_csv(DATA_DIR / "shipment_line_items.csv")
+    agreements = pd.read_csv(DATA_DIR / "carrier_fulfillment_agreements.csv")
+
+    order_regions = _resolve_q1_order_regions(orders, assignments)
+    scoped = order_lines.merge(order_regions, on="order_id")
+
+    events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
+    in_window = events[events["event_date"] <= REPORT_AS_OF].copy()
+    in_window = in_window[in_window["transaction_type"].isin(["Shipment", "Return", "Cancellation"])]
+
+    agreements_by_carrier = agreements.drop_duplicates(subset="carrier_id", keep="first")
+    in_window = in_window.merge(
+        agreements_by_carrier[["carrier_id", "freight_terms"]], on="carrier_id", how="left"
+    )
+    in_window["freight_terms"] = in_window["freight_terms"].fillna("FOB Destination")
+    fob_origin_adjustment = (
+        (in_window["freight_terms"] == "FOB Origin")
+        & (in_window["transaction_type"] != "Shipment")
+    )
+    in_window = in_window[~fob_origin_adjustment]
+
+    matched = scoped[["order_id", "line_id"]].merge(
+        in_window[["order_id", "line_id", "quantity"]], on=["order_id", "line_id"]
+    )
+    fulfilled = matched.groupby(["order_id", "line_id"])["quantity"].sum().reset_index(
+        name="quantity_fulfilled_net"
+    )
+    lines = scoped.merge(fulfilled, on=["order_id", "line_id"], how="left")
+    lines["quantity_fulfilled_net"] = lines["quantity_fulfilled_net"].fillna(0)
+    return int(lines["quantity_fulfilled_net"].sum())
+
+
+def test_case_11_quantity_fulfilled_net_rejects_carrier_id_only_agreement_join(
+    ground_truth, naive_total_fulfilled_carrier_id_only
+):
+    """total_quantity_fulfilled_net must not land near the naive figure
+    obtained by reducing carrier_fulfillment_agreements.csv to one row per
+    carrier_id before applying it, without also matching on warehouse_id.
+
+    This trap only ever adjusts Return/Cancellation netting, never Shipment
+    quantity, so its available pool is a small slice of total volume (~5-6%
+    of shipment activity is a Return/Cancellation to begin with) -- unlike
+    test_08/09/10, whose naive mistakes corrupt Shipment quantity directly
+    and can clear a 3% threshold. 0.01 is calibrated to this trap's actual
+    ceiling: test_case_04/05 (exact per-region match) are the primary
+    defense regardless of this test's threshold -- any deviation at all
+    fails those outright. This is supplementary insurance, not the primary
+    catch.
+    """
+    with open(SUMMARY_PATH) as f:
+        s = json.load(f)
+    got = s["total_quantity_fulfilled_net"]
+    exp = ground_truth["total_quantity_fulfilled_net"]
+    rel_err_from_naive = abs(got - naive_total_fulfilled_carrier_id_only) / naive_total_fulfilled_carrier_id_only
+    assert rel_err_from_naive > 0.006, \
+        (f"total_quantity_fulfilled_net ({got}) is suspiciously close to the naive "
+         f"figure obtained by treating carrier_id as uniquely determining "
+         f"freight_terms ({naive_total_fulfilled_carrier_id_only}); the lookup "
+         f"must also match on warehouse_id. Correct total is {exp}.")

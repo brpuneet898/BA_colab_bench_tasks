@@ -13,6 +13,7 @@ All input files are located in `/workspace/data/`:
 | `warehouse_region_assignments.csv` | Effective-dated `region` assignment for each warehouse. Columns: `warehouse_id`, `region`, `effective_from`, `effective_to`, `change_reason`, `recorded_at` |
 | `products.csv` | Product catalog (reference only) |
 | `carriers.csv` | Carrier master data (reference only) |
+| `carrier_fulfillment_agreements.csv` | Freight terms for carrier/warehouse combinations shipping under non-default terms. Columns: `carrier_id`, `warehouse_id`, `freight_terms`, `agreement_start_date` |
 | `orders.csv` | Orders placed between 2023-10-01 and 2024-06-30, each assigned to a fulfilling warehouse via `assigned_warehouse_id` |
 | `order_lines.csv` | Line items for each order in `orders.csv`. Columns: `order_id`, `line_id`, `product_id`, `quantity_ordered`, `unit_price`, `discount_pct`, `line_status`, `created_at` |
 | `shipment_headers.csv` | One row per fulfillment document. Columns: `warehouse_id`, `shipment_id`, `carrier_id`, `transaction_type`, `event_date`, `tracking_number`, `freight_cost`, `carrier_service_level`, `created_at` |
@@ -30,7 +31,7 @@ Compute the following for each region in `warehouse_region_assignments.csv`.
 
 **Quantity ordered**: for each in-scope order line, its `quantity_ordered`. Sum this across all in-scope order lines belonging to that region.
 
-**Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer has actually received and kept as of the 2024-04-15 cutoff, net of anything later returned or cancelled. Sum this across all in-scope order lines belonging to that region.
+**Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer has actually received and kept as of the 2024-04-15 cutoff, net of anything later returned or cancelled while the assigned warehouse still bore fulfillment responsibility for that shipment. Sum this across all in-scope order lines belonging to that region.
 
 **Fill rate** = quantity fulfilled (net) / quantity ordered, rounded to 4 decimal places.
 
