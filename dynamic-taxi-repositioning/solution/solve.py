@@ -197,7 +197,7 @@ def apply_airport_exemptions(chains, airport):
     exempt_ids = set(
         check.loc[
             (check["dropoff_utc"] >= check["queue_start_utc"])
-            & (check["dropoff_utc"] <= check["queue_end_utc"]),
+            & (check["queue_end_utc"].isna() | (check["dropoff_utc"] <= check["queue_end_utc"])),
             "trip_id",
         ]
     )

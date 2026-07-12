@@ -197,7 +197,7 @@ Deadhead repositioning distance is not directly recorded and must be inferred fr
 
 Extended wait periods at **JFK International Airport (`zone_id` 132)** and **LaGuardia Airport (`zone_id` 138)** may represent legitimate operational queue behavior rather than inefficient repositioning.
 
-A repositioning chain is **airport-exempt** when its `dropoff_zone_id` matches one of these airport zones and the `dropoff_datetime` (UTC) falls within the closed interval `[queue_start, queue_end]` of any matching entry in `airport_queue_periods.csv`. Exempt chains must not be classified as operationally inefficient regardless of idle duration.
+A repositioning chain is **airport-exempt** when its `dropoff_zone_id` matches one of these airport zones and the `dropoff_datetime` (UTC) falls within the interval `[queue_start, queue_end]` of any matching entry in `airport_queue_periods.csv`. Some queue periods have no recorded end time, indicating an ongoing queue that was still in effect at the time of data collection; treat such periods as having no upper bound. Exempt chains must not be classified as operationally inefficient regardless of whether their idle duration meets or exceeds the 30-minute inefficiency threshold.
 
 ---
 
@@ -225,7 +225,7 @@ To verify the operational reconstruction pipeline, write the following values to
 | `cancelled_trip_count`         | `int` | Number of billing reversal entries in the timestamp-normalized dataset, counted before any duration or fare-based record exclusion |
 | `negative_duration_trip_count` | `int` | Number of invalid trip durations in the timestamp-normalized dataset, counted before any duration or fare-based record exclusion, then removed |
 | `deduplicated_dispatch_count`  | `int` | Remaining dispatch events after operational deduplication                         |
-| `airport_exemption_count`      | `int` | Count of reposition chains meeting the airport queue exemption criteria, regardless of idle duration |
+| `airport_exemption_count`      | `int` | Count of repositioning chains that satisfy the airport queue exemption criteria, regardless of whether their idle duration meets the 30-minute inefficiency threshold |
 
 All values must be integers.
 

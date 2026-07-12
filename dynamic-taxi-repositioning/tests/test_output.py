@@ -68,6 +68,11 @@ def test_input_data_not_tampered():
     assert nan_dispatch == 50, (
         f"dispatch_events.csv data integrity check failed (expected 50, got {nan_dispatch})."
     )
+    airport = pd.read_csv(DATA_DIR / "airport_queue_periods.csv")
+    nan_queue_end = int(airport["queue_end"].isna().sum())
+    assert nan_queue_end == 2, (
+        f"airport_queue_periods.csv data integrity check failed (expected 2 null queue_end, got {nan_queue_end})."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -192,7 +197,7 @@ def _apply_airport_exemptions(raw, chains):
     exempt_ids = set(
         check.loc[
             (check["dropoff_utc"] >= check["queue_start_utc"])
-            & (check["dropoff_utc"] <= check["queue_end_utc"]),
+            & (check["queue_end_utc"].isna() | (check["dropoff_utc"] <= check["queue_end_utc"])),
             "trip_id",
         ]
     )
@@ -414,4 +419,19 @@ def test_summary_sorted_and_top_zone(summary_df, ground_truth):
     )
     assert actual_top == expected_top, (
         f"Expected top inefficient zone {expected_top}, got {actual_top}."
+    )
+
+
+def test_open_ended_airport_queue(summary_json, ground_truth):
+    """Queue periods with no recorded end time must be treated as ongoing.
+    The two open-ended entries in airport_queue_periods.csv cover JFK chains
+    from 2024-03-25 and LGA chains from 2024-03-20 onward; a pipeline that
+    applies a plain date-range comparison silently misses all of them."""
+    expected = ground_truth["airport_exemption_count"]
+    actual   = summary_json.get("airport_exemption_count")
+    assert actual is not None, "airport_exemption_count missing from summary.json."
+    assert actual == expected, (
+        f"Expected airport_exemption_count={expected}, got {actual}. "
+        "Queue periods with no recorded end time must be treated as still in effect; "
+        "a plain upper-bound date comparison evaluates to False for null values."
     )
