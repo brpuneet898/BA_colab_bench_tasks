@@ -79,6 +79,7 @@ One row per supplier from `suppliers.csv`. Columns in this exact order:
 | `sla_breach_count` | integer | 0 for suppliers with no Q1 POs |
 | `total_penalty_usd` | float | 0.0 for suppliers with no Q1 POs |
 | `composite_score` | float | null for suppliers with no Q1 POs |
+| `max_consecutive_breach_streak` | integer | 0 for suppliers with no Q1 POs; the length of the longest uninterrupted run of SLA-breaching purchase orders for that supplier, evaluated in ascending `order_date` order with `po_id` as a tiebreaker within the same date |
 
 Sort by `composite_score` ascending (nulls last), then by `supplier_id` ascending as a tiebreaker.
 

@@ -187,6 +187,16 @@ def compute_penalty_cap(contracts):
     return latest.set_index("supplier_id")["max_penalty_cap_usd"].to_dict()
 
 
+def _max_consecutive_streak(breach_series):
+    """Length of the longest consecutive True run in breach_series."""
+    streak = max_s = 0
+    for v in breach_series:
+        streak = (streak + 1) if v else 0
+        if streak > max_s:
+            max_s = streak
+    return max_s
+
+
 def build_scorecard(suppliers, po_level, penalty_caps):
     records = []
     for _, sup in suppliers.iterrows():
@@ -200,6 +210,7 @@ def build_scorecard(suppliers, po_level, penalty_caps):
                 total_pos=0, on_time_delivery_rate=None,
                 net_fill_rate=None, sla_breach_count=0,
                 total_penalty_usd=0.0, composite_score=None,
+                max_consecutive_breach_streak=0,
             ))
             continue
 
@@ -213,6 +224,8 @@ def build_scorecard(suppliers, po_level, penalty_caps):
         cap          = penalty_caps.get(sid, float("inf"))
         penalty      = round(min(raw_penalty, cap), 2)
         score        = round(on_time_rate * 0.6 + net_fill * 0.4, 4)
+        # po_level is already sorted by (supplier_id, order_date, po_id)
+        streak = _max_consecutive_streak(sup_pos["sla_breach"].tolist())
 
         records.append(dict(
             supplier_id=sid, supplier_name=name,
@@ -222,6 +235,7 @@ def build_scorecard(suppliers, po_level, penalty_caps):
             sla_breach_count=breach_count,
             total_penalty_usd=penalty,
             composite_score=score,
+            max_consecutive_breach_streak=streak,
         ))
 
     df = pd.DataFrame(records)

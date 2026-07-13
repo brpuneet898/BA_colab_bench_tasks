@@ -107,6 +107,18 @@ Headroom mechanisms tested:
             product_uom_reference.csv provides the conversion: 1 MT = 1000 EA.
             A model that skips conversion produces fill rates ~1000× too large
             for Chemicals, suppressing all their SLA breaches.
+
+  Trap 14 — Consecutive breach streak vs total breach count.
+            max_consecutive_breach_streak is the length of the longest
+            uninterrupted run of SLA-breaching POs for a supplier, evaluated
+            in ascending order_date order with po_id as a tiebreaker. This is
+            NOT the same as sla_breach_count (total breaches). With ~50 POs per
+            supplier and ~40% breach rate, max_streak is typically 4–7 while
+            total breach count is 15–25. A model that substitutes cumsum() (which
+            gives a running total) or total breach count produces values 3–5× too
+            large. Correct implementation requires transition detection:
+            (sla_breach != sla_breach.shift()).cumsum() to assign group IDs to
+            consecutive runs, or an equivalent Python loop.
 """
 
 import json
@@ -218,6 +230,16 @@ def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
     return po
 
 
+def _max_consecutive_streak(breach_series):
+    """Length of the longest consecutive True run (same logic as oracle solve.py)."""
+    streak = max_s = 0
+    for v in breach_series:
+        streak = (streak + 1) if v else 0
+        if streak > max_s:
+            max_s = streak
+    return max_s
+
+
 def _penalty_caps(contracts):
     latest = (
         contracts
@@ -247,7 +269,8 @@ def _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates):
         if sup_pos.empty:
             records.append(dict(supplier_id=sid, supplier_name=sup["supplier_name"],
                 total_pos=0, on_time_delivery_rate=None, net_fill_rate=None,
-                sla_breach_count=0, total_penalty_usd=0.0, composite_score=None))
+                sla_breach_count=0, total_penalty_usd=0.0, composite_score=None,
+                max_consecutive_breach_streak=0))
             continue
         n          = len(sup_pos)
         otr        = round(sup_pos["on_time"].sum() / n, 4)
@@ -257,9 +280,12 @@ def _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates):
         cap        = caps.get(sid, float("inf"))
         penalty    = round(min(raw_pen, cap), 2)
         score      = round(otr * 0.6 + nfr * 0.4, 4)
+        # po_level is sorted by (supplier_id, order_date, po_id) — use that order
+        streak     = _max_consecutive_streak(sup_pos["sla_breach"].tolist())
         records.append(dict(supplier_id=sid, supplier_name=sup["supplier_name"],
             total_pos=n, on_time_delivery_rate=otr, net_fill_rate=nfr,
-            sla_breach_count=breach_cnt, total_penalty_usd=penalty, composite_score=score))
+            sla_breach_count=breach_cnt, total_penalty_usd=penalty, composite_score=score,
+            max_consecutive_breach_streak=streak))
 
     df = pd.DataFrame(records)
     df = df.sort_values(["composite_score", "supplier_id"],
@@ -455,7 +481,8 @@ def test_case_02_output_structure(agent_scorecard, agent_summary):
 
     required_cols = ["supplier_id", "supplier_name", "total_pos",
                      "on_time_delivery_rate", "net_fill_rate",
-                     "sla_breach_count", "total_penalty_usd", "composite_score"]
+                     "sla_breach_count", "total_penalty_usd", "composite_score",
+                     "max_consecutive_breach_streak"]
     for col in required_cols:
         assert col in agent_scorecard.columns, f"Missing column in scorecard: {col}"
 
@@ -667,15 +694,17 @@ def test_case_07_row_level_accuracy(agent_scorecard, expected):
     Spot-checks all key metrics for the 10 suppliers with the highest PO count.
     Errors from any trap surface here: wrong join key (inflated delivery qty),
     unhandled NaT (missing POs), unsigned returns not negated (inflated fill rate),
-    original instead of amended ordered_quantity (wrong denominator), or Rework
-    events included in net fill rate calculations (inflated NFR by 0.5–2%).
+    original instead of amended ordered_quantity (wrong denominator), Rework
+    events included in net fill rate calculations (inflated NFR by 0.5–2%), or
+    total breach count substituted for max_consecutive_breach_streak (incorrect
+    when breaches are spread across the quarter rather than clustered).
     """
     exp_df, _, _ = expected
     spot = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:10].tolist()
 
     merged = agent_scorecard.merge(
         exp_df[["supplier_id", "on_time_delivery_rate", "net_fill_rate",
-                "total_penalty_usd", "composite_score"]],
+                "total_penalty_usd", "composite_score", "max_consecutive_breach_streak"]],
         on="supplier_id", suffixes=("_act", "_exp"),
     )
     merged = merged[merged["supplier_id"].isin(spot)]
@@ -698,6 +727,16 @@ def test_case_07_row_level_accuracy(agent_scorecard, expected):
         if pen_diff > 500:
             failures.append(f"{sid}: total_penalty_usd {row['total_penalty_usd_act']:,.2f} "
                             f"!= {row['total_penalty_usd_exp']:,.2f}")
+
+        if "max_consecutive_breach_streak_act" in row.index:
+            exp_streak = int(row["max_consecutive_breach_streak_exp"])
+            act_streak = int(row["max_consecutive_breach_streak_act"])
+            if act_streak != exp_streak:
+                failures.append(
+                    f"{sid}: max_consecutive_breach_streak {act_streak} != expected {exp_streak}. "
+                    f"Compute the longest uninterrupted run of SLA-breaching POs sorted by "
+                    f"(order_date, po_id) — not the total breach count."
+                )
 
     assert not failures, "\n".join(failures)
 
