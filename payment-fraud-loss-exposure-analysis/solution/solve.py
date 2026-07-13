@@ -22,6 +22,13 @@ What the data actually required, once explored:
   within hours (velocity fraud), others are spread across weeks (ordinary
   repeat customers) — only a genuine 48h sliding-window check on merchant
   count separates the two.
+- transactions.csv is NOT strictly Q1-bounded — .min()/.max() on transaction_date
+  shows activity from late December 2023 through early April 2024. Some
+  instruments' 48h velocity window straddles the Dec31/Jan1 or Mar31/Apr1
+  boundary: fewer than 3 distinct merchants appear in the Q1-only slice, but
+  3+ appear once the surrounding buffer transactions are included. The
+  clustering check has to run on the full file before scoping to Q1 for the
+  report, not the other way around.
 """
 
 import json
@@ -110,7 +117,7 @@ def confirmed_fraud_transactions(case_transactions, confirmed_cases, txns_with_t
     return confirmed_links.merge(txns_with_tier, on=["gateway_id", "transaction_id"], how="inner")
 
 
-def flag_velocity_fraud(txns_with_tier):
+def flag_velocity_fraud(all_transactions):
     """
     A payment instrument used at 3+ distinct merchants within any 48-hour
     window is a velocity-fraud cluster. Uses a standard two-pointer sliding
@@ -119,9 +126,15 @@ def flag_velocity_fraud(txns_with_tier):
     the current window spans >= 3 distinct merchants. This correctly finds
     every transaction belonging to ANY qualifying 48h window, not just the
     instrument's overall min-max span.
+
+    Runs on ALL transactions, not just the Q1-scoped subset — the file isn't
+    strictly Q1-bounded, and some instruments' qualifying window straddles
+    the Q1 boundary. Scoping to Q1 first would silently hide the
+    out-of-window transactions that make a cluster reach the 3-merchant
+    threshold in the first place.
     """
     flagged_keys = []
-    for _, grp in txns_with_tier.groupby("payment_instrument_id"):
+    for _, grp in all_transactions.groupby("payment_instrument_id"):
         if len(grp) < 3:
             continue
         grp = grp.sort_values("transaction_date")
@@ -187,6 +200,11 @@ def build_summary(report):
 def main():
     merchants, tiers, transactions, disputes, resolutions, case_transactions = load_data()
 
+    # Velocity clustering runs on the FULL file first — some clusters straddle
+    # the Q1 boundary and need the buffer-period transactions to reach the
+    # 3-merchant threshold. Only after flagging do we scope to Q1 for the report.
+    velocity_keys = flag_velocity_fraud(transactions)
+
     q1_txns = transactions[
         (transactions["transaction_date"] >= Q1_START) & (transactions["transaction_date"] < Q1_END_EXCLUSIVE)
     ].copy()
@@ -195,7 +213,6 @@ def main():
     confirmed = confirmed_fraud_cases(disputes, resolutions)
     case_confirmed_txns = confirmed_fraud_transactions(case_transactions, confirmed, txns_with_tier)
 
-    velocity_keys = flag_velocity_fraud(txns_with_tier)
     key_cols = ["gateway_id", "transaction_id"]
     velocity_txns = txns_with_tier[
         txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)

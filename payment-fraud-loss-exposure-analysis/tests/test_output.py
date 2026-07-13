@@ -109,10 +109,15 @@ def _confirmed_fraud_cases(disputes, resolutions):
     return joined.loc[is_fraud & is_liable, "case_id"]
 
 
-def _flag_velocity_fraud(txns_with_tier):
-    """Trap 5 — same two-pointer sliding-window logic as solve.py."""
+def _flag_velocity_fraud(all_transactions):
+    """
+    Trap 5/6 — same two-pointer sliding-window logic as solve.py. Must run on
+    ALL transactions, not just the Q1-scoped subset — the file is not
+    strictly Q1-bounded, and some instruments' qualifying 48h window
+    straddles the Q1 boundary.
+    """
     flagged = []
-    for _, grp in txns_with_tier.groupby("payment_instrument_id"):
+    for _, grp in all_transactions.groupby("payment_instrument_id"):
         if len(grp) < 3:
             continue
         grp = grp.sort_values("transaction_date")
@@ -130,6 +135,10 @@ def _flag_velocity_fraud(txns_with_tier):
 
 
 def _build_expected(merchants, tiers, transactions, disputes, resolutions, case_transactions):
+    # Velocity clustering runs on the FULL file first (Trap 6) — only after
+    # flagging do we scope to Q1 for the report.
+    velocity_keys = _flag_velocity_fraud(transactions)
+
     q1_txns = transactions[
         (transactions["transaction_date"] >= Q1_START) & (transactions["transaction_date"] < Q1_END_EXCLUSIVE)
     ].copy()
@@ -141,7 +150,6 @@ def _build_expected(merchants, tiers, transactions, disputes, resolutions, case_
         txns_with_tier, on=["gateway_id", "transaction_id"], how="inner"
     )
 
-    velocity_keys = _flag_velocity_fraud(txns_with_tier)
     key_cols = ["gateway_id", "transaction_id"]
     velocity_txns = txns_with_tier[txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)]
 
@@ -249,10 +257,15 @@ def test_case_01_input_sentinels(raw_data):
     multi_merchant = inst_stats[inst_stats["n_merchants"] >= 3]
     true_clusters = (multi_merchant["span_hours"] < 48).sum()
     decoys = (multi_merchant["span_hours"] >= 48).sum()
-    assert true_clusters == 12, \
-        f"transactions.csv must have exactly 12 payment_instrument_id values with 3+ merchants within 48h, got {true_clusters}"
+    assert true_clusters == 20, \
+        f"transactions.csv must have exactly 20 payment_instrument_id values with 3+ merchants within 48h, got {true_clusters}"
     assert decoys == 15, \
         f"transactions.csv must have exactly 15 payment_instrument_id values with 3+ merchants spread beyond 48h, got {decoys}"
+
+    assert transactions["transaction_date"].min() < Q1_START, \
+        "transactions.csv must include pre-Q1 buffer activity (file is not strictly Q1-bounded)"
+    assert transactions["transaction_date"].max() >= Q1_END_EXCLUSIVE, \
+        "transactions.csv must include post-Q1 buffer activity (file is not strictly Q1-bounded)"
 
 
 # ---------------------------------------------------------------------------
@@ -625,5 +638,57 @@ def test_case_11_velocity_decoy_exclusion(agent_report, expected, raw_data):
                 "A payment instrument used at several merchants spread across weeks is not a "
                 "velocity-fraud cluster — the 48-hour window must be checked, not just the "
                 "distinct-merchant count."
+            )
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 12 — Boundary-spanning velocity clusters (Trap 6)
+# ---------------------------------------------------------------------------
+
+def test_case_12_boundary_spanning_clusters(agent_report, expected, raw_data):
+    """
+    Trap 6 — transactions.csv is not strictly Q1-bounded (it carries a
+    Dec 2023 / Apr 2024 buffer). 8 payment instruments have a qualifying
+    48-hour, 3+-merchant window that straddles the Q1 boundary: fewer than 3
+    distinct merchants appear in the Q1-only slice, but 3+ appear once the
+    buffer-period transactions are included. A pipeline that scopes to Q1
+    BEFORE running the velocity clustering check silently sees only the
+    smaller Q1-side view and misses these — the correct order clusters on
+    the full file first, then scopes to Q1 for the report.
+
+    Spot-checks tier/month cells containing a boundary-cluster's Q1-side
+    transaction.
+    """
+    _, _, transactions, _, _, _ = raw_data
+    exp_report, txns_with_tier, _, _, velocity_keys = expected
+
+    boundary_instruments = transactions.loc[
+        transactions["payment_instrument_id"].str.startswith("PMT-BND", na=False), "payment_instrument_id"
+    ].unique()
+    assert len(boundary_instruments) == 8, \
+        f"transactions.csv must have exactly 8 boundary-spanning payment instruments, got {len(boundary_instruments)}"
+
+    key_cols = ["gateway_id", "transaction_id"]
+    boundary_txns = txns_with_tier[txns_with_tier["payment_instrument_id"].isin(boundary_instruments)]
+    assert len(boundary_txns) > 0, "test setup error: expected Q1-side transactions for boundary instruments"
+    assert boundary_txns[key_cols].apply(tuple, axis=1).isin(velocity_keys).all(), \
+        "test setup error: a boundary instrument's Q1-side transaction was not flagged by the correct full-file check"
+
+    cells = boundary_txns[["risk_tier", "month"]].drop_duplicates()
+
+    failures = []
+    for _, c in cells.head(5).iterrows():
+        tier, month = c["risk_tier"], c["month"]
+        exp_loss = _cell(exp_report, tier, month, "confirmed_fraud_loss_usd")
+        act_loss = _cell(agent_report, tier, month, "confirmed_fraud_loss_usd")
+        if act_loss is None:
+            failures.append(f"{tier}/{month}: row missing from agent report")
+            continue
+        if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
+            failures.append(
+                f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
+                "The velocity-cluster check must run on the full transactions.csv file, not a "
+                "Q1-scoped subset — some qualifying windows straddle the Q1 boundary."
             )
     assert not failures, "\n".join(failures)

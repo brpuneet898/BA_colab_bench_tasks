@@ -11,14 +11,14 @@ All input files are located in `/workspace/data/`:
 | `merchants.csv` | Master list of merchants (reference only) |
 | `merchant_risk_tiers.csv` | Risk tier assigned to each merchant, with `tier_effective_from` and `tier_effective_to` recording the period each assignment applied |
 | `gateway_metadata.csv` | Gateway reference data (reference only) |
-| `transactions.csv` | All card-not-present transactions processed in Q1 2024 across gateways `ALPHA`, `BRAVO`, and `CHARLIE`. Each row records the `gateway_id` that processed the transaction, a `transaction_id`, and the `payment_instrument_id` used. |
+| `transactions.csv` | Card-not-present transactions across gateways `ALPHA`, `BRAVO`, and `CHARLIE`, covering a window around Q1 2024. Each row records the `gateway_id` that processed the transaction, a `transaction_id`, and the `payment_instrument_id` used. |
 | `fraud_disputes.csv` | One row per fraud case (`case_id`), recording the `reason_code` describing the cardholder's claim, the `filed_date`, and the transaction reported when the case was opened (`reported_gateway_id`, `reported_transaction_id`) |
 | `dispute_resolutions.csv` | Resolution records for each `case_id`, recording `resolution_status` and `resolution_date`. A case may carry more than one resolution record as it moves through review. |
 | `case_transactions.csv` | The transactions associated with each `case_id`, identified by `gateway_id` and `transaction_id` |
 
 ## Scope
 
-Include all transactions where `transaction_date` falls within Q1 2024 (2024-01-01 to 2024-03-31, inclusive).
+A transaction contributes to the report — transaction volume, confirmed fraud loss, and every downstream metric — only if its `transaction_date` falls within Q1 2024 (2024-01-01 to 2024-03-31, inclusive).
 
 ## Grouping
 
