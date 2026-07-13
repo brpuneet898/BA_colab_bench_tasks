@@ -13,7 +13,7 @@ All input files are located in `/workspace/data/`:
 | `gateway_metadata.csv` | Gateway reference data (reference only) |
 | `transactions.csv` | Card-not-present transactions across gateways `ALPHA`, `BRAVO`, and `CHARLIE`, covering a window around Q1 2024. Each row records the `gateway_id` that processed the transaction, a `transaction_id`, and the `payment_instrument_id` used. |
 | `fraud_disputes.csv` | One row per fraud case (`case_id`), recording the `reason_code` describing the cardholder's claim, the `filed_date`, and the transaction reported when the case was opened (`reported_gateway_id`, `reported_transaction_id`) |
-| `dispute_resolutions.csv` | Resolution records for each `case_id`, recording `resolution_status` and `resolution_date`. A case may carry more than one resolution record as it moves through review. |
+| `dispute_resolutions.csv` | Resolution records for each `case_id`, recording `resolution_status`, `resolution_date`, and `writeoff_status` (whether the loss has been posted to the general ledger). A case may carry more than one resolution record as it moves through review. |
 | `case_transactions.csv` | The transactions associated with each `case_id`, identified by `gateway_id` and `transaction_id` |
 
 ## Scope

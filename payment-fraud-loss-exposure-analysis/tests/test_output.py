@@ -43,9 +43,26 @@ Headroom mechanisms tested:
             instruments are also used at 3+ distinct merchants, but spread
             across weeks — ordinary repeat customers, not fraud. A model
             that checks distinct-merchant count without any time window
-            wrongly flags the decoys (overcount). A model that buckets by
-            calendar day instead of a rolling window misses the 9 true
-            clusters that straddle a day boundary (undercount).
+            wrongly flags the decoys (overcount).
+
+  Trap 6 — Boundary-spanning velocity clusters (pipeline-sequencing).
+            transactions.csv is not strictly Q1-bounded (Dec 2023 / Apr 2024
+            buffer). 8 instruments have a qualifying 48h window that
+            straddles the Q1 boundary — fewer than 3 distinct merchants in
+            the Q1-only slice, 3+ once buffer-period transactions are
+            included. A pipeline that scopes to Q1 before clustering misses
+            these regardless of EDA thoroughness — it's a pipeline-order
+            error, not an anomaly-discovery one.
+
+  Trap 7 — writeoff_status false friend.
+            dispute_resolutions.csv carries writeoff_status on every "lost"
+            row — a GL/accounting-cycle fact (write-off posting batches lag
+            actual case resolution) that is never part of the confirmed-
+            fraud-loss definition (reason_code + resolution_status only). A
+            model that discovers this column and infers "not posted yet
+            means not final" excludes the ~30% of confirmed cases still
+            pending write-off — a natural administrative-workflow instinct
+            that happens to be wrong here.
 """
 
 import json
@@ -266,6 +283,13 @@ def test_case_01_input_sentinels(raw_data):
         "transactions.csv must include pre-Q1 buffer activity (file is not strictly Q1-bounded)"
     assert transactions["transaction_date"].max() >= Q1_END_EXCLUSIVE, \
         "transactions.csv must include post-Q1 buffer activity (file is not strictly Q1-bounded)"
+
+    assert "writeoff_status" in resolutions.columns, \
+        "dispute_resolutions.csv must have a writeoff_status column"
+    lost_writeoffs = resolutions.loc[resolutions["resolution_status"] == "lost", "writeoff_status"]
+    pending_writeoffs = (lost_writeoffs == "pending").sum()
+    assert pending_writeoffs == 36, \
+        f"dispute_resolutions.csv must have exactly 36 'lost' rows with writeoff_status == 'pending', got {pending_writeoffs}"
 
 
 # ---------------------------------------------------------------------------
@@ -552,7 +576,7 @@ def test_case_09_transaction_count_reconciliation(agent_report, raw_data):
 
 
 # ---------------------------------------------------------------------------
-# Test 10 — Velocity-fraud cluster detection (Trap 5)
+# Test 10 — Velocity-fraud cluster detection + decoy exclusion (Trap 5)
 # ---------------------------------------------------------------------------
 
 def test_case_10_velocity_cluster_detection(agent_report, expected, raw_data):
@@ -560,55 +584,23 @@ def test_case_10_velocity_cluster_detection(agent_report, expected, raw_data):
     Trap 5 — A payment instrument used at 3+ distinct merchants within any
     48-hour window is a velocity-fraud cluster and counts as confirmed fraud
     loss independent of any dispute case. A model that misses this mechanism
-    entirely, or buckets by calendar day instead of a rolling window (missing
-    clusters that straddle midnight), undercounts confirmed_fraud_loss_usd in
-    the tier/month cells those clusters' transactions belong to.
+    entirely undercounts confirmed_fraud_loss_usd in the tier/month cells
+    those clusters' transactions belong to.
 
-    Spot-checks tier/month cells containing a true velocity-cluster transaction.
+    15 separate payment instruments are used at 3+ distinct merchants but
+    spread across weeks, not within any 48-hour window (ordinary repeat
+    customers). A model that checks distinct-merchant count without any time
+    constraint wrongly flags these too, overstating confirmed_fraud_loss_usd
+    in the cells their transactions belong to.
+
+    Spot-checks tier/month cells touched by true clusters and by decoys.
     """
     _, _, transactions, _, _, _ = raw_data
     exp_report, txns_with_tier, _, _, velocity_keys = expected
-
     key_cols = ["gateway_id", "transaction_id"]
+
     vel_txns = txns_with_tier[txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)]
     assert len(vel_txns) > 0, "test setup error: expected at least one velocity-flagged transaction"
-
-    cells = vel_txns[["risk_tier", "month"]].drop_duplicates()
-
-    failures = []
-    for _, c in cells.head(5).iterrows():
-        tier, month = c["risk_tier"], c["month"]
-        exp_loss = _cell(exp_report, tier, month, "confirmed_fraud_loss_usd")
-        act_loss = _cell(agent_report, tier, month, "confirmed_fraud_loss_usd")
-        if act_loss is None:
-            failures.append(f"{tier}/{month}: row missing from agent report")
-            continue
-        if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
-            failures.append(
-                f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
-                "A payment instrument used at 3+ distinct merchants within any 48-hour window "
-                "counts as confirmed fraud loss, independent of any dispute case."
-            )
-    assert not failures, "\n".join(failures)
-
-
-# ---------------------------------------------------------------------------
-# Test 11 — Velocity-fraud decoy exclusion (Trap 5)
-# ---------------------------------------------------------------------------
-
-def test_case_11_velocity_decoy_exclusion(agent_report, expected, raw_data):
-    """
-    Trap 5 — 15 payment instruments are used at 3+ distinct merchants but
-    spread across weeks, not within any 48-hour window (ordinary repeat
-    customers, not fraud). A model that checks distinct-merchant count
-    without any time constraint wrongly flags these as velocity fraud,
-    overstating confirmed_fraud_loss_usd in the tier/month cells their
-    transactions belong to.
-
-    Spot-checks tier/month cells containing a decoy instrument's transaction.
-    """
-    _, _, transactions, _, _, _ = raw_data
-    exp_report, txns_with_tier, _, _, velocity_keys = expected
 
     inst_stats = transactions.groupby("payment_instrument_id").agg(
         n_merchants=("merchant_id", "nunique"),
@@ -617,15 +609,16 @@ def test_case_11_velocity_decoy_exclusion(agent_report, expected, raw_data):
     decoy_instruments = inst_stats[(inst_stats["n_merchants"] >= 3) & (inst_stats["span_hours"] >= 48)].index
     decoy_txns = txns_with_tier[txns_with_tier["payment_instrument_id"].isin(decoy_instruments)]
     assert len(decoy_txns) > 0, "test setup error: expected at least one decoy instrument transaction"
-
-    key_cols = ["gateway_id", "transaction_id"]
     assert not decoy_txns[key_cols].apply(tuple, axis=1).isin(velocity_keys).any(), \
         "test setup error: a decoy instrument's transaction was flagged by the correct sliding-window logic"
 
-    cells = decoy_txns[["risk_tier", "month"]].drop_duplicates()
+    cells = pd.concat([
+        vel_txns[["risk_tier", "month"]].drop_duplicates().head(3),
+        decoy_txns[["risk_tier", "month"]].drop_duplicates().head(3),
+    ]).drop_duplicates()
 
     failures = []
-    for _, c in cells.head(5).iterrows():
+    for _, c in cells.iterrows():
         tier, month = c["risk_tier"], c["month"]
         exp_loss = _cell(exp_report, tier, month, "confirmed_fraud_loss_usd")
         act_loss = _cell(agent_report, tier, month, "confirmed_fraud_loss_usd")
@@ -635,18 +628,17 @@ def test_case_11_velocity_decoy_exclusion(agent_report, expected, raw_data):
         if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
             failures.append(
                 f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
-                "A payment instrument used at several merchants spread across weeks is not a "
-                "velocity-fraud cluster — the 48-hour window must be checked, not just the "
-                "distinct-merchant count."
+                "A payment instrument used at 3+ distinct merchants within any 48-hour window counts "
+                "as confirmed fraud loss independent of any dispute case; one spread across weeks does not."
             )
     assert not failures, "\n".join(failures)
 
 
 # ---------------------------------------------------------------------------
-# Test 12 — Boundary-spanning velocity clusters (Trap 6)
+# Test 11 — Boundary-spanning velocity clusters (Trap 6)
 # ---------------------------------------------------------------------------
 
-def test_case_12_boundary_spanning_clusters(agent_report, expected, raw_data):
+def test_case_11_boundary_spanning_clusters(agent_report, expected, raw_data):
     """
     Trap 6 — transactions.csv is not strictly Q1-bounded (it carries a
     Dec 2023 / Apr 2024 buffer). 8 payment instruments have a qualifying
@@ -691,4 +683,67 @@ def test_case_12_boundary_spanning_clusters(agent_report, expected, raw_data):
                 "The velocity-cluster check must run on the full transactions.csv file, not a "
                 "Q1-scoped subset — some qualifying windows straddle the Q1 boundary."
             )
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 12 — Writeoff-status false friend (Trap 7)
+# ---------------------------------------------------------------------------
+
+def test_case_12_writeoff_status_not_a_confirmation_gate(agent_report, agent_summary, expected, raw_data):
+    """
+    Trap 7 — writeoff_status records whether a confirmed case's loss has been
+    posted to the general ledger yet — a GL/accounting-cycle fact, not part
+    of the confirmed-fraud-loss definition (reason_code + resolution_status
+    only). ~30% of confirmed cases carry writeoff_status == "pending" on
+    their final resolution (write-off posting is batched and lags actual
+    case resolution). A model that discovers this column and infers "not
+    posted yet means not final" excludes these cases, undercounting
+    confirmed_fraud_loss_usd in the tier/month cells they touch and shifting
+    highest_loss_rate_tier.
+
+    Spot-checks tier/month cells touched by a pending-writeoff confirmed case,
+    and the summary-level highest_loss_rate_tier.
+    """
+    _, _, _, _, resolutions, case_transactions = raw_data
+    exp_report, txns_with_tier, confirmed_txns, confirmed, _ = expected
+
+    latest = resolutions.sort_values("resolution_date").groupby("case_id", as_index=False).last()
+    pending_writeoff_cases = set(latest.loc[latest["writeoff_status"] == "pending", "case_id"]) & set(confirmed)
+    assert len(pending_writeoff_cases) > 0, "test setup error: expected at least one confirmed case pending write-off"
+
+    pending_links = case_transactions[case_transactions["case_id"].isin(pending_writeoff_cases)]
+    key_cols = ["gateway_id", "transaction_id"]
+    pending_txns = pending_links.merge(txns_with_tier, on=key_cols, how="inner")
+    assert len(pending_txns) > 0, "test setup error: expected at least one pending-writeoff confirmed transaction"
+
+    cells = pending_txns[["risk_tier", "month"]].drop_duplicates()
+
+    failures = []
+    for _, c in cells.head(5).iterrows():
+        tier, month = c["risk_tier"], c["month"]
+        exp_loss = _cell(exp_report, tier, month, "confirmed_fraud_loss_usd")
+        act_loss = _cell(agent_report, tier, month, "confirmed_fraud_loss_usd")
+        if act_loss is None:
+            failures.append(f"{tier}/{month}: row missing from agent report")
+            continue
+        if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
+            failures.append(
+                f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
+                "writeoff_status records GL posting timing, not fraud confirmation — a case pending "
+                "write-off is still confirmed fraud loss if reason_code and resolution_status qualify."
+            )
+
+    by_tier = exp_report.groupby("risk_tier").agg(
+        total_transaction_volume_usd=("total_transaction_volume_usd", "sum"),
+        confirmed_fraud_loss_usd=("confirmed_fraud_loss_usd", "sum"),
+    )
+    by_tier["rate_bps"] = by_tier["confirmed_fraud_loss_usd"] / by_tier["total_transaction_volume_usd"] * 10000
+    exp_highest_tier = str(by_tier["rate_bps"].idxmax())
+    if str(agent_summary["highest_loss_rate_tier"]) != exp_highest_tier:
+        failures.append(
+            f"highest_loss_rate_tier: expected {exp_highest_tier}, got {agent_summary['highest_loss_rate_tier']}. "
+            "Excluding pending-writeoff cases shifts which tier has the highest fraud loss rate."
+        )
+
     assert not failures, "\n".join(failures)
