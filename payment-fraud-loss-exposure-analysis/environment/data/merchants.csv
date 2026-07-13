@@ -1,0 +1,51 @@
+merchant_id,merchant_name,industry_category
+MCH-001,VantagePeak,E-commerce Retail
+MCH-002,RiverWorks,Marketplace
+MCH-003,HarborWave,Marketplace
+MCH-004,CedarPeak,Travel & Ticketing
+MCH-005,VantagePoint,Travel & Ticketing
+MCH-006,SilverLoop,Gaming & Digital Goods
+MCH-007,RiverGate,E-commerce Retail
+MCH-008,HarborGoods,Marketplace
+MCH-009,SilverGoods,Digital Subscriptions
+MCH-010,NorthWorks,E-commerce Retail
+MCH-011,VantagePeak,Travel & Ticketing
+MCH-012,HarborPeak,Gaming & Digital Goods
+MCH-013,UnionWorks,Marketplace
+MCH-014,RiverMarket,Marketplace
+MCH-015,CedarPoint,Marketplace
+MCH-016,SilverWorks,Marketplace
+MCH-017,BlueField,Travel & Ticketing
+MCH-018,UnionLoop,E-commerce Retail
+MCH-019,NorthGoods,Gaming & Digital Goods
+MCH-020,VantageField,Travel & Ticketing
+MCH-021,HarborField,Travel & Ticketing
+MCH-022,BrightGoods,Digital Subscriptions
+MCH-023,BrightMarket,E-commerce Retail
+MCH-024,SummitPoint,Gaming & Digital Goods
+MCH-025,UnionPeak,Marketplace
+MCH-026,BrightPeak,Marketplace
+MCH-027,BrightWave,Travel & Ticketing
+MCH-028,VantageLoop,Gaming & Digital Goods
+MCH-029,VantagePoint,Travel & Ticketing
+MCH-030,HarborLoop,Travel & Ticketing
+MCH-031,SummitLoop,Travel & Ticketing
+MCH-032,CedarWorks,Digital Subscriptions
+MCH-033,CedarTrail,E-commerce Retail
+MCH-034,NorthPeak,Travel & Ticketing
+MCH-035,SummitPeak,Gaming & Digital Goods
+MCH-036,HarborPoint,E-commerce Retail
+MCH-037,UnionWorks,Gaming & Digital Goods
+MCH-038,BrightTrail,Gaming & Digital Goods
+MCH-039,NorthLoop,Digital Subscriptions
+MCH-040,CedarPoint,Marketplace
+MCH-041,CedarTrail,E-commerce Retail
+MCH-042,NorthTrail,Marketplace
+MCH-043,VantageGoods,Marketplace
+MCH-044,UnionWave,Digital Subscriptions
+MCH-045,RiverWorks,E-commerce Retail
+MCH-046,SilverMarket,Gaming & Digital Goods
+MCH-047,SummitWorks,Travel & Ticketing
+MCH-048,SilverField,Gaming & Digital Goods
+MCH-049,NorthMarket,Marketplace
+MCH-050,BrightWave,Marketplace
