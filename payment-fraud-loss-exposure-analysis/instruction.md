@@ -11,7 +11,7 @@ All input files are located in `/workspace/data/`:
 | `merchants.csv` | Master list of merchants (reference only) |
 | `merchant_risk_tiers.csv` | Risk tier assigned to each merchant, with `tier_effective_from` and `tier_effective_to` recording the period each assignment applied |
 | `gateway_metadata.csv` | Gateway reference data (reference only) |
-| `transactions.csv` | All card-not-present transactions processed in Q1 2024 across gateways `ALPHA`, `BRAVO`, and `CHARLIE`. Each row records the `gateway_id` that processed the transaction and a `transaction_id`. |
+| `transactions.csv` | All card-not-present transactions processed in Q1 2024 across gateways `ALPHA`, `BRAVO`, and `CHARLIE`. Each row records the `gateway_id` that processed the transaction, a `transaction_id`, and the `payment_instrument_id` used. |
 | `fraud_disputes.csv` | One row per fraud case (`case_id`), recording the `reason_code` describing the cardholder's claim, the `filed_date`, and the transaction reported when the case was opened (`reported_gateway_id`, `reported_transaction_id`) |
 | `dispute_resolutions.csv` | Resolution records for each `case_id`, recording `resolution_status` and `resolution_date`. A case may carry more than one resolution record as it moves through review. |
 | `case_transactions.csv` | The transactions associated with each `case_id`, identified by `gateway_id` and `transaction_id` |
@@ -38,7 +38,11 @@ A fraud case represents **confirmed fraud loss** when the cardholder's claim is 
 
 Confirmed fraud loss for a case is the sum of `amount_usd` across every transaction associated with that `case_id` in `case_transactions.csv`. Each transaction's loss is assigned to the tier/month determined by its own `transaction_date` and merchant.
 
-`confirmed_fraud_loss_usd` = sum of `amount_usd` for transactions belonging to a confirmed-fraud case, assigned to the tier/month of each underlying transaction.
+### Velocity-Based Fraud Detection
+
+Independent of dispute cases, a payment instrument (`payment_instrument_id`) used at three or more distinct merchants within any 48-hour window is considered a velocity-fraud cluster — a pattern consistent with a compromised instrument being tested across multiple merchants before detection. Every transaction using that payment instrument within such a window also counts as confirmed fraud loss, whether or not a dispute case was filed for it.
+
+`confirmed_fraud_loss_usd` = sum of `amount_usd` for transactions belonging to a confirmed-fraud case or a velocity-fraud cluster, assigned to the tier/month of each underlying transaction. A transaction counted through one basis is not counted a second time if it also qualifies through the other.
 
 `confirmed_fraud_count` = count of those transactions.
 

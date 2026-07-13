@@ -17,12 +17,18 @@ What the data actually required, once explored:
   tier_effective_to (open-ended assignment, no scheduled review). A plain
   `date <= tier_effective_to` comparison drops those merchants entirely, so
   the open-ended case needs an explicit isna() branch.
+- transactions.csv carries time-of-day, not just a date, and a payment_instrument_id.
+  Grouping by instrument shows a tail with 3+ distinct merchants: some cluster
+  within hours (velocity fraud), others are spread across weeks (ordinary
+  repeat customers) — only a genuine 48h sliding-window check on merchant
+  count separates the two.
 """
 
 import json
 import os
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 WORKSPACE_DIR = Path(os.environ.get("WORKSPACE_DIR", "/workspace"))
@@ -33,6 +39,7 @@ SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
 
 Q1_START = pd.Timestamp("2024-01-01")
 Q1_END = pd.Timestamp("2024-03-31")
+Q1_END_EXCLUSIVE = pd.Timestamp("2024-04-01")  # transaction_date carries time-of-day; use a half-open upper bound
 
 FRAUD_REASONS = {"fraud_card_not_present", "fraud_account_takeover", "fraud_lost_stolen_card"}
 
@@ -66,7 +73,7 @@ def assign_risk_tier(transactions, tiers):
     matched = merged[in_effect].copy()
     matched["month"] = matched["transaction_date"].dt.strftime("%Y-%m")
     return matched[["gateway_id", "transaction_id", "merchant_id", "transaction_date",
-                     "amount_usd", "risk_tier", "month"]]
+                     "amount_usd", "payment_instrument_id", "risk_tier", "month"]]
 
 
 def latest_resolution(resolutions):
@@ -101,6 +108,34 @@ def confirmed_fraud_transactions(case_transactions, confirmed_cases, txns_with_t
     """
     confirmed_links = case_transactions[case_transactions["case_id"].isin(confirmed_cases)]
     return confirmed_links.merge(txns_with_tier, on=["gateway_id", "transaction_id"], how="inner")
+
+
+def flag_velocity_fraud(txns_with_tier):
+    """
+    A payment instrument used at 3+ distinct merchants within any 48-hour
+    window is a velocity-fraud cluster. Uses a standard two-pointer sliding
+    window per instrument (sorted by time): as the right edge advances,
+    shrink the left edge while the window exceeds 48h, then check whether
+    the current window spans >= 3 distinct merchants. This correctly finds
+    every transaction belonging to ANY qualifying 48h window, not just the
+    instrument's overall min-max span.
+    """
+    flagged_keys = []
+    for _, grp in txns_with_tier.groupby("payment_instrument_id"):
+        if len(grp) < 3:
+            continue
+        grp = grp.sort_values("transaction_date")
+        times = grp["transaction_date"].to_numpy()
+        merchants = grp["merchant_id"].to_numpy()
+        keys = list(zip(grp["gateway_id"], grp["transaction_id"]))
+        window = np.timedelta64(48, "h")
+        left = 0
+        for right in range(len(grp)):
+            while times[right] - times[left] > window:
+                left += 1
+            if len(set(merchants[left:right + 1])) >= 3:
+                flagged_keys.extend(keys[left:right + 1])
+    return set(flagged_keys)
 
 
 def build_report(txns_with_tier, confirmed_txns):
@@ -153,12 +188,20 @@ def main():
     merchants, tiers, transactions, disputes, resolutions, case_transactions = load_data()
 
     q1_txns = transactions[
-        (transactions["transaction_date"] >= Q1_START) & (transactions["transaction_date"] <= Q1_END)
+        (transactions["transaction_date"] >= Q1_START) & (transactions["transaction_date"] < Q1_END_EXCLUSIVE)
     ].copy()
 
     txns_with_tier = assign_risk_tier(q1_txns, tiers)
     confirmed = confirmed_fraud_cases(disputes, resolutions)
-    confirmed_txns = confirmed_fraud_transactions(case_transactions, confirmed, txns_with_tier)
+    case_confirmed_txns = confirmed_fraud_transactions(case_transactions, confirmed, txns_with_tier)
+
+    velocity_keys = flag_velocity_fraud(txns_with_tier)
+    key_cols = ["gateway_id", "transaction_id"]
+    velocity_txns = txns_with_tier[
+        txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)
+    ]
+
+    confirmed_txns = pd.concat([case_confirmed_txns, velocity_txns]).drop_duplicates(subset=key_cols)
 
     report = build_report(txns_with_tier, confirmed_txns)
     summary = build_summary(report)

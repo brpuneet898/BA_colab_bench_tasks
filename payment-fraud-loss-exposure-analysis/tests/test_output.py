@@ -35,6 +35,17 @@ Headroom mechanisms tested:
             transaction_date <= tier_effective_to evaluates False against a
             null, silently dropping those merchants' transactions from the
             tier-grouped totals.
+
+  Trap 5 — Velocity-fraud clustering (payment_instrument_id).
+            Independent of the dispute-case system: a payment instrument
+            used at 3+ distinct merchants within any 48-hour window is a
+            velocity-fraud cluster: 12 true clusters exist. 15 decoy
+            instruments are also used at 3+ distinct merchants, but spread
+            across weeks — ordinary repeat customers, not fraud. A model
+            that checks distinct-merchant count without any time window
+            wrongly flags the decoys (overcount). A model that buckets by
+            calendar day instead of a rolling window misses the 9 true
+            clusters that straddle a day boundary (undercount).
 """
 
 import json
@@ -42,6 +53,7 @@ import math
 import os
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -66,6 +78,7 @@ SUMMARY_PATH = WORKSPACE_DIR / "summary.json"
 
 Q1_START = pd.Timestamp("2024-01-01")
 Q1_END = pd.Timestamp("2024-03-31")
+Q1_END_EXCLUSIVE = pd.Timestamp("2024-04-01")  # transaction_date carries time-of-day; use a half-open upper bound
 FRAUD_REASONS = {"fraud_card_not_present", "fraud_account_takeover", "fraud_lost_stolen_card"}
 
 REQUIRED_COLUMNS = ["risk_tier", "month", "total_transaction_volume_usd", "transaction_count",
@@ -96,17 +109,43 @@ def _confirmed_fraud_cases(disputes, resolutions):
     return joined.loc[is_fraud & is_liable, "case_id"]
 
 
+def _flag_velocity_fraud(txns_with_tier):
+    """Trap 5 — same two-pointer sliding-window logic as solve.py."""
+    flagged = []
+    for _, grp in txns_with_tier.groupby("payment_instrument_id"):
+        if len(grp) < 3:
+            continue
+        grp = grp.sort_values("transaction_date")
+        times = grp["transaction_date"].to_numpy()
+        merchants = grp["merchant_id"].to_numpy()
+        keys = list(zip(grp["gateway_id"], grp["transaction_id"]))
+        window = np.timedelta64(48, "h")
+        left = 0
+        for right in range(len(grp)):
+            while times[right] - times[left] > window:
+                left += 1
+            if len(set(merchants[left:right + 1])) >= 3:
+                flagged.extend(keys[left:right + 1])
+    return set(flagged)
+
+
 def _build_expected(merchants, tiers, transactions, disputes, resolutions, case_transactions):
     q1_txns = transactions[
-        (transactions["transaction_date"] >= Q1_START) & (transactions["transaction_date"] <= Q1_END)
+        (transactions["transaction_date"] >= Q1_START) & (transactions["transaction_date"] < Q1_END_EXCLUSIVE)
     ].copy()
     txns_with_tier = _assign_risk_tier(q1_txns, tiers)
 
     confirmed = _confirmed_fraud_cases(disputes, resolutions)
     confirmed_links = case_transactions[case_transactions["case_id"].isin(confirmed)]
-    confirmed_txns = confirmed_links.merge(
+    case_confirmed_txns = confirmed_links.merge(
         txns_with_tier, on=["gateway_id", "transaction_id"], how="inner"
     )
+
+    velocity_keys = _flag_velocity_fraud(txns_with_tier)
+    key_cols = ["gateway_id", "transaction_id"]
+    velocity_txns = txns_with_tier[txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)]
+
+    confirmed_txns = pd.concat([case_confirmed_txns, velocity_txns]).drop_duplicates(subset=key_cols)
 
     volume = txns_with_tier.groupby(["risk_tier", "month"]).agg(
         total_transaction_volume_usd=("amount_usd", "sum"),
@@ -125,7 +164,7 @@ def _build_expected(merchants, tiers, transactions, disputes, resolutions, case_
     )
     report = report.sort_values(["risk_tier", "month"]).reset_index(drop=True)
 
-    return report, txns_with_tier, confirmed_txns, confirmed
+    return report, txns_with_tier, confirmed_txns, confirmed, velocity_keys
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +240,20 @@ def test_case_01_input_sentinels(raw_data):
     assert colliding_ids == 180, \
         f"transactions.csv must have exactly 180 transaction_id values shared across gateways, got {colliding_ids}"
 
+    assert "payment_instrument_id" in transactions.columns, \
+        "transactions.csv must have a payment_instrument_id column"
+    inst_stats = transactions.groupby("payment_instrument_id").agg(
+        n_merchants=("merchant_id", "nunique"),
+        span_hours=("transaction_date", lambda s: (s.max() - s.min()).total_seconds() / 3600),
+    )
+    multi_merchant = inst_stats[inst_stats["n_merchants"] >= 3]
+    true_clusters = (multi_merchant["span_hours"] < 48).sum()
+    decoys = (multi_merchant["span_hours"] >= 48).sum()
+    assert true_clusters == 12, \
+        f"transactions.csv must have exactly 12 payment_instrument_id values with 3+ merchants within 48h, got {true_clusters}"
+    assert decoys == 15, \
+        f"transactions.csv must have exactly 15 payment_instrument_id values with 3+ merchants spread beyond 48h, got {decoys}"
+
 
 # ---------------------------------------------------------------------------
 # Test 02 — Output structure
@@ -215,7 +268,7 @@ def test_case_02_output_structure(agent_report, agent_summary, expected):
     for col in REQUIRED_COLUMNS:
         assert col in agent_report.columns, f"Missing column in fraud_loss_report.csv: {col}"
 
-    exp_report, _, _, _ = expected
+    exp_report, _, _, _, _ = expected
     assert len(agent_report) == len(exp_report), \
         f"fraud_loss_report.csv must have {len(exp_report)} rows (one per risk_tier/month with Q1 activity), got {len(agent_report)}"
 
@@ -240,7 +293,7 @@ def test_case_03_case_transaction_expansion(agent_report, expected, raw_data):
     transaction.
     """
     _, _, _, disputes, resolutions, case_transactions = raw_data
-    exp_report, txns_with_tier, confirmed_txns, confirmed = expected
+    exp_report, txns_with_tier, confirmed_txns, confirmed, _ = expected
 
     reported = disputes.set_index("case_id")[["reported_gateway_id", "reported_transaction_id"]]
     confirmed_links = case_transactions[case_transactions["case_id"].isin(confirmed)]
@@ -286,7 +339,7 @@ def test_case_04_resolution_history(agent_report, expected, raw_data):
     dual-resolution case.
     """
     _, _, _, disputes, resolutions, case_transactions = raw_data
-    exp_report, txns_with_tier, _, _ = expected
+    exp_report, txns_with_tier, _, _, _ = expected
 
     dual_cases = resolutions["case_id"].value_counts().loc[lambda s: s > 1].index
     dual_links = case_transactions[case_transactions["case_id"].isin(dual_cases)]
@@ -325,7 +378,7 @@ def test_case_05_composite_key_join(agent_report, expected, raw_data):
     that falls in the colliding id pool.
     """
     _, _, transactions, disputes, resolutions, case_transactions = raw_data
-    exp_report, txns_with_tier, confirmed_txns, confirmed = expected
+    exp_report, txns_with_tier, confirmed_txns, confirmed, _ = expected
 
     collision = transactions.groupby("transaction_id")["gateway_id"].nunique()
     colliding_ids = set(collision[collision > 1].index)
@@ -369,7 +422,7 @@ def test_case_06_nat_risk_tier(agent_report, expected, raw_data):
     of volume.
     """
     merchants, tiers, transactions, _, _, _ = raw_data
-    exp_report, txns_with_tier, _, _ = expected
+    exp_report, txns_with_tier, _, _, _ = expected
 
     open_ended_merchants = set(tiers[tiers["tier_effective_to"].isna()]["merchant_id"])
     assert len(open_ended_merchants) == 15
@@ -404,7 +457,7 @@ def test_case_06_nat_risk_tier(agent_report, expected, raw_data):
 
 def test_case_07_full_row_accuracy(agent_report, expected):
     """Every (risk_tier, month) row must match ground truth within tolerance."""
-    exp_report, _, _, _ = expected
+    exp_report, _, _, _, _ = expected
     merged = agent_report.merge(exp_report, on=["risk_tier", "month"], suffixes=("_act", "_exp"))
     assert len(merged) == len(exp_report), "agent report is missing one or more risk_tier/month rows"
 
@@ -432,7 +485,7 @@ def test_case_07_full_row_accuracy(agent_report, expected):
 
 def test_case_08_summary_scalars(agent_summary, expected):
     """Portfolio-level totals and the highest-loss-rate tier must match ground truth."""
-    exp_report, _, _, _ = expected
+    exp_report, _, _, _, _ = expected
     exp_volume = float(exp_report["total_transaction_volume_usd"].sum())
     exp_fraud = float(exp_report["confirmed_fraud_loss_usd"].sum())
     exp_count = int(exp_report["confirmed_fraud_count"].sum())
@@ -474,7 +527,7 @@ def test_case_09_transaction_count_reconciliation(agent_report, raw_data):
     """
     _, _, transactions, _, _, _ = raw_data
     q1_count = int(((transactions["transaction_date"] >= Q1_START) &
-                     (transactions["transaction_date"] <= Q1_END)).sum())
+                     (transactions["transaction_date"] < Q1_END_EXCLUSIVE)).sum())
     act_total = int(agent_report["transaction_count"].sum())
     assert act_total <= q1_count, \
         (f"Sum of transaction_count across the report ({act_total}) exceeds the number of "
@@ -483,3 +536,94 @@ def test_case_09_transaction_count_reconciliation(agent_report, raw_data):
         (f"Sum of transaction_count across the report ({act_total}) is well below the number of "
          f"Q1 transactions in transactions.csv ({q1_count}) — check for transactions silently "
          f"dropped during risk tier assignment.")
+
+
+# ---------------------------------------------------------------------------
+# Test 10 — Velocity-fraud cluster detection (Trap 5)
+# ---------------------------------------------------------------------------
+
+def test_case_10_velocity_cluster_detection(agent_report, expected, raw_data):
+    """
+    Trap 5 — A payment instrument used at 3+ distinct merchants within any
+    48-hour window is a velocity-fraud cluster and counts as confirmed fraud
+    loss independent of any dispute case. A model that misses this mechanism
+    entirely, or buckets by calendar day instead of a rolling window (missing
+    clusters that straddle midnight), undercounts confirmed_fraud_loss_usd in
+    the tier/month cells those clusters' transactions belong to.
+
+    Spot-checks tier/month cells containing a true velocity-cluster transaction.
+    """
+    _, _, transactions, _, _, _ = raw_data
+    exp_report, txns_with_tier, _, _, velocity_keys = expected
+
+    key_cols = ["gateway_id", "transaction_id"]
+    vel_txns = txns_with_tier[txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)]
+    assert len(vel_txns) > 0, "test setup error: expected at least one velocity-flagged transaction"
+
+    cells = vel_txns[["risk_tier", "month"]].drop_duplicates()
+
+    failures = []
+    for _, c in cells.head(5).iterrows():
+        tier, month = c["risk_tier"], c["month"]
+        exp_loss = _cell(exp_report, tier, month, "confirmed_fraud_loss_usd")
+        act_loss = _cell(agent_report, tier, month, "confirmed_fraud_loss_usd")
+        if act_loss is None:
+            failures.append(f"{tier}/{month}: row missing from agent report")
+            continue
+        if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
+            failures.append(
+                f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
+                "A payment instrument used at 3+ distinct merchants within any 48-hour window "
+                "counts as confirmed fraud loss, independent of any dispute case."
+            )
+    assert not failures, "\n".join(failures)
+
+
+# ---------------------------------------------------------------------------
+# Test 11 — Velocity-fraud decoy exclusion (Trap 5)
+# ---------------------------------------------------------------------------
+
+def test_case_11_velocity_decoy_exclusion(agent_report, expected, raw_data):
+    """
+    Trap 5 — 15 payment instruments are used at 3+ distinct merchants but
+    spread across weeks, not within any 48-hour window (ordinary repeat
+    customers, not fraud). A model that checks distinct-merchant count
+    without any time constraint wrongly flags these as velocity fraud,
+    overstating confirmed_fraud_loss_usd in the tier/month cells their
+    transactions belong to.
+
+    Spot-checks tier/month cells containing a decoy instrument's transaction.
+    """
+    _, _, transactions, _, _, _ = raw_data
+    exp_report, txns_with_tier, _, _, velocity_keys = expected
+
+    inst_stats = transactions.groupby("payment_instrument_id").agg(
+        n_merchants=("merchant_id", "nunique"),
+        span_hours=("transaction_date", lambda s: (s.max() - s.min()).total_seconds() / 3600),
+    )
+    decoy_instruments = inst_stats[(inst_stats["n_merchants"] >= 3) & (inst_stats["span_hours"] >= 48)].index
+    decoy_txns = txns_with_tier[txns_with_tier["payment_instrument_id"].isin(decoy_instruments)]
+    assert len(decoy_txns) > 0, "test setup error: expected at least one decoy instrument transaction"
+
+    key_cols = ["gateway_id", "transaction_id"]
+    assert not decoy_txns[key_cols].apply(tuple, axis=1).isin(velocity_keys).any(), \
+        "test setup error: a decoy instrument's transaction was flagged by the correct sliding-window logic"
+
+    cells = decoy_txns[["risk_tier", "month"]].drop_duplicates()
+
+    failures = []
+    for _, c in cells.head(5).iterrows():
+        tier, month = c["risk_tier"], c["month"]
+        exp_loss = _cell(exp_report, tier, month, "confirmed_fraud_loss_usd")
+        act_loss = _cell(agent_report, tier, month, "confirmed_fraud_loss_usd")
+        if act_loss is None:
+            failures.append(f"{tier}/{month}: row missing from agent report")
+            continue
+        if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
+            failures.append(
+                f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
+                "A payment instrument used at several merchants spread across weeks is not a "
+                "velocity-fraud cluster — the 48-hour window must be checked, not just the "
+                "distinct-merchant count."
+            )
+    assert not failures, "\n".join(failures)
