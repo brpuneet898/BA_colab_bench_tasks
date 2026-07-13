@@ -438,7 +438,17 @@ def test_case_01_input_sentinels(raw_data):
 # ---------------------------------------------------------------------------
 
 def test_case_02_output_structure(agent_scorecard, agent_summary):
-    """Both output files exist and have the required shape and columns."""
+    """
+    Both output files exist with the required shape, columns, sort order, and
+    numeric precision.
+
+    Sort order: composite_score ascending (nulls last), then supplier_id
+    ascending as a tiebreaker (instruction line 83).
+
+    Precision: on_time_delivery_rate, net_fill_rate, and composite_score must
+    be rounded to 4 decimal places; total_penalty_usd to 2 decimal places
+    (instruction §Metrics).
+    """
     assert SCORECARD_PATH.exists(), "supplier_scorecard.csv not found in /workspace"
     assert SUMMARY_PATH.exists(),   "summary.json not found in /workspace"
     assert agent_scorecard is not None
@@ -457,6 +467,39 @@ def test_case_02_output_structure(agent_scorecard, agent_summary):
                      "total_sla_breach_count"]
     for key in required_keys:
         assert key in agent_summary, f"Missing key in summary.json: {key}"
+
+    # Sort order check
+    sc = agent_scorecard.reset_index(drop=True)
+    re_sorted = (
+        sc.sort_values(["composite_score", "supplier_id"],
+                       ascending=[True, True], na_position="last")
+        .reset_index(drop=True)
+    )
+    assert sc["supplier_id"].tolist() == re_sorted["supplier_id"].tolist(), (
+        "supplier_scorecard.csv must be sorted by composite_score ascending "
+        "(nulls last), then supplier_id ascending as a tiebreaker. "
+        f"First mismatch at position "
+        f"{next(i for i, (a, e) in enumerate(zip(sc['supplier_id'], re_sorted['supplier_id'])) if a != e)}: "
+        f"got {sc['supplier_id'].tolist()[:5]}, expected {re_sorted['supplier_id'].tolist()[:5]}"
+    )
+
+    # Rounding precision check — 4 dp for rates/score, 2 dp for penalties
+    _RATE_COLS = ["on_time_delivery_rate", "net_fill_rate", "composite_score"]
+    for col in _RATE_COLS:
+        vals = sc[col].dropna()
+        bad = vals[abs(vals - vals.round(4)) > 5e-5]
+        assert bad.empty, (
+            f"{col}: {len(bad)} value(s) have more than 4 decimal places — "
+            f"the instruction requires rounding to 4 dp. "
+            f"Sample unrounded values: {bad.head(3).tolist()}"
+        )
+    pen_vals = sc["total_penalty_usd"]
+    bad_pen = pen_vals[abs(pen_vals - pen_vals.round(2)) > 5e-3]
+    assert bad_pen.empty, (
+        f"total_penalty_usd: {len(bad_pen)} value(s) have more than 2 decimal places — "
+        f"the instruction requires rounding to 2 dp. "
+        f"Sample unrounded values: {bad_pen.head(3).tolist()}"
+    )
 
 
 # ---------------------------------------------------------------------------

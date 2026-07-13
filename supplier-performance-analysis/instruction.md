@@ -16,7 +16,7 @@ All input files are located in `/workspace/data/`:
 | `supplier_contacts.csv` | Supplier contact details (reference only) |
 | `warehouse_metadata.csv` | Warehouse reference data (reference only) |
 | `regional_penalty_rates.csv` | Regional penalty adjustment multipliers, indexed by warehouse and contract tier |
-| `product_uom_reference.csv` | Unit-of-measure definitions and EA-equivalent conversion factors (reference only) |
+| `product_uom_reference.csv` | Unit-of-measure definitions and EA-equivalent conversion factors |
 
 ## Scope
 
