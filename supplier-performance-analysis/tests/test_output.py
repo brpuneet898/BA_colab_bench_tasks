@@ -128,6 +128,21 @@ Headroom mechanisms tested:
             large. Correct implementation requires transition detection:
             (sla_breach != sla_breach.shift()).cumsum() to assign group IDs to
             consecutive runs, or an equivalent Python loop.
+
+  Trap 16 — receipt_status domain knowledge gap.
+            ~10% of non-split Primary delivery rows carry
+            receipt_status = "provisional_receipt"; all other rows carry
+            receipt_status = "accepted". In WMS/ERP practice, "provisional
+            receipt" means the Goods Receipt document was posted and the units
+            are in inventory, but invoice matching is still pending — the goods
+            ARE received for fill-rate purposes. A model applying general
+            accounting intuition ("provisional" = unconfirmed → exclude) will
+            filter out ~285 Primary rows, zeroing fill quantities for those POs
+            and converting oracle non-breaches to SLA breaches. This inflates
+            sla_breach_count by ~160–190, pushing test_06 (abs_tol=3) well
+            outside tolerance. The instruction says "Primary deliveries increase
+            it" with no receipt_status qualifier; the trap is invisible without
+            applying the wrong domain convention.
 """
 
 import json
@@ -479,6 +494,20 @@ def test_case_01_input_sentinels(raw_data):
     assert mt_count > 0, \
         (f"purchase_orders.csv must have MT-unit rows (Chemicals category); "
          f"got {mt_count} MT rows")
+
+    # Trap 16: receipt_status domain knowledge gap
+    assert "receipt_status" in deliveries.columns, \
+        "delivery_records.csv must have a receipt_status column"
+    prov_count = (
+        deliveries[deliveries["delivery_type"] == "Primary"]["receipt_status"]
+        .eq("provisional_receipt")
+        .sum()
+    )
+    assert prov_count >= 200, \
+        (f"delivery_records.csv must contain at least 200 Primary rows with "
+         f"receipt_status='provisional_receipt'; got {prov_count}. "
+         f"These rows represent goods that are physically received but pending "
+         f"invoice confirmation — they count for fill rate regardless of status.")
 
 
 # ---------------------------------------------------------------------------
