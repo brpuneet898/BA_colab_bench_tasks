@@ -54,17 +54,29 @@ Headroom mechanisms tested:
             these regardless of EDA thoroughness — it's a pipeline-order
             error, not an anomaly-discovery one.
 
-  Trap 7 — 3-D Secure liability shift.
-            transactions.csv carries three_ds_authenticated on every row.
-            Per the instructions, a 3DS-authenticated transaction's fraud
+  Trap 7 — 3-D Secure liability shift (minimal-disclosure domain fact).
+            transactions.csv carries three_ds_authenticated on every row,
+            named factually with no explanation of its significance. Under
+            real card network rules, a 3DS-authenticated transaction's fraud
             liability shifts to the card issuer and represents no loss
             exposure for the processor, under EITHER confirmed-fraud basis
-            (dispute case or velocity cluster). The rule is stated explicitly
-            — the difficulty is applying it consistently to both bases at
-            once, not discovering it. A model whose strongest prior is that
-            resolution_status alone determines loss ignores it entirely; a
-            model that only remembers to apply it to one basis (case-based
-            or velocity-based) undercounts the exclusion.
+            (dispute case or velocity cluster). No instruction text states
+            this rule — it follows only from the "loss exposure" definition
+            in the opening paragraph plus standard payments domain knowledge.
+            A model whose strongest prior is that resolution_status alone
+            determines loss ignores it entirely; a model that only applies
+            it to one basis (case-based or velocity-based) undercounts.
+
+  Trap 8 — case_status administrative-lifecycle false friend.
+            dispute_resolutions.csv carries case_status (open/closed),
+            entirely undisclosed in the instructions. It tracks the case
+            file's administrative lifecycle (recovery pursuit, documentation
+            wrap-up), independent of resolution_status, the sole liability
+            determinant. ~35% of confirmed cases carry case_status == "open"
+            on their latest resolution. A model that discovers this column
+            (ordinary EDA on dispute_resolutions.columns) and requires
+            case_status == "closed" as an additional finality gate, by false
+            analogy to resolution_status, wrongly excludes these.
 """
 
 import json
@@ -293,8 +305,15 @@ def test_case_01_input_sentinels(raw_data):
     assert "three_ds_authenticated" in transactions.columns, \
         "transactions.csv must have a three_ds_authenticated column"
     three_ds_count = int(transactions["three_ds_authenticated"].sum())
-    assert three_ds_count == 4356, \
-        f"transactions.csv must have exactly 4356 three_ds_authenticated == True rows, got {three_ds_count}"
+    assert three_ds_count == 4355, \
+        f"transactions.csv must have exactly 4355 three_ds_authenticated == True rows, got {three_ds_count}"
+
+    assert "case_status" in resolutions.columns, \
+        "dispute_resolutions.csv must have a case_status column"
+    latest_res = resolutions.sort_values("resolution_date").groupby("case_id", as_index=False).last()
+    lost_open = ((latest_res["resolution_status"] == "lost") & (latest_res["case_status"] == "open")).sum()
+    assert lost_open == 62, \
+        f"dispute_resolutions.csv must have exactly 62 cases whose latest resolution is 'lost' with case_status == 'open', got {lost_open}"
 
 
 # ---------------------------------------------------------------------------
@@ -692,23 +711,35 @@ def test_case_11_boundary_spanning_clusters(agent_report, expected, raw_data):
 
 
 # ---------------------------------------------------------------------------
-# Test 12 — 3-D Secure liability shift (Trap 7)
+# Test 12 — Domain-convention false friends: 3DS liability shift (Trap 7) +
+# case_status administrative lifecycle (Trap 8)
 # ---------------------------------------------------------------------------
 
-def test_case_12_liability_shift_both_bases(agent_report, agent_summary, expected, raw_data):
+def test_case_12_domain_convention_false_friends(agent_report, agent_summary, expected, raw_data):
     """
     Trap 7 — a transaction authenticated via 3-D Secure carries no loss
-    exposure for the processor (liability shifts to the issuer), per the
-    instructions, whether it qualifies as confirmed fraud through a dispute
-    case OR a velocity cluster. The rule is stated explicitly; the difficulty
-    is applying it to BOTH bases consistently. Checks cells touched by a
-    3DS-authenticated case-confirmed transaction AND cells touched by a
-    3DS-authenticated velocity-confirmed transaction independently, so a
-    model that only remembers the exclusion for one basis still fails here.
+    exposure for the processor (liability shifts to the issuer) under real
+    card network rules, whether it qualifies as confirmed fraud through a
+    dispute case OR a velocity cluster. Neither the instructions nor this
+    docstring name the mechanism directly; it follows from the "loss
+    exposure" framing plus standard payments domain knowledge. Checks cells
+    touched by a 3DS-authenticated case-confirmed transaction AND cells
+    touched by a 3DS-authenticated velocity-confirmed transaction
+    independently, so a model that only remembers the exclusion for one
+    basis still fails here.
 
-    Also checks highest_loss_rate_tier, which the exclusion can shift.
+    Trap 8 — case_status (open/closed) tracks a case file's administrative
+    lifecycle in the case-management system, not the liability determination
+    (resolution_status). A case can be "open" administratively (recovery
+    pursuit, documentation wrap-up) while its most recent resolution already
+    confirms fraud loss. The instructions never mention case_status — using
+    it as an additional finality gate is a filter a model invents by false
+    analogy to resolution_status. Checks cells touched by a confirmed case
+    whose latest resolution has case_status == "open".
+
+    Also checks highest_loss_rate_tier, which either exclusion can shift.
     """
-    _, _, transactions, _, _, case_transactions = raw_data
+    _, _, transactions, _, resolutions, case_transactions = raw_data
     exp_report, txns_with_tier, confirmed_txns, confirmed, velocity_keys = expected
     key_cols = ["gateway_id", "transaction_id"]
 
@@ -721,9 +752,18 @@ def test_case_12_liability_shift_both_bases(agent_report, agent_summary, expecte
     velocity_3ds_txns = velocity_txns[velocity_txns["three_ds_authenticated"]]
     assert len(velocity_3ds_txns) > 0, "test setup error: expected a 3DS-authenticated velocity-confirmed transaction"
 
+    latest_res = resolutions.sort_values("resolution_date").groupby("case_id", as_index=False).last()
+    open_case_ids = set(latest_res.loc[latest_res["case_status"] == "open", "case_id"]) & set(confirmed)
+    assert len(open_case_ids) > 0, "test setup error: expected a confirmed case with case_status == 'open'"
+    open_case_txns = case_transactions[case_transactions["case_id"].isin(open_case_ids)].merge(
+        txns_with_tier, on=key_cols, how="inner"
+    )
+    assert len(open_case_txns) > 0, "test setup error: expected a transaction for an open-status confirmed case"
+
     cells = pd.concat([
-        case_3ds_txns[["risk_tier", "month"]].drop_duplicates().head(3),
-        velocity_3ds_txns[["risk_tier", "month"]].drop_duplicates().head(3),
+        case_3ds_txns[["risk_tier", "month"]].drop_duplicates().head(2),
+        velocity_3ds_txns[["risk_tier", "month"]].drop_duplicates().head(2),
+        open_case_txns[["risk_tier", "month"]].drop_duplicates().head(2),
     ]).drop_duplicates()
 
     failures = []
@@ -737,8 +777,9 @@ def test_case_12_liability_shift_both_bases(agent_report, agent_summary, expecte
         if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
             failures.append(
                 f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
-                "A 3-D Secure authenticated transaction carries no loss exposure for the processor "
-                "under either confirmed-fraud basis (dispute case or velocity cluster)."
+                "Check both: (1) a 3-D Secure authenticated transaction carries no loss exposure for "
+                "the processor under either confirmed-fraud basis, and (2) case_status is an "
+                "administrative attribute, not part of the confirmed-fraud-loss determination."
             )
 
     by_tier = exp_report.groupby("risk_tier").agg(

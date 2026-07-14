@@ -29,12 +29,21 @@ What the data actually required, once explored:
   3+ appear once the surrounding buffer transactions are included. The
   clustering check has to run on the full file before scoping to Q1 for the
   report, not the other way around.
-- The instructions state that 3-D Secure authenticated transactions carry no
-  loss exposure for the processor (liability shifts to the issuer) under
-  either confirmed-fraud basis. This exclusion has to be applied to the
-  unioned confirmed-transaction set (case-based + velocity-based), not to
-  just one of the two — applying it before the union, to only one source,
-  silently leaves the other basis's 3DS-authenticated transactions counted.
+- "Loss exposure" is defined as the portion of confirmed fraud loss the
+  processor itself bears, not the card issuer. Under real card network rules,
+  a transaction authenticated via 3-D Secure (three_ds_authenticated is true
+  in transactions.csv) has its fraud liability shift to the issuer — this
+  isn't spelled out anywhere else in the instructions, it follows from the
+  loss-exposure definition plus standard payments domain knowledge. The
+  exclusion applies to the unioned confirmed-transaction set (case-based +
+  velocity-based) — applying it to only one basis silently leaves the
+  other's 3DS-authenticated transactions counted.
+- dispute_resolutions.csv also carries a case_status column (open/closed)
+  that looks like it could gate finality the same way resolution_status
+  does, but it tracks the case FILE's administrative lifecycle (has the
+  paperwork/recovery-pursuit wrapped up), not the liability determination.
+  The instructions never mention it — resolution_status alone determines
+  confirmed fraud loss, regardless of case_status.
 """
 
 import json

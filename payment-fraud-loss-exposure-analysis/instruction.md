@@ -1,6 +1,6 @@
 # Q1 2024 Fraud Loss Exposure Report
 
-The risk team at a payment processor requires a quarterly fraud loss exposure report covering Q1 2024 (January–March). The processor routes card-not-present transactions on behalf of its merchants through three acquiring gateways, and the report is reviewed by the risk committee to monitor loss exposure by merchant risk tier.
+The risk team at a payment processor requires a quarterly fraud loss exposure report covering Q1 2024 (January–March). The processor routes card-not-present transactions on behalf of its merchants through three acquiring gateways, and the report is reviewed by the risk committee to monitor the processor's **loss exposure** — the portion of confirmed fraud loss for which the processor itself, rather than the card issuer, bears financial responsibility — by merchant risk tier.
 
 ## Input Data
 
@@ -42,11 +42,7 @@ Confirmed fraud loss for a case is the sum of `amount_usd` across every transact
 
 Independent of dispute cases, a payment instrument (`payment_instrument_id`) used at three or more distinct merchants within any 48-hour window is considered a velocity-fraud cluster — a pattern consistent with a compromised instrument being tested across multiple merchants before detection. Every transaction using that payment instrument within such a window also counts as confirmed fraud loss, whether or not a dispute case was filed for it.
 
-### Loss Exposure and Liability Shift
-
-Under card network rules, fraud liability for a transaction that completed 3-D Secure authentication (`three_ds_authenticated` is true) shifts from the merchant's processor to the card issuer, regardless of a dispute case's resolution or a velocity-based determination. Such a transaction represents no loss exposure for the processor and does not contribute to `confirmed_fraud_loss_usd` or `confirmed_fraud_count`, even when it would otherwise qualify as confirmed fraud loss under either basis above.
-
-`confirmed_fraud_loss_usd` = sum of `amount_usd` for transactions belonging to a confirmed-fraud case or a velocity-fraud cluster, net of the liability-shift exclusion above, assigned to the tier/month of each underlying transaction. A transaction counted through one basis is not counted a second time if it also qualifies through the other.
+`confirmed_fraud_loss_usd` = sum of `amount_usd` for transactions belonging to a confirmed-fraud case or a velocity-fraud cluster, assigned to the tier/month of each underlying transaction. A transaction counted through one basis is not counted a second time if it also qualifies through the other.
 
 `confirmed_fraud_count` = count of those transactions.
 
