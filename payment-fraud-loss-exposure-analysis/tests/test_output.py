@@ -54,15 +54,17 @@ Headroom mechanisms tested:
             these regardless of EDA thoroughness — it's a pipeline-order
             error, not an anomaly-discovery one.
 
-  Trap 7 — writeoff_status false friend.
-            dispute_resolutions.csv carries writeoff_status on every "lost"
-            row — a GL/accounting-cycle fact (write-off posting batches lag
-            actual case resolution) that is never part of the confirmed-
-            fraud-loss definition (reason_code + resolution_status only). A
-            model that discovers this column and infers "not posted yet
-            means not final" excludes the ~30% of confirmed cases still
-            pending write-off — a natural administrative-workflow instinct
-            that happens to be wrong here.
+  Trap 7 — 3-D Secure liability shift.
+            transactions.csv carries three_ds_authenticated on every row.
+            Per the instructions, a 3DS-authenticated transaction's fraud
+            liability shifts to the card issuer and represents no loss
+            exposure for the processor, under EITHER confirmed-fraud basis
+            (dispute case or velocity cluster). The rule is stated explicitly
+            — the difficulty is applying it consistently to both bases at
+            once, not discovering it. A model whose strongest prior is that
+            resolution_status alone determines loss ignores it entirely; a
+            model that only remembers to apply it to one basis (case-based
+            or velocity-based) undercounts the exclusion.
 """
 
 import json
@@ -171,6 +173,10 @@ def _build_expected(merchants, tiers, transactions, disputes, resolutions, case_
     velocity_txns = txns_with_tier[txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)]
 
     confirmed_txns = pd.concat([case_confirmed_txns, velocity_txns]).drop_duplicates(subset=key_cols)
+
+    # Trap 7: 3-D Secure liability shift — no loss exposure for the processor
+    # under either confirmed-fraud basis, applied after the union of both.
+    confirmed_txns = confirmed_txns[~confirmed_txns["three_ds_authenticated"]]
 
     volume = txns_with_tier.groupby(["risk_tier", "month"]).agg(
         total_transaction_volume_usd=("amount_usd", "sum"),
@@ -284,12 +290,11 @@ def test_case_01_input_sentinels(raw_data):
     assert transactions["transaction_date"].max() >= Q1_END_EXCLUSIVE, \
         "transactions.csv must include post-Q1 buffer activity (file is not strictly Q1-bounded)"
 
-    assert "writeoff_status" in resolutions.columns, \
-        "dispute_resolutions.csv must have a writeoff_status column"
-    lost_writeoffs = resolutions.loc[resolutions["resolution_status"] == "lost", "writeoff_status"]
-    pending_writeoffs = (lost_writeoffs == "pending").sum()
-    assert pending_writeoffs == 36, \
-        f"dispute_resolutions.csv must have exactly 36 'lost' rows with writeoff_status == 'pending', got {pending_writeoffs}"
+    assert "three_ds_authenticated" in transactions.columns, \
+        "transactions.csv must have a three_ds_authenticated column"
+    three_ds_count = int(transactions["three_ds_authenticated"].sum())
+    assert three_ds_count == 4356, \
+        f"transactions.csv must have exactly 4356 three_ds_authenticated == True rows, got {three_ds_count}"
 
 
 # ---------------------------------------------------------------------------
@@ -687,40 +692,42 @@ def test_case_11_boundary_spanning_clusters(agent_report, expected, raw_data):
 
 
 # ---------------------------------------------------------------------------
-# Test 12 — Writeoff-status false friend (Trap 7)
+# Test 12 — 3-D Secure liability shift (Trap 7)
 # ---------------------------------------------------------------------------
 
-def test_case_12_writeoff_status_not_a_confirmation_gate(agent_report, agent_summary, expected, raw_data):
+def test_case_12_liability_shift_both_bases(agent_report, agent_summary, expected, raw_data):
     """
-    Trap 7 — writeoff_status records whether a confirmed case's loss has been
-    posted to the general ledger yet — a GL/accounting-cycle fact, not part
-    of the confirmed-fraud-loss definition (reason_code + resolution_status
-    only). ~30% of confirmed cases carry writeoff_status == "pending" on
-    their final resolution (write-off posting is batched and lags actual
-    case resolution). A model that discovers this column and infers "not
-    posted yet means not final" excludes these cases, undercounting
-    confirmed_fraud_loss_usd in the tier/month cells they touch and shifting
-    highest_loss_rate_tier.
+    Trap 7 — a transaction authenticated via 3-D Secure carries no loss
+    exposure for the processor (liability shifts to the issuer), per the
+    instructions, whether it qualifies as confirmed fraud through a dispute
+    case OR a velocity cluster. The rule is stated explicitly; the difficulty
+    is applying it to BOTH bases consistently. Checks cells touched by a
+    3DS-authenticated case-confirmed transaction AND cells touched by a
+    3DS-authenticated velocity-confirmed transaction independently, so a
+    model that only remembers the exclusion for one basis still fails here.
 
-    Spot-checks tier/month cells touched by a pending-writeoff confirmed case,
-    and the summary-level highest_loss_rate_tier.
+    Also checks highest_loss_rate_tier, which the exclusion can shift.
     """
-    _, _, _, _, resolutions, case_transactions = raw_data
-    exp_report, txns_with_tier, confirmed_txns, confirmed, _ = expected
-
-    latest = resolutions.sort_values("resolution_date").groupby("case_id", as_index=False).last()
-    pending_writeoff_cases = set(latest.loc[latest["writeoff_status"] == "pending", "case_id"]) & set(confirmed)
-    assert len(pending_writeoff_cases) > 0, "test setup error: expected at least one confirmed case pending write-off"
-
-    pending_links = case_transactions[case_transactions["case_id"].isin(pending_writeoff_cases)]
+    _, _, transactions, _, _, case_transactions = raw_data
+    exp_report, txns_with_tier, confirmed_txns, confirmed, velocity_keys = expected
     key_cols = ["gateway_id", "transaction_id"]
-    pending_txns = pending_links.merge(txns_with_tier, on=key_cols, how="inner")
-    assert len(pending_txns) > 0, "test setup error: expected at least one pending-writeoff confirmed transaction"
 
-    cells = pending_txns[["risk_tier", "month"]].drop_duplicates()
+    confirmed_links = case_transactions[case_transactions["case_id"].isin(confirmed)]
+    case_confirmed_txns = confirmed_links.merge(txns_with_tier, on=key_cols, how="inner")
+    case_3ds_txns = case_confirmed_txns[case_confirmed_txns["three_ds_authenticated"]]
+    assert len(case_3ds_txns) > 0, "test setup error: expected a 3DS-authenticated case-confirmed transaction"
+
+    velocity_txns = txns_with_tier[txns_with_tier[key_cols].apply(tuple, axis=1).isin(velocity_keys)]
+    velocity_3ds_txns = velocity_txns[velocity_txns["three_ds_authenticated"]]
+    assert len(velocity_3ds_txns) > 0, "test setup error: expected a 3DS-authenticated velocity-confirmed transaction"
+
+    cells = pd.concat([
+        case_3ds_txns[["risk_tier", "month"]].drop_duplicates().head(3),
+        velocity_3ds_txns[["risk_tier", "month"]].drop_duplicates().head(3),
+    ]).drop_duplicates()
 
     failures = []
-    for _, c in cells.head(5).iterrows():
+    for _, c in cells.iterrows():
         tier, month = c["risk_tier"], c["month"]
         exp_loss = _cell(exp_report, tier, month, "confirmed_fraud_loss_usd")
         act_loss = _cell(agent_report, tier, month, "confirmed_fraud_loss_usd")
@@ -730,8 +737,8 @@ def test_case_12_writeoff_status_not_a_confirmation_gate(agent_report, agent_sum
         if not math.isclose(float(act_loss), float(exp_loss), rel_tol=0.03, abs_tol=15):
             failures.append(
                 f"{tier}/{month}: confirmed_fraud_loss_usd {act_loss:,.2f} != expected {exp_loss:,.2f}. "
-                "writeoff_status records GL posting timing, not fraud confirmation — a case pending "
-                "write-off is still confirmed fraud loss if reason_code and resolution_status qualify."
+                "A 3-D Secure authenticated transaction carries no loss exposure for the processor "
+                "under either confirmed-fraud basis (dispute case or velocity cluster)."
             )
 
     by_tier = exp_report.groupby("risk_tier").agg(
@@ -743,7 +750,7 @@ def test_case_12_writeoff_status_not_a_confirmation_gate(agent_report, agent_sum
     if str(agent_summary["highest_loss_rate_tier"]) != exp_highest_tier:
         failures.append(
             f"highest_loss_rate_tier: expected {exp_highest_tier}, got {agent_summary['highest_loss_rate_tier']}. "
-            "Excluding pending-writeoff cases shifts which tier has the highest fraud loss rate."
+            "The liability-shift exclusion changes which tier has the highest fraud loss rate."
         )
 
     assert not failures, "\n".join(failures)

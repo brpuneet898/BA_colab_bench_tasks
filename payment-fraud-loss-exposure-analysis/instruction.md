@@ -11,9 +11,9 @@ All input files are located in `/workspace/data/`:
 | `merchants.csv` | Master list of merchants (reference only) |
 | `merchant_risk_tiers.csv` | Risk tier assigned to each merchant, with `tier_effective_from` and `tier_effective_to` recording the period each assignment applied |
 | `gateway_metadata.csv` | Gateway reference data (reference only) |
-| `transactions.csv` | Card-not-present transactions across gateways `ALPHA`, `BRAVO`, and `CHARLIE`, covering a window around Q1 2024. Each row records the `gateway_id` that processed the transaction, a `transaction_id`, and the `payment_instrument_id` used. |
+| `transactions.csv` | Card-not-present transactions across gateways `ALPHA`, `BRAVO`, and `CHARLIE`, covering a window around Q1 2024. Each row records the `gateway_id` that processed the transaction, a `transaction_id`, the `payment_instrument_id` used, and whether the transaction completed 3-D Secure authentication (`three_ds_authenticated`). |
 | `fraud_disputes.csv` | One row per fraud case (`case_id`), recording the `reason_code` describing the cardholder's claim, the `filed_date`, and the transaction reported when the case was opened (`reported_gateway_id`, `reported_transaction_id`) |
-| `dispute_resolutions.csv` | Resolution records for each `case_id`, recording `resolution_status`, `resolution_date`, and `writeoff_status` (whether the loss has been posted to the general ledger). A case may carry more than one resolution record as it moves through review. |
+| `dispute_resolutions.csv` | Resolution records for each `case_id`, recording `resolution_status` and `resolution_date`. A case may carry more than one resolution record as it moves through review. |
 | `case_transactions.csv` | The transactions associated with each `case_id`, identified by `gateway_id` and `transaction_id` |
 
 ## Scope
@@ -42,7 +42,11 @@ Confirmed fraud loss for a case is the sum of `amount_usd` across every transact
 
 Independent of dispute cases, a payment instrument (`payment_instrument_id`) used at three or more distinct merchants within any 48-hour window is considered a velocity-fraud cluster — a pattern consistent with a compromised instrument being tested across multiple merchants before detection. Every transaction using that payment instrument within such a window also counts as confirmed fraud loss, whether or not a dispute case was filed for it.
 
-`confirmed_fraud_loss_usd` = sum of `amount_usd` for transactions belonging to a confirmed-fraud case or a velocity-fraud cluster, assigned to the tier/month of each underlying transaction. A transaction counted through one basis is not counted a second time if it also qualifies through the other.
+### Loss Exposure and Liability Shift
+
+Under card network rules, fraud liability for a transaction that completed 3-D Secure authentication (`three_ds_authenticated` is true) shifts from the merchant's processor to the card issuer, regardless of a dispute case's resolution or a velocity-based determination. Such a transaction represents no loss exposure for the processor and does not contribute to `confirmed_fraud_loss_usd` or `confirmed_fraud_count`, even when it would otherwise qualify as confirmed fraud loss under either basis above.
+
+`confirmed_fraud_loss_usd` = sum of `amount_usd` for transactions belonging to a confirmed-fraud case or a velocity-fraud cluster, net of the liability-shift exclusion above, assigned to the tier/month of each underlying transaction. A transaction counted through one basis is not counted a second time if it also qualifies through the other.
 
 `confirmed_fraud_count` = count of those transactions.
 

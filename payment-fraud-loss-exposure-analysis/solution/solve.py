@@ -29,6 +29,12 @@ What the data actually required, once explored:
   3+ appear once the surrounding buffer transactions are included. The
   clustering check has to run on the full file before scoping to Q1 for the
   report, not the other way around.
+- The instructions state that 3-D Secure authenticated transactions carry no
+  loss exposure for the processor (liability shifts to the issuer) under
+  either confirmed-fraud basis. This exclusion has to be applied to the
+  unioned confirmed-transaction set (case-based + velocity-based), not to
+  just one of the two — applying it before the union, to only one source,
+  silently leaves the other basis's 3DS-authenticated transactions counted.
 """
 
 import json
@@ -80,7 +86,8 @@ def assign_risk_tier(transactions, tiers):
     matched = merged[in_effect].copy()
     matched["month"] = matched["transaction_date"].dt.strftime("%Y-%m")
     return matched[["gateway_id", "transaction_id", "merchant_id", "transaction_date",
-                     "amount_usd", "payment_instrument_id", "risk_tier", "month"]]
+                     "amount_usd", "payment_instrument_id", "three_ds_authenticated",
+                     "risk_tier", "month"]]
 
 
 def latest_resolution(resolutions):
@@ -219,6 +226,10 @@ def main():
     ]
 
     confirmed_txns = pd.concat([case_confirmed_txns, velocity_txns]).drop_duplicates(subset=key_cols)
+
+    # 3-D Secure liability shift: no loss exposure for the processor under
+    # either confirmed-fraud basis, applied after the union of both bases.
+    confirmed_txns = confirmed_txns[~confirmed_txns["three_ds_authenticated"]]
 
     report = build_report(txns_with_tier, confirmed_txns)
     summary = build_summary(report)
