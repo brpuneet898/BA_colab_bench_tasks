@@ -108,6 +108,15 @@ Headroom mechanisms tested:
             A model that skips conversion produces fill rates ~1000× too large
             for Chemicals, suppressing all their SLA breaches.
 
+  Trap 15 — Split Primary deliveries (partial-then-late shipment).
+            150 POs have two Primary rows: first arrives 2 days before the
+            promised date at 60% of ordered quantity; second arrives 5 days
+            after at 45%. Net total = 105% (no fill breach). Net by effective
+            deadline = 60% < ordered_quantity → on-time breach. A model that
+            evaluates on-time as "did a Primary delivery arrive by the
+            deadline?" sees the first shipment arrive on time and misses all
+            150 breaches, shifting breach count by 150 (abs_tol = 3).
+
   Trap 14 — Consecutive breach streak vs total breach count.
             max_consecutive_breach_streak is the length of the longest
             uninterrupted run of SLA-breaching POs for a supplier, evaluated
@@ -441,6 +450,19 @@ def test_case_01_input_sentinels(raw_data):
     assert "Rejection" in return_basis_vals and "Operational" in return_basis_vals, \
         (f"Return rows must have both Rejection and Operational in return_basis; "
          f"got {return_basis_vals}")
+
+    # Trap 15: split Primary deliveries — some (warehouse_id, po_id) pairs have 2 Primary rows
+    primary_counts = (
+        deliveries[deliveries["delivery_type"] == "Primary"]
+        .groupby(["warehouse_id", "po_id"])
+        .size()
+    )
+    split_primary_count = (primary_counts > 1).sum()
+    assert split_primary_count >= 100, \
+        (f"delivery_records.csv must contain at least 100 (warehouse_id, po_id) pairs with "
+         f"multiple Primary rows (split shipments); got {split_primary_count}. "
+         f"Net quantity received by the deadline must be summed across all qualifying "
+         f"delivery events — not evaluated per-Primary-shipment.")
 
     # Trap 12: regional_penalty_rates.csv composite key (warehouse_id, contract_tier)
     assert len(regional_rates) == 9, \
