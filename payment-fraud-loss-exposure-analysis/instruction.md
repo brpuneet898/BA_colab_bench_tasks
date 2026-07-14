@@ -1,6 +1,6 @@
 # Q1 2024 Fraud Loss Exposure Report
 
-The risk team at a payment processor requires a quarterly fraud loss exposure report covering Q1 2024 (January–March). The processor routes card-not-present transactions on behalf of its merchants through three acquiring gateways, and the report is reviewed by the risk committee to monitor the processor's **loss exposure** — the portion of confirmed fraud loss for which the processor itself, rather than the card issuer, bears financial responsibility — by merchant risk tier.
+The risk team at a payment processor requires a quarterly fraud loss exposure report covering Q1 2024 (January–March). The processor routes card-not-present transactions on behalf of its merchants through three acquiring gateways, and the report is reviewed by the risk committee to monitor the processor's fraud loss exposure by merchant risk tier.
 
 ## Input Data
 
@@ -42,7 +42,7 @@ Confirmed fraud loss for a case is the sum of `amount_usd` across every transact
 
 Independent of dispute cases, a payment instrument (`payment_instrument_id`) used at three or more distinct merchants within any 48-hour window is considered a velocity-fraud cluster — a pattern consistent with a compromised instrument being tested across multiple merchants before detection. Every transaction using that payment instrument within such a window also counts as confirmed fraud loss, whether or not a dispute case was filed for it.
 
-`confirmed_fraud_loss_usd` = sum of `amount_usd` for transactions belonging to a confirmed-fraud case or a velocity-fraud cluster, assigned to the tier/month of each underlying transaction. A transaction counted through one basis is not counted a second time if it also qualifies through the other.
+`confirmed_fraud_loss_usd` is the processor's fraud loss exposure: the sum of `amount_usd` for transactions belonging to a confirmed-fraud case or a velocity-fraud cluster **where liability for the loss rests with the processor**, assigned to the tier/month of each underlying transaction. A transaction counted through one basis is not counted a second time if it also qualifies through the other.
 
 `confirmed_fraud_count` = count of those transactions.
 

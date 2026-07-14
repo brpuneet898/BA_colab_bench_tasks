@@ -29,13 +29,13 @@ What the data actually required, once explored:
   3+ appear once the surrounding buffer transactions are included. The
   clustering check has to run on the full file before scoping to Q1 for the
   report, not the other way around.
-- "Loss exposure" is defined as the portion of confirmed fraud loss the
-  processor itself bears, not the card issuer. Under real card network rules,
-  a transaction authenticated via 3-D Secure (three_ds_authenticated is true
-  in transactions.csv) has its fraud liability shift to the issuer — this
-  isn't spelled out anywhere else in the instructions, it follows from the
-  loss-exposure definition plus standard payments domain knowledge. The
-  exclusion applies to the unioned confirmed-transaction set (case-based +
+- confirmed_fraud_loss_usd is defined as the transactions where "liability
+  for the loss rests with the processor" — under real card network rules, a
+  transaction authenticated via 3-D Secure (three_ds_authenticated is true
+  in transactions.csv) has its fraud liability shift to the issuer instead,
+  which follows from that definition plus standard payments domain
+  knowledge, not from any separate rule spelled out elsewhere. The exclusion
+  applies to the unioned confirmed-transaction set (case-based +
   velocity-based) — applying it to only one basis silently leaves the
   other's 3DS-authenticated transactions counted.
 - dispute_resolutions.csv also carries a case_status column (open/closed)

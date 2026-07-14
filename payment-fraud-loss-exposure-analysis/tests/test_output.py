@@ -56,16 +56,17 @@ Headroom mechanisms tested:
 
   Trap 7 — 3-D Secure liability shift (minimal-disclosure domain fact).
             transactions.csv carries three_ds_authenticated on every row,
-            named factually with no explanation of its significance. Under
-            real card network rules, a 3DS-authenticated transaction's fraud
-            liability shifts to the card issuer and represents no loss
-            exposure for the processor, under EITHER confirmed-fraud basis
-            (dispute case or velocity cluster). No instruction text states
-            this rule — it follows only from the "loss exposure" definition
-            in the opening paragraph plus standard payments domain knowledge.
-            A model whose strongest prior is that resolution_status alone
-            determines loss ignores it entirely; a model that only applies
-            it to one basis (case-based or velocity-based) undercounts.
+            named factually with no explanation of its significance.
+            confirmed_fraud_loss_usd is defined as transactions where
+            liability for the loss rests with the processor. Under real
+            card network rules, a 3DS-authenticated transaction's fraud
+            liability shifts to the issuer instead, under EITHER
+            confirmed-fraud basis (dispute case or velocity cluster) —
+            connecting three_ds_authenticated to the liability definition
+            requires standard payments domain knowledge. A model whose
+            strongest prior is that resolution_status alone determines loss
+            ignores it entirely; a model that only applies it to one basis
+            (case-based or velocity-based) undercounts.
 
   Trap 8 — case_status administrative-lifecycle false friend.
             dispute_resolutions.csv carries case_status (open/closed),
@@ -717,16 +718,15 @@ def test_case_11_boundary_spanning_clusters(agent_report, expected, raw_data):
 
 def test_case_12_domain_convention_false_friends(agent_report, agent_summary, expected, raw_data):
     """
-    Trap 7 — a transaction authenticated via 3-D Secure carries no loss
-    exposure for the processor (liability shifts to the issuer) under real
-    card network rules, whether it qualifies as confirmed fraud through a
-    dispute case OR a velocity cluster. Neither the instructions nor this
-    docstring name the mechanism directly; it follows from the "loss
-    exposure" framing plus standard payments domain knowledge. Checks cells
-    touched by a 3DS-authenticated case-confirmed transaction AND cells
-    touched by a 3DS-authenticated velocity-confirmed transaction
-    independently, so a model that only remembers the exclusion for one
-    basis still fails here.
+    Trap 7 — confirmed_fraud_loss_usd is defined as transactions where
+    liability for the loss rests with the processor. Under real card network
+    rules, a transaction authenticated via 3-D Secure has its fraud liability
+    shift to the issuer instead — connecting three_ds_authenticated to that
+    definition requires standard payments domain knowledge, not a separately
+    stated rule. Checks cells touched by a 3DS-authenticated case-confirmed
+    transaction AND cells touched by a 3DS-authenticated velocity-confirmed
+    transaction independently, so a model that only remembers the exclusion
+    for one basis still fails here.
 
     Trap 8 — case_status (open/closed) tracks a case file's administrative
     lifecycle in the case-management system, not the liability determination
