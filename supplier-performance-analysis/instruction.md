@@ -34,7 +34,7 @@ A purchase order is **on time** if the net quantity received on or before `promi
 
 ### Net Fill Rate
 
-The net quantity received for a purchase order is the cumulative on-hand quantity from qualifying delivery events — stock received counts toward it; returns arising from non-conforming goods reduce it — regardless of when those events occurred.
+The net quantity received for a purchase order is the cumulative stock from the supplier that has been accepted into inventory — accepted goods receipts count toward it; returns arising from non-conforming goods reduce it — regardless of when those events occurred.
 
 `net_fill_rate` = sum of net quantities received across all Q1 POs / sum of `ordered_quantity` across all Q1 POs, rounded to 4 decimal places. Null for suppliers with no Q1 POs.
 

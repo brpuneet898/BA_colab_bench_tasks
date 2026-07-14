@@ -49,13 +49,13 @@ Headroom mechanisms tested:
 
   Trap 8 — Rework delivery events.
             ~80 rows in delivery_records.csv carry delivery_type="Rework" with
-            a positive quantity_received. These are internal quality events and
-            must not be counted toward net fill rate or on-time quantity. The
-            instruction defines the net quantity computation only for Primary
-            (increase) and Return (decrease); Rework has no assigned role.
-            A model that negates Returns then sums all quantity_received inflates
-            per-supplier NFR by 0.5–2% and produces extra phantom "no-breach"
-            POs.
+            a positive quantity_received. These represent internal quality
+            remediation — goods already in inventory moved to a rework station,
+            not new goods received from the supplier. The instruction says
+            "stock from the supplier accepted into inventory"; Rework events are
+            not supplier-originated and must be excluded. A model that includes
+            Rework in the net quantity inflates per-supplier NFR by 0.5–2%,
+            producing phantom "no-breach" POs.
 
   Trap 9 — Pre-deadline Return events.
             100 Return rows have received_date ≤ promised_delivery_date.
@@ -129,20 +129,18 @@ Headroom mechanisms tested:
             (sla_breach != sla_breach.shift()).cumsum() to assign group IDs to
             consecutive runs, or an equivalent Python loop.
 
-  Trap 16 — receipt_status domain knowledge gap.
+  Trap 16 — receipt_status: provisional receipts excluded from fill rate.
             ~10% of non-split Primary delivery rows carry
-            receipt_status = "provisional_receipt"; all other rows carry
-            receipt_status = "accepted". In WMS/ERP practice, "provisional
-            receipt" means the Goods Receipt document was posted and the units
-            are in inventory, but invoice matching is still pending — the goods
-            ARE received for fill-rate purposes. A model applying general
-            accounting intuition ("provisional" = unconfirmed → exclude) will
-            filter out ~285 Primary rows, zeroing fill quantities for those POs
-            and converting oracle non-breaches to SLA breaches. This inflates
-            sla_breach_count by ~160–190, pushing test_06 (abs_tol=3) well
-            outside tolerance. The instruction says "Primary deliveries increase
-            it" with no receipt_status qualifier; the trap is invisible without
-            applying the wrong domain convention.
+            receipt_status = "provisional_receipt"; all others carry
+            receipt_status = "accepted". In inventory management, a goods receipt
+            is only posted to stock once it is formally accepted; provisionally
+            received goods are dock-logged but not yet accepted into inventory.
+            The instruction says "stock from the supplier accepted into inventory"
+            — only receipt_status="accepted" Primary rows qualify. A model that
+            includes all Primary rows without filtering receipt_status will
+            over-count net received quantity, suppressing SLA breaches and
+            producing inflated fill rates. Observable via EDA:
+            deliveries["receipt_status"].value_counts() reveals the split.
 """
 
 import json
@@ -275,7 +273,10 @@ def _penalty_caps(contracts):
 
 
 def _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates):
-    keep = (deliveries["delivery_type"] == "Primary") | (
+    keep = (
+        (deliveries["delivery_type"] == "Primary") &
+        (deliveries["receipt_status"] == "accepted")
+    ) | (
         (deliveries["delivery_type"] == "Return") &
         (deliveries["return_basis"] == "Rejection")
     )
@@ -506,8 +507,8 @@ def test_case_01_input_sentinels(raw_data):
     assert prov_count >= 200, \
         (f"delivery_records.csv must contain at least 200 Primary rows with "
          f"receipt_status='provisional_receipt'; got {prov_count}. "
-         f"These rows represent goods that are physically received but pending "
-         f"invoice confirmation — they count for fill rate regardless of status.")
+         f"These are dock-received goods not yet accepted into inventory — "
+         f"only receipt_status='accepted' Primary rows contribute to fill rate.")
 
 
 # ---------------------------------------------------------------------------

@@ -67,7 +67,10 @@ def sign_returns(deliveries):
     Operational returns (buyer-initiated) do not affect the supplier's fill-rate
     metrics and are excluded.
     """
-    keep = (deliveries["delivery_type"] == "Primary") | (
+    keep = (
+        (deliveries["delivery_type"] == "Primary") &
+        (deliveries["receipt_status"] == "accepted")
+    ) | (
         (deliveries["delivery_type"] == "Return") &
         (deliveries["return_basis"] == "Rejection")
     )
