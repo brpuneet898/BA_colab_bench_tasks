@@ -11,7 +11,7 @@ All input files are in `/workspace/data/`:
 | `suppliers.csv` | Master list of all suppliers |
 | `supplier_contracts.csv` | Contract terms per supplier, including SLA thresholds, penalty rates, and effective dates |
 | `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC |
-| `delivery_records.csv` | Delivery events against purchase orders |
+| `delivery_records.csv` | Delivery events against purchase orders; each row carries a `ship_date` (date goods were tendered to the carrier at the supplier's facility) and a `received_date` (date goods arrived at the warehouse) |
 | `regional_penalty_rates.csv` | Regional penalty adjustment multipliers, indexed by warehouse and contract tier |
 | `product_uom_reference.csv` | Unit-of-measure definitions and EA-equivalent conversion factors |
 | `quality_inspections.csv` | Quality inspection results per delivery (reference only) |
@@ -28,13 +28,13 @@ Compute the following metrics per supplier across all Q1 purchase orders assigne
 
 ### On-Time Delivery Rate
 
-A purchase order is **on time** if the net quantity received on or before `promised_delivery_date + grace_period_days` meets or exceeds `ordered_quantity`, where `grace_period_days` is drawn from the applicable contract.
+A purchase order is **on time** if the net quantity that the supplier has contractually delivered — assessed at the date delivery risk transfers to the buyer under the `incoterms` on the purchase order — meets or exceeds `ordered_quantity` by `promised_delivery_date + grace_period_days`, where `grace_period_days` is drawn from the applicable contract.
 
 `on_time_delivery_rate` = count of on-time POs / total Q1 POs for the supplier, rounded to 4 decimal places. Null for suppliers with no Q1 POs.
 
 ### Net Fill Rate
 
-The net quantity received for a purchase order is the cumulative stock from the supplier that has been accepted into inventory — accepted goods receipts count toward it; returns arising from non-conforming goods reduce it — regardless of when those events occurred.
+The net quantity received for a purchase order is the cumulative stock the supplier has delivered and accepted into inventory — supplier deliveries with accepted status count toward it; returns arising from non-conforming goods reduce it; internal quality events do not count toward it — regardless of when those events occurred.
 
 `net_fill_rate` = sum of net quantities received across all Q1 POs / sum of `ordered_quantity` across all Q1 POs, rounded to 4 decimal places. Null for suppliers with no Q1 POs.
 

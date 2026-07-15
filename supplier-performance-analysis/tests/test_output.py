@@ -141,6 +141,20 @@ Headroom mechanisms tested:
             over-count net received quantity, suppressing SLA breaches and
             producing inflated fill rates. Observable via EDA:
             deliveries["receipt_status"].value_counts() reveals the split.
+
+  Trap 17 — Incoterms-based delivery date (FOB/EXW vs DDP/DAP/CIF).
+            delivery_records.csv carries both ship_date (goods left supplier's
+            facility) and received_date (goods arrived at warehouse). For FOB
+            and EXW purchase orders the supplier's obligation ends at carrier
+            handover — the correct on-time date is ship_date. For DDP, DAP, and
+            CIF the seller delivers to the warehouse — use received_date. ~120+
+            FOB/EXW Primary rows have ship_date ≤ promised_delivery_date but
+            received_date > promised_delivery_date (transit delay the supplier
+            is not responsible for). A model that uses received_date for all
+            incoterms over-counts these as on-time breaches. Observable via
+            merge of delivery_records with purchase_orders on (warehouse_id,
+            po_id), then filtering to incoterms in ['FOB','EXW'] and computing
+            (received_date - ship_date).dt.days.
 """
 
 import json
@@ -196,6 +210,9 @@ def _get_applicable_contract(pos, contracts):
     return applicable
 
 
+_BUYER_PICKUP_INCOTERMS = {"FOB", "EXW"}
+
+
 def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
     net_qty = (
         deliveries
@@ -206,7 +223,8 @@ def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
 
     d_with_deadline = deliveries.merge(
         pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
-                            "ordered_quantity", "grace_period_days"]].drop_duplicates(),
+                            "ordered_quantity", "grace_period_days",
+                            "incoterms"]].drop_duplicates(),
         on=["warehouse_id", "po_id"], how="inner",
     )
     d_with_deadline = d_with_deadline.copy()
@@ -214,8 +232,11 @@ def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
         d_with_deadline["promised_delivery_date"] +
         pd.to_timedelta(d_with_deadline["grace_period_days"].fillna(0).astype(int), unit="D")
     )
+    buyer_pickup = d_with_deadline["incoterms"].isin(_BUYER_PICKUP_INCOTERMS)
+    d_with_deadline["effective_date"] = d_with_deadline["received_date"].copy()
+    d_with_deadline.loc[buyer_pickup, "effective_date"] = d_with_deadline.loc[buyer_pickup, "ship_date"]
     d_before = d_with_deadline[
-        d_with_deadline["received_date"] <= d_with_deadline["effective_deadline"]
+        d_with_deadline["effective_date"] <= d_with_deadline["effective_deadline"]
     ]
     net_by_deadline = (
         d_before
@@ -333,7 +354,7 @@ def raw_data():
                              parse_dates=["order_date", "promised_delivery_date",
                                           "amendment_date"])
     deliveries = pd.read_csv(DATA_DIR / "delivery_records.csv",
-                             parse_dates=["received_date"])
+                             parse_dates=["received_date", "ship_date"])
     regional_rates = pd.read_csv(DATA_DIR / "regional_penalty_rates.csv")
     uom_ref        = pd.read_csv(DATA_DIR / "product_uom_reference.csv")
     return suppliers, contracts, pos, deliveries, regional_rates, uom_ref
@@ -509,6 +530,33 @@ def test_case_01_input_sentinels(raw_data):
          f"receipt_status='provisional_receipt'; got {prov_count}. "
          f"These are dock-received goods not yet accepted into inventory — "
          f"only receipt_status='accepted' Primary rows contribute to fill rate.")
+
+    # Trap 17: incoterms-based delivery date (FOB/EXW vs DDP/DAP/CIF)
+    assert "ship_date" in deliveries.columns, \
+        "delivery_records.csv must have a ship_date column (date goods left supplier facility)"
+    assert "incoterms" in pos.columns, \
+        "purchase_orders.csv must have an incoterms column"
+    pos_latest_inco = (
+        pos.sort_values(["warehouse_id", "po_id", "amendment_date"],
+                        ascending=[True, True, False])
+        .drop_duplicates(subset=["warehouse_id", "po_id"], keep="first")
+        [["po_id", "warehouse_id", "incoterms", "promised_delivery_date"]]
+    )
+    dlv_primary_inco = (
+        deliveries[deliveries["delivery_type"] == "Primary"]
+        .merge(pos_latest_inco, on=["po_id", "warehouse_id"], how="left")
+    )
+    buyer_pickup_rows = dlv_primary_inco[
+        dlv_primary_inco["incoterms"].isin({"FOB", "EXW"})
+    ]
+    transit_gap_rows = buyer_pickup_rows[
+        buyer_pickup_rows["ship_date"] < buyer_pickup_rows["received_date"]
+    ]
+    assert len(transit_gap_rows) >= 100, \
+        (f"delivery_records.csv must contain at least 100 FOB/EXW Primary rows with "
+         f"ship_date < received_date (transit gap); got {len(transit_gap_rows)}. "
+         f"For FOB/EXW incoterms the supplier's obligation ends at carrier handover "
+         f"(ship_date), not warehouse receipt (received_date).")
 
 
 # ---------------------------------------------------------------------------

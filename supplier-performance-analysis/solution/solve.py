@@ -25,7 +25,7 @@ def load_data():
                              parse_dates=["order_date", "promised_delivery_date",
                                           "amendment_date"])
     deliveries = pd.read_csv(DATA_DIR / "delivery_records.csv",
-                             parse_dates=["received_date"])
+                             parse_dates=["received_date", "ship_date"])
     regional_rates = pd.read_csv(DATA_DIR / "regional_penalty_rates.csv")
     uom_ref        = pd.read_csv(DATA_DIR / "product_uom_reference.csv")
     return suppliers, contracts, pos, deliveries, regional_rates, uom_ref
@@ -107,12 +107,17 @@ def get_applicable_contract(pos, contracts):
     return applicable
 
 
+_BUYER_PICKUP_INCOTERMS = {"FOB", "EXW"}
+
+
 def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
     """
     Compute net fill rate, on-time flag, SLA breach, and penalty per PO.
     deliveries must already have Rejection Return quantities negated (via sign_returns).
 
     On-time uses promised_delivery_date + grace_period_days as the effective deadline.
+    The date checked against the deadline depends on the purchase order's incoterms:
+    FOB/EXW → ship_date (risk transfers at origin); all other terms → received_date.
 
     Penalty = order_value_usd × penalty_rate_pct × regional_penalty_multiplier,
     where the multiplier is sourced from regional_penalty_rates.csv using the
@@ -131,7 +136,8 @@ def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
 
     d_with_deadline = deliveries.merge(
         pos_with_contracts[["warehouse_id", "po_id", "promised_delivery_date",
-                            "ordered_quantity", "grace_period_days"]].drop_duplicates(),
+                            "ordered_quantity", "grace_period_days",
+                            "incoterms"]].drop_duplicates(),
         on=["warehouse_id", "po_id"],
         how="inner",
     )
@@ -140,8 +146,13 @@ def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
         d_with_deadline["promised_delivery_date"] +
         pd.to_timedelta(d_with_deadline["grace_period_days"].fillna(0).astype(int), unit="D")
     )
+    # Use ship_date for FOB/EXW (delivery obligation ends at carrier handover);
+    # use received_date for all other terms (seller delivers to warehouse).
+    buyer_pickup = d_with_deadline["incoterms"].isin(_BUYER_PICKUP_INCOTERMS)
+    d_with_deadline["effective_date"] = d_with_deadline["received_date"].copy()
+    d_with_deadline.loc[buyer_pickup, "effective_date"] = d_with_deadline.loc[buyer_pickup, "ship_date"]
     d_before = d_with_deadline[
-        d_with_deadline["received_date"] <= d_with_deadline["effective_deadline"]
+        d_with_deadline["effective_date"] <= d_with_deadline["effective_deadline"]
     ]
     net_by_deadline = (
         d_before
