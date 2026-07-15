@@ -18,11 +18,11 @@ number. The join key is always (warehouse_id, shipment_id).
 
 Quantity fulfilled (net) per order line nets every Shipment, Return, and
 Cancellation header recorded against that line, filtered to
-event_date <= REPORT_AS_OF. quantity in shipment_line_items.csv is signed
-the way this WMS actually records it: positive for a Shipment row,
-negative for a Return or Cancellation row (a credit against what went
-out). Summing quantity across Shipment/Return/Cancellation rows nets
-correctly with a plain sum.
+event_date <= REPORT_AS_OF. Checking quantity by transaction_type shows it
+is signed: positive for Shipment (and Backorder), negative for Return or
+Cancellation (a credit against what went out) -- see the sign check in
+net_fulfilled_by_line(). Summing quantity across Shipment/Return/
+Cancellation rows therefore nets correctly with a plain sum.
 
 shipment_headers.csv also contains a fourth transaction_type, Backorder,
 recording quantity still awaiting fulfillment. It carries a positive
@@ -33,23 +33,25 @@ transaction_type instead of restricting to Shipment/Return/Cancellation
 folds backordered (not-yet-sent) quantity in as if it were fulfilled and
 overstates fulfillment by whatever was backordered.
 
-carrier_fulfillment_agreements.csv is a sparse exceptions list: it only
-lists (carrier_id, warehouse_id) pairs shipping under FOB Origin freight
-terms, where fulfillment responsibility passes to the customer the moment
-goods leave the warehouse dock. Every pair absent from the file is FOB
-Destination (the default), where the warehouse's responsibility continues
-until delivery. Under FOB Origin, a later Return or Cancellation is a
-matter between the customer and the carrier, not a failure of the
-warehouse's own fulfillment -- it does not net against quantity fulfilled,
-the shipped quantity still counts in full. Under FOB Destination,
-Return/Cancellation nets against fulfillment as usual (unchanged from
-before this file existed). carrier_id alone is not a unique key into this
-table -- six carriers are FOB Origin at exactly two of the warehouses
-they serve, so the lookup must join on (warehouse_id, carrier_id), never
-carrier_id alone; collapsing a carrier's two FOB Origin rows down to one
-(e.g. via drop_duplicates(subset="carrier_id")) applies FOB Origin
-treatment to every warehouse that carrier serves, not just the two it
-actually applies to.
+carrier_fulfillment_agreements.csv lists (carrier_id, warehouse_id) pairs
+shipping under FOB Origin freight terms; every value present in its
+freight_terms column is "FOB Origin" (checked in net_fulfilled_by_line()),
+confirming it is a sparse exceptions list rather than a full record of
+every pair's terms -- a pair absent from the file ships under the
+unstated default, FOB Destination. Under standard Incoterms usage, FOB
+Origin means title and fulfillment responsibility pass to the customer
+the moment goods leave the warehouse dock, so a later Return or
+Cancellation is a matter between the customer and the carrier, not a
+failure of the warehouse's own fulfillment -- it does not net against
+quantity fulfilled, the shipped quantity still counts in full. Under FOB
+Destination (the default), the warehouse's responsibility continues until
+delivery, so Return/Cancellation nets against fulfillment as usual.
+carrier_id is not unique in this table (checked in net_fulfilled_by_line()),
+so the lookup must join on (warehouse_id, carrier_id), never carrier_id
+alone; collapsing a carrier's rows down to one (e.g. via
+drop_duplicates(subset="carrier_id")) applies FOB Origin treatment to
+every warehouse that carrier serves, not just the ones it actually
+applies to.
 
 Fulfillment region is the region assigned to the order's
 assigned_warehouse_id, as recorded in warehouse_region_assignments.csv, in
@@ -144,6 +146,21 @@ def net_fulfilled_by_line(scoped_lines, headers, line_items, fulfillment_agreeme
     untouched either way.
     """
     events = line_items.merge(headers, on=["warehouse_id", "shipment_id"])
+
+    sign_by_type = events.groupby("transaction_type")["quantity"].agg(["min", "max"])
+    assert (sign_by_type.loc[["Shipment", "Backorder"], "min"] > 0).all(), (
+        "expected Shipment/Backorder quantity to be positive"
+    )
+    assert (sign_by_type.loc[["Return", "Cancellation"], "max"] < 0).all(), (
+        "expected Return/Cancellation quantity to be negative"
+    )
+    assert set(fulfillment_agreements["freight_terms"].unique()) == {"FOB Origin"}, (
+        "expected carrier_fulfillment_agreements.csv to list only FOB Origin exceptions"
+    )
+    assert fulfillment_agreements["carrier_id"].duplicated().any(), (
+        "expected carrier_id to repeat across warehouses in carrier_fulfillment_agreements.csv"
+    )
+
     in_window = events[events["event_date"] <= REPORT_AS_OF].copy()
     in_window = in_window[in_window["transaction_type"].isin(FULFILLMENT_TYPES)]
 
