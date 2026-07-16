@@ -107,7 +107,7 @@ def get_applicable_contract(pos, contracts):
     return applicable
 
 
-_BUYER_PICKUP_INCOTERMS = {"FOB", "EXW"}
+_BUYER_PICKUP_INCOTERMS = {"FOB", "EXW", "CIF"}
 
 
 def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
