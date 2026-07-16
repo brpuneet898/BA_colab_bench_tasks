@@ -10,7 +10,7 @@ All input files are in `/workspace/data/`:
 |------|-------------|
 | `suppliers.csv` | Master list of all suppliers |
 | `supplier_contracts.csv` | Contract terms per supplier, including SLA thresholds, penalty rates, and effective dates |
-| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC; purchase orders that were revised after initial issuance carry one row per revision — apply the most recently revised terms |
+| `purchase_orders.csv` | All purchase orders raised in Q1 2024 across three regional warehouses: AMER, EMEA, and APAC |
 | `delivery_records.csv` | Delivery events against purchase orders; each row carries a `ship_date` (date goods were tendered to the carrier at the supplier's facility) and a `received_date` (date goods arrived at the warehouse) |
 | `regional_penalty_rates.csv` | Regional penalty adjustment multipliers, indexed by warehouse and contract tier |
 | `product_uom_reference.csv` | Unit-of-measure definitions and EA-equivalent conversion factors |
