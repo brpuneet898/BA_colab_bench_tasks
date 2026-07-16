@@ -1,6 +1,7 @@
 """Oracle solution for the Q1 2024 Supplier Performance Scorecard task."""
 
 import json
+import numpy as np
 import pandas as pd
 from pathlib import Path
 
@@ -142,12 +143,13 @@ def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
         how="inner",
     )
     d_with_deadline = d_with_deadline.copy()
-    d_with_deadline["effective_deadline"] = (
-        d_with_deadline["promised_delivery_date"] +
-        pd.to_timedelta(d_with_deadline["grace_period_days"].fillna(0).astype(int), unit="D")
-    )
-    # Use ship_date for FOB/EXW (delivery obligation ends at carrier handover);
-    # use received_date for all other terms (seller delivers to warehouse).
+    grace = d_with_deadline["grace_period_days"].fillna(0).astype(int)
+    d_with_deadline["effective_deadline"] = pd.to_datetime([
+        np.busday_offset(d.date(), int(n), roll="forward")
+        for d, n in zip(d_with_deadline["promised_delivery_date"], grace)
+    ])
+    # Use ship_date for FOB/EXW/CIF (delivery obligation ends at carrier handover);
+    # use received_date for DDP/DAP (seller delivers to warehouse).
     buyer_pickup = d_with_deadline["incoterms"].isin(_BUYER_PICKUP_INCOTERMS)
     d_with_deadline["effective_date"] = d_with_deadline["received_date"].copy()
     d_with_deadline.loc[buyer_pickup, "effective_date"] = d_with_deadline.loc[buyer_pickup, "ship_date"]
@@ -164,12 +166,23 @@ def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
     po = pos_with_contracts.merge(net_qty,         on=["warehouse_id", "po_id"], how="left")
     po = po.merge(net_by_deadline, on=["warehouse_id", "po_id"], how="left")
 
-    po["net_fill_rate_po"] = po["net_qty_received"] / po["ordered_quantity"]
+    po["net_fill_rate_po"] = po["net_qty_received"].fillna(0) / po["ordered_quantity"]
     po["on_time"] = po["net_qty_by_deadline"].fillna(0) >= po["ordered_quantity"]
 
     fill_breach   = po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]
     ontime_breach = ~po["on_time"]
     po["sla_breach"] = fill_breach | ontime_breach
+
+    # Trap B: assessment base for fill-rate-only breaches is the shortfall value,
+    # not the full order value. On-time breaches (with or without fill breach) use
+    # the full order_value_usd.
+    fill_only = fill_breach & ~ontime_breach
+    po["assessment_base"] = po["order_value_usd"]
+    mask = po["sla_breach"] & fill_only
+    po.loc[mask, "assessment_base"] = (
+        po.loc[mask, "order_value_usd"] *
+        (1.0 - po.loc[mask, "net_fill_rate_po"].clip(upper=1.0))
+    )
 
     po = po.merge(
         regional_rates[["warehouse_id", "contract_tier", "regional_penalty_multiplier"]],
@@ -184,7 +197,7 @@ def compute_po_level_metrics(pos_with_contracts, deliveries, regional_rates):
     base_rate = po["penalty_rate_pct"] * po["regional_penalty_multiplier"]
     po["penalty_rate_eff"] = base_rate.where(~escalated, base_rate * 2)
     po["penalty_po"] = po.apply(
-        lambda r: r["order_value_usd"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
+        lambda r: r["assessment_base"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
         axis=1,
     )
     return po

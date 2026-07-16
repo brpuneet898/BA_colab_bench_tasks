@@ -28,7 +28,7 @@ Compute the following metrics per supplier across all Q1 purchase orders assigne
 
 ### On-Time Delivery Rate
 
-A purchase order is **on time** if the net quantity that the supplier has contractually delivered — assessed at the date delivery risk transfers to the buyer under the `incoterms` on the purchase order — meets or exceeds `ordered_quantity` by `promised_delivery_date + grace_period_days`, where `grace_period_days` is drawn from the applicable contract.
+A purchase order is **on time** if the net quantity that the supplier has contractually delivered — assessed at the date delivery risk transfers to the buyer under the `incoterms` on the purchase order — meets or exceeds `ordered_quantity` by `promised_delivery_date` plus `grace_period_days` business days (Monday–Friday), where `grace_period_days` is drawn from the applicable contract.
 
 `on_time_delivery_rate` = count of on-time POs / total Q1 POs for the supplier, rounded to 4 decimal places. Null for suppliers with no Q1 POs.
 
@@ -47,7 +47,7 @@ Use the contract in effect at the time of each purchase order's `order_date`. Wh
 
 **Escalating penalty for repeat breaches:** Where a supplier has 6 or more SLA-breaching purchase orders in Q1, each breaching PO from the 6th onwards — evaluated in ascending `order_date` order, with `po_id` as a tiebreaker — is assessed at **twice** the standard `penalty_rate_pct`. The first five breaching purchase orders are always assessed at the standard rate.
 
-Penalty for a breaching PO = `order_value_usd` × applicable `penalty_rate_pct` × regional multiplier from `regional_penalty_rates.csv`.
+Penalty for a breaching PO = **assessment base** × applicable `penalty_rate_pct` × regional multiplier from `regional_penalty_rates.csv`, where the assessment base is `order_value_usd × (1 − net_fill_rate_po)` for purchase orders that breach **only** the fill-rate SLA (on-time delivery was satisfied, but net quantity fell below `fill_rate_sla_threshold`); for all other SLA-breaching purchase orders the assessment base is `order_value_usd`. Here `net_fill_rate_po` is the individual PO's net fill rate (net quantity received divided by `ordered_quantity`).
 
 `total_penalty_usd` per supplier = sum of all PO-level penalties, **capped** at `max_penalty_cap_usd`. Use the cap from the supplier's most recently effective contract.
 

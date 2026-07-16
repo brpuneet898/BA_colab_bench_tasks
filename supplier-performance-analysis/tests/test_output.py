@@ -142,23 +142,48 @@ Headroom mechanisms tested:
             producing inflated fill rates. Observable via EDA:
             deliveries["receipt_status"].value_counts() reveals the split.
 
-  Trap 17 — Incoterms-based delivery date (FOB/EXW vs DDP/DAP/CIF).
+  Trap 17 — Incoterms-based delivery date (FOB/EXW/CIF vs DDP/DAP).
             delivery_records.csv carries both ship_date (goods left supplier's
-            facility) and received_date (goods arrived at warehouse). For FOB
-            and EXW purchase orders the supplier's obligation ends at carrier
-            handover — the correct on-time date is ship_date. For DDP, DAP, and
-            CIF the seller delivers to the warehouse — use received_date. ~120+
-            FOB/EXW Primary rows have ship_date ≤ promised_delivery_date but
-            received_date > promised_delivery_date (transit delay the supplier
-            is not responsible for). A model that uses received_date for all
-            incoterms over-counts these as on-time breaches. Observable via
-            merge of delivery_records with purchase_orders on (warehouse_id,
-            po_id), then filtering to incoterms in ['FOB','EXW'] and computing
-            (received_date - ship_date).dt.days.
+            facility) and received_date (goods arrived at warehouse). For FOB,
+            EXW, and CIF purchase orders the supplier's obligation ends at
+            carrier handover — the correct on-time date is ship_date. For DDP
+            and DAP the seller delivers to the warehouse — use received_date.
+            ~120+ FOB/EXW Primary rows have ship_date ≤ promised_delivery_date
+            but received_date > promised_delivery_date (transit delay the
+            supplier is not responsible for). Observable via merge on
+            (warehouse_id, po_id) and computing (received_date - ship_date).
+
+  Trap 18 — Business days vs calendar days for grace_period_days.
+            grace_period_days in supplier_contracts.csv is in business days
+            (Monday–Friday). The effective delivery deadline is
+            np.busday_offset(promised_delivery_date, grace_period_days), not
+            promised_delivery_date + timedelta(days=grace_period_days). ~80
+            DDP/DAP Primary rows are engineered with received_date equal to
+            the BUSINESS deadline: a date on Monday or Tuesday that falls
+            strictly after the calendar deadline (Saturday or Sunday, when
+            promised_delivery_date is Thursday or Friday). A model using
+            pd.Timedelta for grace produces a calendar deadline before the
+            actual delivery, flagging these rows as late when they are on time.
+            Observable: for Primary rows where promised_delivery_date.dayofweek
+            in {3,4} and grace_period_days >= 1, compare
+            received_date with promised_delivery_date + timedelta(grace).
+
+  Trap 19 — Liquidated damages assessed on shortfall, not full order value.
+            For purchase orders that breach ONLY the fill-rate SLA (on-time
+            delivery was satisfied but net quantity fell below the threshold),
+            the penalty assessment base is the value of the undelivered
+            quantity: order_value_usd × (1 − net_fill_rate_po). For all other
+            SLA-breaching POs the full order_value_usd is the base. A model
+            that uniformly applies order_value_usd × rate for all breach types
+            over-states penalties for fill-rate-only breaches by ~$139K.
+            Observable: group POs by (on_time, fill_breach) to identify the
+            fill-rate-only segment, then compare per-PO penalty with and
+            without the shortfall adjustment.
 """
 
 import json
 import math
+import numpy as np
 import os
 import pytest
 import pandas as pd
@@ -228,10 +253,11 @@ def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
         on=["warehouse_id", "po_id"], how="inner",
     )
     d_with_deadline = d_with_deadline.copy()
-    d_with_deadline["effective_deadline"] = (
-        d_with_deadline["promised_delivery_date"] +
-        pd.to_timedelta(d_with_deadline["grace_period_days"].fillna(0).astype(int), unit="D")
-    )
+    grace = d_with_deadline["grace_period_days"].fillna(0).astype(int)
+    d_with_deadline["effective_deadline"] = pd.to_datetime([
+        np.busday_offset(d.date(), int(n), roll="forward")
+        for d, n in zip(d_with_deadline["promised_delivery_date"], grace)
+    ])
     buyer_pickup = d_with_deadline["incoterms"].isin(_BUYER_PICKUP_INCOTERMS)
     d_with_deadline["effective_date"] = d_with_deadline["received_date"].copy()
     d_with_deadline.loc[buyer_pickup, "effective_date"] = d_with_deadline.loc[buyer_pickup, "ship_date"]
@@ -248,10 +274,19 @@ def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
     po = pos_with_contracts.merge(net_qty,         on=["warehouse_id", "po_id"], how="left")
     po = po.merge(net_by_deadline, on=["warehouse_id", "po_id"], how="left")
 
-    po["net_fill_rate_po"] = po["net_qty_received"] / po["ordered_quantity"]
+    po["net_fill_rate_po"] = po["net_qty_received"].fillna(0) / po["ordered_quantity"]
     po["on_time"] = po["net_qty_by_deadline"].fillna(0) >= po["ordered_quantity"]
-    po["sla_breach"] = (
-        (po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]) | (~po["on_time"])
+
+    fill_breach   = po["net_fill_rate_po"] < po["fill_rate_sla_threshold"]
+    ontime_breach = ~po["on_time"]
+    po["sla_breach"] = fill_breach | ontime_breach
+
+    fill_only = fill_breach & ~ontime_breach
+    po["assessment_base"] = po["order_value_usd"]
+    mask = po["sla_breach"] & fill_only
+    po.loc[mask, "assessment_base"] = (
+        po.loc[mask, "order_value_usd"] *
+        (1.0 - po.loc[mask, "net_fill_rate_po"].clip(upper=1.0))
     )
 
     po = po.merge(
@@ -267,7 +302,7 @@ def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
     base_rate = po["penalty_rate_pct"] * po["regional_penalty_multiplier"]
     po["penalty_rate_eff"] = base_rate.where(~escalated, base_rate * 2)
     po["penalty_po"] = po.apply(
-        lambda r: r["order_value_usd"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
+        lambda r: r["assessment_base"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
         axis=1,
     )
     return po
