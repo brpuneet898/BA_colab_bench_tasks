@@ -31,7 +31,7 @@ Compute the following for each region in `warehouse_region_assignments.csv`.
 
 **Quantity ordered**: for each in-scope order line, its `quantity_ordered`. Sum this across all in-scope order lines belonging to that region.
 
-**Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer has actually received and kept as of the 2024-04-15 cutoff, net of anything later returned or cancelled while the assigned warehouse still bore fulfillment responsibility for that shipment. Sum this across all in-scope order lines belonging to that region.
+**Quantity fulfilled (net)**: for each in-scope order line, the quantity from that line the customer has actually received and kept as of the 2024-04-15 cutoff, net of anything later returned or cancelled while the assigned warehouse still bore fulfillment responsibility for that shipment. Whether the assigned warehouse still bore fulfillment responsibility for a shipment is governed by the freight terms in `carrier_fulfillment_agreements.csv`. Sum this across all in-scope order lines belonging to that region.
 
 **Fill rate** = quantity fulfilled (net) / quantity ordered, rounded to 4 decimal places.
 
