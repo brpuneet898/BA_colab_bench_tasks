@@ -28,7 +28,16 @@ Compute the following metrics per supplier across all Q1 purchase orders assigne
 
 ### On-Time Delivery Rate
 
-A purchase order is **on time** if the net quantity that the supplier has contractually delivered — assessed at the date delivery risk transfers to the buyer under the `incoterms` on the purchase order — meets or exceeds `ordered_quantity` by `promised_delivery_date` plus `grace_period_days` business days (Monday–Friday), where `grace_period_days` is drawn from the applicable contract.
+A purchase order is **on time** if the net quantity that the supplier has contractually delivered — assessed at the date delivery risk transfers to the buyer under the `incoterms` on the purchase order — meets or exceeds `ordered_quantity` by the effective deadline.
+
+**Risk-transfer date by Incoterms:**
+
+| `incoterms` | Date to use | Transfer point |
+|-------------|-------------|----------------|
+| `FOB`, `EXW`, `CIF` | `ship_date` | Risk transfers at port of loading / origin |
+| `DDP`, `DAP` | `received_date` | Seller responsible to named destination |
+
+**Effective deadline:** `promised_delivery_date` plus `grace_period_days` business days (Monday–Friday), where `grace_period_days` is drawn from the applicable contract. If `promised_delivery_date` falls on a Saturday or Sunday, advance it to the following Monday before counting grace days.
 
 `on_time_delivery_rate` = count of on-time POs / total Q1 POs for the supplier, rounded to 4 decimal places. Null for suppliers with no Q1 POs.
 
