@@ -28,6 +28,14 @@ never authorized (approval_status == "rejected") must be excluded before
 resolving which revision governs a date -- the prior authorized revision
 continues governing undisturbed. instruction.md signals this with the word
 "authorized" in the planned-hours definition; it never names the column.
+
+projects.csv also carries billing_type. A minority of engagement_type ==
+"client_billable" projects have billing_type == "pro_bono" -- a real client
+engagement the practice does not bill for. billable_utilization_pct must
+exclude their hours even though engagement_type alone says "client_billable"
+-- instruction.md signals this by defining the metric as hours "the
+practice actually bills the client for", not as hours logged against
+"client-billable engagements"; it never names billing_type.
 """
 
 import json
@@ -66,7 +74,7 @@ def scope_timesheets_to_april(timesheets, projects):
     april = timesheets[
         (timesheets["week_ending_date"] >= APRIL_START) & (timesheets["week_ending_date"] <= APRIL_END)
     ]
-    return april.merge(projects[["project_id", "engagement_type"]], on="project_id", how="left")
+    return april.merge(projects[["project_id", "engagement_type", "billing_type"]], on="project_id", how="left")
 
 
 def compute_net_capacity(resources, time_off):
@@ -93,7 +101,7 @@ def build_resource_summary(resources, april_ts, time_off):
 
     all_hours = april_ts.groupby("resource_id")["hours_logged"].sum()
     billable_hours = (
-        april_ts[april_ts["engagement_type"] == "client_billable"]
+        april_ts[(april_ts["engagement_type"] == "client_billable") & (april_ts["billing_type"] == "standard")]
         .groupby("resource_id")["hours_logged"].sum()
     )
     out["all_hours_logged"] = out["resource_id"].map(all_hours).fillna(0.0)

@@ -31,7 +31,7 @@ instruction.md -- each is discoverable by inspecting the raw data):
    earlier revision entirely and extends the corrected rate backward over
    days it never covered.
 
-5. Authorization gate (hardest) -- assignment_revisions.csv also carries
+5. Authorization gate -- assignment_revisions.csv also carries
    approval_status. A revision with approval_status == "rejected" was
    proposed but never authorized -- it must be excluded before resolving
    which revision governs a date, leaving the prior authorized revision in
@@ -41,6 +41,16 @@ instruction.md -- each is discoverable by inspecting the raw data):
    describes a filter. A model that resolves recency (4) without also
    filtering to approved revisions lets a never-authorized revision govern
    real dates.
+
+6. Pro-bono billing (domain knowledge gap) -- projects.csv also carries
+   billing_type. A minority of engagement_type == "client_billable"
+   projects have billing_type == "pro_bono": a real client engagement the
+   practice does not bill for. billable_utilization_pct must exclude their
+   hours even though engagement_type alone correctly says
+   "client_billable" -- the engagement_type filter from (1) is necessary
+   but no longer sufficient on its own. instruction.md defines the metric
+   as hours "the practice actually bills the client for", never naming
+   billing_type or describing a second filter.
 
 Ground truth is computed inline below, directly from
 /workspace/data/*.csv -- never from a pre-baked constant.
@@ -90,7 +100,7 @@ def ground_truth():
     # unambiguous.
     april_ts = timesheets[
         (timesheets.week_ending_date >= APRIL_START) & (timesheets.week_ending_date <= APRIL_END)
-    ].merge(projects[["project_id", "engagement_type"]], on="project_id", how="left")
+    ].merge(projects[["project_id", "engagement_type", "billing_type"]], on="project_id", how="left")
 
     time_off = time_off.copy()
     time_off["start_date"] = pd.to_datetime(time_off.start_date)
@@ -115,7 +125,7 @@ def ground_truth():
 
     all_hours = april_ts.groupby("resource_id").hours_logged.sum()
     billable_hours = (
-        april_ts[april_ts.engagement_type == "client_billable"]
+        april_ts[(april_ts.engagement_type == "client_billable") & (april_ts.billing_type == "standard")]
         .groupby("resource_id").hours_logged.sum()
     )
     out["all_hours_logged"] = out.resource_id.map(all_hours).fillna(0.0)
@@ -167,6 +177,11 @@ def ground_truth():
     )
     zero_timesheet_ids = sorted(set(resources.resource_id) - set(april_ts.resource_id))
 
+    pro_bono_mix_ids = sorted(set(
+        april_ts[(april_ts.engagement_type == "client_billable") & (april_ts.billing_type == "pro_bono")]
+        .resource_id
+    ))
+
     rejected_pairs = sorted(
         set(zip(revisions[revisions.approval_status == "rejected"].resource_id,
                 revisions[revisions.approval_status == "rejected"].project_id))
@@ -176,6 +191,7 @@ def ground_truth():
     return dict(
         resource_summary=out, assignment_accuracy=accuracy_df,
         internal_mix_ids=internal_mix_ids, zero_timesheet_ids=zero_timesheet_ids,
+        pro_bono_mix_ids=pro_bono_mix_ids,
         projects=projects, time_off=time_off, revisions=revisions, rejected_pairs=rejected_pairs,
     )
 
@@ -359,9 +375,33 @@ def test_case_10_anti_cheat_sentinels(ground_truth):
     assert lt_counts.get("company_holiday") == 1500
     assert lt_counts.get("pto") == 300
 
-    assert len(ground_truth["zero_timesheet_ids"]) == 130
+    assert len(ground_truth["zero_timesheet_ids"]) == 132
 
     revisions = ground_truth["revisions"]
     approval_counts = revisions.approval_status.value_counts()
     assert approval_counts.get("rejected", 0) >= 50
     assert approval_counts.get("approved", 0) > approval_counts.get("rejected", 0) * 3
+
+    billing_counts = projects[projects.engagement_type == "client_billable"].billing_type.value_counts()
+    assert billing_counts.get("pro_bono", 0) >= 20
+    assert billing_counts.get("standard", 0) > billing_counts.get("pro_bono", 0) * 5
+
+
+def test_case_11_pro_bono_billing_domain_hook(ground_truth):
+    """A minority of engagement_type == 'client_billable' projects are
+    billing_type == 'pro_bono' -- a real client engagement the practice
+    does not bill for. billable_utilization_pct must exclude their hours;
+    engagement_type alone is necessary but not sufficient."""
+    df = _load_csv("resource_summary.csv").set_index("resource_id")
+    gt = ground_truth["resource_summary"].set_index("resource_id")
+    ids = ground_truth["pro_bono_mix_ids"]
+    assert len(ids) >= 50, "sanity: expected a meaningful pro-bono-mix cohort in the fixture"
+
+    deltas = (df.loc[ids, "billable_utilization_pct"] - gt.loc[ids, "billable_utilization_pct"]).abs()
+    n_within = (deltas <= 2.0).sum()
+    assert n_within / len(ids) >= 0.85, (
+        f"billable_utilization_pct wrong for {len(ids) - n_within}/{len(ids)} resources who logged hours "
+        f"against a pro-bono client engagement -- engagement_type == 'client_billable' is correct for "
+        f"these projects but the practice does not bill for them, so their hours must not count toward "
+        f"billable_utilization_pct."
+    )
