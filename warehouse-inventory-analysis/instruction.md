@@ -1,25 +1,57 @@
-A distribution company needs its June 2024 monthly warehouse inventory report. For each product held at each warehouse, the report must show the on-hand quantity and value, how much of that quantity is available to promise against new demand, and the cost of goods sold on everything shipped from that warehouse during June. Input files are in `/workspace/data/`; use only the files named below.
+A company that distributes products needs a report on what's in their warehouses for the month of June 2024. This report has to show how many of each product are in each warehouse what these products are worth how many can be promised to customers and the cost of the products that were shipped from each warehouse in June.
 
-`warehouses.csv` lists each warehouse's name and region. `products.csv` identifies each product and its category. `receipts.csv` records inbound inventory — purchase-order receipts and customer returns — each with a quantity, a unit cost, and a hold_status. `shipments.csv` records outbound units shipped against customer orders, by warehouse. `transfers.csv` records inventory moved between two of the company's own warehouses, with the date it shipped from the source and the date it was received at the destination. `open_orders.csv` records customer orders placed but not yet shipped as of the report cutoff, June 30, 2024 — these reserve inventory against future fulfillment.
+To make this report we will use files from the /workspace/data/ folder. We will only use the following files: warehouses.csv, products.csv receipts.csv shipments.csv transfers.csv and open_orders.csv.
 
-Inventory is costed FIFO: each receipt — whether a purchase-order receipt or a customer return — opens a cost layer at its warehouse, dated by its own receipt_date. Outbound units (shipments and transfers) draw from the oldest eligible cost layer first. A customer return is valued at the unit cost of the units originally shipped to the customer.
+The warehouses.csv file has the names and regions of the warehouses. The products.csv file has the names and categories of the products. The receipts.csv file has the products that were received including the quantity, cost. If they are on hold or not. The shipments.csv file has the products that were shipped to customers from each warehouse. The transfers.csv file has the products that were moved from one warehouse to another. The open_orders.csv file has the customer orders that were placed but not shipped yet.
 
-A receipt with hold_status `on_hold` is physically in the warehouse but is not yet eligible to be shipped or transferred; a receipt with hold_status `released` is.
+The products in the warehouse are costed using the first first out method. When a product is received it is given a cost and a date. When products are shipped or transferred the oldest products are used first. If a customer returns a product it is valued at the cost as when it was originally shipped.
 
-A transfer's units leave the source warehouse's inventory on its ship_date. They do not become part of the destination warehouse's inventory until its receive_date — a transfer that has shipped but not yet been received as of June 30 belongs to neither warehouse.
+If a receipt is on hold it means the product is in the warehouse but cannot be shipped or transferred yet. If a receipt is released it means the product can be shipped or transferred.
 
-Compute the following for each (product, warehouse) combination that appears in `receipts.csv`, as of June 30, 2024.
+When a product is transferred from one warehouse to another it leaves the warehouse on the ship date and arrives at the second warehouse on the receive date. If a product is transferred but not received yet it does not belong to either warehouse.
 
-On-hand quantity and value (`on_hand_qty`, `on_hand_value`) reflect all inventory physically present, at its FIFO cost, regardless of hold status.
+We need to calculate the following for each product in each warehouse:
 
-Allocated quantity (`allocated_qty`) is the total quantity reserved by open, unshipped orders for that product and warehouse.
+* The. Value of the products that are in the warehouse no matter if they are on hold or not.
 
-Available-to-promise quantity (`available_to_promise_qty`) is on-hand quantity, less allocated quantity, less any quantity currently on hold.
+* The quantity of products that are reserved for orders.
 
-Save `/workspace/inventory_position.csv` sorted by `product_id` then `warehouse_id`, with one row per (product, warehouse) combination present in `receipts.csv`, columns: `product_id`, `warehouse_id`, `on_hand_qty`, `on_hand_value`, `allocated_qty`, `available_to_promise_qty`. Round quantities and values to 2 decimal places.
+* The quantity of products that can be promised to customers, which is the quantity in the warehouse minus the quantity reserved and the quantity on hold.
 
-For each shipment recorded in `shipments.csv` with a ship_date in June 2024, report `cogs_value`: the FIFO cost of the units shipped.
+We will save this information in a file called /workspace/inventory_position.csv sorted by product and warehouse. The file will have the following columns: product id warehouse id, quantity in the warehouse value of products in the warehouse quantity reserved and quantity that can be promised.
 
-Save `/workspace/cogs_report.csv` sorted by `product_id`, then `warehouse_id`, then `shipment_id`, with one row per June shipment, columns: `shipment_id`, `product_id`, `warehouse_id`, `ship_date`, `quantity`, `cogs_value`. Round the same way.
+We also need to report the cost of the products that were shipped in June. We will save this information in a file called /workspace/cogs_report.csv sorted by product, warehouse and shipment. The file will have the following columns: shipment id, product id warehouse id, ship date, quantity shipped and cost of the products shipped.
 
-Save `/workspace/summary.json` with keys: `combo_count` (integer), `total_on_hand_value`, `total_available_to_promise_qty`, `total_june_cogs` — all rounded to 2 decimal places.
+Finally we will save a summary of the information in a file called /workspace/summary.json. This file will have the number of product and warehouse combinations the total value of products in the warehouses the total quantity of products that can be promised and the total cost of the products shipped in June.
+
+All of the quantities and values will be rounded to 2 places.
+
+* The following files will be used:
+
+* warehouses.csv
+
+* products.csv
+
+* receipts.csv
+
+* shipments.csv
+
+* transfers.csv
+
+* open_orders.csv
+
+* The report will have the following information:
+
+*. Value of products, in each warehouse
+
+* Quantity of products reserved for orders
+
+* Quantity of products that can be promised to customers
+
+* The report will be saved in the following files:
+
+* /workspace/inventory_position.csv
+
+* /workspace/cogs_report.csv
+
+* /workspace/summary.json
