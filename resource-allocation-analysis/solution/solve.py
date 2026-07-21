@@ -22,6 +22,12 @@ allocation timeline for a pair has to be built one business day at a time,
 not by simply keeping the single most-recently-submitted row for the whole
 assignment (that would silently drop the earlier revision even for days it
 still legitimately governs).
+
+assignment_revisions.csv also carries approval_status. A revision that was
+never authorized (approval_status == "rejected") must be excluded before
+resolving which revision governs a date -- the prior authorized revision
+continues governing undisturbed. instruction.md signals this with the word
+"authorized" in the planned-hours definition; it never names the column.
 """
 
 import json
@@ -69,14 +75,13 @@ def compute_net_capacity(resources, time_off):
 
     def time_off_hours(resource_id):
         rows = time_off[time_off["resource_id"] == resource_id]
-        total = 0.0
+        covered_days = set()
         for _, row in rows.iterrows():
             start, end = max(row["start_date"], APRIL_START), min(row["end_date"], APRIL_END)
             if start > end:
                 continue
-            bd = np.busday_count(start.date(), (end + pd.Timedelta(days=1)).date())
-            total += bd * 8.0
-        return total
+            covered_days.update(pd.bdate_range(start, end))
+        return len(covered_days) * 8.0
 
     net = gross_capacity - resources["resource_id"].apply(time_off_hours)
     return net
@@ -94,7 +99,7 @@ def build_resource_summary(resources, april_ts, time_off):
     out["all_hours_logged"] = out["resource_id"].map(all_hours).fillna(0.0)
     out["billable_hours"] = out["resource_id"].map(billable_hours).fillna(0.0)
     out["billable_utilization_pct"] = out["billable_hours"] / out["net_capacity_hours"] * 100
-    out["bench_hours"] = out["net_capacity_hours"] - out["all_hours_logged"]
+    out["bench_hours"] = (out["net_capacity_hours"] - out["all_hours_logged"]).clip(lower=0.0)
 
     for col in ["net_capacity_hours", "billable_hours", "all_hours_logged",
                 "billable_utilization_pct", "bench_hours"]:
@@ -127,15 +132,16 @@ def resolve_governing_revision_hours(pair_revisions, window_start, window_end):
 
 
 def build_assignment_accuracy(revisions, april_ts):
-    pairs = revisions.groupby(["resource_id", "project_id"]).agg(
+    authorized = revisions[revisions["approval_status"] == "approved"]
+    pairs = authorized.groupby(["resource_id", "project_id"]).agg(
         pair_start=("effective_start_date", "min"), pair_end=("effective_end_date", "max")
     ).reset_index()
     active = pairs[(pairs["pair_start"] <= APRIL_END) & (pairs["pair_end"] >= APRIL_START)]
 
     rows = []
     for _, pair in active.iterrows():
-        pair_revisions = revisions[
-            (revisions["resource_id"] == pair["resource_id"]) & (revisions["project_id"] == pair["project_id"])
+        pair_revisions = authorized[
+            (authorized["resource_id"] == pair["resource_id"]) & (authorized["project_id"] == pair["project_id"])
         ]
         window_start = max(pair["pair_start"], APRIL_START)
         window_end = min(pair["pair_end"], APRIL_END)

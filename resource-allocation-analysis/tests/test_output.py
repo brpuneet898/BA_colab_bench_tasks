@@ -19,17 +19,28 @@ instruction.md -- each is discoverable by inspecting the raw data):
    leave_type (individual PTO and a firm-wide holiday use different
    leave_type values but both reduce capacity the same way).
 
-4. Revision resolution (hardest) -- assignment_revisions.csv allows
-   multiple revision rows per (resource_id, project_id) when planned
-   allocation is amended mid-assignment. Some of these amendments are
-   submitted with an effective date range that OVERLAPS the original
-   revision's range rather than starting where it left off -- the original
-   revision still legitimately governs the days before the correction took
-   effect. The correct resolution for any date is: among all revisions for
-   that pair covering that date, take the one with the latest
-   submitted_date. Naively keeping only the single most-recently-submitted
-   row per assignment discards the earlier revision entirely and extends
-   the corrected rate backward over days it never covered.
+4. Revision resolution -- assignment_revisions.csv allows multiple revision
+   rows per (resource_id, project_id) when planned allocation is amended
+   mid-assignment. Some of these amendments are submitted with an effective
+   date range that OVERLAPS the original revision's range rather than
+   starting where it left off -- the original revision still legitimately
+   governs the days before the correction took effect. The correct
+   resolution for any date is: among all revisions for that pair covering
+   that date, take the one with the latest submitted_date. Naively keeping
+   only the single most-recently-submitted row per assignment discards the
+   earlier revision entirely and extends the corrected rate backward over
+   days it never covered.
+
+5. Authorization gate (hardest) -- assignment_revisions.csv also carries
+   approval_status. A revision with approval_status == "rejected" was
+   proposed but never authorized -- it must be excluded before resolving
+   which revision governs a date, leaving the prior authorized revision in
+   force for the entire period the rejected one claims to cover.
+   instruction.md signals this with a single word ("authorized") inside the
+   existing planned-hours sentence; it never names approval_status or
+   describes a filter. A model that resolves recency (4) without also
+   filtering to approved revisions lets a never-authorized revision govern
+   real dates.
 
 Ground truth is computed inline below, directly from
 /workspace/data/*.csv -- never from a pre-baked constant.
@@ -91,14 +102,13 @@ def ground_truth():
 
     def time_off_hours(rid):
         rows = time_off[time_off.resource_id == rid]
-        total = 0.0
+        covered_days = set()
         for _, r in rows.iterrows():
             s, e = max(r.start_date, APRIL_START), min(r.end_date, APRIL_END)
             if s > e:
                 continue
-            bd = np.busday_count(s.date(), (e + pd.Timedelta(days=1)).date())
-            total += bd * 8.0
-        return total
+            covered_days.update(pd.bdate_range(s, e))
+        return len(covered_days) * 8.0
 
     out = resources.copy()
     out["net_capacity_hours"] = out.resource_id.apply(time_off_hours).rsub(gross_capacity)
@@ -111,16 +121,19 @@ def ground_truth():
     out["all_hours_logged"] = out.resource_id.map(all_hours).fillna(0.0)
     out["billable_hours"] = out.resource_id.map(billable_hours).fillna(0.0)
     out["billable_utilization_pct"] = (out.billable_hours / out.net_capacity_hours * 100).round(2)
-    out["bench_hours"] = (out.net_capacity_hours - out.all_hours_logged).round(2)
+    out["bench_hours"] = (out.net_capacity_hours - out.all_hours_logged).clip(lower=0.0).round(2)
 
     # Revision resolution, April-scoped, per (resource_id, project_id) pair.
-    pairs = revisions.groupby(["resource_id", "project_id"]).agg(
+    # Only authorized (approved) revisions can govern a date -- a rejected
+    # revision was proposed but never took effect.
+    authorized = revisions[revisions.approval_status == "approved"]
+    pairs = authorized.groupby(["resource_id", "project_id"]).agg(
         pair_start=("eff_start", "min"), pair_end=("eff_end", "max")
     ).reset_index()
     active_pairs = pairs[(pairs.pair_start <= APRIL_END) & (pairs.pair_end >= APRIL_START)].copy()
 
     def resolved_hours(rid, pid, window_start, window_end):
-        g = revisions[(revisions.resource_id == rid) & (revisions.project_id == pid)]
+        g = authorized[(authorized.resource_id == rid) & (authorized.project_id == pid)]
         total = 0.0
         for d in pd.bdate_range(window_start, window_end):
             covering = g[(g.eff_start <= d) & (g.eff_end >= d)]
@@ -154,10 +167,16 @@ def ground_truth():
     )
     zero_timesheet_ids = sorted(set(resources.resource_id) - set(april_ts.resource_id))
 
+    rejected_pairs = sorted(
+        set(zip(revisions[revisions.approval_status == "rejected"].resource_id,
+                revisions[revisions.approval_status == "rejected"].project_id))
+        & set(zip(active_pairs.resource_id, active_pairs.project_id))
+    )
+
     return dict(
         resource_summary=out, assignment_accuracy=accuracy_df,
         internal_mix_ids=internal_mix_ids, zero_timesheet_ids=zero_timesheet_ids,
-        projects=projects, time_off=time_off,
+        projects=projects, time_off=time_off, revisions=revisions, rejected_pairs=rejected_pairs,
     )
 
 
@@ -298,7 +317,34 @@ def test_case_08_summary_json_aggregates(ground_truth):
     )
 
 
-def test_case_09_anti_cheat_sentinels(ground_truth):
+def test_case_09_revision_authorization_gate(ground_truth):
+    """A revision with approval_status == 'rejected' was never authorized --
+    it must be excluded when resolving the governing revision for a date,
+    leaving the prior authorized revision in force for the whole period the
+    rejected one claims to cover. Isolated from test_07 to attribute
+    failures specifically to the authorization filter, not general
+    date-recency resolution."""
+    df = _load_csv("assignment_accuracy.csv").set_index(["resource_id", "project_id"]).sort_index()
+    gt = ground_truth["assignment_accuracy"].set_index(["resource_id", "project_id"]).sort_index()
+    rejected_pairs = ground_truth["rejected_pairs"]
+    assert len(rejected_pairs) >= 50, "sanity: expected a meaningful rejected-amendment cohort in the fixture"
+
+    common = [p for p in rejected_pairs if p in df.index]
+    assert len(common) == len(rejected_pairs), (
+        "assignment_accuracy.csv is missing rows for pairs with a rejected amendment"
+    )
+
+    deltas = (df.loc[common, "allocation_accuracy_pct"] - gt.loc[common, "allocation_accuracy_pct"]).abs()
+    n_within = (deltas <= 1.5).sum()
+    assert n_within / len(common) >= 0.85, (
+        f"allocation_accuracy_pct wrong for {len(common) - n_within}/{len(common)} (resource, project) "
+        f"pairs with a rejected amendment revision -- a rejected revision was never authorized and must "
+        f"not govern any date, even though it has the latest submitted_date and its effective range "
+        f"claims to cover part of April."
+    )
+
+
+def test_case_10_anti_cheat_sentinels(ground_truth):
     """Structural sentinels on the immutable source data -- guard against
     outputs that happen to pass value checks without genuinely resolving
     the underlying joins."""
@@ -313,4 +359,9 @@ def test_case_09_anti_cheat_sentinels(ground_truth):
     assert lt_counts.get("company_holiday") == 1500
     assert lt_counts.get("pto") == 300
 
-    assert len(ground_truth["zero_timesheet_ids"]) == 133
+    assert len(ground_truth["zero_timesheet_ids"]) == 130
+
+    revisions = ground_truth["revisions"]
+    approval_counts = revisions.approval_status.value_counts()
+    assert approval_counts.get("rejected", 0) >= 50
+    assert approval_counts.get("approved", 0) > approval_counts.get("rejected", 0) * 3
