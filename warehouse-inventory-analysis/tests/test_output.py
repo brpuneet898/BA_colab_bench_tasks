@@ -19,14 +19,21 @@ instruction.md -- each is discoverable by inspecting the raw data):
    date) changes which units later June shipments draw from, and therefore
    their cogs_value.
 
-3. Allocation netting -- open_orders.csv holds unshipped demand as of the
-   cutoff. available_to_promise_qty = on_hand_qty - allocated_qty - held
-   quantity. on_hand_qty itself is NOT reduced by allocation.
+3. Allocation netting -- available_to_promise_qty = on_hand_qty -
+   allocated_qty - held quantity. on_hand_qty itself is NOT reduced by
+   allocation.
 
 4. Quality hold (same-axis false friend) -- receipts.csv rows with
    hold_status == "on_hold" are physically received (they count toward
    on_hand_qty/on_hand_value) but are not eligible for outbound consumption
    and must be excluded from available_to_promise_qty.
+
+5. Partial order fulfillment -- shipments.csv carries its own order_id
+   column. A slice of open_orders.csv rows already have a shipment booked
+   against the same order_id; allocated_qty for that order is its quantity
+   minus whatever's already shipped against it, not the order's raw size.
+   This is only visible by joining the two files on order_id -- nothing in
+   either file's own .describe()/.value_counts() shows it.
 
 Ground truth is computed inline below, directly from /workspace/data/*.csv,
 via an independent re-implementation of the FIFO simulation -- never from a
@@ -62,6 +69,7 @@ def ground_truth():
     shipments = pd.read_csv(DATA_DIR / "shipments.csv", parse_dates=["ship_date"])
     transfers = pd.read_csv(DATA_DIR / "transfers.csv", parse_dates=["ship_date", "receive_date"])
     open_orders = pd.read_csv(DATA_DIR / "open_orders.csv", parse_dates=["order_date"])
+    linked_shipments = shipments[shipments["order_id"].notna()]
 
     # --- build initial FIFO layers, one per receipt row ---
     layers = {}
@@ -116,7 +124,14 @@ def ground_truth():
             })
 
     active_combos = sorted(set(zip(receipts.product_id, receipts.warehouse_id)))
-    open_by_combo = open_orders.groupby(["product_id", "warehouse_id"]).quantity.sum()
+
+    shipped_by_order = linked_shipments.groupby("order_id").quantity.sum()
+    already_shipped = open_orders["order_id"].map(shipped_by_order).fillna(0.0)
+    outstanding_qty = (open_orders["quantity"] - already_shipped).clip(lower=0.0)
+    open_by_combo = (
+        open_orders.assign(outstanding_qty=outstanding_qty)
+        .groupby(["product_id", "warehouse_id"]).outstanding_qty.sum()
+    )
 
     pos_rows = []
     for pid, wh in active_combos:
@@ -155,11 +170,15 @@ def ground_truth():
         receipts[receipts.hold_status == "on_hold"].warehouse_id,
     )))
 
+    partial_orders = open_orders[open_orders.order_id.isin(set(linked_shipments.order_id))]
+    partial_order_ids = sorted(set(zip(partial_orders.product_id, partial_orders.warehouse_id)))
+
     return dict(
         inventory_position=inventory_position, cogs_report=june_cogs,
         intransit_dest_ids=intransit_dest_ids, return_combo_ids=return_combo_ids,
-        allocation_ids=allocation_ids, hold_ids=hold_ids,
+        allocation_ids=allocation_ids, hold_ids=hold_ids, partial_order_ids=partial_order_ids,
         receipts=receipts, transfers=transfers, open_orders=open_orders,
+        shipments=shipments,
     )
 
 
@@ -260,7 +279,33 @@ def test_case_06_allocation_netting(ground_truth):
     )
 
 
-def test_case_07_quality_hold_onhand_inclusion(ground_truth):
+def test_case_07_partial_order_netting(ground_truth):
+    """A slice of open_orders.csv rows already have a shipment booked against
+    the same order_id (shipments.csv carries its own order_id column) --
+    allocated_qty for that order is its quantity minus whatever's already
+    shipped against it, not the order's raw original size."""
+    df = _load_csv("inventory_position.csv").set_index(["product_id", "warehouse_id"])
+    gt = ground_truth["inventory_position"].set_index(["product_id", "warehouse_id"])
+    ids = ground_truth["partial_order_ids"]
+    assert len(ids) >= 80, "sanity: expected a meaningful partial-fulfillment cohort in the fixture"
+
+    deltas = (df.loc[ids, "allocated_qty"] - gt.loc[ids, "allocated_qty"]).abs()
+    n_within = (deltas <= 3.0).sum()
+    assert n_within / len(ids) >= 0.75, (
+        f"allocated_qty wrong for {len(ids) - n_within}/{len(ids)} combos carrying an order "
+        f"that's already partially shipped -- check whether allocated_qty nets out shipments "
+        f"already booked against the same order_id, or just sums each open order's own quantity."
+    )
+
+    atp_deltas = (df.loc[ids, "available_to_promise_qty"] - gt.loc[ids, "available_to_promise_qty"]).abs()
+    n_atp_within = (atp_deltas <= 3.0).sum()
+    assert n_atp_within / len(ids) >= 0.75, (
+        f"available_to_promise_qty wrong for {len(ids) - n_atp_within}/{len(ids)} combos with a "
+        f"partially-shipped open order."
+    )
+
+
+def test_case_08_quality_hold_onhand_inclusion(ground_truth):
     """on_hold receipts are physically in the warehouse -- they must still
     count toward on_hand_qty and on_hand_value."""
     df = _load_csv("inventory_position.csv").set_index(["product_id", "warehouse_id"])
@@ -276,7 +321,7 @@ def test_case_07_quality_hold_onhand_inclusion(ground_truth):
     )
 
 
-def test_case_08_quality_hold_atp_exclusion(ground_truth):
+def test_case_09_quality_hold_atp_exclusion(ground_truth):
     """The same on_hold combos must exclude held quantity from
     available_to_promise_qty -- physically-present and available diverge
     specifically on hold status here."""
@@ -293,7 +338,7 @@ def test_case_08_quality_hold_atp_exclusion(ground_truth):
     )
 
 
-def test_case_09_summary_json_aggregates(ground_truth):
+def test_case_10_summary_json_aggregates(ground_truth):
     """Portfolio-level cross-check on summary.json -- catches drift that
     individual-row tolerance checks could average out, and confirms all
     four promised keys are present and correctly aggregated."""
@@ -322,7 +367,7 @@ def test_case_09_summary_json_aggregates(ground_truth):
     )
 
 
-def test_case_10_anti_cheat_conservation(ground_truth):
+def test_case_11_anti_cheat_conservation(ground_truth):
     """Company-wide mass-conservation sentinel, independent of any single
     trap -- catches silent row loss (e.g. a groupby that drops rows) even
     when the per-trap checks above happen to look fine."""
@@ -347,16 +392,18 @@ def test_case_10_anti_cheat_conservation(ground_truth):
     )
 
 
-def test_case_11_anti_cheat_sentinels(ground_truth):
+def test_case_12_anti_cheat_sentinels(ground_truth):
     """Structural sentinels on the immutable source data -- this generator
     is deterministic (fixed seed), so these are fixed facts about the
     shipped CSVs, not values the agent's output could ever legitimately
     change."""
     receipts = ground_truth["receipts"]
     transfers = ground_truth["transfers"]
+    shipments = ground_truth["shipments"]
 
     assert (receipts.source == "customer_return").sum() == 720
     assert (receipts.hold_status == "on_hold").sum() == 243
+    assert shipments["order_id"].notna().sum() == 300
 
     intransit_count = ((transfers.ship_date <= CUTOFF) & (transfers.receive_date > CUTOFF)).sum()
     settled_count = ((transfers.ship_date <= CUTOFF) & (transfers.receive_date <= CUTOFF)).sum()

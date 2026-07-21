@@ -19,8 +19,12 @@ hold_status == 'on_hold' receipts are physically in the warehouse (they count
 toward on_hand_qty and on_hand_value) but are not eligible for outbound
 consumption or for available_to_promise_qty until released.
 
-open_orders.csv holds unshipped demand as of the report cutoff: it reduces
-available_to_promise_qty but not on_hand_qty.
+open_orders.csv holds demand reserved against a product/warehouse as of the
+report cutoff: it reduces available_to_promise_qty but not on_hand_qty.
+Some open orders already have a shipment booked against the same order_id
+(shipments.csv carries its own order_id column) -- only the order's quantity
+still outstanding after netting out that shipment counts toward
+allocated_qty, not the order's original size.
 """
 import json
 from pathlib import Path
@@ -157,8 +161,26 @@ def run_simulation(receipts, shipments, transfers):
     return layers, pd.DataFrame(cogs_rows)
 
 
-def build_inventory_position(layers, open_orders, active_combos):
-    open_by_combo = open_orders.groupby(["product_id", "warehouse_id"])["quantity"].sum()
+def compute_allocated_by_combo(open_orders, shipments):
+    """Each open order's allocated (still-outstanding) quantity is its own
+    quantity minus whatever's already shipped against the same order_id --
+    not the order's raw original size."""
+    shipped_by_order = (
+        shipments.loc[shipments["order_id"].notna()]
+        .groupby("order_id")["quantity"]
+        .sum()
+    )
+    already_shipped = open_orders["order_id"].map(shipped_by_order).fillna(0.0)
+    outstanding = (open_orders["quantity"] - already_shipped).clip(lower=0.0)
+    return (
+        open_orders.assign(outstanding_qty=outstanding)
+        .groupby(["product_id", "warehouse_id"])["outstanding_qty"]
+        .sum()
+    )
+
+
+def build_inventory_position(layers, open_orders, shipments, active_combos):
+    open_by_combo = compute_allocated_by_combo(open_orders, shipments)
 
     rows = []
     for pid, wh in active_combos:
@@ -199,7 +221,7 @@ def main():
 
     layers, cogs_df = run_simulation(receipts, shipments, transfers)
 
-    inventory_position = build_inventory_position(layers, open_orders, active_combos)
+    inventory_position = build_inventory_position(layers, open_orders, shipments, active_combos)
     inventory_position.to_csv(WORKSPACE_DIR / "inventory_position.csv", index=False)
 
     cogs_report = build_cogs_report(cogs_df)
