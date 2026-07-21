@@ -1,0 +1,401 @@
+product_id,name,category,unit_of_measure
+SKU001,Electronics Item 001,Electronics,EA
+SKU002,Home & Garden Item 002,Home & Garden,EA
+SKU003,Industrial Item 003,Industrial,EA
+SKU004,Apparel Item 004,Apparel,EA
+SKU005,Hardware Item 005,Hardware,EA
+SKU006,Electronics Item 006,Electronics,EA
+SKU007,Home & Garden Item 007,Home & Garden,EA
+SKU008,Industrial Item 008,Industrial,EA
+SKU009,Apparel Item 009,Apparel,EA
+SKU010,Hardware Item 010,Hardware,EA
+SKU011,Electronics Item 011,Electronics,EA
+SKU012,Home & Garden Item 012,Home & Garden,EA
+SKU013,Industrial Item 013,Industrial,EA
+SKU014,Apparel Item 014,Apparel,EA
+SKU015,Hardware Item 015,Hardware,EA
+SKU016,Electronics Item 016,Electronics,EA
+SKU017,Home & Garden Item 017,Home & Garden,EA
+SKU018,Industrial Item 018,Industrial,EA
+SKU019,Apparel Item 019,Apparel,EA
+SKU020,Hardware Item 020,Hardware,EA
+SKU021,Electronics Item 021,Electronics,EA
+SKU022,Home & Garden Item 022,Home & Garden,EA
+SKU023,Industrial Item 023,Industrial,EA
+SKU024,Apparel Item 024,Apparel,EA
+SKU025,Hardware Item 025,Hardware,EA
+SKU026,Electronics Item 026,Electronics,EA
+SKU027,Home & Garden Item 027,Home & Garden,EA
+SKU028,Industrial Item 028,Industrial,EA
+SKU029,Apparel Item 029,Apparel,EA
+SKU030,Hardware Item 030,Hardware,EA
+SKU031,Electronics Item 031,Electronics,EA
+SKU032,Home & Garden Item 032,Home & Garden,EA
+SKU033,Industrial Item 033,Industrial,EA
+SKU034,Apparel Item 034,Apparel,EA
+SKU035,Hardware Item 035,Hardware,EA
+SKU036,Electronics Item 036,Electronics,EA
+SKU037,Home & Garden Item 037,Home & Garden,EA
+SKU038,Industrial Item 038,Industrial,EA
+SKU039,Apparel Item 039,Apparel,EA
+SKU040,Hardware Item 040,Hardware,EA
+SKU041,Electronics Item 041,Electronics,EA
+SKU042,Home & Garden Item 042,Home & Garden,EA
+SKU043,Industrial Item 043,Industrial,EA
+SKU044,Apparel Item 044,Apparel,EA
+SKU045,Hardware Item 045,Hardware,EA
+SKU046,Electronics Item 046,Electronics,EA
+SKU047,Home & Garden Item 047,Home & Garden,EA
+SKU048,Industrial Item 048,Industrial,EA
+SKU049,Apparel Item 049,Apparel,EA
+SKU050,Hardware Item 050,Hardware,EA
+SKU051,Electronics Item 051,Electronics,EA
+SKU052,Home & Garden Item 052,Home & Garden,EA
+SKU053,Industrial Item 053,Industrial,EA
+SKU054,Apparel Item 054,Apparel,EA
+SKU055,Hardware Item 055,Hardware,EA
+SKU056,Electronics Item 056,Electronics,EA
+SKU057,Home & Garden Item 057,Home & Garden,EA
+SKU058,Industrial Item 058,Industrial,EA
+SKU059,Apparel Item 059,Apparel,EA
+SKU060,Hardware Item 060,Hardware,EA
+SKU061,Electronics Item 061,Electronics,EA
+SKU062,Home & Garden Item 062,Home & Garden,EA
+SKU063,Industrial Item 063,Industrial,EA
+SKU064,Apparel Item 064,Apparel,EA
+SKU065,Hardware Item 065,Hardware,EA
+SKU066,Electronics Item 066,Electronics,EA
+SKU067,Home & Garden Item 067,Home & Garden,EA
+SKU068,Industrial Item 068,Industrial,EA
+SKU069,Apparel Item 069,Apparel,EA
+SKU070,Hardware Item 070,Hardware,EA
+SKU071,Electronics Item 071,Electronics,EA
+SKU072,Home & Garden Item 072,Home & Garden,EA
+SKU073,Industrial Item 073,Industrial,EA
+SKU074,Apparel Item 074,Apparel,EA
+SKU075,Hardware Item 075,Hardware,EA
+SKU076,Electronics Item 076,Electronics,EA
+SKU077,Home & Garden Item 077,Home & Garden,EA
+SKU078,Industrial Item 078,Industrial,EA
+SKU079,Apparel Item 079,Apparel,EA
+SKU080,Hardware Item 080,Hardware,EA
+SKU081,Electronics Item 081,Electronics,EA
+SKU082,Home & Garden Item 082,Home & Garden,EA
+SKU083,Industrial Item 083,Industrial,EA
+SKU084,Apparel Item 084,Apparel,EA
+SKU085,Hardware Item 085,Hardware,EA
+SKU086,Electronics Item 086,Electronics,EA
+SKU087,Home & Garden Item 087,Home & Garden,EA
+SKU088,Industrial Item 088,Industrial,EA
+SKU089,Apparel Item 089,Apparel,EA
+SKU090,Hardware Item 090,Hardware,EA
+SKU091,Electronics Item 091,Electronics,EA
+SKU092,Home & Garden Item 092,Home & Garden,EA
+SKU093,Industrial Item 093,Industrial,EA
+SKU094,Apparel Item 094,Apparel,EA
+SKU095,Hardware Item 095,Hardware,EA
+SKU096,Electronics Item 096,Electronics,EA
+SKU097,Home & Garden Item 097,Home & Garden,EA
+SKU098,Industrial Item 098,Industrial,EA
+SKU099,Apparel Item 099,Apparel,EA
+SKU100,Hardware Item 100,Hardware,EA
+SKU101,Electronics Item 101,Electronics,EA
+SKU102,Home & Garden Item 102,Home & Garden,EA
+SKU103,Industrial Item 103,Industrial,EA
+SKU104,Apparel Item 104,Apparel,EA
+SKU105,Hardware Item 105,Hardware,EA
+SKU106,Electronics Item 106,Electronics,EA
+SKU107,Home & Garden Item 107,Home & Garden,EA
+SKU108,Industrial Item 108,Industrial,EA
+SKU109,Apparel Item 109,Apparel,EA
+SKU110,Hardware Item 110,Hardware,EA
+SKU111,Electronics Item 111,Electronics,EA
+SKU112,Home & Garden Item 112,Home & Garden,EA
+SKU113,Industrial Item 113,Industrial,EA
+SKU114,Apparel Item 114,Apparel,EA
+SKU115,Hardware Item 115,Hardware,EA
+SKU116,Electronics Item 116,Electronics,EA
+SKU117,Home & Garden Item 117,Home & Garden,EA
+SKU118,Industrial Item 118,Industrial,EA
+SKU119,Apparel Item 119,Apparel,EA
+SKU120,Hardware Item 120,Hardware,EA
+SKU121,Electronics Item 121,Electronics,EA
+SKU122,Home & Garden Item 122,Home & Garden,EA
+SKU123,Industrial Item 123,Industrial,EA
+SKU124,Apparel Item 124,Apparel,EA
+SKU125,Hardware Item 125,Hardware,EA
+SKU126,Electronics Item 126,Electronics,EA
+SKU127,Home & Garden Item 127,Home & Garden,EA
+SKU128,Industrial Item 128,Industrial,EA
+SKU129,Apparel Item 129,Apparel,EA
+SKU130,Hardware Item 130,Hardware,EA
+SKU131,Electronics Item 131,Electronics,EA
+SKU132,Home & Garden Item 132,Home & Garden,EA
+SKU133,Industrial Item 133,Industrial,EA
+SKU134,Apparel Item 134,Apparel,EA
+SKU135,Hardware Item 135,Hardware,EA
+SKU136,Electronics Item 136,Electronics,EA
+SKU137,Home & Garden Item 137,Home & Garden,EA
+SKU138,Industrial Item 138,Industrial,EA
+SKU139,Apparel Item 139,Apparel,EA
+SKU140,Hardware Item 140,Hardware,EA
+SKU141,Electronics Item 141,Electronics,EA
+SKU142,Home & Garden Item 142,Home & Garden,EA
+SKU143,Industrial Item 143,Industrial,EA
+SKU144,Apparel Item 144,Apparel,EA
+SKU145,Hardware Item 145,Hardware,EA
+SKU146,Electronics Item 146,Electronics,EA
+SKU147,Home & Garden Item 147,Home & Garden,EA
+SKU148,Industrial Item 148,Industrial,EA
+SKU149,Apparel Item 149,Apparel,EA
+SKU150,Hardware Item 150,Hardware,EA
+SKU151,Electronics Item 151,Electronics,EA
+SKU152,Home & Garden Item 152,Home & Garden,EA
+SKU153,Industrial Item 153,Industrial,EA
+SKU154,Apparel Item 154,Apparel,EA
+SKU155,Hardware Item 155,Hardware,EA
+SKU156,Electronics Item 156,Electronics,EA
+SKU157,Home & Garden Item 157,Home & Garden,EA
+SKU158,Industrial Item 158,Industrial,EA
+SKU159,Apparel Item 159,Apparel,EA
+SKU160,Hardware Item 160,Hardware,EA
+SKU161,Electronics Item 161,Electronics,EA
+SKU162,Home & Garden Item 162,Home & Garden,EA
+SKU163,Industrial Item 163,Industrial,EA
+SKU164,Apparel Item 164,Apparel,EA
+SKU165,Hardware Item 165,Hardware,EA
+SKU166,Electronics Item 166,Electronics,EA
+SKU167,Home & Garden Item 167,Home & Garden,EA
+SKU168,Industrial Item 168,Industrial,EA
+SKU169,Apparel Item 169,Apparel,EA
+SKU170,Hardware Item 170,Hardware,EA
+SKU171,Electronics Item 171,Electronics,EA
+SKU172,Home & Garden Item 172,Home & Garden,EA
+SKU173,Industrial Item 173,Industrial,EA
+SKU174,Apparel Item 174,Apparel,EA
+SKU175,Hardware Item 175,Hardware,EA
+SKU176,Electronics Item 176,Electronics,EA
+SKU177,Home & Garden Item 177,Home & Garden,EA
+SKU178,Industrial Item 178,Industrial,EA
+SKU179,Apparel Item 179,Apparel,EA
+SKU180,Hardware Item 180,Hardware,EA
+SKU181,Electronics Item 181,Electronics,EA
+SKU182,Home & Garden Item 182,Home & Garden,EA
+SKU183,Industrial Item 183,Industrial,EA
+SKU184,Apparel Item 184,Apparel,EA
+SKU185,Hardware Item 185,Hardware,EA
+SKU186,Electronics Item 186,Electronics,EA
+SKU187,Home & Garden Item 187,Home & Garden,EA
+SKU188,Industrial Item 188,Industrial,EA
+SKU189,Apparel Item 189,Apparel,EA
+SKU190,Hardware Item 190,Hardware,EA
+SKU191,Electronics Item 191,Electronics,EA
+SKU192,Home & Garden Item 192,Home & Garden,EA
+SKU193,Industrial Item 193,Industrial,EA
+SKU194,Apparel Item 194,Apparel,EA
+SKU195,Hardware Item 195,Hardware,EA
+SKU196,Electronics Item 196,Electronics,EA
+SKU197,Home & Garden Item 197,Home & Garden,EA
+SKU198,Industrial Item 198,Industrial,EA
+SKU199,Apparel Item 199,Apparel,EA
+SKU200,Hardware Item 200,Hardware,EA
+SKU201,Electronics Item 201,Electronics,EA
+SKU202,Home & Garden Item 202,Home & Garden,EA
+SKU203,Industrial Item 203,Industrial,EA
+SKU204,Apparel Item 204,Apparel,EA
+SKU205,Hardware Item 205,Hardware,EA
+SKU206,Electronics Item 206,Electronics,EA
+SKU207,Home & Garden Item 207,Home & Garden,EA
+SKU208,Industrial Item 208,Industrial,EA
+SKU209,Apparel Item 209,Apparel,EA
+SKU210,Hardware Item 210,Hardware,EA
+SKU211,Electronics Item 211,Electronics,EA
+SKU212,Home & Garden Item 212,Home & Garden,EA
+SKU213,Industrial Item 213,Industrial,EA
+SKU214,Apparel Item 214,Apparel,EA
+SKU215,Hardware Item 215,Hardware,EA
+SKU216,Electronics Item 216,Electronics,EA
+SKU217,Home & Garden Item 217,Home & Garden,EA
+SKU218,Industrial Item 218,Industrial,EA
+SKU219,Apparel Item 219,Apparel,EA
+SKU220,Hardware Item 220,Hardware,EA
+SKU221,Electronics Item 221,Electronics,EA
+SKU222,Home & Garden Item 222,Home & Garden,EA
+SKU223,Industrial Item 223,Industrial,EA
+SKU224,Apparel Item 224,Apparel,EA
+SKU225,Hardware Item 225,Hardware,EA
+SKU226,Electronics Item 226,Electronics,EA
+SKU227,Home & Garden Item 227,Home & Garden,EA
+SKU228,Industrial Item 228,Industrial,EA
+SKU229,Apparel Item 229,Apparel,EA
+SKU230,Hardware Item 230,Hardware,EA
+SKU231,Electronics Item 231,Electronics,EA
+SKU232,Home & Garden Item 232,Home & Garden,EA
+SKU233,Industrial Item 233,Industrial,EA
+SKU234,Apparel Item 234,Apparel,EA
+SKU235,Hardware Item 235,Hardware,EA
+SKU236,Electronics Item 236,Electronics,EA
+SKU237,Home & Garden Item 237,Home & Garden,EA
+SKU238,Industrial Item 238,Industrial,EA
+SKU239,Apparel Item 239,Apparel,EA
+SKU240,Hardware Item 240,Hardware,EA
+SKU241,Electronics Item 241,Electronics,EA
+SKU242,Home & Garden Item 242,Home & Garden,EA
+SKU243,Industrial Item 243,Industrial,EA
+SKU244,Apparel Item 244,Apparel,EA
+SKU245,Hardware Item 245,Hardware,EA
+SKU246,Electronics Item 246,Electronics,EA
+SKU247,Home & Garden Item 247,Home & Garden,EA
+SKU248,Industrial Item 248,Industrial,EA
+SKU249,Apparel Item 249,Apparel,EA
+SKU250,Hardware Item 250,Hardware,EA
+SKU251,Electronics Item 251,Electronics,EA
+SKU252,Home & Garden Item 252,Home & Garden,EA
+SKU253,Industrial Item 253,Industrial,EA
+SKU254,Apparel Item 254,Apparel,EA
+SKU255,Hardware Item 255,Hardware,EA
+SKU256,Electronics Item 256,Electronics,EA
+SKU257,Home & Garden Item 257,Home & Garden,EA
+SKU258,Industrial Item 258,Industrial,EA
+SKU259,Apparel Item 259,Apparel,EA
+SKU260,Hardware Item 260,Hardware,EA
+SKU261,Electronics Item 261,Electronics,EA
+SKU262,Home & Garden Item 262,Home & Garden,EA
+SKU263,Industrial Item 263,Industrial,EA
+SKU264,Apparel Item 264,Apparel,EA
+SKU265,Hardware Item 265,Hardware,EA
+SKU266,Electronics Item 266,Electronics,EA
+SKU267,Home & Garden Item 267,Home & Garden,EA
+SKU268,Industrial Item 268,Industrial,EA
+SKU269,Apparel Item 269,Apparel,EA
+SKU270,Hardware Item 270,Hardware,EA
+SKU271,Electronics Item 271,Electronics,EA
+SKU272,Home & Garden Item 272,Home & Garden,EA
+SKU273,Industrial Item 273,Industrial,EA
+SKU274,Apparel Item 274,Apparel,EA
+SKU275,Hardware Item 275,Hardware,EA
+SKU276,Electronics Item 276,Electronics,EA
+SKU277,Home & Garden Item 277,Home & Garden,EA
+SKU278,Industrial Item 278,Industrial,EA
+SKU279,Apparel Item 279,Apparel,EA
+SKU280,Hardware Item 280,Hardware,EA
+SKU281,Electronics Item 281,Electronics,EA
+SKU282,Home & Garden Item 282,Home & Garden,EA
+SKU283,Industrial Item 283,Industrial,EA
+SKU284,Apparel Item 284,Apparel,EA
+SKU285,Hardware Item 285,Hardware,EA
+SKU286,Electronics Item 286,Electronics,EA
+SKU287,Home & Garden Item 287,Home & Garden,EA
+SKU288,Industrial Item 288,Industrial,EA
+SKU289,Apparel Item 289,Apparel,EA
+SKU290,Hardware Item 290,Hardware,EA
+SKU291,Electronics Item 291,Electronics,EA
+SKU292,Home & Garden Item 292,Home & Garden,EA
+SKU293,Industrial Item 293,Industrial,EA
+SKU294,Apparel Item 294,Apparel,EA
+SKU295,Hardware Item 295,Hardware,EA
+SKU296,Electronics Item 296,Electronics,EA
+SKU297,Home & Garden Item 297,Home & Garden,EA
+SKU298,Industrial Item 298,Industrial,EA
+SKU299,Apparel Item 299,Apparel,EA
+SKU300,Hardware Item 300,Hardware,EA
+SKU301,Electronics Item 301,Electronics,EA
+SKU302,Home & Garden Item 302,Home & Garden,EA
+SKU303,Industrial Item 303,Industrial,EA
+SKU304,Apparel Item 304,Apparel,EA
+SKU305,Hardware Item 305,Hardware,EA
+SKU306,Electronics Item 306,Electronics,EA
+SKU307,Home & Garden Item 307,Home & Garden,EA
+SKU308,Industrial Item 308,Industrial,EA
+SKU309,Apparel Item 309,Apparel,EA
+SKU310,Hardware Item 310,Hardware,EA
+SKU311,Electronics Item 311,Electronics,EA
+SKU312,Home & Garden Item 312,Home & Garden,EA
+SKU313,Industrial Item 313,Industrial,EA
+SKU314,Apparel Item 314,Apparel,EA
+SKU315,Hardware Item 315,Hardware,EA
+SKU316,Electronics Item 316,Electronics,EA
+SKU317,Home & Garden Item 317,Home & Garden,EA
+SKU318,Industrial Item 318,Industrial,EA
+SKU319,Apparel Item 319,Apparel,EA
+SKU320,Hardware Item 320,Hardware,EA
+SKU321,Electronics Item 321,Electronics,EA
+SKU322,Home & Garden Item 322,Home & Garden,EA
+SKU323,Industrial Item 323,Industrial,EA
+SKU324,Apparel Item 324,Apparel,EA
+SKU325,Hardware Item 325,Hardware,EA
+SKU326,Electronics Item 326,Electronics,EA
+SKU327,Home & Garden Item 327,Home & Garden,EA
+SKU328,Industrial Item 328,Industrial,EA
+SKU329,Apparel Item 329,Apparel,EA
+SKU330,Hardware Item 330,Hardware,EA
+SKU331,Electronics Item 331,Electronics,EA
+SKU332,Home & Garden Item 332,Home & Garden,EA
+SKU333,Industrial Item 333,Industrial,EA
+SKU334,Apparel Item 334,Apparel,EA
+SKU335,Hardware Item 335,Hardware,EA
+SKU336,Electronics Item 336,Electronics,EA
+SKU337,Home & Garden Item 337,Home & Garden,EA
+SKU338,Industrial Item 338,Industrial,EA
+SKU339,Apparel Item 339,Apparel,EA
+SKU340,Hardware Item 340,Hardware,EA
+SKU341,Electronics Item 341,Electronics,EA
+SKU342,Home & Garden Item 342,Home & Garden,EA
+SKU343,Industrial Item 343,Industrial,EA
+SKU344,Apparel Item 344,Apparel,EA
+SKU345,Hardware Item 345,Hardware,EA
+SKU346,Electronics Item 346,Electronics,EA
+SKU347,Home & Garden Item 347,Home & Garden,EA
+SKU348,Industrial Item 348,Industrial,EA
+SKU349,Apparel Item 349,Apparel,EA
+SKU350,Hardware Item 350,Hardware,EA
+SKU351,Electronics Item 351,Electronics,EA
+SKU352,Home & Garden Item 352,Home & Garden,EA
+SKU353,Industrial Item 353,Industrial,EA
+SKU354,Apparel Item 354,Apparel,EA
+SKU355,Hardware Item 355,Hardware,EA
+SKU356,Electronics Item 356,Electronics,EA
+SKU357,Home & Garden Item 357,Home & Garden,EA
+SKU358,Industrial Item 358,Industrial,EA
+SKU359,Apparel Item 359,Apparel,EA
+SKU360,Hardware Item 360,Hardware,EA
+SKU361,Electronics Item 361,Electronics,EA
+SKU362,Home & Garden Item 362,Home & Garden,EA
+SKU363,Industrial Item 363,Industrial,EA
+SKU364,Apparel Item 364,Apparel,EA
+SKU365,Hardware Item 365,Hardware,EA
+SKU366,Electronics Item 366,Electronics,EA
+SKU367,Home & Garden Item 367,Home & Garden,EA
+SKU368,Industrial Item 368,Industrial,EA
+SKU369,Apparel Item 369,Apparel,EA
+SKU370,Hardware Item 370,Hardware,EA
+SKU371,Electronics Item 371,Electronics,EA
+SKU372,Home & Garden Item 372,Home & Garden,EA
+SKU373,Industrial Item 373,Industrial,EA
+SKU374,Apparel Item 374,Apparel,EA
+SKU375,Hardware Item 375,Hardware,EA
+SKU376,Electronics Item 376,Electronics,EA
+SKU377,Home & Garden Item 377,Home & Garden,EA
+SKU378,Industrial Item 378,Industrial,EA
+SKU379,Apparel Item 379,Apparel,EA
+SKU380,Hardware Item 380,Hardware,EA
+SKU381,Electronics Item 381,Electronics,EA
+SKU382,Home & Garden Item 382,Home & Garden,EA
+SKU383,Industrial Item 383,Industrial,EA
+SKU384,Apparel Item 384,Apparel,EA
+SKU385,Hardware Item 385,Hardware,EA
+SKU386,Electronics Item 386,Electronics,EA
+SKU387,Home & Garden Item 387,Home & Garden,EA
+SKU388,Industrial Item 388,Industrial,EA
+SKU389,Apparel Item 389,Apparel,EA
+SKU390,Hardware Item 390,Hardware,EA
+SKU391,Electronics Item 391,Electronics,EA
+SKU392,Home & Garden Item 392,Home & Garden,EA
+SKU393,Industrial Item 393,Industrial,EA
+SKU394,Apparel Item 394,Apparel,EA
+SKU395,Hardware Item 395,Hardware,EA
+SKU396,Electronics Item 396,Electronics,EA
+SKU397,Home & Garden Item 397,Home & Garden,EA
+SKU398,Industrial Item 398,Industrial,EA
+SKU399,Apparel Item 399,Apparel,EA
+SKU400,Hardware Item 400,Hardware,EA

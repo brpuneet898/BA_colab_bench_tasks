@@ -1,0 +1,6 @@
+warehouse_id,name,region
+WH01,Northeast DC,Northeast
+WH02,Midwest DC,Midwest
+WH03,Southeast DC,Southeast
+WH04,Southwest DC,Southwest
+WH05,Pacific DC,Pacific
