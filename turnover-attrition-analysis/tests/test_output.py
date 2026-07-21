@@ -2,7 +2,7 @@
 
 Ground truth is computed inline (an independent re-implementation, never
 imported from solution/solve.py) from the immutable input data. It checks
-three reasoning traps, none of which are named in instruction.md:
+four reasoning traps, none of which are named in instruction.md:
 
   1. Spell grain -- employee_id repeats for the ~30 rehired employees.
      A model that collapses to one row per employee_id (a natural EDA
@@ -17,6 +17,22 @@ three reasoning traps, none of which are named in instruction.md:
      some leave_start occurred before D. The dataset deliberately contains
      more employees whose leave had already concluded before the report
      cutoff than employees genuinely on leave at cutoff.
+  4. Point-in-time worker_category scope -- worker_category is likewise a
+     starting value, not a static flag: intern/contractor spells that later
+     convert to regular_full_time/regular_part_time (recorded in
+     worker_category_changes.csv) must be scoped in or out as of the date
+     being evaluated, mirroring trap 2's resolution pattern but on a
+     second, independent attribute.
+
+Traps 2 and 4 both feed the same output fields (headcount_jun30,
+avg_headcount, the separations counts), so a submission that mishandles
+either one can fail the same downstream tests -- that's intentional
+compounding, not test contamination: getting these fields right requires
+both to be resolved correctly. What keeps the traps independently provable
+is the *data*, not the tests: converted spells never carry transfer or
+leave records, so each trap has its own naive-baseline sufficiency check
+(see test_case_05 and test_case_10) proving it alone moves the dataset by
+a large margin, regardless of how the other traps are handled.
 """
 from pathlib import Path
 
@@ -50,15 +66,21 @@ def ground_truth():
     departments = pd.read_csv(DATA_DIR / "departments.csv")
     employees = pd.read_csv(DATA_DIR / "employees.csv", parse_dates=["hire_date", "term_date"])
     transfers = pd.read_csv(DATA_DIR / "department_transfers.csv", parse_dates=["transfer_date"])
+    category_changes = pd.read_csv(DATA_DIR / "worker_category_changes.csv", parse_dates=["change_date"])
     leaves = pd.read_csv(DATA_DIR / "leave_records.csv", parse_dates=["leave_start", "leave_end"])
 
     dept_ids = departments["department_id"].tolist()
-    regular = employees[employees["worker_category"].isin(REGULAR_CATEGORIES)].copy()
 
     transfer_lookup = {}
     for sid, g in transfers.groupby("spell_id"):
         transfer_lookup[sid] = list(
             g.sort_values("transfer_date")[["transfer_date", "new_department_id"]].itertuples(index=False, name=None)
+        )
+
+    category_lookup = {}
+    for sid, g in category_changes.groupby("spell_id"):
+        category_lookup[sid] = list(
+            g.sort_values("change_date")[["change_date", "new_worker_category"]].itertuples(index=False, name=None)
         )
 
     leave_lookup = {}
@@ -74,8 +96,14 @@ def ground_truth():
                 break
         return d
 
-    def naive_dept(row):
-        return row.home_department_id
+    def category_as_of(row, date):
+        c = row.worker_category
+        for c_date, new_cat in category_lookup.get(row.spell_id, []):
+            if c_date <= date:
+                c = new_cat
+            else:
+                break
+        return c
 
     def on_leave(spell_id, date):
         for start, end in leave_lookup.get(spell_id, []):
@@ -90,22 +118,36 @@ def ground_truth():
             return False
         return True
 
+    # --- True ground truth: department AND worker_category both resolved
+    # as of the relevant date, for every spell (no upfront category filter). ---
     month_end_hc = {d: {m: 0 for m in MONTH_ENDS} for d in dept_ids}
-    naive_hc_jun30 = {d: 0 for d in dept_ids}
-    for row in regular.itertuples(index=False):
+    # naive_dept_hc: static home_department_id, but TRUE (as-of) worker_category
+    # -- isolates the department-attribution trap (2) from the category trap (4).
+    naive_dept_hc_jun30 = {d: 0 for d in dept_ids}
+    # naive_category_hc: TRUE (as-of) department, but STATIC worker_category
+    # -- isolates the category-scope trap (4) from the department trap (2).
+    naive_category_hc_jun30 = {d: 0 for d in dept_ids}
+    for row in employees.itertuples(index=False):
         for m in MONTH_ENDS:
-            if active_on(row, m):
-                month_end_hc[dept_as_of(row, m)][m] += 1
+            if not active_on(row, m):
+                continue
+            if category_as_of(row, m) not in REGULAR_CATEGORIES:
+                continue
+            month_end_hc[dept_as_of(row, m)][m] += 1
         if active_on(row, CUTOFF):
-            naive_hc_jun30[naive_dept(row)] += 1
+            true_regular_jun30 = category_as_of(row, CUTOFF) in REGULAR_CATEGORIES
+            if true_regular_jun30:
+                naive_dept_hc_jun30[row.home_department_id] += 1
+            if row.worker_category in REGULAR_CATEGORIES:
+                naive_category_hc_jun30[dept_as_of(row, CUTOFF)] += 1
 
     avg_headcount = {d: sum(month_end_hc[d].values()) / len(MONTH_ENDS) for d in dept_ids}
     headcount_jun30 = {d: month_end_hc[d][CUTOFF] for d in dept_ids}
 
     working_headcount_jun30 = {d: 0 for d in dept_ids}
     naive_working_hc_jun30 = {d: 0 for d in dept_ids}  # naive: leave_start <= cutoff only
-    for row in regular.itertuples(index=False):
-        if not active_on(row, CUTOFF):
+    for row in employees.itertuples(index=False):
+        if not active_on(row, CUTOFF) or category_as_of(row, CUTOFF) not in REGULAR_CATEGORIES:
             continue
         d = dept_as_of(row, CUTOFF)
         if not on_leave(row.spell_id, CUTOFF):
@@ -116,14 +158,26 @@ def ground_truth():
 
     voluntary_sep = {d: 0 for d in dept_ids}
     involuntary_sep = {d: 0 for d in dept_ids}
-    for row in regular.itertuples(index=False):
+    # naive_category separations: TRUE department, STATIC worker_category
+    # -- isolates trap 4 the same way naive_category_hc_jun30 does above.
+    naive_category_voluntary_sep = {d: 0 for d in dept_ids}
+    naive_category_involuntary_sep = {d: 0 for d in dept_ids}
+    for row in employees.itertuples(index=False):
         if pd.isna(row.term_date) or not (Q2_START <= row.term_date <= CUTOFF):
             continue
         d = dept_as_of(row, row.term_date)
-        if row.term_reason in VOLUNTARY_REASONS:
-            voluntary_sep[d] += 1
-        elif row.term_reason in INVOLUNTARY_REASONS:
-            involuntary_sep[d] += 1
+        is_true_regular = category_as_of(row, row.term_date) in REGULAR_CATEGORIES
+        is_naive_regular = row.worker_category in REGULAR_CATEGORIES
+        if is_true_regular:
+            if row.term_reason in VOLUNTARY_REASONS:
+                voluntary_sep[d] += 1
+            elif row.term_reason in INVOLUNTARY_REASONS:
+                involuntary_sep[d] += 1
+        if is_naive_regular:
+            if row.term_reason in VOLUNTARY_REASONS:
+                naive_category_voluntary_sep[d] += 1
+            elif row.term_reason in INVOLUNTARY_REASONS:
+                naive_category_involuntary_sep[d] += 1
 
     rate = {
         d: (
@@ -140,29 +194,41 @@ def ground_truth():
     overall_voluntary_rate = round(total_voluntary / total_avg_headcount * 100, 2)
     overall_involuntary_rate = round(total_involuntary / total_avg_headcount * 100, 2)
 
-    # rehires: how many active-at-cutoff regular spells belong to an
-    # employee_id that also has an earlier (terminated) spell
+    # rehires: how many active-at-cutoff spells belong to an employee_id
+    # that also has an earlier (terminated) spell. Rehire spells are always
+    # created regular_full_time/regular_part_time, so they never intersect
+    # the category-conversion trap.
     dupe_ids = employees["employee_id"].value_counts()
     dupe_ids = set(dupe_ids[dupe_ids > 1].index)
     active_rehire_spells = sum(
-        1 for row in regular.itertuples(index=False)
+        1 for row in employees.itertuples(index=False)
         if row.employee_id in dupe_ids and active_on(row, CUTOFF)
+        and category_as_of(row, CUTOFF) in REGULAR_CATEGORIES
     )
-    n_on_leave_at_cutoff = sum(1 for sid in regular["spell_id"] if on_leave(sid, CUTOFF))
+    n_on_leave_at_cutoff = sum(1 for sid in employees["spell_id"] if on_leave(sid, CUTOFF))
     n_already_returned = sum(
         1 for sid in leaves["spell_id"].unique()
         if not on_leave(sid, CUTOFF) and any(s <= CUTOFF for s, e in leave_lookup.get(sid, []))
+    )
+
+    n_conversions = len(category_changes)
+    n_converted_active_jun30 = sum(
+        1 for row in category_changes.itertuples(index=False)
+        if pd.isna(employees.set_index("spell_id").loc[row.spell_id, "term_date"])
     )
 
     return {
         "dept_ids": dept_ids,
         "avg_headcount": avg_headcount,
         "headcount_jun30": headcount_jun30,
-        "naive_hc_jun30": naive_hc_jun30,
+        "naive_dept_hc_jun30": naive_dept_hc_jun30,
+        "naive_category_hc_jun30": naive_category_hc_jun30,
         "working_headcount_jun30": working_headcount_jun30,
         "naive_working_hc_jun30": naive_working_hc_jun30,
         "voluntary_sep": voluntary_sep,
         "involuntary_sep": involuntary_sep,
+        "naive_category_voluntary_sep": naive_category_voluntary_sep,
+        "naive_category_involuntary_sep": naive_category_involuntary_sep,
         "rate": rate,
         "total_avg_headcount": total_avg_headcount,
         "total_headcount_jun30": total_headcount_jun30,
@@ -174,6 +240,8 @@ def ground_truth():
         "active_rehire_spells": active_rehire_spells,
         "n_on_leave_at_cutoff": n_on_leave_at_cutoff,
         "n_already_returned": n_already_returned,
+        "n_conversions": n_conversions,
+        "n_converted_active_jun30": n_converted_active_jun30,
     }
 
 
@@ -210,7 +278,11 @@ def test_case_03_summary_structure(submission):
 def test_case_04_spell_grain_and_conservation(submission, ground_truth):
     """Trap 1: company-wide sums, computed without regard to which department
     each spell lands in, isolate whether rehire spells were silently dropped
-    (or any other row loss) from department-attribution errors."""
+    (or any other row loss) from department-attribution errors -- trap 2 is
+    purely redistributive across departments and does not move these totals.
+    Trap 4 does move these totals (a missed worker_category conversion
+    changes which spells are in scope at all, not just which department
+    they land in), so this also catches trap 4."""
     report, _ = submission
     assert ground_truth["active_rehire_spells"] >= 15
 
@@ -222,10 +294,17 @@ def test_case_04_spell_grain_and_conservation(submission, ground_truth):
 
 def test_case_05_department_attribution(submission, ground_truth):
     """Trap 2: per-department headcount_jun30 must reflect the transfer-
-    reconstructed department, not the static home_department_id."""
+    reconstructed department, not the static home_department_id. The
+    sufficiency check below (mean_naive_delta) isolates trap 2 from trap 4
+    by holding worker_category resolution correct in its naive baseline, to
+    prove trap 2 alone moves this dataset enough regardless of trap 4. The
+    pass/fail comparison against `true_hc` is against the fully-resolved
+    value, so a submission that mishandles either trap 2 or trap 4 (they
+    share this output field) can fail here -- that's intentional: getting
+    headcount_jun30 right requires both to be resolved correctly."""
     report, _ = submission
     true_hc = ground_truth["headcount_jun30"]
-    naive_hc = ground_truth["naive_hc_jun30"]
+    naive_hc = ground_truth["naive_dept_hc_jun30"]
     mean_naive_delta = sum(abs(true_hc[d] - naive_hc[d]) for d in ground_truth["dept_ids"]) / len(ground_truth["dept_ids"])
     assert mean_naive_delta >= 1.5, "dataset does not exercise this trap enough"
 
@@ -294,12 +373,51 @@ def test_case_09_summary_json_aggregates(submission, ground_truth):
     assert abs(summary["overall_involuntary_turnover_rate"] - ground_truth["overall_involuntary_rate"]) <= 2.0
 
 
-def test_case_10_anti_cheat_sentinels(ground_truth):
+def test_case_10_worker_category_scope(submission, ground_truth):
+    """Trap 4: worker_category is a starting value, not a static flag. The
+    sufficiency check below (mean_naive_delta) isolates trap 4 from trap 2
+    by holding department resolution correct in its naive baseline, to
+    prove trap 4 alone moves this dataset enough regardless of trap 2 --
+    converted spells never carry transfer or leave records, so this
+    isolation is clean at the data level. The pass/fail comparison against
+    `true_hc` is against the fully-resolved value (same as test_case_05),
+    so mishandling either trap can fail here; a submission that resolves
+    department perfectly but reads worker_category straight off
+    employees.csv still fails on the isolation check alone."""
+    report, _ = submission
+    assert ground_truth["n_conversions"] >= 100
+    assert ground_truth["n_converted_active_jun30"] >= 20
+
+    true_hc = ground_truth["headcount_jun30"]
+    naive_hc = ground_truth["naive_category_hc_jun30"]
+    mean_naive_delta = sum(abs(true_hc[d] - naive_hc[d]) for d in ground_truth["dept_ids"]) / len(ground_truth["dept_ids"])
+    assert mean_naive_delta >= 3.0, "dataset does not exercise this trap enough"
+
+    within_hc = 0
+    for _, row in report.iterrows():
+        d = row["department_id"]
+        if abs(row["headcount_jun30"] - true_hc[d]) <= 2:
+            within_hc += 1
+    assert within_hc >= 8, f"only {within_hc}/10 departments within tolerance on headcount_jun30 (category scope)"
+
+    within_sep = 0
+    for _, row in report.iterrows():
+        d = row["department_id"]
+        vol_ok = abs(row["voluntary_separations"] - ground_truth["voluntary_sep"][d]) <= 1
+        inv_ok = abs(row["involuntary_separations"] - ground_truth["involuntary_sep"][d]) <= 1
+        if vol_ok and inv_ok:
+            within_sep += 1
+    assert within_sep >= 7, f"only {within_sep}/10 departments within tolerance on separations (category scope)"
+
+
+def test_case_11_anti_cheat_sentinels(ground_truth):
     """Fixed structural facts about the immutable input data, from the
     deterministic seed -- guards against tampering with /workspace/data."""
     assert ground_truth["n_rehire_pairs"] == 630
     assert ground_truth["active_rehire_spells"] == 471
     assert ground_truth["n_on_leave_at_cutoff"] == 369
     assert ground_truth["n_already_returned"] == 956
-    assert ground_truth["total_voluntary"] == 754
-    assert ground_truth["total_involuntary"] == 561
+    assert ground_truth["total_voluntary"] == 775
+    assert ground_truth["total_involuntary"] == 572
+    assert ground_truth["n_conversions"] == 165
+    assert ground_truth["n_converted_active_jun30"] == 65

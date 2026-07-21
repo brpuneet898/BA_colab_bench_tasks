@@ -5,16 +5,18 @@ Business rules implemented:
   - `employees.csv` is one row per employment spell; the same employee_id can
     have more than one spell (a rehire). Every spell is treated independently
     -- spell_id is the grain, never employee_id.
-  - A spell's department on any given date is its home_department_id updated
-    by every department_transfers.csv row for that spell with
-    transfer_date <= that date, taking the most recent one.
+  - A spell's department and worker_category are each a starting value
+    (home_department_id, worker_category) plus a change log
+    (department_transfers.csv, worker_category_changes.csv). Either
+    attribute "as of" a date is the most recent logged change with a
+    change/transfer date <= that date, else the starting value.
   - A spell is part of headcount on a date if hire_date <= date and
-    (term_date is null or term_date > date). A separation is attributed to
-    the quarter containing its term_date (inclusive of both endpoints).
+    (term_date is null or term_date > date), AND its worker_category as of
+    that date is regular_full_time or regular_part_time. A separation is
+    attributed to the quarter containing its term_date (inclusive of both
+    endpoints), scoped by worker_category as of that same term_date.
   - A spell is "on leave" on a date if that date falls within
     [leave_start, leave_end] for any of its leave_records.csv rows.
-  - Only worker_category in {regular_full_time, regular_part_time} counts
-    toward this report.
 """
 import json
 from pathlib import Path
@@ -38,28 +40,29 @@ def load_data():
     departments = pd.read_csv(DATA_DIR / "departments.csv")
     employees = pd.read_csv(DATA_DIR / "employees.csv", parse_dates=["hire_date", "term_date"])
     transfers = pd.read_csv(DATA_DIR / "department_transfers.csv", parse_dates=["transfer_date"])
+    category_changes = pd.read_csv(DATA_DIR / "worker_category_changes.csv", parse_dates=["change_date"])
     leaves = pd.read_csv(DATA_DIR / "leave_records.csv", parse_dates=["leave_start", "leave_end"])
-    return departments, employees, transfers, leaves
+    return departments, employees, transfers, category_changes, leaves
 
 
-def build_department_lookup(transfers):
-    """spell_id -> list of (transfer_date, new_department_id) sorted ascending."""
+def build_change_lookup(df, date_col, value_col):
+    """spell_id -> list of (date, new_value) sorted ascending."""
     lookup = {}
-    for spell_id, grp in transfers.groupby("spell_id"):
+    for spell_id, grp in df.groupby("spell_id"):
         lookup[spell_id] = list(
-            grp.sort_values("transfer_date")[["transfer_date", "new_department_id"]].itertuples(index=False, name=None)
+            grp.sort_values(date_col)[[date_col, value_col]].itertuples(index=False, name=None)
         )
     return lookup
 
 
-def department_as_of(spell, transfer_lookup, date):
-    department = spell.home_department_id
-    for t_date, new_dept in transfer_lookup.get(spell.spell_id, []):
-        if t_date <= date:
-            department = new_dept
+def value_as_of(spell_id, base_value, lookup, date):
+    value = base_value
+    for change_date, new_value in lookup.get(spell_id, []):
+        if change_date <= date:
+            value = new_value
         else:
             break
-    return department
+    return value
 
 
 def build_leave_lookup(leaves):
@@ -84,19 +87,21 @@ def is_active_on(spell, date):
     return True
 
 
-def build_report(employees, transfer_lookup, leave_lookup, departments):
-    regular = employees[employees["worker_category"].isin(REGULAR_CATEGORIES)].copy()
-
+def build_report(employees, transfer_lookup, category_lookup, leave_lookup, departments):
     dept_ids = departments["department_id"].tolist()
     month_end_headcounts = {d: {m: 0 for m in MONTH_ENDS} for d in dept_ids}
     total_month_end_headcounts = {m: 0 for m in MONTH_ENDS}
 
-    for spell in regular.itertuples(index=False):
+    for spell in employees.itertuples(index=False):
         for m in MONTH_ENDS:
-            if is_active_on(spell, m):
-                dept = department_as_of(spell, transfer_lookup, m)
-                month_end_headcounts[dept][m] += 1
-                total_month_end_headcounts[m] += 1
+            if not is_active_on(spell, m):
+                continue
+            category = value_as_of(spell.spell_id, spell.worker_category, category_lookup, m)
+            if category not in REGULAR_CATEGORIES:
+                continue
+            dept = value_as_of(spell.spell_id, spell.home_department_id, transfer_lookup, m)
+            month_end_headcounts[dept][m] += 1
+            total_month_end_headcounts[m] += 1
 
     avg_headcount = {
         d: sum(month_end_headcounts[d].values()) / len(MONTH_ENDS) for d in dept_ids
@@ -105,19 +110,28 @@ def build_report(employees, transfer_lookup, leave_lookup, departments):
 
     headcount_jun30 = {d: month_end_headcounts[d][CUTOFF] for d in dept_ids}
     working_headcount_jun30 = {d: 0 for d in dept_ids}
-    for spell in regular.itertuples(index=False):
-        if is_active_on(spell, CUTOFF) and not is_on_leave(spell.spell_id, leave_lookup, CUTOFF):
-            dept = department_as_of(spell, transfer_lookup, CUTOFF)
-            working_headcount_jun30[dept] += 1
+    for spell in employees.itertuples(index=False):
+        if not is_active_on(spell, CUTOFF):
+            continue
+        category = value_as_of(spell.spell_id, spell.worker_category, category_lookup, CUTOFF)
+        if category not in REGULAR_CATEGORIES:
+            continue
+        if is_on_leave(spell.spell_id, leave_lookup, CUTOFF):
+            continue
+        dept = value_as_of(spell.spell_id, spell.home_department_id, transfer_lookup, CUTOFF)
+        working_headcount_jun30[dept] += 1
 
     voluntary_separations = {d: 0 for d in dept_ids}
     involuntary_separations = {d: 0 for d in dept_ids}
-    for spell in regular.itertuples(index=False):
+    for spell in employees.itertuples(index=False):
         if pd.isna(spell.term_date):
             continue
         if not (Q2_START <= spell.term_date <= CUTOFF):
             continue
-        dept = department_as_of(spell, transfer_lookup, spell.term_date)
+        category = value_as_of(spell.spell_id, spell.worker_category, category_lookup, spell.term_date)
+        if category not in REGULAR_CATEGORIES:
+            continue
+        dept = value_as_of(spell.spell_id, spell.home_department_id, transfer_lookup, spell.term_date)
         if spell.term_reason in VOLUNTARY_REASONS:
             voluntary_separations[dept] += 1
         elif spell.term_reason in INVOLUNTARY_REASONS:
@@ -160,11 +174,12 @@ def build_report(employees, transfer_lookup, leave_lookup, departments):
 
 
 def main():
-    departments, employees, transfers, leaves = load_data()
-    transfer_lookup = build_department_lookup(transfers)
+    departments, employees, transfers, category_changes, leaves = load_data()
+    transfer_lookup = build_change_lookup(transfers, "transfer_date", "new_department_id")
+    category_lookup = build_change_lookup(category_changes, "change_date", "new_worker_category")
     leave_lookup = build_leave_lookup(leaves)
 
-    report_df, summary = build_report(employees, transfer_lookup, leave_lookup, departments)
+    report_df, summary = build_report(employees, transfer_lookup, category_lookup, leave_lookup, departments)
 
     report_df.to_csv(WORKSPACE_DIR / "department_turnover_report.csv", index=False)
     with open(WORKSPACE_DIR / "summary.json", "w") as f:
