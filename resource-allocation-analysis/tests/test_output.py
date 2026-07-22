@@ -65,7 +65,24 @@ instruction.md -- each is discoverable by inspecting the raw data):
    combined into the same deduped set of covered days as time_off.csv. A
    model that computes gross capacity from a single global business-day
    count and only nets time_off.csv silently overstates capacity for every
-   EMEA/APAC resource.
+   EMEA/APAC resource. A resource has zero available capacity on any day
+   covered by time_off.csv or their region's regional_holidays.csv -- that
+   governs resolved_planned_hours in allocation_accuracy_pct too (4), not
+   just net_capacity_hours: a resource can't be planned to deliver a
+   percentage of their capacity on a day they have no capacity at all.
+
+8. Fixed-fee billing cap (value-level computation, a different skill again
+   from (6) and (7)) -- projects.csv also carries contract_type and
+   contracted_hour_cap. A minority of client_billable projects are
+   "fixed_fee" with a contracted_hour_cap below the project's own natural
+   April hours total, summed across every resource who logged hours
+   against it. billable_hours must be capped at the PROJECT level (a
+   cross-resource aggregation, not per-resource) and any shortfall applied
+   proportionally back across every resource who contributed hours to that
+   project -- not per-resource, not first-come-first-served. Discovering
+   contract_type == "fixed_fee" does not by itself hand you the fix; it
+   still requires a real computation (group by project, sum, compare to
+   the cap, distribute proportionally), not a boolean filter.
 
 Ground truth is computed inline below, directly from
 /workspace/data/*.csv -- never from a pre-baked constant.
@@ -131,30 +148,49 @@ def ground_truth():
         np.busday_count(APRIL_START.date(), (APRIL_END + pd.Timedelta(days=1)).date()) / 5 * 40
     )
 
-    def covered_hours(rid, region):
-        rows = time_off[time_off.resource_id == rid]
+    # Per resource, the set of April business days with zero available
+    # capacity -- covered by time_off.csv or a regional_holidays.csv row
+    # for their own region. Shared by net_capacity_hours AND the planned-
+    # hours resolution below: a resource can't be planned to work on a day
+    # they have no capacity at all.
+    unavailable_days = {}
+    for _, r in resources.iterrows():
+        rid, region = r.resource_id, r.region
         covered_days = set()
-        for _, r in rows.iterrows():
-            s, e = max(r.start_date, APRIL_START), min(r.end_date, APRIL_END)
+        rows = time_off[time_off.resource_id == rid]
+        for _, row in rows.iterrows():
+            s, e = max(row.start_date, APRIL_START), min(row.end_date, APRIL_END)
             if s > e:
                 continue
             covered_days.update(pd.bdate_range(s, e))
-        for _, r in regional_holidays[regional_holidays.region == region].iterrows():
-            d = r.holiday_date
+        for _, row in regional_holidays[regional_holidays.region == region].iterrows():
+            d = row.holiday_date
             if APRIL_START <= d <= APRIL_END:
                 covered_days.add(d)
-        return len(covered_days) * 8.0
+        unavailable_days[rid] = covered_days
 
     out = resources.copy()
-    out["net_capacity_hours"] = out.apply(
-        lambda r: gross_capacity - covered_hours(r.resource_id, r.region), axis=1
+    out["net_capacity_hours"] = out.resource_id.map(
+        lambda rid: gross_capacity - len(unavailable_days[rid]) * 8.0
     )
 
     all_hours = april_ts.groupby("resource_id").hours_logged.sum()
-    billable_hours = (
-        april_ts[april_ts.engagement_type == "client_billable"]
-        .groupby("resource_id").hours_logged.sum()
-    )
+
+    # billable_hours for a fixed_fee project is capped at its
+    # contracted_hour_cap, summed across every resource on it -- if the
+    # project-wide total exceeds the cap, each resource's own billable
+    # contribution is scaled down proportionally.
+    billable = april_ts[april_ts.engagement_type == "client_billable"].copy()
+    caps = projects.loc[
+        projects.contract_type == "fixed_fee", ["project_id", "region", "contracted_hour_cap"]
+    ]
+    billable = billable.merge(caps, on=["project_id", "region"], how="left")
+    project_totals = billable.groupby(["region", "project_id"]).hours_logged.transform("sum")
+    over_cap = billable.contracted_hour_cap.notna() & (project_totals > billable.contracted_hour_cap)
+    ratio = np.where(over_cap, billable.contracted_hour_cap / project_totals, 1.0)
+    billable["billable_hours_capped"] = billable.hours_logged * ratio
+    billable_hours = billable.groupby("resource_id").billable_hours_capped.sum()
+
     out["all_hours_logged"] = out.resource_id.map(all_hours).fillna(0.0)
     out["billable_hours"] = out.resource_id.map(billable_hours).fillna(0.0)
     out["billable_utilization_pct"] = (out.billable_hours / out.net_capacity_hours * 100).round(2)
@@ -171,8 +207,11 @@ def ground_truth():
 
     def resolved_hours(rid, pid, window_start, window_end):
         g = authorized[(authorized.resource_id == rid) & (authorized.project_id == pid)]
+        resource_unavailable = unavailable_days[rid]
         total = 0.0
         for d in pd.bdate_range(window_start, window_end):
+            if d in resource_unavailable:
+                continue
             covering = g[(g.eff_start <= d) & (g.eff_end >= d)]
             if covering.empty:
                 continue
@@ -225,10 +264,21 @@ def ground_truth():
     holiday_regions = set(regional_holidays.region.unique())
     holiday_affected_ids = sorted(set(resources[resources.region.isin(holiday_regions)].resource_id))
 
+    # Resources who logged April hours against a fixed_fee project -- a
+    # naive uncapped billable_hours sum overstates their contribution once
+    # the project-wide total crosses contracted_hour_cap.
+    fixed_fee_pids = set(zip(
+        projects.loc[projects.contract_type == "fixed_fee", "region"],
+        projects.loc[projects.contract_type == "fixed_fee", "project_id"],
+    ))
+    billable_key = pd.MultiIndex.from_arrays([billable.region, billable.project_id])
+    fixed_fee_resource_ids = sorted(set(billable.loc[billable_key.isin(fixed_fee_pids), "resource_id"]))
+
     return dict(
         resource_summary=out, assignment_accuracy=accuracy_df,
         internal_mix_ids=internal_mix_ids, zero_timesheet_ids=zero_timesheet_ids,
         collision_resource_ids=collision_resource_ids, holiday_affected_ids=holiday_affected_ids,
+        fixed_fee_resource_ids=fixed_fee_resource_ids,
         projects=projects, time_off=time_off, revisions=revisions, rejected_pairs=rejected_pairs,
         regional_holidays=regional_holidays,
     )
@@ -271,13 +321,14 @@ def test_case_03_assignment_accuracy_structure(ground_truth):
 def test_case_04_billable_utilization_domain_hook(ground_truth):
     """engagement_type lives only in projects.csv -- billable_utilization_pct
     must be scoped to client_billable hours, not all hours logged. Excludes
-    the regional-holiday cohort (test_12) so a failure here is attributable
-    specifically to the engagement_type filter, not net_capacity_hours."""
+    the regional-holiday cohort (test_11) and fixed-fee cohort (test_12) so
+    a failure here is attributable specifically to the engagement_type
+    filter, not net_capacity_hours or the billing cap."""
     df = _load_csv("resource_summary.csv").set_index("resource_id")
     gt = ground_truth["resource_summary"].set_index("resource_id")
-    holiday_ids = set(ground_truth["holiday_affected_ids"])
-    ids = [r for r in ground_truth["internal_mix_ids"] if r not in holiday_ids]
-    assert len(ids) >= 50, "sanity: expected a meaningful internal-mix cohort outside the holiday cohort"
+    exclude = set(ground_truth["holiday_affected_ids"]) | set(ground_truth["fixed_fee_resource_ids"])
+    ids = [r for r in ground_truth["internal_mix_ids"] if r not in exclude]
+    assert len(ids) >= 50, "sanity: expected a meaningful internal-mix cohort outside the holiday/fixed-fee cohorts"
 
     deltas = (df.loc[ids, "billable_utilization_pct"] - gt.loc[ids, "billable_utilization_pct"]).abs()
     n_within = (deltas <= 2.0).sum()
@@ -337,7 +388,13 @@ def test_case_06_capacity_netting(ground_truth):
 def test_case_07_revision_resolution_coverage(ground_truth):
     """The governing revision for any date is the one with the latest
     submitted_date among revisions whose effective range covers that date --
-    not simply the row with the latest submitted_date for the assignment."""
+    not simply the row with the latest submitted_date for the assignment.
+    Also covers the authorization gate: a revision with approval_status ==
+    'rejected' was never authorized and must be excluded before resolving
+    which revision governs a date, leaving the prior authorized revision in
+    force for the whole period the rejected one claims to cover -- checked
+    on its own cohort within this same test so a failure is still
+    attributable to the authorization filter specifically."""
     df = _load_csv("assignment_accuracy.csv").set_index(["resource_id", "project_id"]).sort_index()
     gt = ground_truth["assignment_accuracy"].set_index(["resource_id", "project_id"]).sort_index()
     common = df.index.intersection(gt.index)
@@ -349,6 +406,21 @@ def test_case_07_revision_resolution_coverage(ground_truth):
         f"allocation_accuracy_pct wrong for {len(common) - n_within}/{len(common)} "
         f"(resource, project) pairs -- check how the governing revision is picked "
         f"when a pair has more than one revision row."
+    )
+
+    rejected_pairs = ground_truth["rejected_pairs"]
+    assert len(rejected_pairs) >= 50, "sanity: expected a meaningful rejected-amendment cohort in the fixture"
+    rej_common = [p for p in rejected_pairs if p in df.index]
+    assert len(rej_common) == len(rejected_pairs), (
+        "assignment_accuracy.csv is missing rows for pairs with a rejected amendment"
+    )
+    rej_deltas = (df.loc[rej_common, "allocation_accuracy_pct"] - gt.loc[rej_common, "allocation_accuracy_pct"]).abs()
+    rej_within = (rej_deltas <= 1.5).sum()
+    assert rej_within / len(rej_common) >= 0.85, (
+        f"allocation_accuracy_pct wrong for {len(rej_common) - rej_within}/{len(rej_common)} (resource, project) "
+        f"pairs with a rejected amendment revision -- a rejected revision was never authorized and must "
+        f"not govern any date, even though it has the latest submitted_date and its effective range "
+        f"claims to cover part of April."
     )
 
 
@@ -382,34 +454,7 @@ def test_case_08_summary_json_aggregates(ground_truth):
     )
 
 
-def test_case_09_revision_authorization_gate(ground_truth):
-    """A revision with approval_status == 'rejected' was never authorized --
-    it must be excluded when resolving the governing revision for a date,
-    leaving the prior authorized revision in force for the whole period the
-    rejected one claims to cover. Isolated from test_07 to attribute
-    failures specifically to the authorization filter, not general
-    date-recency resolution."""
-    df = _load_csv("assignment_accuracy.csv").set_index(["resource_id", "project_id"]).sort_index()
-    gt = ground_truth["assignment_accuracy"].set_index(["resource_id", "project_id"]).sort_index()
-    rejected_pairs = ground_truth["rejected_pairs"]
-    assert len(rejected_pairs) >= 50, "sanity: expected a meaningful rejected-amendment cohort in the fixture"
-
-    common = [p for p in rejected_pairs if p in df.index]
-    assert len(common) == len(rejected_pairs), (
-        "assignment_accuracy.csv is missing rows for pairs with a rejected amendment"
-    )
-
-    deltas = (df.loc[common, "allocation_accuracy_pct"] - gt.loc[common, "allocation_accuracy_pct"]).abs()
-    n_within = (deltas <= 1.5).sum()
-    assert n_within / len(common) >= 0.85, (
-        f"allocation_accuracy_pct wrong for {len(common) - n_within}/{len(common)} (resource, project) "
-        f"pairs with a rejected amendment revision -- a rejected revision was never authorized and must "
-        f"not govern any date, even though it has the latest submitted_date and its effective range "
-        f"claims to cover part of April."
-    )
-
-
-def test_case_10_anti_cheat_sentinels(ground_truth):
+def test_case_09_anti_cheat_sentinels(ground_truth):
     """Structural sentinels on the immutable source data -- guard against
     outputs that happen to pass value checks without genuinely resolving
     the underlying joins."""
@@ -441,8 +486,12 @@ def test_case_10_anti_cheat_sentinels(ground_truth):
     assert set(regional_holidays.region.unique()) == {"EMEA", "APAC"}
     assert len(regional_holidays) >= 4
 
+    fixed_fee = projects[projects.contract_type == "fixed_fee"]
+    assert len(fixed_fee) >= 30, "sanity: expected a meaningful number of fixed-fee projects"
+    assert fixed_fee.contracted_hour_cap.notna().all()
 
-def test_case_11_region_scoped_project_code_collision(ground_truth):
+
+def test_case_10_region_scoped_project_code_collision(ground_truth):
     """project_id is only unique WITHIN a region -- a minority of codes are
     reused independently across two or more regions. The project join must
     go through each resource's own region (from resources.csv); joining on
@@ -462,7 +511,7 @@ def test_case_11_region_scoped_project_code_collision(ground_truth):
     )
 
 
-def test_case_12_regional_holiday_capacity(ground_truth):
+def test_case_11_regional_holiday_capacity(ground_truth):
     """EMEA and APAC each observe regional holidays not shared by AMER
     (regional_holidays.csv). "Available April capacity" is prorated over
     business days without specifying which calendar -- net_capacity_hours
@@ -480,4 +529,26 @@ def test_case_12_regional_holiday_capacity(ground_truth):
         f"net_capacity_hours wrong for {len(ids) - n_within}/{len(ids)} EMEA/APAC resources -- "
         f"regional_holidays.csv lists additional non-working days for these regions that must "
         f"reduce available April capacity alongside time_off.csv."
+    )
+
+
+def test_case_12_fixed_fee_billing_cap(ground_truth):
+    """A minority of client_billable projects are "fixed_fee" with a
+    contracted_hour_cap below the project's own natural April hours total,
+    summed across every resource on it. billable_hours must be capped at
+    the project level and any shortfall applied proportionally back across
+    every resource who logged hours on that project -- a naive uncapped
+    sum overstates billable_hours for every resource who worked on one."""
+    df = _load_csv("resource_summary.csv").set_index("resource_id")
+    gt = ground_truth["resource_summary"].set_index("resource_id")
+    ids = ground_truth["fixed_fee_resource_ids"]
+    assert len(ids) >= 50, "sanity: expected a meaningful fixed-fee-affected cohort in the fixture"
+
+    deltas = (df.loc[ids, "billable_hours"] - gt.loc[ids, "billable_hours"]).abs()
+    n_within = (deltas <= 2.0).sum()
+    assert n_within / len(ids) >= 0.85, (
+        f"billable_hours wrong for {len(ids) - n_within}/{len(ids)} resources who logged hours against "
+        f"a fixed-fee project -- billable_hours must be capped at the project's contracted_hour_cap, "
+        f"summed across every resource on it, with any shortfall applied proportionally, not counted "
+        f"in full for whichever resource happened to log the hours."
     )

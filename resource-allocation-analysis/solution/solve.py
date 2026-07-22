@@ -46,6 +46,31 @@ capacity" is prorated over business days without specifying which calendar
 -- net capacity must subtract these region-specific dates too, combined
 into the same deduped set of covered days as time_off.csv (a resource's own
 region determines which regional holidays apply to them).
+
+A resource has zero available capacity on any day covered by time_off.csv
+or their region's regional_holidays.csv -- that governs planned hours in
+allocation_accuracy_pct too, not just net_capacity_hours: a resource can't
+be planned to deliver a percentage of their capacity on a day they have no
+capacity at all. The same per-resource unavailable-days set feeds both
+net_capacity_hours and resolve_governing_revision_hours. instruction.md
+makes this explicit ("...in effect on each date that month when the
+resource had available capacity to work") -- added 2026-07-22 after a real
+eval round showed 2/3 independent models (both Gemini runs) already
+reasoning their way to this consistency on their own, while the ground
+truth had never enforced it; without the clarification this was a genuine
+three-way ambiguity (no exclusion / holidays-only / holidays+time_off), not
+a designed trap.
+
+projects.csv also carries contract_type and contracted_hour_cap. A minority
+of client_billable projects are "fixed_fee" rather than
+"time_and_materials", with a contracted_hour_cap below the project's own
+natural April hours total (summed across every resource on it) -- the
+practice can't bill beyond the contracted ceiling even though the hours
+were genuinely logged against a client_billable engagement. billable_hours
+must be capped at the PROJECT level (group by project, not by resource)
+and any shortfall applied proportionally back across every resource who
+logged hours on that project -- not per-resource, not first-come-first-
+served by date.
 """
 
 import json
@@ -79,6 +104,25 @@ def load_data():
     return resources, projects, revisions, timesheets, time_off, regional_holidays
 
 
+def apply_fixed_fee_caps(april_ts, projects):
+    """billable_hours for a fixed_fee project is capped at its
+    contracted_hour_cap, summed across every resource who logged hours
+    against it -- if the project-wide total exceeds the cap, each
+    resource's own billable contribution is scaled down proportionally so
+    the sum across all of them equals the cap exactly."""
+    billable = april_ts[april_ts["engagement_type"] == "client_billable"].copy()
+    caps = projects.loc[
+        projects["contract_type"] == "fixed_fee", ["project_id", "region", "contracted_hour_cap"]
+    ]
+    billable = billable.merge(caps, on=["project_id", "region"], how="left")
+
+    project_totals = billable.groupby(["region", "project_id"])["hours_logged"].transform("sum")
+    over_cap = billable["contracted_hour_cap"].notna() & (project_totals > billable["contracted_hour_cap"])
+    ratio = np.where(over_cap, billable["contracted_hour_cap"] / project_totals, 1.0)
+    billable["billable_hours"] = billable["hours_logged"] * ratio
+    return billable
+
+
 def scope_timesheets_to_april(timesheets, projects, resources):
     """Every week in this dataset falls inside a single calendar month, so
     scoping by week_ending_date alone is unambiguous.
@@ -93,13 +137,17 @@ def scope_timesheets_to_april(timesheets, projects, resources):
     return april.merge(projects[["project_id", "region", "engagement_type"]], on=["region", "project_id"], how="left")
 
 
-def compute_net_capacity(resources, time_off, regional_holidays):
-    business_days = np.busday_count(APRIL_START.date(), (APRIL_END + pd.Timedelta(days=1)).date())
-    gross_capacity = business_days / 5 * resources["weekly_capacity_hours"]
-
-    def covered_hours(resource_id, region):
-        rows = time_off[time_off["resource_id"] == resource_id]
+def compute_unavailable_days(resources, time_off, regional_holidays):
+    """Per resource, the set of April business days on which the resource
+    has zero available capacity -- covered by time_off.csv or by a
+    regional_holidays.csv row for their own region. Shared by both
+    net_capacity_hours and resolve_governing_revision_hours: a resource
+    can't be planned to work on a day they have no capacity at all."""
+    unavailable = {}
+    for _, r in resources.iterrows():
+        resource_id, region = r["resource_id"], r["region"]
         covered_days = set()
+        rows = time_off[time_off["resource_id"] == resource_id]
         for _, row in rows.iterrows():
             start, end = max(row["start_date"], APRIL_START), min(row["end_date"], APRIL_END)
             if start > end:
@@ -109,23 +157,26 @@ def compute_net_capacity(resources, time_off, regional_holidays):
             d = row["holiday_date"]
             if APRIL_START <= d <= APRIL_END:
                 covered_days.add(d)
-        return len(covered_days) * 8.0
+        unavailable[resource_id] = covered_days
+    return unavailable
 
-    net = gross_capacity - resources.apply(
-        lambda r: covered_hours(r["resource_id"], r["region"]), axis=1
+
+def compute_net_capacity(resources, unavailable_days):
+    business_days = np.busday_count(APRIL_START.date(), (APRIL_END + pd.Timedelta(days=1)).date())
+    gross_capacity = business_days / 5 * resources["weekly_capacity_hours"]
+    net = gross_capacity - resources["resource_id"].map(
+        lambda rid: len(unavailable_days[rid]) * 8.0
     )
     return net
 
 
-def build_resource_summary(resources, april_ts, time_off, regional_holidays):
+def build_resource_summary(resources, april_ts, unavailable_days, projects):
     out = resources.copy()
-    out["net_capacity_hours"] = compute_net_capacity(resources, time_off, regional_holidays)
+    out["net_capacity_hours"] = compute_net_capacity(resources, unavailable_days)
 
     all_hours = april_ts.groupby("resource_id")["hours_logged"].sum()
-    billable_hours = (
-        april_ts[april_ts["engagement_type"] == "client_billable"]
-        .groupby("resource_id")["hours_logged"].sum()
-    )
+    capped_billable = apply_fixed_fee_caps(april_ts, projects)
+    billable_hours = capped_billable.groupby("resource_id")["billable_hours"].sum()
     out["all_hours_logged"] = out["resource_id"].map(all_hours).fillna(0.0)
     out["billable_hours"] = out["resource_id"].map(billable_hours).fillna(0.0)
     out["billable_utilization_pct"] = out["billable_hours"] / out["net_capacity_hours"] * 100
@@ -140,7 +191,7 @@ def build_resource_summary(resources, april_ts, time_off, regional_holidays):
                 "bench_hours"]].sort_values("resource_id").reset_index(drop=True)
 
 
-def resolve_governing_revision_hours(pair_revisions, window_start, window_end):
+def resolve_governing_revision_hours(pair_revisions, window_start, window_end, unavailable_days):
     """Build the resolved planned-hours timeline for one (resource, project)
     pair, one business day at a time.
 
@@ -148,9 +199,13 @@ def resolve_governing_revision_hours(pair_revisions, window_start, window_end):
     day has the latest submitted_date. A later revision only supersedes an
     earlier one for the days its own effective range actually covers -- days
     outside that range are still governed by whichever revision covers them.
+    A resource has no planned hours on a day they have zero available
+    capacity (time_off.csv or a regional holiday for their region).
     """
     total = 0.0
     for day in pd.bdate_range(window_start, window_end):
+        if day in unavailable_days:
+            continue
         covering = pair_revisions[
             (pair_revisions["effective_start_date"] <= day) & (pair_revisions["effective_end_date"] >= day)
         ]
@@ -161,7 +216,7 @@ def resolve_governing_revision_hours(pair_revisions, window_start, window_end):
     return total
 
 
-def build_assignment_accuracy(revisions, april_ts):
+def build_assignment_accuracy(revisions, april_ts, unavailable_days_by_resource):
     authorized = revisions[revisions["approval_status"] == "approved"]
     pairs = authorized.groupby(["resource_id", "project_id"]).agg(
         pair_start=("effective_start_date", "min"), pair_end=("effective_end_date", "max")
@@ -175,7 +230,8 @@ def build_assignment_accuracy(revisions, april_ts):
         ]
         window_start = max(pair["pair_start"], APRIL_START)
         window_end = min(pair["pair_end"], APRIL_END)
-        resolved = resolve_governing_revision_hours(pair_revisions, window_start, window_end)
+        unavailable_days = unavailable_days_by_resource[pair["resource_id"]]
+        resolved = resolve_governing_revision_hours(pair_revisions, window_start, window_end, unavailable_days)
 
         actual = april_ts[
             (april_ts["resource_id"] == pair["resource_id"]) & (april_ts["project_id"] == pair["project_id"])
@@ -200,11 +256,12 @@ def main():
     resources, projects, revisions, timesheets, time_off, regional_holidays = load_data()
 
     april_ts = scope_timesheets_to_april(timesheets, projects, resources)
+    unavailable_days = compute_unavailable_days(resources, time_off, regional_holidays)
 
-    resource_summary = build_resource_summary(resources, april_ts, time_off, regional_holidays)
+    resource_summary = build_resource_summary(resources, april_ts, unavailable_days, projects)
     resource_summary.to_csv(WORKSPACE_DIR / "resource_summary.csv", index=False)
 
-    assignment_accuracy = build_assignment_accuracy(revisions, april_ts)
+    assignment_accuracy = build_assignment_accuracy(revisions, april_ts, unavailable_days)
     assignment_accuracy.to_csv(WORKSPACE_DIR / "assignment_accuracy.csv", index=False)
 
     summary = {
