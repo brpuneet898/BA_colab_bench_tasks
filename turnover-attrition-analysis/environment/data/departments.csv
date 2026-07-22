@@ -1,11 +1,13 @@
-department_id,department_name
-DEPT01,Engineering
-DEPT02,Sales
-DEPT03,Customer Support
-DEPT04,Finance
-DEPT05,Human Resources
-DEPT06,Operations
-DEPT07,Marketing
-DEPT08,Product
-DEPT09,Legal
-DEPT10,Information Technology
+business_unit_id,department_id,department_name
+BU01,DEPT01,Engineering
+BU01,DEPT02,Sales
+BU01,DEPT07,Marketing
+BU01,DEPT08,Product
+BU02,DEPT03,Regional Customer Support
+BU02,DEPT05,Regional HR
+BU02,DEPT06,Regional Operations
+BU02,DEPT10,Regional IT
+BU01,DEPT04,Finance
+BU02,DEPT04,Subsidiary Finance
+BU01,DEPT09,Legal
+BU02,DEPT09,Subsidiary Compliance

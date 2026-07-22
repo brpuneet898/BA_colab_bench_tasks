@@ -9,7 +9,11 @@ Business rules implemented:
     (home_department_id, worker_category) plus a change log
     (department_transfers.csv, worker_category_changes.csv). Either
     attribute "as of" a date is the most recent logged change with a
-    change/transfer date <= that date, else the starting value.
+    change/transfer date <= that date, else the starting value -- but only
+    over the change rows that actually took effect: a transfer_type of
+    temporary_secondment doesn't change the department of record, and an
+    approval_status other than approved means the category change never
+    happened.
   - A spell is part of headcount on a date if hire_date <= date and
     (term_date is null or term_date > date), AND its worker_category as of
     that date is regular_full_time or regular_part_time. A separation is
@@ -17,6 +21,10 @@ Business rules implemented:
     endpoints), scoped by worker_category as of that same term_date.
   - A spell is "on leave" on a date if that date falls within
     [leave_start, leave_end] for any of its leave_records.csv rows.
+  - A spell's business_unit_id is fixed for its whole life. departments.csv
+    has one row per department per business unit -- department_id alone is
+    not a unique key there, so every department bucket is
+    (business_unit_id, department_id), never department_id alone.
 """
 import json
 from pathlib import Path
@@ -88,8 +96,8 @@ def is_active_on(spell, date):
 
 
 def build_report(employees, transfer_lookup, category_lookup, leave_lookup, departments):
-    dept_ids = departments["department_id"].tolist()
-    month_end_headcounts = {d: {m: 0 for m in MONTH_ENDS} for d in dept_ids}
+    dept_keys = list(departments[["business_unit_id", "department_id"]].itertuples(index=False, name=None))
+    month_end_headcounts = {k: {m: 0 for m in MONTH_ENDS} for k in dept_keys}
     total_month_end_headcounts = {m: 0 for m in MONTH_ENDS}
 
     for spell in employees.itertuples(index=False):
@@ -100,16 +108,17 @@ def build_report(employees, transfer_lookup, category_lookup, leave_lookup, depa
             if category not in REGULAR_CATEGORIES:
                 continue
             dept = value_as_of(spell.spell_id, spell.home_department_id, transfer_lookup, m)
-            month_end_headcounts[dept][m] += 1
+            key = (spell.business_unit_id, dept)
+            month_end_headcounts[key][m] += 1
             total_month_end_headcounts[m] += 1
 
     avg_headcount = {
-        d: sum(month_end_headcounts[d].values()) / len(MONTH_ENDS) for d in dept_ids
+        k: sum(month_end_headcounts[k].values()) / len(MONTH_ENDS) for k in dept_keys
     }
     total_avg_headcount = sum(total_month_end_headcounts.values()) / len(MONTH_ENDS)
 
-    headcount_jun30 = {d: month_end_headcounts[d][CUTOFF] for d in dept_ids}
-    working_headcount_jun30 = {d: 0 for d in dept_ids}
+    headcount_jun30 = {k: month_end_headcounts[k][CUTOFF] for k in dept_keys}
+    working_headcount_jun30 = {k: 0 for k in dept_keys}
     for spell in employees.itertuples(index=False):
         if not is_active_on(spell, CUTOFF):
             continue
@@ -119,10 +128,10 @@ def build_report(employees, transfer_lookup, category_lookup, leave_lookup, depa
         if is_on_leave(spell.spell_id, leave_lookup, CUTOFF):
             continue
         dept = value_as_of(spell.spell_id, spell.home_department_id, transfer_lookup, CUTOFF)
-        working_headcount_jun30[dept] += 1
+        working_headcount_jun30[(spell.business_unit_id, dept)] += 1
 
-    voluntary_separations = {d: 0 for d in dept_ids}
-    involuntary_separations = {d: 0 for d in dept_ids}
+    voluntary_separations = {k: 0 for k in dept_keys}
+    involuntary_separations = {k: 0 for k in dept_keys}
     for spell in employees.itertuples(index=False):
         if pd.isna(spell.term_date):
             continue
@@ -132,24 +141,26 @@ def build_report(employees, transfer_lookup, category_lookup, leave_lookup, depa
         if category not in REGULAR_CATEGORIES:
             continue
         dept = value_as_of(spell.spell_id, spell.home_department_id, transfer_lookup, spell.term_date)
+        key = (spell.business_unit_id, dept)
         if spell.term_reason in VOLUNTARY_REASONS:
-            voluntary_separations[dept] += 1
+            voluntary_separations[key] += 1
         elif spell.term_reason in INVOLUNTARY_REASONS:
-            involuntary_separations[dept] += 1
+            involuntary_separations[key] += 1
 
     rows = []
-    for d in dept_ids:
-        name = departments.loc[departments["department_id"] == d, "department_name"].iloc[0]
-        ah = avg_headcount[d]
-        vol = voluntary_separations[d]
-        inv = involuntary_separations[d]
+    for dept_row in departments.itertuples(index=False):
+        key = (dept_row.business_unit_id, dept_row.department_id)
+        ah = avg_headcount[key]
+        vol = voluntary_separations[key]
+        inv = involuntary_separations[key]
         rows.append(
             {
-                "department_id": d,
-                "department_name": name,
+                "business_unit_id": dept_row.business_unit_id,
+                "department_id": dept_row.department_id,
+                "department_name": dept_row.department_name,
                 "avg_headcount": round(ah, 2),
-                "headcount_jun30": headcount_jun30[d],
-                "working_headcount_jun30": working_headcount_jun30[d],
+                "headcount_jun30": headcount_jun30[key],
+                "working_headcount_jun30": working_headcount_jun30[key],
                 "voluntary_separations": vol,
                 "involuntary_separations": inv,
                 "voluntary_turnover_rate": round(vol / ah * 100, 2) if ah > 0 else 0.0,
@@ -157,7 +168,7 @@ def build_report(employees, transfer_lookup, category_lookup, leave_lookup, depa
             }
         )
 
-    report_df = pd.DataFrame(rows).sort_values("department_id").reset_index(drop=True)
+    report_df = pd.DataFrame(rows).sort_values(["business_unit_id", "department_id"]).reset_index(drop=True)
 
     total_voluntary = sum(voluntary_separations.values())
     total_involuntary = sum(involuntary_separations.values())
@@ -175,8 +186,10 @@ def build_report(employees, transfer_lookup, category_lookup, leave_lookup, depa
 
 def main():
     departments, employees, transfers, category_changes, leaves = load_data()
-    transfer_lookup = build_change_lookup(transfers, "transfer_date", "new_department_id")
-    category_lookup = build_change_lookup(category_changes, "change_date", "new_worker_category")
+    permanent_transfers = transfers[transfers["transfer_type"] == "permanent"]
+    approved_changes = category_changes[category_changes["approval_status"] == "approved"]
+    transfer_lookup = build_change_lookup(permanent_transfers, "transfer_date", "new_department_id")
+    category_lookup = build_change_lookup(approved_changes, "change_date", "new_worker_category")
     leave_lookup = build_leave_lookup(leaves)
 
     report_df, summary = build_report(employees, transfer_lookup, category_lookup, leave_lookup, departments)
