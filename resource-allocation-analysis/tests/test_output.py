@@ -42,15 +42,30 @@ instruction.md -- each is discoverable by inspecting the raw data):
    filtering to approved revisions lets a never-authorized revision govern
    real dates.
 
-6. Pro-bono billing (domain knowledge gap) -- projects.csv also carries
-   billing_type. A minority of engagement_type == "client_billable"
-   projects have billing_type == "pro_bono": a real client engagement the
-   practice does not bill for. billable_utilization_pct must exclude their
-   hours even though engagement_type alone correctly says
-   "client_billable" -- the engagement_type filter from (1) is necessary
-   but no longer sufficient on its own. instruction.md defines the metric
-   as hours "the practice actually bills the client for", never naming
-   billing_type or describing a second filter.
+6. Region-scoped project code collision (join-structure) -- projects.csv
+   carries a region column, and project_id is only unique WITHIN a region:
+   a minority of project codes are reused independently across two or more
+   regions (a shared numbering pool that predates each region's own PSA
+   instance). Every resource is staffed exclusively within their own
+   region's project pool, so the data itself is never ambiguous, but the
+   correct join from timesheets to projects requires first attaching each
+   resource's own region (from resources.csv) and merging on (region,
+   project_id) together. Merging on project_id alone silently matches a
+   colliding code against every region that reuses it, duplicating that
+   timesheet row once per spurious match and inflating all_hours_logged
+   (and understating bench_hours) for the resources whose project code
+   happens to collide.
+
+7. Regional holiday capacity netting (calendar/group-scoped netting, a
+   different skill from (6)'s join-key integrity) -- regional_holidays.csv
+   lists non-working days observed by EMEA and APAC (AMER has none beyond
+   the firm-wide time_off.csv holiday). "Available April capacity" is
+   prorated over business days without specifying which calendar --
+   net_capacity_hours must subtract these region-specific dates too,
+   combined into the same deduped set of covered days as time_off.csv. A
+   model that computes gross capacity from a single global business-day
+   count and only nets time_off.csv silently overstates capacity for every
+   EMEA/APAC resource.
 
 Ground truth is computed inline below, directly from
 /workspace/data/*.csv -- never from a pre-baked constant.
@@ -87,6 +102,7 @@ def ground_truth():
     revisions = pd.read_csv(DATA_DIR / "assignment_revisions.csv")
     timesheets = pd.read_csv(DATA_DIR / "timesheets.csv")
     time_off = pd.read_csv(DATA_DIR / "time_off.csv")
+    regional_holidays = pd.read_csv(DATA_DIR / "regional_holidays.csv")
 
     revisions = revisions.copy()
     revisions["eff_start"] = pd.to_datetime(revisions.effective_start_date)
@@ -97,20 +113,25 @@ def ground_truth():
     timesheets["week_ending_date"] = pd.to_datetime(timesheets.week_ending_date)
     # Every week in this dataset falls cleanly inside a single calendar
     # month (April 2024 starts on a Monday), so scoping to April is
-    # unambiguous.
+    # unambiguous. project_id is only unique WITHIN a region, so the
+    # project join must go through each resource's own region first.
     april_ts = timesheets[
         (timesheets.week_ending_date >= APRIL_START) & (timesheets.week_ending_date <= APRIL_END)
-    ].merge(projects[["project_id", "engagement_type", "billing_type"]], on="project_id", how="left")
+    ].merge(resources[["resource_id", "region"]], on="resource_id", how="left") \
+     .merge(projects[["project_id", "region", "engagement_type"]], on=["region", "project_id"], how="left")
 
     time_off = time_off.copy()
     time_off["start_date"] = pd.to_datetime(time_off.start_date)
     time_off["end_date"] = pd.to_datetime(time_off.end_date)
 
+    regional_holidays = regional_holidays.copy()
+    regional_holidays["holiday_date"] = pd.to_datetime(regional_holidays.holiday_date)
+
     gross_capacity = (
         np.busday_count(APRIL_START.date(), (APRIL_END + pd.Timedelta(days=1)).date()) / 5 * 40
     )
 
-    def time_off_hours(rid):
+    def covered_hours(rid, region):
         rows = time_off[time_off.resource_id == rid]
         covered_days = set()
         for _, r in rows.iterrows():
@@ -118,14 +139,20 @@ def ground_truth():
             if s > e:
                 continue
             covered_days.update(pd.bdate_range(s, e))
+        for _, r in regional_holidays[regional_holidays.region == region].iterrows():
+            d = r.holiday_date
+            if APRIL_START <= d <= APRIL_END:
+                covered_days.add(d)
         return len(covered_days) * 8.0
 
     out = resources.copy()
-    out["net_capacity_hours"] = out.resource_id.apply(time_off_hours).rsub(gross_capacity)
+    out["net_capacity_hours"] = out.apply(
+        lambda r: gross_capacity - covered_hours(r.resource_id, r.region), axis=1
+    )
 
     all_hours = april_ts.groupby("resource_id").hours_logged.sum()
     billable_hours = (
-        april_ts[(april_ts.engagement_type == "client_billable") & (april_ts.billing_type == "standard")]
+        april_ts[april_ts.engagement_type == "client_billable"]
         .groupby("resource_id").hours_logged.sum()
     )
     out["all_hours_logged"] = out.resource_id.map(all_hours).fillna(0.0)
@@ -177,9 +204,13 @@ def ground_truth():
     )
     zero_timesheet_ids = sorted(set(resources.resource_id) - set(april_ts.resource_id))
 
-    pro_bono_mix_ids = sorted(set(
-        april_ts[(april_ts.engagement_type == "client_billable") & (april_ts.billing_type == "pro_bono")]
-        .resource_id
+    # Resources whose April timesheets reference a project_id that is reused
+    # by more than one region -- a naive project_id-only merge (dropping the
+    # region key) would duplicate their rows for that assignment.
+    region_counts_by_pid = projects.groupby("project_id").region.nunique()
+    colliding_project_ids = set(region_counts_by_pid[region_counts_by_pid > 1].index)
+    collision_resource_ids = sorted(set(
+        april_ts[april_ts.project_id.isin(colliding_project_ids)].resource_id
     ))
 
     rejected_pairs = sorted(
@@ -188,11 +219,18 @@ def ground_truth():
         & set(zip(active_pairs.resource_id, active_pairs.project_id))
     )
 
+    # Resources in a region with any regional holiday -- a naive capacity
+    # calculation that only nets time_off.csv overstates net_capacity_hours
+    # for these resources.
+    holiday_regions = set(regional_holidays.region.unique())
+    holiday_affected_ids = sorted(set(resources[resources.region.isin(holiday_regions)].resource_id))
+
     return dict(
         resource_summary=out, assignment_accuracy=accuracy_df,
         internal_mix_ids=internal_mix_ids, zero_timesheet_ids=zero_timesheet_ids,
-        pro_bono_mix_ids=pro_bono_mix_ids,
+        collision_resource_ids=collision_resource_ids, holiday_affected_ids=holiday_affected_ids,
         projects=projects, time_off=time_off, revisions=revisions, rejected_pairs=rejected_pairs,
+        regional_holidays=regional_holidays,
     )
 
 
@@ -232,11 +270,14 @@ def test_case_03_assignment_accuracy_structure(ground_truth):
 
 def test_case_04_billable_utilization_domain_hook(ground_truth):
     """engagement_type lives only in projects.csv -- billable_utilization_pct
-    must be scoped to client_billable hours, not all hours logged."""
+    must be scoped to client_billable hours, not all hours logged. Excludes
+    the regional-holiday cohort (test_12) so a failure here is attributable
+    specifically to the engagement_type filter, not net_capacity_hours."""
     df = _load_csv("resource_summary.csv").set_index("resource_id")
     gt = ground_truth["resource_summary"].set_index("resource_id")
-    ids = ground_truth["internal_mix_ids"]
-    assert len(ids) >= 5, "sanity: expected a meaningful internal-mix cohort in the fixture"
+    holiday_ids = set(ground_truth["holiday_affected_ids"])
+    ids = [r for r in ground_truth["internal_mix_ids"] if r not in holiday_ids]
+    assert len(ids) >= 50, "sanity: expected a meaningful internal-mix cohort outside the holiday cohort"
 
     deltas = (df.loc[ids, "billable_utilization_pct"] - gt.loc[ids, "billable_utilization_pct"]).abs()
     n_within = (deltas <= 2.0).sum()
@@ -249,10 +290,15 @@ def test_case_04_billable_utilization_domain_hook(ground_truth):
 
 def test_case_05_bench_hours_reredivation(ground_truth):
     """bench_hours must be recomputed from ALL logged hours, not the
-    billable-filtered frame used for billable_utilization_pct."""
+    billable-filtered frame used for billable_utilization_pct. Excludes the
+    region-collision cohort (test_11) and regional-holiday cohort (test_12)
+    so a failure here is attributable specifically to reusing the filtered
+    frame, not the project join or net_capacity_hours."""
     df = _load_csv("resource_summary.csv").set_index("resource_id")
     gt = ground_truth["resource_summary"].set_index("resource_id")
-    ids = ground_truth["internal_mix_ids"]
+    exclude = set(ground_truth["collision_resource_ids"]) | set(ground_truth["holiday_affected_ids"])
+    ids = [r for r in ground_truth["internal_mix_ids"] if r not in exclude]
+    assert len(ids) >= 50, "sanity: expected a meaningful internal-mix cohort outside the collision/holiday cohorts"
 
     deltas = (df.loc[ids, "bench_hours"] - gt.loc[ids, "bench_hours"]).abs()
     n_within = (deltas <= 2.0).sum()
@@ -261,7 +307,7 @@ def test_case_05_bench_hours_reredivation(ground_truth):
         f"likely reusing the billable-filtered frame instead of recomputing from all hours."
     )
 
-    zero_ids = ground_truth["zero_timesheet_ids"]
+    zero_ids = [r for r in ground_truth["zero_timesheet_ids"] if r not in exclude]
     gt_bench = gt.loc[zero_ids, "bench_hours"]
     actual_bench = df.loc[zero_ids, "bench_hours"]
     assert (actual_bench - gt_bench).abs().le(2.0).all(), (
@@ -272,7 +318,10 @@ def test_case_05_bench_hours_reredivation(ground_truth):
 
 def test_case_06_capacity_netting(ground_truth):
     """net_capacity_hours must subtract every time_off.csv row overlapping
-    April, regardless of leave_type (including the firm-wide holiday)."""
+    April, regardless of leave_type (including the firm-wide holiday), AND
+    every applicable regional_holidays.csv row for the resource's region
+    (test_12 isolates the latter specifically; this is the general,
+    all-resources check on the same output column)."""
     df = _load_csv("resource_summary.csv").set_index("resource_id").sort_index()
     gt = ground_truth["resource_summary"].set_index("resource_id").sort_index()
 
@@ -375,33 +424,60 @@ def test_case_10_anti_cheat_sentinels(ground_truth):
     assert lt_counts.get("company_holiday") == 1500
     assert lt_counts.get("pto") == 300
 
-    assert len(ground_truth["zero_timesheet_ids"]) == 132
+    assert len(ground_truth["zero_timesheet_ids"]) == 133
 
     revisions = ground_truth["revisions"]
     approval_counts = revisions.approval_status.value_counts()
     assert approval_counts.get("rejected", 0) >= 50
     assert approval_counts.get("approved", 0) > approval_counts.get("rejected", 0) * 3
 
-    billing_counts = projects[projects.engagement_type == "client_billable"].billing_type.value_counts()
-    assert billing_counts.get("pro_bono", 0) >= 20
-    assert billing_counts.get("standard", 0) > billing_counts.get("pro_bono", 0) * 5
+    region_counts_by_pid = projects.groupby("project_id").region.nunique()
+    n_colliding_project_ids = int((region_counts_by_pid > 1).sum())
+    assert n_colliding_project_ids >= 15, (
+        "sanity: expected a meaningful number of project_id values reused across regions"
+    )
+
+    regional_holidays = ground_truth["regional_holidays"]
+    assert set(regional_holidays.region.unique()) == {"EMEA", "APAC"}
+    assert len(regional_holidays) >= 4
 
 
-def test_case_11_pro_bono_billing_domain_hook(ground_truth):
-    """A minority of engagement_type == 'client_billable' projects are
-    billing_type == 'pro_bono' -- a real client engagement the practice
-    does not bill for. billable_utilization_pct must exclude their hours;
-    engagement_type alone is necessary but not sufficient."""
+def test_case_11_region_scoped_project_code_collision(ground_truth):
+    """project_id is only unique WITHIN a region -- a minority of codes are
+    reused independently across two or more regions. The project join must
+    go through each resource's own region (from resources.csv); joining on
+    project_id alone duplicates the affected resources' rows for that
+    assignment, inflating all_hours_logged."""
     df = _load_csv("resource_summary.csv").set_index("resource_id")
     gt = ground_truth["resource_summary"].set_index("resource_id")
-    ids = ground_truth["pro_bono_mix_ids"]
-    assert len(ids) >= 50, "sanity: expected a meaningful pro-bono-mix cohort in the fixture"
+    ids = ground_truth["collision_resource_ids"]
+    assert len(ids) >= 30, "sanity: expected a meaningful region-collision cohort in the fixture"
 
-    deltas = (df.loc[ids, "billable_utilization_pct"] - gt.loc[ids, "billable_utilization_pct"]).abs()
+    deltas = (df.loc[ids, "all_hours_logged"] - gt.loc[ids, "all_hours_logged"]).abs()
     n_within = (deltas <= 2.0).sum()
     assert n_within / len(ids) >= 0.85, (
-        f"billable_utilization_pct wrong for {len(ids) - n_within}/{len(ids)} resources who logged hours "
-        f"against a pro-bono client engagement -- engagement_type == 'client_billable' is correct for "
-        f"these projects but the practice does not bill for them, so their hours must not count toward "
-        f"billable_utilization_pct."
+        f"all_hours_logged wrong for {len(ids) - n_within}/{len(ids)} resources whose April assignment "
+        f"uses a project_id that is reused by another region -- the project join must go through each "
+        f"resource's own region (resources.csv), not project_id alone, or rows get duplicated."
+    )
+
+
+def test_case_12_regional_holiday_capacity(ground_truth):
+    """EMEA and APAC each observe regional holidays not shared by AMER
+    (regional_holidays.csv). "Available April capacity" is prorated over
+    business days without specifying which calendar -- net_capacity_hours
+    must subtract these region-specific dates in addition to time_off.csv,
+    or capacity (and everything derived from it) is silently overstated for
+    every EMEA/APAC resource."""
+    df = _load_csv("resource_summary.csv").set_index("resource_id")
+    gt = ground_truth["resource_summary"].set_index("resource_id")
+    ids = ground_truth["holiday_affected_ids"]
+    assert len(ids) >= 100, "sanity: expected a large EMEA/APAC cohort in the fixture"
+
+    deltas = (df.loc[ids, "net_capacity_hours"] - gt.loc[ids, "net_capacity_hours"]).abs()
+    n_within = (deltas <= 1.0).sum()
+    assert n_within / len(ids) >= 0.85, (
+        f"net_capacity_hours wrong for {len(ids) - n_within}/{len(ids)} EMEA/APAC resources -- "
+        f"regional_holidays.csv lists additional non-working days for these regions that must "
+        f"reduce available April capacity alongside time_off.csv."
     )

@@ -1,6 +1,6 @@
 We need the April 2024 monthly resource allocation report for the consulting practice. For each resource, show billable utilization, idle (bench) capacity, and how close actual hours were to the allocation on record, for each of their project assignments that month. Input files are in `/workspace/data/`, just use the files named below and nothing else.
 
-`resources.csv` has each resource's role, region and standard weekly capacity. `projects.csv` tells you which project belongs to which client. `assignment_revisions.csv` has each resource's planned allocation to a project. `timesheets.csv` has the actual hours a resource logged against a project, by week. `time_off.csv` has approved leave that reduces a resource's available capacity for the days it covers.
+`resources.csv` has each resource's role, region and standard weekly capacity. `projects.csv` tells you which project belongs to which client. `assignment_revisions.csv` has each resource's planned allocation to a project. `timesheets.csv` has the actual hours a resource logged against a project, by week. `time_off.csv` has approved leave that reduces a resource's available capacity for the days it covers. `regional_holidays.csv` lists non working days observed by each region.
 
 Compute the following for each resource, for April 2024.
 

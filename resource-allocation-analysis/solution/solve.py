@@ -29,13 +29,23 @@ resolving which revision governs a date -- the prior authorized revision
 continues governing undisturbed. instruction.md signals this with the word
 "authorized" in the planned-hours definition; it never names the column.
 
-projects.csv also carries billing_type. A minority of engagement_type ==
-"client_billable" projects have billing_type == "pro_bono" -- a real client
-engagement the practice does not bill for. billable_utilization_pct must
-exclude their hours even though engagement_type alone says "client_billable"
--- instruction.md signals this by defining the metric as hours "the
-practice actually bills the client for", not as hours logged against
-"client-billable engagements"; it never names billing_type.
+projects.csv also carries region, and project_id is NOT globally unique --
+it is only unique WITHIN a region. Every resource is staffed exclusively
+within their own region's project pool (resources.csv carries each
+resource's region), so joining timesheets to projects requires first
+attaching each resource's region and then merging on (region, project_id)
+together -- merging on project_id alone silently matches a colliding code
+against every region that happens to reuse it, duplicating that timesheet
+row once per spurious match and inflating all_hours_logged (and therefore
+understating bench_hours) for the resources whose project code happens to
+collide.
+
+regional_holidays.csv lists non-working days observed by EMEA and APAC
+(AMER has none beyond the firm-wide time_off.csv holiday). "Available April
+capacity" is prorated over business days without specifying which calendar
+-- net capacity must subtract these region-specific dates too, combined
+into the same deduped set of covered days as time_off.csv (a resource's own
+region determines which regional holidays apply to them).
 """
 
 import json
@@ -65,23 +75,29 @@ def load_data():
     )
     timesheets = pd.read_csv(DATA_DIR / "timesheets.csv", parse_dates=["week_ending_date"])
     time_off = pd.read_csv(DATA_DIR / "time_off.csv", parse_dates=["start_date", "end_date"])
-    return resources, projects, revisions, timesheets, time_off
+    regional_holidays = pd.read_csv(DATA_DIR / "regional_holidays.csv", parse_dates=["holiday_date"])
+    return resources, projects, revisions, timesheets, time_off, regional_holidays
 
 
-def scope_timesheets_to_april(timesheets, projects):
+def scope_timesheets_to_april(timesheets, projects, resources):
     """Every week in this dataset falls inside a single calendar month, so
-    scoping by week_ending_date alone is unambiguous."""
+    scoping by week_ending_date alone is unambiguous.
+
+    project_id is only unique within a region, so the project join must go
+    through each resource's own region -- merging on project_id alone would
+    silently match a colliding code against every region that reuses it."""
     april = timesheets[
         (timesheets["week_ending_date"] >= APRIL_START) & (timesheets["week_ending_date"] <= APRIL_END)
     ]
-    return april.merge(projects[["project_id", "engagement_type", "billing_type"]], on="project_id", how="left")
+    april = april.merge(resources[["resource_id", "region"]], on="resource_id", how="left")
+    return april.merge(projects[["project_id", "region", "engagement_type"]], on=["region", "project_id"], how="left")
 
 
-def compute_net_capacity(resources, time_off):
+def compute_net_capacity(resources, time_off, regional_holidays):
     business_days = np.busday_count(APRIL_START.date(), (APRIL_END + pd.Timedelta(days=1)).date())
     gross_capacity = business_days / 5 * resources["weekly_capacity_hours"]
 
-    def time_off_hours(resource_id):
+    def covered_hours(resource_id, region):
         rows = time_off[time_off["resource_id"] == resource_id]
         covered_days = set()
         for _, row in rows.iterrows():
@@ -89,19 +105,25 @@ def compute_net_capacity(resources, time_off):
             if start > end:
                 continue
             covered_days.update(pd.bdate_range(start, end))
+        for _, row in regional_holidays[regional_holidays["region"] == region].iterrows():
+            d = row["holiday_date"]
+            if APRIL_START <= d <= APRIL_END:
+                covered_days.add(d)
         return len(covered_days) * 8.0
 
-    net = gross_capacity - resources["resource_id"].apply(time_off_hours)
+    net = gross_capacity - resources.apply(
+        lambda r: covered_hours(r["resource_id"], r["region"]), axis=1
+    )
     return net
 
 
-def build_resource_summary(resources, april_ts, time_off):
+def build_resource_summary(resources, april_ts, time_off, regional_holidays):
     out = resources.copy()
-    out["net_capacity_hours"] = compute_net_capacity(resources, time_off)
+    out["net_capacity_hours"] = compute_net_capacity(resources, time_off, regional_holidays)
 
     all_hours = april_ts.groupby("resource_id")["hours_logged"].sum()
     billable_hours = (
-        april_ts[(april_ts["engagement_type"] == "client_billable") & (april_ts["billing_type"] == "standard")]
+        april_ts[april_ts["engagement_type"] == "client_billable"]
         .groupby("resource_id")["hours_logged"].sum()
     )
     out["all_hours_logged"] = out["resource_id"].map(all_hours).fillna(0.0)
@@ -175,11 +197,11 @@ def build_assignment_accuracy(revisions, april_ts):
 
 
 def main():
-    resources, projects, revisions, timesheets, time_off = load_data()
+    resources, projects, revisions, timesheets, time_off, regional_holidays = load_data()
 
-    april_ts = scope_timesheets_to_april(timesheets, projects)
+    april_ts = scope_timesheets_to_april(timesheets, projects, resources)
 
-    resource_summary = build_resource_summary(resources, april_ts, time_off)
+    resource_summary = build_resource_summary(resources, april_ts, time_off, regional_holidays)
     resource_summary.to_csv(WORKSPACE_DIR / "resource_summary.csv", index=False)
 
     assignment_accuracy = build_assignment_accuracy(revisions, april_ts)
