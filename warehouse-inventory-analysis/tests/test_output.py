@@ -412,10 +412,15 @@ def test_case_08_landed_cost_allocation(ground_truth):
     """receipts.csv's unit_cost is only the invoice line price. Receipts
     sharing a po_batch_id had freight_invoices.csv's freight_amount for that
     batch allocated across them by extended value -- that landed cost, not
-    the bare unit_cost, is what becomes the FIFO layer's cost. Checked in
-    aggregate across the batch-affected cohort, same reasoning as the return
-    cost check: no single receipt's cost is a full test of a combo's value
-    on its own."""
+    the bare unit_cost, is what becomes the FIFO layer's cost. The aggregate
+    sum across the whole batch-affected cohort catches an implementation
+    that ignores freight_invoices.csv entirely (a batch's freight either
+    lands somewhere in the cohort or it doesn't). It can NOT catch a
+    within-batch split that's done on the wrong basis (e.g. evenly by
+    quantity share instead of by each receipt's own extended value) --
+    total freight allocated within a batch is conserved either way, so a
+    wrong split still sums correctly. The per-combo check below is what
+    actually verifies the split basis itself."""
     ids = ground_truth["batch_combo_ids"]
     assert len(ids) >= 40, "sanity: expected a meaningful freight-batch cohort in the fixture"
 
@@ -428,6 +433,16 @@ def test_case_08_landed_cost_allocation(ground_truth):
         f"on_hand_value summed across all {len(ids)} freight-batch combos = {cohort_actual:.2f}, "
         f"expected ~{cohort_expected:.2f} (tolerance {tolerance:.2f}) -- check whether receipts.csv's "
         f"unit_cost alone was used instead of the freight-allocated landed cost."
+    )
+
+    deltas = (df.loc[ids, "on_hand_value"] - gt.loc[ids, "on_hand_value"]).abs()
+    pct = deltas / gt.loc[ids, "on_hand_value"].replace(0, pd.NA) * 100
+    n_within = (pct.fillna(0) <= 2.0).sum()
+    assert n_within / len(ids) >= 0.80, (
+        f"on_hand_value wrong for {len(ids) - n_within}/{len(ids)} individual freight-batch combos "
+        f"-- check what BASIS each batch's freight is split on: it has to be each receipt's own "
+        f"extended value (quantity * unit_cost), not an even split by quantity share. A quantity-based "
+        f"split can still pass the cohort-wide sum above while being wrong combo by combo."
     )
 
 
@@ -524,9 +539,9 @@ def test_case_12_anti_cheat_sentinels(ground_truth):
     assert len(freight_invoices) == 110
     assert freight_invoices["po_batch_id"].is_unique
     assert transfer_fees["transfer_id"].is_unique
-    assert len(transfer_fees) == 821
+    assert len(transfer_fees) == 815
 
     intransit_count = ((transfers.ship_date <= CUTOFF) & (transfers.receive_date > CUTOFF)).sum()
     settled_count = ((transfers.ship_date <= CUTOFF) & (transfers.receive_date <= CUTOFF)).sum()
     assert intransit_count == 272
-    assert settled_count == 942
+    assert settled_count == 932
