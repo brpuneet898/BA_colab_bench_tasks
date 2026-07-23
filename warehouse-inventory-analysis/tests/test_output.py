@@ -39,10 +39,12 @@ instruction.md -- each is discoverable by inspecting the raw data):
    either file's own .describe()/.value_counts() shows it.
 
 6. Landed cost allocation -- receipts.csv's unit_cost is only the invoice
-   line price. Receipts sharing a po_batch_id had one freight_invoices.csv
-   invoice's freight_amount allocated across them by extended value
-   (quantity * unit_cost); that allocated share, not the bare unit_cost,
-   is the receipt's true FIFO layer cost.
+   line price. Receipts sharing a po_batch_id had that batch's total
+   freight (freight_invoices.csv -- sometimes billed as more than one
+   invoice line per batch, which must be summed before allocating)
+   allocated across them by extended value (quantity * unit_cost); that
+   allocated share, not the bare unit_cost, is the receipt's true FIFO
+   layer cost.
 
 7. Transfer handling fee -- a transfer's destination layer cost is the
    source consumption's weighted-average cost PLUS that transfer's own
@@ -88,13 +90,15 @@ def ground_truth():
     linked_shipments = shipments[shipments["order_id"].notna()]
 
     # --- landed cost: a receipt's true cost is its own line price plus its
-    # batch's freight allocated by extended value, not the bare unit_cost ---
+    # batch's freight allocated by extended value, not the bare unit_cost.
+    # A batch's freight can be billed as more than one invoice line sharing
+    # the same po_batch_id -- lines must be summed per batch first. ---
     landed_cost = receipts["unit_cost"].astype(float).copy()
     batched = receipts[receipts["po_batch_id"].notna()]
     if not batched.empty:
         extended_value = batched["quantity"] * batched["unit_cost"]
         batch_total_value = extended_value.groupby(batched["po_batch_id"]).transform("sum")
-        freight_by_batch = freight_invoices.set_index("po_batch_id")["freight_amount"]
+        freight_by_batch = freight_invoices.groupby("po_batch_id")["freight_amount"].sum()
         freight_amount = batched["po_batch_id"].map(freight_by_batch)
         allocated_freight_per_unit = (freight_amount * extended_value / batch_total_value) / batched["quantity"]
         landed_cost.loc[batched.index] = batched["unit_cost"] + allocated_freight_per_unit
@@ -229,6 +233,11 @@ def ground_truth():
         receipts[receipts.po_batch_id.notna()].warehouse_id,
     )))
 
+    invoices_per_batch = freight_invoices.groupby("po_batch_id").size()
+    multi_invoice_batches = set(invoices_per_batch[invoices_per_batch > 1].index)
+    multi_invoice_receipts = receipts[receipts.po_batch_id.isin(multi_invoice_batches)]
+    multi_invoice_combo_ids = sorted(set(zip(multi_invoice_receipts.product_id, multi_invoice_receipts.warehouse_id)))
+
     fee_transfers = transfers[transfers.transfer_id.isin(set(transfer_fees.transfer_id))]
     settled_fee_transfers = fee_transfers[fee_transfers.receive_date <= CUTOFF]
     fee_dest_ids = sorted(set(zip(settled_fee_transfers.product_id, settled_fee_transfers.dest_warehouse_id)))
@@ -237,7 +246,7 @@ def ground_truth():
         inventory_position=inventory_position, cogs_report=june_cogs,
         intransit_dest_ids=intransit_dest_ids, return_combo_ids=return_combo_ids,
         allocation_ids=allocation_ids, hold_ids=hold_ids, partial_order_ids=partial_order_ids,
-        batch_combo_ids=batch_combo_ids, fee_dest_ids=fee_dest_ids,
+        batch_combo_ids=batch_combo_ids, multi_invoice_combo_ids=multi_invoice_combo_ids, fee_dest_ids=fee_dest_ids,
         receipts=receipts, transfers=transfers, open_orders=open_orders,
         shipments=shipments, freight_invoices=freight_invoices, transfer_fees=transfer_fees,
     )
@@ -445,6 +454,17 @@ def test_case_08_landed_cost_allocation(ground_truth):
         f"split can still pass the cohort-wide sum above while being wrong combo by combo."
     )
 
+    multi_ids = ground_truth["multi_invoice_combo_ids"]
+    assert len(multi_ids) >= 20, "sanity: expected a meaningful multi-invoice-batch cohort in the fixture"
+    multi_deltas = (df.loc[multi_ids, "on_hand_value"] - gt.loc[multi_ids, "on_hand_value"]).abs()
+    multi_pct = multi_deltas / gt.loc[multi_ids, "on_hand_value"].replace(0, pd.NA) * 100
+    n_multi_within = (multi_pct.fillna(0) <= 2.0).sum()
+    assert n_multi_within / len(multi_ids) >= 0.80, (
+        f"on_hand_value wrong for {len(multi_ids) - n_multi_within}/{len(multi_ids)} combos whose batch "
+        f"was billed as more than one freight invoice line -- check whether all of a po_batch_id's "
+        f"freight_invoices.csv rows are summed before being allocated, not just one of them."
+    )
+
 
 def test_case_09_transfer_handling_fee(ground_truth):
     """A settled transfer's destination layer cost is the source's weighted-
@@ -535,13 +555,15 @@ def test_case_12_anti_cheat_sentinels(ground_truth):
     assert (receipts.hold_status == "on_hold").sum() == 243
     assert shipments["order_id"].notna().sum() == 300
     assert receipts["original_shipment_id"].notna().sum() == 720
-    assert receipts["po_batch_id"].notna().sum() == 316
-    assert len(freight_invoices) == 110
-    assert freight_invoices["po_batch_id"].is_unique
+    assert receipts["po_batch_id"].notna().sum() == 321
+    assert len(freight_invoices) == 138
+    assert freight_invoices["po_batch_id"].nunique() == 110
+    invoices_per_batch = freight_invoices.groupby("po_batch_id").size()
+    assert (invoices_per_batch == 2).sum() == 28
     assert transfer_fees["transfer_id"].is_unique
-    assert len(transfer_fees) == 815
+    assert len(transfer_fees) == 803
 
     intransit_count = ((transfers.ship_date <= CUTOFF) & (transfers.receive_date > CUTOFF)).sum()
     settled_count = ((transfers.ship_date <= CUTOFF) & (transfers.receive_date <= CUTOFF)).sum()
     assert intransit_count == 272
-    assert settled_count == 932
+    assert settled_count == 929

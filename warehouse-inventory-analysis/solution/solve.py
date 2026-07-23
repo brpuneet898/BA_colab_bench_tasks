@@ -78,7 +78,12 @@ def apply_landed_cost(receipts, freight_invoices):
     """A receipt's own unit_cost is only its invoice/base cost. Receipts that
     share a po_batch_id had their batch's freight_amount allocated across
     them in proportion to each receipt's own extended value -- return a
-    Series of true landed unit_cost, indexed like receipts."""
+    Series of true landed unit_cost, indexed like receipts.
+
+    A batch's freight can be billed as more than one invoice line (e.g. base
+    freight plus a separate surcharge) sharing the same po_batch_id -- the
+    full landed cost needs all of a batch's freight, so lines must be summed
+    per batch, not looked up as if po_batch_id were a unique key."""
     landed = receipts["unit_cost"].astype(float).copy()
     batched = receipts[receipts["po_batch_id"].notna()]
     if batched.empty:
@@ -86,7 +91,7 @@ def apply_landed_cost(receipts, freight_invoices):
 
     extended_value = batched["quantity"] * batched["unit_cost"]
     batch_total_value = extended_value.groupby(batched["po_batch_id"]).transform("sum")
-    freight_by_batch = freight_invoices.set_index("po_batch_id")["freight_amount"]
+    freight_by_batch = freight_invoices.groupby("po_batch_id")["freight_amount"].sum()
     freight_amount = batched["po_batch_id"].map(freight_by_batch)
     allocated_freight_per_unit = (freight_amount * extended_value / batch_total_value) / batched["quantity"]
     landed.loc[batched.index] = batched["unit_cost"] + allocated_freight_per_unit
