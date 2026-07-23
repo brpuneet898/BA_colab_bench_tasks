@@ -219,8 +219,8 @@ def _get_applicable_contract(pos, contracts):
     merged = pos.merge(
         contracts[["supplier_id", "contract_effective_from", "contract_effective_to",
                    "contract_superseded_by", "contract_tier",
-                   "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap_usd",
-                   "grace_period_days"]],
+                   "fill_rate_sla_threshold", "penalty_rate_pct", "max_penalty_cap",
+                   "currency", "grace_period_days"]],
         on="supplier_id", how="left",
     )
     open_ended     = merged["contract_effective_to"].isna()
@@ -238,7 +238,10 @@ def _get_applicable_contract(pos, contracts):
 _BUYER_PICKUP_INCOTERMS = {"FOB", "EXW", "CIF"}
 
 
-def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
+def _compute_po_level(pos_with_contracts, deliveries, regional_rates, escalation_rules):
+    esc_threshold_map  = escalation_rules.set_index("contract_tier")["breach_threshold"].to_dict()
+    esc_multiplier_map = escalation_rules.set_index("contract_tier")["escalation_multiplier"].to_dict()
+
     net_qty = (
         deliveries
         .groupby(["warehouse_id", "po_id"], as_index=False)["quantity_received"]
@@ -298,9 +301,13 @@ def _compute_po_level(pos_with_contracts, deliveries, regional_rates):
 
     po = po.sort_values(["supplier_id", "order_date", "po_id"]).copy()
     po["breach_rank"] = po.groupby("supplier_id")["sla_breach"].cumsum()
-    escalated = po["sla_breach"] & (po["breach_rank"] > 5)
-    base_rate = po["penalty_rate_pct"] * po["regional_penalty_multiplier"]
-    po["penalty_rate_eff"] = base_rate.where(~escalated, base_rate * 2)
+
+    # Tier-dependent escalation from escalation_rules
+    po["esc_threshold"]  = po["contract_tier"].map(esc_threshold_map).fillna(5).astype(int)
+    po["esc_multiplier"] = po["contract_tier"].map(esc_multiplier_map).fillna(2.0)
+    escalated  = po["sla_breach"] & (po["breach_rank"] > po["esc_threshold"])
+    base_rate  = po["penalty_rate_pct"] * po["regional_penalty_multiplier"]
+    po["penalty_rate_eff"] = base_rate.where(~escalated, base_rate * po["esc_multiplier"])
     po["penalty_po"] = po.apply(
         lambda r: r["assessment_base"] * r["penalty_rate_eff"] if r["sla_breach"] else 0.0,
         axis=1,
@@ -318,17 +325,8 @@ def _max_consecutive_streak(breach_series):
     return max_s
 
 
-def _penalty_caps(contracts):
-    latest = (
-        contracts
-        .sort_values("contract_effective_from", ascending=False)
-        .drop_duplicates(subset="supplier_id", keep="first")
-        [["supplier_id", "max_penalty_cap_usd"]]
-    )
-    return latest.set_index("supplier_id")["max_penalty_cap_usd"].to_dict()
-
-
-def _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates):
+def _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates,
+                    escalation_rules, fx_rates, hierarchy):
     keep = (
         (deliveries["delivery_type"] == "Primary") &
         (deliveries["receipt_status"] == "accepted")
@@ -340,38 +338,82 @@ def _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates):
     deliveries.loc[deliveries["delivery_type"] == "Return", "quantity_received"] *= -1
 
     pos_c  = _get_applicable_contract(q1_pos, contracts)
-    po_lvl = _compute_po_level(pos_c, deliveries, regional_rates)
-    caps   = _penalty_caps(contracts)
+    po_lvl = _compute_po_level(pos_c, deliveries, regional_rates, escalation_rules)
 
-    records = []
+    # March 2024 FX rates for individual cap conversion
+    march_fx = (
+        fx_rates[fx_rates["reporting_month"] == "2024-03"]
+        .set_index("currency")["usd_per_unit"]
+        .to_dict()
+    )
+    # Group cap structures (subsidiaries)
+    sub_to_parent = hierarchy.set_index("supplier_id")["parent_company_id"].to_dict()
+    group_caps    = hierarchy.groupby("parent_company_id")["group_penalty_cap_usd"].first().to_dict()
+    # Latest contract per supplier (individual cap + currency)
+    latest_ctrs = (
+        contracts
+        .sort_values("contract_effective_from", ascending=False)
+        .drop_duplicates(subset="supplier_id", keep="first")
+        .set_index("supplier_id")
+    )
+
+    # Pass 1: compute raw metrics
+    raw_penalties = {}
+    records       = {}
     for _, sup in suppliers.iterrows():
         sid     = sup["supplier_id"]
         sup_pos = po_lvl[po_lvl["supplier_id"] == sid]
         if sup_pos.empty:
-            records.append(dict(supplier_id=sid, supplier_name=sup["supplier_name"],
+            raw_penalties[sid] = 0.0
+            records[sid] = dict(supplier_id=sid, supplier_name=sup["supplier_name"],
                 total_pos=0, on_time_delivery_rate=None, net_fill_rate=None,
                 sla_breach_count=0, total_penalty_usd=0.0, composite_score=None,
-                max_consecutive_breach_streak=0))
+                max_consecutive_breach_streak=0)
             continue
         n          = len(sup_pos)
         otr        = round(sup_pos["on_time"].sum() / n, 4)
         nfr        = round(sup_pos["net_qty_received"].sum() / sup_pos["ordered_quantity"].sum(), 4)
         breach_cnt = int(sup_pos["sla_breach"].sum())
         raw_pen    = sup_pos["penalty_po"].sum()
-        cap        = caps.get(sid, float("inf"))
-        penalty    = round(min(raw_pen, cap), 2)
         score      = round(otr * 0.6 + nfr * 0.4, 4)
-        # po_level is sorted by (supplier_id, order_date, po_id) — use that order
         streak     = _max_consecutive_streak(sup_pos["sla_breach"].tolist())
-        records.append(dict(supplier_id=sid, supplier_name=sup["supplier_name"],
+        raw_penalties[sid] = raw_pen
+        records[sid] = dict(supplier_id=sid, supplier_name=sup["supplier_name"],
             total_pos=n, on_time_delivery_rate=otr, net_fill_rate=nfr,
-            sla_breach_count=breach_cnt, total_penalty_usd=penalty, composite_score=score,
-            max_consecutive_breach_streak=streak))
+            sla_breach_count=breach_cnt, total_penalty_usd=None, composite_score=score,
+            max_consecutive_breach_streak=streak)
 
-    df = pd.DataFrame(records)
+    # Pass 2a: group cap for subsidiaries (pro-rata)
+    groups = {}
+    for sid, parent in sub_to_parent.items():
+        groups.setdefault(parent, []).append(sid)
+    for parent, members in groups.items():
+        group_raw    = sum(raw_penalties.get(sid, 0.0) for sid in members)
+        gcap         = float(group_caps[parent])
+        group_capped = min(group_raw, gcap)
+        for sid in members:
+            raw = raw_penalties.get(sid, 0.0)
+            allocated = (group_capped * (raw / group_raw)) if group_raw > 0 else 0.0
+            records[sid]["total_penalty_usd"] = round(allocated, 2)
+
+    # Pass 2b: individual FX-converted cap for independent suppliers
+    for sid, rec in records.items():
+        if rec["total_penalty_usd"] is not None:
+            continue
+        raw = raw_penalties.get(sid, 0.0)
+        if sid in latest_ctrs.index:
+            lc       = latest_ctrs.loc[sid]
+            cap_val  = lc["max_penalty_cap"]
+            currency = lc.get("currency", "USD")
+            cap_usd  = float("inf") if pd.isna(cap_val) else float(cap_val) * march_fx.get(str(currency), 1.0)
+        else:
+            cap_usd = float("inf")
+        rec["total_penalty_usd"] = round(min(raw, cap_usd), 2)
+
+    df = pd.DataFrame(list(records.values()))
     df = df.sort_values(["composite_score", "supplier_id"],
                         ascending=[True, True], na_position="last").reset_index(drop=True)
-    return df, po_lvl, caps
+    return df, po_lvl
 
 
 # ---------------------------------------------------------------------------
@@ -390,14 +432,18 @@ def raw_data():
                                           "amendment_date"])
     deliveries = pd.read_csv(DATA_DIR / "delivery_records.csv",
                              parse_dates=["received_date", "ship_date"])
-    regional_rates = pd.read_csv(DATA_DIR / "regional_penalty_rates.csv")
-    uom_ref        = pd.read_csv(DATA_DIR / "product_uom_reference.csv")
-    return suppliers, contracts, pos, deliveries, regional_rates, uom_ref
+    regional_rates   = pd.read_csv(DATA_DIR / "regional_penalty_rates.csv")
+    uom_ref          = pd.read_csv(DATA_DIR / "product_uom_reference.csv")
+    escalation_rules = pd.read_csv(DATA_DIR / "escalation_rules.csv")
+    fx_rates         = pd.read_csv(DATA_DIR / "fx_rates.csv")
+    hierarchy        = pd.read_csv(DATA_DIR / "supplier_hierarchy.csv")
+    return (suppliers, contracts, pos, deliveries, regional_rates, uom_ref,
+            escalation_rules, fx_rates, hierarchy)
 
 
 @pytest.fixture(scope="module")
 def q1_pos(raw_data):
-    _, _, pos, _, _, uom_ref = raw_data
+    _, _, pos, _, _, uom_ref, _, _, _ = raw_data
     pos = pos.copy()
     if "quantity_uom" in pos.columns:
         uom_map = uom_ref.set_index("quantity_uom")["units_per_ea_equivalent"].to_dict()
@@ -413,9 +459,12 @@ def q1_pos(raw_data):
 
 @pytest.fixture(scope="module")
 def expected(raw_data, q1_pos):
-    suppliers, contracts, _, deliveries, regional_rates, _ = raw_data
-    df, po_lvl, caps = _build_expected(suppliers, contracts, q1_pos, deliveries, regional_rates)
-    return df, po_lvl, caps
+    suppliers, contracts, _, deliveries, regional_rates, _, escalation_rules, fx_rates, hierarchy = raw_data
+    df, po_lvl = _build_expected(
+        suppliers, contracts, q1_pos, deliveries, regional_rates,
+        escalation_rules, fx_rates, hierarchy,
+    )
+    return df, po_lvl
 
 
 @pytest.fixture(scope="module")
@@ -443,7 +492,7 @@ def test_case_01_input_sentinels(raw_data):
     presence of Rework events, pre-deadline Return events (early return trap),
     post-Q1 Return events, Chemicals MT unit mismatch, and regional penalty rates.
     """
-    suppliers, contracts, pos, deliveries, regional_rates, uom_ref = raw_data
+    suppliers, contracts, pos, deliveries, regional_rates, uom_ref, escalation_rules, fx_rates, hierarchy = raw_data
 
     assert len(suppliers) == 60, \
         f"suppliers.csv must not be modified (expected 60, got {len(suppliers)})"
@@ -593,6 +642,23 @@ def test_case_01_input_sentinels(raw_data):
          f"For FOB/EXW incoterms the supplier's obligation ends at carrier handover "
          f"(ship_date), not warehouse receipt (received_date).")
 
+    # New mechanism files
+    assert len(escalation_rules) == 3, \
+        (f"escalation_rules.csv must have 3 rows (one per contract tier A/B/C), "
+         f"got {len(escalation_rules)}")
+    assert set(escalation_rules["contract_tier"].tolist()) == {"A", "B", "C"}, \
+        "escalation_rules.csv must have rows for contract_tier A, B, and C"
+    assert len(fx_rates) == 9, \
+        (f"fx_rates.csv must have 9 rows (3 currencies × 3 months), got {len(fx_rates)}")
+    assert len(hierarchy) == 12, \
+        (f"supplier_hierarchy.csv must have 12 rows (4 parent groups × 3 subsidiaries), "
+         f"got {len(hierarchy)}")
+    sub_null = contracts[contracts["supplier_id"].isin(
+        hierarchy["supplier_id"].tolist()
+    )]["max_penalty_cap"].isna().all()
+    assert sub_null, \
+        "All subsidiary supplier rows in supplier_contracts.csv must have NULL max_penalty_cap"
+
 
 # ---------------------------------------------------------------------------
 # Test 02 — Output structure
@@ -678,7 +744,7 @@ def test_case_03_po_count_per_supplier(agent_scorecard, expected, raw_data):
 
     Spot-checks total_pos for the 5 suppliers with the highest PO count.
     """
-    exp_df, _, _ = expected
+    exp_df, _ = expected
     spot = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:5].tolist()
 
     failures = []
@@ -710,8 +776,8 @@ def test_case_04_open_ended_contract_suppliers(agent_scorecard, expected, raw_da
 
     Spot-checks on_time_delivery_rate for the first 5 open-ended-contract suppliers.
     """
-    _, contracts, _, _, _, _ = raw_data
-    exp_df, _, _ = expected
+    _, contracts, _, _, _, _, _, _, _ = raw_data
+    exp_df, _ = expected
 
     nat_suppliers = contracts[contracts["contract_effective_to"].isna()]["supplier_id"].tolist()
     assert len(nat_suppliers) == 20
@@ -757,18 +823,21 @@ def test_case_04_open_ended_contract_suppliers(agent_scorecard, expected, raw_da
 
 def test_case_05_escalating_penalty_high_breach_suppliers(agent_scorecard, expected, raw_data):
     """
-    Trap 7 — After a supplier's 5th SLA breach (in order_date, po_id order),
-    each further breaching PO is assessed at 2x the standard penalty_rate_pct.
+    Trap 20 — Escalation thresholds and multipliers differ by contract tier.
+    Look up breach_threshold and escalation_multiplier from escalation_rules.csv
+    (keyed by contract_tier) rather than applying a hardcoded "6th breach at 2×".
 
-    Spot-checks total_penalty_usd for the 5 non-NaT suppliers with the most
-    SLA breaches (where the escalation effect is largest).
+    Spot-checks total_penalty_usd for the 5 non-NaT, non-subsidiary suppliers with
+    the most SLA breaches (where the escalation effect is largest).
     """
-    _, contracts, _, _, _, _ = raw_data
-    exp_df, po_lvl, _ = expected
+    _, contracts, _, _, _, _, escalation_rules, _, hierarchy = raw_data
+    exp_df, po_lvl = expected
 
     nat_suppliers = set(contracts[contracts["contract_effective_to"].isna()]["supplier_id"])
+    subsidiary_suppliers = set(hierarchy["supplier_id"].tolist())
+    excluded = nat_suppliers | subsidiary_suppliers
     breach_counts = (
-        po_lvl[~po_lvl["supplier_id"].isin(nat_suppliers)]
+        po_lvl[~po_lvl["supplier_id"].isin(excluded)]
         .groupby("supplier_id")["sla_breach"]
         .sum()
         .sort_values(ascending=False)
@@ -790,7 +859,8 @@ def test_case_05_escalating_penalty_high_breach_suppliers(agent_scorecard, expec
             failures.append(
                 f"{sid}: total_penalty_usd {act_pen:,.2f} != expected {exp_pen:,.2f} "
                 f"(diff {act_pen - exp_pen:+,.2f}, {breach_n} SLA breaches). "
-                "Each breaching PO from the 6th onwards must be assessed at 2x rate."
+                "Escalation threshold and multiplier come from escalation_rules.csv "
+                "(keyed by contract_tier) — not a hardcoded '6th breach at 2×'."
             )
 
     assert not failures, "\n".join(failures)
@@ -808,7 +878,7 @@ def test_case_06_aggregate_breach_and_penalty(agent_summary, expected):
     events (Trap 8 inflates fill rates enough to suppress ~5 breaches,
     pushing the count outside the abs_tol=3 tolerance).
     """
-    exp_df, _, _ = expected
+    exp_df, _ = expected
     exp_total_pen = round(float(exp_df["total_penalty_usd"].sum()), 2)
     act_total_pen = float(agent_summary["total_penalty_assessed_usd"])
     assert math.isclose(act_total_pen, exp_total_pen, rel_tol=0.005), \
@@ -834,7 +904,7 @@ def test_case_07_row_level_accuracy(agent_scorecard, expected):
     total breach count substituted for max_consecutive_breach_streak (incorrect
     when breaches are spread across the quarter rather than clustered).
     """
-    exp_df, _, _ = expected
+    exp_df, _ = expected
     spot = exp_df.sort_values("total_pos", ascending=False)["supplier_id"].iloc[:10].tolist()
 
     merged = agent_scorecard.merge(
@@ -885,7 +955,7 @@ def test_case_08_composite_score_ranking(agent_scorecard, expected):
     Bottom-3 and top-3 suppliers by composite_score must match ground truth.
     Errors from any trap shuffle the ranking.
     """
-    exp_df, _, _ = expected
+    exp_df, _ = expected
     exp_active = exp_df[exp_df["total_pos"] > 0].dropna(subset=["composite_score"])
     act_active  = agent_scorecard[agent_scorecard["total_pos"] > 0].dropna(subset=["composite_score"])
 
@@ -909,7 +979,7 @@ def test_case_09_summary_scalars(agent_summary, expected):
     Verifies worst_on_time_supplier_id and worst_fill_rate_supplier_id.
     Ties broken by lowest supplier_id alphabetically.
     """
-    exp_df, _, _ = expected
+    exp_df, _ = expected
     active = exp_df[exp_df["total_pos"] > 0]
 
     exp_worst_ot  = str(active.sort_values(["on_time_delivery_rate",  "supplier_id"]).iloc[0]["supplier_id"])
@@ -941,8 +1011,8 @@ def test_case_10_contract_renegotiation_penalty(agent_scorecard, expected, raw_d
 
     Spot-checks total_penalty_usd for the first 5 dual-contract suppliers.
     """
-    _, contracts, _, _, _, _ = raw_data
-    exp_df, _, _ = expected
+    _, contracts, _, _, _, _, _, _, _ = raw_data
+    exp_df, _ = expected
 
     dual_suppliers = (
         contracts.groupby("supplier_id")
@@ -986,8 +1056,8 @@ def test_case_11_chemicals_unit_conversion(agent_scorecard, expected, raw_data):
 
     Spot-checks net_fill_rate for the 3 suppliers with the most Chemicals POs.
     """
-    _, _, pos, _, _, uom_ref = raw_data
-    exp_df, _, _ = expected
+    _, _, pos, _, _, uom_ref, _, _, _ = raw_data
+    exp_df, _ = expected
 
     uom_map = uom_ref.set_index("quantity_uom")["units_per_ea_equivalent"].to_dict()
     pos_conv = pos.copy()
@@ -1043,8 +1113,8 @@ def test_case_12_regional_penalty_multiplier(agent_scorecard, expected, raw_data
     Spot-checks total_penalty_usd for the 5 non-open-ended EMEA/APAC suppliers
     with the highest PO count.
     """
-    _, contracts, pos, _, _, uom_ref = raw_data
-    exp_df, _, _ = expected
+    _, contracts, pos, _, _, uom_ref, _, _, _ = raw_data
+    exp_df, _ = expected
 
     nat_suppliers = set(contracts[contracts["contract_effective_to"].isna()]["supplier_id"])
     pos_conv = pos.copy()

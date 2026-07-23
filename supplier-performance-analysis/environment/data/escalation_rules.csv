@@ -1,0 +1,4 @@
+contract_tier,breach_threshold,escalation_multiplier
+A,3,2.5
+B,4,2.0
+C,7,1.5
